@@ -9,7 +9,7 @@
 	
 	<title>
 	
-		多镜头分布式事务提交 | 
+		多次分布式事务提交 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -162,7 +162,7 @@ var _hmt = _hmt || [];
 	<!-- 引入正文 -->
 	<div id="content">
 		<h1 id="article-title">
-    多镜头分布式事务提交
+    多次分布式事务提交
 </h1>
 <div class="article-meta">
     
@@ -201,18 +201,26 @@ var _hmt = _hmt || [];
 
 <div id="article-content">
     <p><font size=5 style="bold"><strong>摘要</strong></font></p>
+<p>原子事务提交（ACP）是一个和一致性相似的单次协议问题，旨在模拟易出错的分布式系统的事务提交协议属性。我们认为，ACP 限制太多以至于不能捕获现代事务数据存储的复杂性，其中提交协议和并发控制集成，并且他们对不同事务的集成是相互依赖的。作为替代方案，我们引入了传输认证服务（TCS），一个新的正式问题，它通过集成的并发控制来捕获多发事务提交协议的安全保证。TCS 由可实例化的认证函数参数化，以支持常见的隔离级别，如可串行化和快照隔离。然后，我们推导出一个可证明正确性的弹性崩溃协议，用于通过连续改进来实现 TCS。我们的协议比主流方法实现了更好的时间复杂度，主流方法在 Paxos 风格的复制之上分两阶段提交。</p>
 <h2 id="概论">概论</h2>
+<p>现代数据存储通常被需要管理大量数据，同时为用户提供严格的事务保证。它们通过将数据划分为独立管理的<em>分片</em>和容错性来实现可伸缩性，方法是在一组服务器上复制每个碎片。实现这样的系统需要复杂的协议来确保分布式事务满足通常称为酸性的所需属性的组合：原子性，一致性，隔离性和持久性。</p>
 <h2 id="事务确认服务tcs">事务确认服务（TCS）</h2>
-<h2 id="多镜头2pc和本地切片确认函数">多镜头2PC和本地切片确认函数</h2>
+<h2 id="多次2pc和本地分片认证函数">多次2PC和本地分片认证函数</h2>
 <h3 id="系统模型">系统模型</h3>
 <h3 id="一般情况协议">一般情况协议</h3>
 <h3 id="投票计算">投票计算</h3>
-<p>管理切片 <span class="math inline">\(s\)</span> 的进程按照两个<em>本地切片确认函数</em>合取式计算投票：<span class="math inline">\(f_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 和 <span class="math inline">\(g_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span>。与第二部分的确认函数不同，本地切片确认函数是为了检查由 <span class="math inline">\(s\)</span> 管理的切片之间的冲突。它们把第一个参数当作切片上已经提交的事务集合，并且相应地，他们只是准备提交（第11行）。我们需要以上的函数和（1）一样是分布式的。</p>
-<p>例如，考虑第2部分给出的事务模型，并且假设对象集合 <span class="math inline">\(\text{Obj}\)</span> 被分割成了许多切片：<span class="math inline">\(\text{Obj} = \uplus _{s \in \mathcal{S}} \text{Obj}_s\)</span> 。于是一个可能的定义可串行化的本地切片确认函数是这样的：<span class="math inline">\(f_s(T, t) = \text{COMMIT}\)</span> 当且仅当： <span class="math display">\[
+<p>管理分片 <span class="math inline">\(s\)</span> 的进程按照两个<em>本地分片认证函数</em>合取式计算投票：<span class="math inline">\(f_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 和 <span class="math inline">\(g_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span>。与第二部分的认证函数不同，本地分片认证函数是为了检查由 <span class="math inline">\(s\)</span> 管理的分片之间的冲突。它们把第一个参数当作分片上已经提交的事务集合，并且相应地，他们只是准备提交（第11行）。我们需要以上的函数和（1）一样是分布式的。</p>
+<p>例如，考虑第2部分给出的事务模型，并且假设对象集合 <span class="math inline">\(\text{Obj}\)</span> 被分割成了许多分片：<span class="math inline">\(\text{Obj} = \uplus _{s \in \mathcal{S}} \text{Obj}_s\)</span> 。于是一个可能的定义可串行化的本地分片认证函数是这样的：<span class="math inline">\(f_s(T, t) = \text{COMMIT}\)</span> 当且仅当： <span class="math display">\[
 \forall x \in \text{Obj}_s . \forall v.(x, v) \in R(t) \Rightarrow \\ (\forall t&#39; \in T.(x,\_)\in W(t&#39;) \Rightarrow V_c(t&#39;) \le v),
 \]</span></p>
 <h3 id="遗忘和回忆决策">遗忘和回忆决策</h3>
-<p>图1中的协议在21行和24行有两个额外的函数，它们并不确定性地执行。在第4部分我们将展示，这些是为了抽象协议能够捕捉乐观容错TCS实现的行为。</p>
+<p>图1中的协议在21行和24行有两个额外的函数，它们并不确定性地执行。在第4部分我们将展示，这些是为了抽象协议能够捕捉乐观容错TCS实现的行为。因为进程被破坏，这些执行可能临时丢失和最终决策有关的信息，并且之后从相关的分片的投票重构它。同时，正如我们之前解释过的，决策的丢失可能影响到一些投票计算。21行的函数遗忘某一事务的决策（而不是投票）。24行的函数允许进程向协调者重新发送他们知道的投票，这些协调者之后会重新发送最终决策（14行）。这让遗忘决策的进程从相关分片存储的投票重构它。</p>
+<h3 id="正确性">正确性</h3>
+<p>如果 <span class="math inline">\(f_s\)</span> 和 <span class="math inline">\(g_s\)</span> 给出的本地分片确认并发控制与（6）-（8）描述的全局认证函数 <span class="math inline">\(f\)</span> 给出的分片不可知并发控制相关，下面的定理确定了多次 2PC 的正确性。</p>
+<h2 id="容错提交协议">容错提交协议</h2>
+<h2 id="相关工作">相关工作</h2>
+<h2 id="结论">结论</h2>
+<p>在本文中，我们向建立一个现代事务处理系统中的分布式事务提交理论迈出了第一步，这抓住了原子提交和并发控制的交点。我们提出了 TCS 的新问题和一个在可靠进程中解决它的抽象协议。由此，我们提已经系统性地推出了一个可证明正确性的优化的容错协议。</p>
 
 </div>
 
