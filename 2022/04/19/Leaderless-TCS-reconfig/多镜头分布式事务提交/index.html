@@ -200,14 +200,7 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <p><span class="math display">\[
-\def\T{\mathcal{T}}
-\def\D{\mathcal{D}}
-\def\ABORT{\text{ABORT}}
-\def\COMMIT{\text{COMMIT}}
-\def\certify{\text{certify}}
-\def\decision{\text{decision}}
-\]</span></p>
+    <p><span class="math inline">\(\def\T{\mathcal{T}} \def\D{\mathcal{D}} \def\ABORT{\text{ABORT}} \def\COMMIT{\text{COMMIT}} \def\certify{\text{certify}} \def\decision{\text{decision}} \def\Obj{\text{Obj}} \def\Val{\text{Val}} \def\Ver{\text{Ver}}\)</span></p>
 <p><font size=5 style="bold"><strong>摘要</strong></font></p>
 <p>原子事务提交（ACP）是一个和一致性相似的单次协议问题，旨在模拟易出错的分布式系统的事务提交协议属性。我们认为，ACP 限制太多以至于不能捕获现代事务数据存储的复杂性，其中提交协议和并发控制集成，并且他们对不同事务的执行是相互依赖的。作为替代方案，我们引入了传输认证服务（TCS），一个新的正式问题，它通过集成的并发控制来捕获多发事务提交协议的安全保证。TCS 由可实例化的认证函数参数化，以支持常见的隔离级别，如可串行化和快照隔离。然后，我们推导出一个可证明正确性的弹性崩溃协议，用于通过连续改进来实现 TCS。我们的协议比主流方法实现了更好的时间复杂度，主流方法在 Paxos 风格的复制之上分两阶段提交。</p>
 <h2 id="概论">概论</h2>
@@ -221,7 +214,21 @@ var _hmt = _hmt || [];
 <h2 id="事务确认服务tcs">事务确认服务（TCS）</h2>
 <h3 id="接口">接口</h3>
 <p><em>事务认证服务</em> (TCS) 接受来自 <span class="math inline">\(\T\)</span> 的事务并从 <span class="math inline">\(\D = \{ \ABORT, \COMMIT\}\)</span> 产生<em>决策</em>。客户端使用两种类型的<em>操作</em>与 TCS 交互：形式为 <span class="math inline">\(\certify(t)\)</span> 的认证请求，其中 <span class="math inline">\(t \in \T\)</span>，以及形式为 <span class="math inline">\(\decision(t, d)\)</span> 的响应，其中 <span class="math inline">\(d \in \D\)</span>。</p>
-<p>在本文中，我们关注使用（向后）乐观并发控制的事务处理系统。 因此，我们假设提交给 TCS 的事务包括其乐观执行产生的所有信息。 例如，考虑一个事务系统管理集合 Obj 中具有集合 Val 中的值的对象，其中事务可以对对象执行读取和写入。 这些对象与一个完全有序的版本集合 Ver 相关联，该集合具有一个可区分的最低版本 v0。 那么提交给 TCS 的每个事务 t 可能与以下数据相关联：</p>
+<p>在本文中，我们关注使用（向后）乐观并发控制的事务处理系统。 因此，我们假设提交给 TCS 的事务包括其乐观执行产生的所有信息。 例如，考虑一个事务系统管理集合 <span class="math inline">\(\Obj\)</span> 中具有集合 <span class="math inline">\(\Val\)</span> 中的值的<em>对象</em>，其中事务可以对对象执行读取和写入。 这些对象与一个完全有序的<em>版本</em>集合 <span class="math inline">\(\Ver\)</span> 相关联，该集合具有一个可区分的最低版本 <span class="math inline">\(v_0\)</span>。 那么提交给 TCS 的每个事务 <span class="math inline">\(t\)</span> 可能与以下数据相关联：</p>
+<ul>
+<li>读集 <span class="math inline">\(R(t) \subseteq \Obj \times \Ver\)</span>：<span class="math inline">\(t\)</span> 读取的对象及其版本的集合，每个对象包含一个版本。</li>
+<li>写集 <span class="math inline">\(W(t) \subseteq \Obj \times \Val\)</span>：<span class="math inline">\(t\)</span> 写入的具有其值的对象集合，其中每个对象包含一个值。 我们要求任何写入的对象也已被读取：<span class="math inline">\(\forall (x, \_) \in W(t).(x, \_) \in R(t)\)</span>。</li>
+<li>提交版本 <span class="math inline">\(V_c(t) \in \Ver\)</span>：分配给 <span class="math inline">\(t\)</span> 写入的版本。我们要求此版本高于读取的任何版本：<span class="math inline">\(\forall(\_,v) \in R(t).V_c(t)&gt;v\)</span>。</li>
+</ul>
+<h3 id="验证函数">验证函数</h3>
+<p>TCS 由认证函数 <span class="math inline">\(f:2^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 参数化，该函数封装了所需隔离级别的并发控制策略。 结果 <span class="math inline">\(f(T, t)\)</span> 是给定先前提交的事务 <span class="math inline">\(T\)</span> 的集合对事务 <span class="math inline">\(t\)</span> 的决策。我们要求 <span class="math inline">\(f\)</span> 在以下意义上是<em>分布式</em>的： <span class="math display">\[
+\forall T_1, T_2, t. f(T_1 \cup T_2, t) = f(T_1, t) \sqcap f(T_2, t)
+\]</span> 其中操作符 <span class="math inline">\(\sqcap\)</span> 定义如下：<span class="math inline">\(\COMMIT \sqcap \COMMIT= \COMMIT\)</span> 并且对任何 <span class="math inline">\(d\)</span>，<span class="math inline">\(d \sqcap \ABORT = \ABORT\)</span> 这个要求是合理的，因为 <span class="math inline">\(f(T, t)\)</span> 的通用定义分别检查 <span class="math inline">\(t\)</span> 是否与 <span class="math inline">\(T\)</span> 中的每个事务发生冲突。</p>
+<p>例如，给定上述事务域，以下认证函数封装了可串行化的经典并发控制策略： <span class="math inline">\(f(T, t) = \COMMIT\)</span> 当且仅当 <span class="math inline">\(t\)</span> 读取的版本都没有被 <span class="math inline">\(T\)</span> 中的事务覆盖，即， <span class="math display">\[
+\forall x,v.(x,v) \in R(t) \Rightarrow (\forall t&#39;. \in T.(x, \_) \in W(t&#39;) \Rightarrow Vc(t&#39;) \le v).
+\]</span> 快照隔离 (SI) 的认证函数类似，但将认证检查限制在事务 <span class="math inline">\(t\)</span> 写入的对象：<span class="math inline">\(f(T, t) = \COMMIT\)</span> 当且仅当 <span class="math display">\[
+\forall x,v.(x,v) \in R(t) \and (x, \_) \in W(t) \Rightarrow (\forall t&#39; \in T.(x, \_) \in W(t&#39;) \Rightarrow V_c(t&#39;) \le v).
+\]</span> 很容易检查认证函数 (2) 和 (3) 是分布式的。</p>
 <h2 id="多次2pc和本地分片认证函数">多次2PC和本地分片认证函数</h2>
 <h3 id="系统模型">系统模型</h3>
 <h3 id="一般情况协议">一般情况协议</h3>
