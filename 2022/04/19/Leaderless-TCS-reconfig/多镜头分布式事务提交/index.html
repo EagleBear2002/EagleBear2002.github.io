@@ -200,7 +200,7 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <p><span class="math inline">\(\def\T{\mathcal{T}} \def\D{\mathcal{D}} \def\ABORT{\text{ABORT}} \def\COMMIT{\text{COMMIT}} \def\certify{\text{certify}} \def\decision{\text{decision}} \def\Obj{\text{Obj}} \def\Val{\text{Val}} \def\Ver{\text{Ver}}\)</span></p>
+    <p><span class="math inline">\(\def\T{\mathcal{T}} \def\D{\mathcal{D}} \def\l{\mathcal{l}} \def\ABORT{\text{ABORT}} \def\COMMIT{\text{COMMIT}} \def\certify{\text{certify}} \def\decision{\text{decision}} \def\Obj{\text{Obj}} \def\Val{\text{Val}} \def\act{\text{act}} \def\decide{\text{decide}} \def\committed{\text{committed}} \def\Ver{\text{Ver}}\)</span></p>
 <p><font size=5 style="bold"><strong>摘要</strong></font></p>
 <p>原子事务提交（ACP）是一个和一致性相似的单次协议问题，旨在模拟易出错的分布式系统的事务提交协议属性。我们认为，ACP 限制太多以至于不能捕获现代事务数据存储的复杂性，其中提交协议和并发控制集成，并且他们对不同事务的执行是相互依赖的。作为替代方案，我们引入了传输认证服务（TCS），一个新的正式问题，它通过集成的并发控制来捕获多发事务提交协议的安全保证。TCS 由可实例化的认证函数参数化，以支持常见的隔离级别，如可串行化和快照隔离。然后，我们推导出一个可证明正确性的弹性崩溃协议，用于通过连续改进来实现 TCS。我们的协议比主流方法实现了更好的时间复杂度，主流方法在 Paxos 风格的复制之上分两阶段提交。</p>
 <h2 id="概论">概论</h2>
@@ -230,13 +230,16 @@ var _hmt = _hmt || [];
 \forall x,v.(x,v) \in R(t) \wedge (x, \_) \in W(t) \Rightarrow (\forall t&#39; \in T.(x, \_) \in W(t&#39;) \Rightarrow V_c(t&#39;) \le v).
 \]</span> 很容易检查认证函数 (2) 和 (3) 是分布式的。</p>
 <h3 id="历史">历史</h3>
-<p>我们使用<em>历史</em>来表示 TCS 执行——验证和决定操作的有限序列，使得每个事务最多出现一次作为<span class="math inline">\(\certify\)</span>的参数，并且每个决定操作都是对前一个验证操作的响应。 对于历史 h，我们让 act(h) 是 h 中的动作集合。 对于动作 a，a ∈ act(h)，当 a 出现在 h 中的 a 之前，我们写 a ≺h a。 如果其中的每个验证操作都具有匹配的决策操作，则历史 h 是完整的。如果它由连续的验证和匹配决策操作对组成，则完整的历史是连续的。 如果 h 包含 decision(t, commit)，则事务 t 在历史 h 中提交。 我们用committed(h) 表示h 到对应于在h 中提交的事务的动作的投影。 对于完整的历史 h，h [24] 的线性化是一个顺序历史，使得： (i) h 和包含相同的动作；</p>
+<p>我们使用<em>历史</em>来表示 TCS 执行——验证和决定操作的有限序列，使得每个事务最多出现一次作为 <span class="math inline">\(\certify\)</span> 的参数，并且每个决定操作都是对前一个验证操作的响应。 对于历史 <span class="math inline">\(h\)</span>，我们让 <span class="math inline">\(\act(h)\)</span> 是 <span class="math inline">\(h\)</span> 中的动作集合。 对于动作 <span class="math inline">\(a\)</span>，<span class="math inline">\(a&#39; \in \act(h)\)</span>，当 <span class="math inline">\(a\)</span> 出现在 <span class="math inline">\(h\)</span> 中的 <span class="math inline">\(a&#39;\)</span> 之前，我们写 <span class="math inline">\(a \prec_h a&#39;\)</span>。如果其中的每个 <span class="math inline">\(\certify\)</span> 操作都具有匹配的 <span class="math inline">\(\decide\)</span> 操作，则历史 <span class="math inline">\(h\)</span> 是<em>完整的</em>。如果一个完整的历史由连续的 <span class="math inline">\(\certify\)</span> 和匹配 <span class="math inline">\(\decide\)</span> 操作对组成，则该历史是<em>连续的</em>。如果 <span class="math inline">\(h\)</span> 包含 <span class="math inline">\(\decision(t, commit)\)</span>，则事务 <span class="math inline">\(t\)</span> 在历史 <span class="math inline">\(h\)</span> 中<em>提交</em>。 我们用 <span class="math inline">\(\committed(h)\)</span> 表示 <span class="math inline">\(h\)</span> 到对应在 <span class="math inline">\(h\)</span> 中提交的事务的动作的投影。 对于完整的历史 <span class="math inline">\(h\)</span>，<span class="math inline">\(h\)</span> 的<em>线性化</em> <span class="math inline">\(\mathcal{l}\)</span> 是一个顺序历史，使得：(i) <span class="math inline">\(h\)</span> 和 <span class="math inline">\(l\)</span> 包含相同的动作；和 (ii) <span class="math inline">\(\forall t, t&#39;. \decide(t, \_) \prec_ h \certify(t&#39;) \Rightarrow \decide(t, \_) \prec_l \certify(t&#39;).\)</span></p>
+<h3 id="tcs-正确性">TCS 正确性</h3>
+<p>一个完整的序列历史 <span class="math inline">\(h\)</span> 对于一个验证函数 <span class="math inline">\(f\)</span> 是合法的，如果它的证明决定是根据 <span class="math inline">\(f\)</span> 计算的： <span class="math inline">\(\forall a = \decide(t, d) \in \act(h). d = f(\{t&#39; \mid \decide(t&#39;, \COMMIT) \prec_h a \}, t).\)</span></p>
+<p>如果 <span class="math inline">\(h \mid \committed(h)\)</span> 具有合法的线性化，则历史 h 关于 f 是<em>正确的</em>。如果所有历史记录都是正确的，则 TCS 实现对于 <span class="math inline">\(f\)</span> 是<em>正确的</em>。</p>
 <h2 id="多次2pc和本地分片认证函数">多次2PC和本地分片认证函数</h2>
 <h3 id="系统模型">系统模型</h3>
 <h3 id="一般情况协议">一般情况协议</h3>
 <h3 id="投票计算">投票计算</h3>
-<p>管理分片 <span class="math inline">\(s\)</span> 的进程按照两个<em>本地分片认证函数</em>合取式计算投票：<span class="math inline">\(f_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 和 <span class="math inline">\(g_s:s^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span>。与第二部分的认证函数不同，本地分片认证函数是为了检查由 <span class="math inline">\(s\)</span> 管理的分片之间的冲突。它们把第一个参数当作分片上已经提交的事务集合，并且相应地，他们只是准备提交（第11行）。我们需要以上的函数和（1）一样是分布式的。</p>
-<p>例如，考虑第2部分给出的事务模型，并且假设对象集合 <span class="math inline">\(\text{Obj}\)</span> 被分割成了许多分片：<span class="math inline">\(\text{Obj} = \uplus _{s \in \mathcal{S}} \text{Obj}_s\)</span> 。于是一个可能的定义可串行化的本地分片认证函数是这样的：<span class="math inline">\(f_s(T, t) = \text{COMMIT}\)</span> 当且仅当： <span class="math display">\[
+<p>管理分片 <span class="math inline">\(s\)</span> 的进程按照两个<em>本地分片认证函数</em>合取式计算投票：<span class="math inline">\(f_s:s^{\T} \times \T \to \D\)</span> 和 <span class="math inline">\(g_s:s^{\T} \times \T \to \D\)</span>。与第二部分的认证函数不同，本地分片认证函数是为了检查由 <span class="math inline">\(s\)</span> 管理的分片之间的冲突。它们把第一个参数当作分片上已经提交的事务集合，并且相应地，他们只是准备提交（第11行）。我们需要以上的函数和（1）一样是分布式的。</p>
+<p>例如，考虑第2部分给出的事务模型，并且假设对象集合 <span class="math inline">\(\Obj\)</span> 被分割成了许多分片：<span class="math inline">\(\Obj = \uplus _{s \in \mathcal{S}} \Obj_s\)</span> 。于是一个可能的定义可串行化的本地分片认证函数是这样的：<span class="math inline">\(f_s(T, t) = \COMMIT\)</span> 当且仅当： <span class="math display">\[
 \forall x \in \text{Obj}_s . \forall v.(x, v) \in R(t) \Rightarrow \\ (\forall t&#39; \in T.(x,\_)\in W(t&#39;) \Rightarrow V_c(t&#39;) \le v),
 \]</span></p>
 <h3 id="遗忘和回忆决策">遗忘和回忆决策</h3>
