@@ -261,7 +261,7 @@ var _hmt = _hmt || [];
 <p>我们让共识算法中的三个角色由三类代理执行：<em>提议者</em>、<em>接受者</em>和<em>学习者</em>。在一个实现中，单个进程可以充当多个代理，但是在这里我们并不关心从代理到进程的映射。</p>
 <p>假设代理可以通过发送消息相互通信。我们使用惯用的异步非拜占庭模型，其中：</p>
 <ul>
-<li>代理以任意速度运行，可能因停止而失败，也可能重新启动。由于在选择一个值然后重新启动后所有代理都可能失败，因此除非某些信息可以被失败并重新启动的代理记住，否则不可能存在解决方案。</li>
+<li>代理以任意速度运行，可能因停止而宕机，也可能重新启动。由于在选择一个值然后重新启动后所有代理都可能宕机，因此除非某些信息可以被宕机并重新启动的代理记住，否则不可能存在解决方案。</li>
 <li>消息可能需要任意长的时间才能被传递，可以被复制，也可以丢失，但它们不会被破坏。</li>
 </ul>
 <h3 id="选择一个值">选择一个值</h3>
@@ -292,21 +292,19 @@ var _hmt = _hmt || [];
 <p>由于任何由大多数接受者组成的集合 <span class="math inline">\(S\)</span> 都包含 <span class="math inline">\(C\)</span> 的至少一个成员，因此我们可以通过确保保持以下不变量来得出结论：编号为 <span class="math inline">\(n\)</span> 的提案具有值 <span class="math inline">\(v\)</span>：</p>
 <blockquote>
 <p><span class="math inline">\(P2^c\)</span>. 对于任何 <span class="math inline">\(v\)</span> 和 <span class="math inline">\(n\)</span>，如果一个值为 <span class="math inline">\(v\)</span> 且编号为 <span class="math inline">\(n\)</span> 的提案被发布，那么存在一个由大多数接受者组成的集合 <span class="math inline">\(S\)</span>，使得</p>
-<ol type="a">
-<li><p><span class="math inline">\(S\)</span> 中没有接受者接受任何编号小于 <span class="math inline">\(n\)</span> 的提案，或者</p></li>
-<li><p><span class="math inline">\(v\)</span> 是 <span class="math inline">\(S\)</span> 中接受者接受的所有编号小于 <span class="math inline">\(n\)</span> 的提案中编号最高的提案的值。</p></li>
+<ol type="1">
+<li><span class="math inline">\(S\)</span> 中没有接受者接受任何编号小于 <span class="math inline">\(n\)</span> 的提案，或者</li>
+<li><span class="math inline">\(v\)</span> 是 <span class="math inline">\(S\)</span> 中接受者接受的所有编号小于 <span class="math inline">\(n\)</span> 的提案中编号最高的提案的值。</li>
 </ol>
 </blockquote>
 <p>因此，我们可以通过保持 <span class="math inline">\(P2^c\)</span> 的不变性来满足 <span class="math inline">\(P2^b\)</span>。为了保持 <span class="math inline">\(P2^c\)</span> 的不变性，想要发布编号为 <span class="math inline">\(n\)</span> 的提议的提议者必须学习编号小于 <span class="math inline">\(n\)</span> 的最高编号提议，如果有的话，该提议已经或将被大多数接受者中的每个接受者接受。了解已经接受的提案很容易；但很难预测未来的接受。提议者不是试图预测未来，而是通过提取不会有任何此类接受的承诺来控制它。换句话说，提议者要求接受者不再接受编号小于 <span class="math inline">\(n\)</span> 的提议。这导致了以下用于发布提案的算法。</p>
 <ol type="1">
-<li>提议者选择一个新的提议号 <span class="math inline">\(n\)</span> 并向一组接受者中的每个成员发送请求，要求其响应：</li>
-</ol>
-<ol type="a">
+<li><p>提议者选择一个新的提议号 <span class="math inline">\(n\)</span> 并向一组接受者中的每个成员发送请求，要求其响应：</p>
+<ol type="1">
 <li>承诺不再接受编号小于 <span class="math inline">\(n\)</span> 的提案，并且</li>
-<li>其已接受的最大数量小于 <span class="math inline">\(n\)</span> 的提案，如果有的话。</li>
+<li>其已接受的最大数量小于 <span class="math inline">\(n\)</span> 的提案（如果有的话）</li>
 </ol>
-<p>我将这样的请求称为编号为 <span class="math inline">\(n\)</span> 的<em>准备请求</em>。</p>
-<ol start="2" type="1">
+<p>我将这样的请求称为编号为 <span class="math inline">\(n\)</span> 的<em>准备请求</em>。</p></li>
 <li><p>如果提议者收到了大多数接受者的请求响应，那么它可以发出编号为 <span class="math inline">\(n\)</span> 且值为 <span class="math inline">\(v\)</span> 的提议，其中 <span class="math inline">\(v\)</span> 是响应中编号最高的提议的值；如果响应者未报告任何提案，则由提案者任意提出一个值。</p>
 <p>提议者通过向一组接受者发送提议被接受的请求来发布提议。 （这不一定是响应初始请求的同一组接受者。）我们称其为<em>接受请求</em>。</p></li>
 </ol>
@@ -315,7 +313,20 @@ var _hmt = _hmt || [];
 <p><span class="math inline">\(P1^a\)</span>. 接受者可以接受编号为 <span class="math inline">\(n\)</span> 的提案，当且仅当接受者没有响应编号大于 <span class="math inline">\(n\)</span> 的准备请求。</p>
 </blockquote>
 <p>观察到 <span class="math inline">\(P1^a\)</span> 包含 <span class="math inline">\(P1\)</span>。</p>
-<p>我们现在有一个完整的算法来选择满足所需安全属性的值——假设唯一的提案编号。最终的算法是通过一个小的优化得到的。假设一个接受者收到一个编号为 <span class="math inline">\(n\)</span> 的准备请求，但它已经响应了一个编号大于 <span class="math inline">\(n\)</span> 的准备请求，因此承诺不接受任何编号为 <span class="math inline">\(n\)</span> 的新提案。然后接受者没有理由响应新的准备请求，因为它不会接受提议者想要发布的编号为 <span class="math inline">\(n\)</span> 的提案。所以我们让接受者忽略这样的准备请求。我们也让它忽略它已经接受的提案的准备请求。通过这种优化，acceptor 只需要记住它曾经接受过的编号最高的提案以及它已响应的编号最高的准备请求的编号。因为 P2c 必须保持不变而不管失败，接受者必须记住这个信息，即使它失败然后重新启动。请注意，提议者总是可以放弃一个提议并忘记它——只要它永远不会尝试发布另一个具有相同编号的提议。将提议者和接受者的动作放在一起，我们看到算法在以下两个阶段运行。</p>
+<p>我们现在有一个完整的算法来选择满足所需安全属性的值——假设唯一的提案编号。最终的算法是通过一个小的优化得到的。</p>
+<p>假设一个接受者收到一个编号为 <span class="math inline">\(n\)</span> 的准备请求，但它已经响应了一个编号大于 <span class="math inline">\(n\)</span> 的准备请求，因此承诺不接受任何编号为 <span class="math inline">\(n\)</span> 的新提案。然后接受者没有理由响应新的准备请求，因为它不会接受提议者想要发布的编号为 <span class="math inline">\(n\)</span> 的提案。所以我们让接受者忽略这样的准备请求。我们也让它忽略它已经接受的提案的准备请求。</p>
+<p>通过这种优化，接受者只需要记住它曾经接受过的编号最高的提案以及它已响应的编号最高的准备请求的编号。因为 <span class="math inline">\(P2^c\)</span> 必须保持不变而不管宕机，接受者必须记住这个信息，即使它宕机然后重新启动。请注意，提议者总是可以放弃一个提议并完全忘记它——只要它永远不会尝试发布另一个具有相同编号的提议。</p>
+<p>将提议者和接受者的动作放在一起，我们看到算法按照以下两个阶段运行：</p>
+<p><strong>阶段 1.</strong></p>
+<ol type="1">
+<li><p>提议者选择编号为 <span class="math inline">\(n\)</span> 的提议并向大多数接受者发送编号为 <span class="math inline">\(n\)</span> 的准备请求。</p></li>
+<li><p>如果一个接受者收到一个编号 <span class="math inline">\(n\)</span> 大于它已经响应的任何准备请求的准备请求，则它响应该请求并承诺不再接受任何编号小于 <span class="math inline">\(n\)</span> 的提议，并返回已接受的编号最高的提案（如果有）。</p></li>
+</ol>
+<p><strong>阶段 2.</strong></p>
+<ol type="1">
+<li><p>如果提议者从大多数接受者那里收到对其准备请求（编号为 <span class="math inline">\(n\)</span>）的响应，那么它会向这些接受者中的每一个发送一个接受请求，以获取编号为 <span class="math inline">\(n\)</span> 且值为 <span class="math inline">\(v\)</span> 的提议，其中 <span class="math inline">\(v\)</span> 是所有响应中编号最高的提案的值（如果响应报告没有提案，则 <span class="math inline">\(v\)</span> 为任何值）。</p></li>
+<li><p>如果一个接受者收到一个编号为 <span class="math inline">\(n\)</span> 的提议的接受请求，它会接受该提议，除非它已经响应了编号大于 <span class="math inline">\(n\)</span> 的准备请求。</p></li>
+</ol>
 
 </div>
 
