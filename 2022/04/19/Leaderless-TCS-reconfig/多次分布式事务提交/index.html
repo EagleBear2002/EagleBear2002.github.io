@@ -125,6 +125,28 @@ var _hmt = _hmt || [];
                     <li class="directory">
                         <a href="#" class="directory">
                             <i class="fa fa-plus-square-o"></i>
+                            C++高级程序设计
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/">
+                            
+                                面向对象程序设计
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
                             CMU-数据库系统
                         </a>
                         
@@ -361,7 +383,7 @@ dec[] (from N to &#123;COMMIT, ABORT&#125;)<span aria-hidden="true" class="line-
 <img src="/.io//Fig1.png" alt="Fig1"><figcaption aria-hidden="true">Fig1</figcaption>
 </figure>
 <p>为了验证事务 <span class="math inline">\(t\)</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 6 行）。管理分片的进程将收到的所有事务安排到一个总的认证订单中，存储在一个数组 <span class="math inline">\(\txn\)</span> 中；<span class="math inline">\(\next\)</span> 变量指向数组中最后一个填充的插槽。收到事务 <span class="math inline">\(t\)</span>（第 8 行）后，进程将 <span class="math inline">\(t\)</span> 存储在 <span class="math inline">\(\txn\)</span> 的下一个空闲槽中。该进程还计算其<em>投票</em>，说明是 <span class="math inline">\(\COMMIT\)</span> 还是 <span class="math inline">\(\ABORT\)</span> 事务，并将其存储在数组 <span class="math inline">\(\vote\)</span> 中。我们按照以下方式解释投票计算；直观地说，投票是由事务 <span class="math inline">\(t\)</span> 是否与之前收到的事务冲突来决定的。在管理分片 <span class="math inline">\(s\)</span> 的进程收到 <span class="math inline">\(t\)</span> 后，我们说 <span class="math inline">\(t\)</span> 在 <span class="math inline">\(s\)</span> 处<em>准备好</em>。该进程在数组 <span class="math inline">\(\phase\)</span> 跟踪事务状态，其条目最初存储 <span class="math inline">\(\START\)</span>，一旦事务准备好，就会更改为 <span class="math inline">\(\PREPARED\)</span>。准备好事务 <span class="math inline">\(t\)</span> 后，该过程发送一个 <span class="math inline">\(\PREPAREACK\)</span> 消息，其中包含其在认证顺序中的位置和给 <span class="math inline">\(t\)</span> 的<em>协调者</em>的投票。该过程由该函数确定： <span class="math inline">\(\coord: \T \to \P\)</span> 使得 <span class="math inline">\(\forall t.\coord(t) \in \proc(\shards(t))\)</span>。</p>
-<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从其每个分片 <span class="math inline">\(s\)</span> 接收到针对 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\PREPAREACK\)</span> 消息就会采取行动，该消息携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 14 行）。协调器使用 <span class="math inline">\(\sqcap\)</span> 算子（第 2 节）计算关于 <span class="math inline">\(t\)</span> 的最终决定，并将其以 <span class="math inline">\(\DECISION\)</span> 消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18 行），它将决定存储在 <span class="math inline">\(\dec\)</span> 数组中，并将事务的阶段推进到 <span class="math inline">\(\DECIDED\)</span>。请注意，我们不允许协调器单方面中止事务：这可以最大限度地减少我们在第 4 节中介绍的协议的容错版本中的延迟。</p>
+<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从其每个分片 <span class="math inline">\(s\)</span> 接收到针对 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\PREPAREACK\)</span> 消息就会采取行动，该消息携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 14 行）。协调者使用 <span class="math inline">\(\sqcap\)</span> 算子（第 2 节）计算关于 <span class="math inline">\(t\)</span> 的最终决定，并将其以 <span class="math inline">\(\DECISION\)</span> 消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18 行），它将决定存储在 <span class="math inline">\(\dec\)</span> 数组中，并将事务的阶段推进到 <span class="math inline">\(\DECIDED\)</span>。请注意，我们不允许协调者单方面中止事务：这可以最大限度地减少我们在第 4 节中介绍的协议的容错版本中的延迟。</p>
 <h3 id="投票计算">投票计算</h3>
 <p>管理分片 <span class="math inline">\(s\)</span> 的进程将投票计算为两个<em>分片本地认证函数</em> <span class="math inline">\(f_s:s^{\T} \times \T \to \D\)</span> 和 <span class="math inline">\(g_s:s^{\T} \times \T \to \D\)</span> 的结合。与第 2 节的认证函数不同，分片本地认证函数仅用于检查由 <span class="math inline">\(s\)</span> 管理的对象上的冲突。他们将已经决定在分片上提交的事务集以及仅准备提交的事务集作为第一个参数（第 11 行）。我们要求上述函数是分布式的，类似于（1）。</p>
 <p>例如，考虑第 2 节中给出的事务模型。并假设对象集 <span class="math inline">\(\Obj\)</span> 在分片之间进行分区：<span class="math inline">\(\Obj = \uplus _{s \in \S} \Obj_s\)</span>。那么为可串行化定义分片本地认证函数的一种可能方法如下：<span class="math inline">\(f_s(T, t) = \COMMIT\)</span> 当且仅当： <span class="math display">\[
@@ -383,10 +405,10 @@ dec[] (from N to &#123;COMMIT, ABORT&#125;)<span aria-hidden="true" class="line-
 <h3 id="系统模型-1">系统模型</h3>
 <p>我们现在通过允许进程因崩溃而失败（即永久停止执行）来削弱上一节的假设。 我们仍然假设进程是通过可靠的 FIFO 通道连接的，在以下意义上：消息按 FIFO 顺序传递，并且非故障进程之间的消息保证最终传递。 每个分片 <span class="math inline">\(s\)</span> 现在由一组 <span class="math inline">\(2k+1\)</span> 个进程管理，其中最多 <span class="math inline">\(k\)</span> 个可能失败。我们称这组中的一组 <span class="math inline">\(k+1\)</span> 个进程为 <span class="math inline">\(s\)</span> 的法定人数。对于一个分片 <span class="math inline">\(s\)</span>，我们将 <span class="math inline">\(\proc(s)\)</span> 重新定义为管理此分片的一组进程。为简单起见，我们假设管理不同分片的进程组是不相交的。</p>
 <h3 id="香草协议">香草协议</h3>
-<p>在上述模型中实现 TCS 的一种直接方法是使用状态机复制使分片模拟多镜头 2PC 中的可靠过程； 这通常基于共识协议，例如 Paxos。 在这种情况下，永远不会忘记交易的最终决定，因此不会模拟第 21 行和第 24 行的处理程序。 尽管这种方法被多个系统使用，但多名研究人员观察到，由此产生的协议需要大量不必要的消息延迟。 即，图 2a 中的多镜头 2PC 的每个动作都需要额外往返同一分片中的一组进程以保持其效果，从而产生图 2b 中的消息流图。 请注意，协调器的操作也必须被复制，因为如果协调器失败，multishot 2PC 将阻塞。 生成的协议需要 7 次消息延迟，客户端才能了解交易决策。</p>
+<p>在上述模型中实现 TCS 的一种直接方法是使用状态机复制使分片模拟多次 2PC 中的可靠过程； 这通常基于共识协议，例如 Paxos。 在这种情况下，永远不会忘记交易的最终决定，因此不会模拟第 21 行和第 24 行的处理程序。 尽管这种方法被多个系统使用，但多名研究人员观察到，由此产生的协议需要大量不必要的消息延迟。 即，图 2a 中的多次 2PC 的每个动作都需要额外往返同一分片中的一组进程以保持其效果，从而产生图 2b 中的消息流图。 请注意，协调者的操作也必须被复制，因为如果协调者宕机，多次 2PC 将阻塞。 生成的协议需要 7 次消息延迟，客户端才能了解交易决策。</p>
 <h3 id="优化的协议概述">优化的协议概述</h3>
 <p>在图 5 中，我们给出了一个提交协议，该协议通过将跨分片的 multi-shot 2PC 和每个分片内的类 Paxos 协议编织在一起来减少消息延迟的数量。我们从代码中省略了与消息重传相关的细节。我们在图 2c 中说明了协议的消息流，并在图 6 中总结了其正确性证明中使用的关键不变量</p>
-<p>一个过程维护与多镜头 2PC 协议中相同的变量（图 1）和一些其他的。分片中的每个进程要么是分片的领导者，要么是追随者。如果领导者失败，则其中一个追随者接管。状态变量记录进程是领导者、追随者还是处于领导者更改期间使用的特殊恢复状态。使用整数选票表示特定进程充当领导者的一段时间。对于 b ≥ 1 的选票，过程领导者 (b) = ((b - 1) mod (2 f + 1)) 是选票的领导者。我们使用整组整数作为选票，因为给定的进程可能多次扮演领导者的角色。在任何给定时间，一个进程都参与一个单一的投票，该投票存储在一个变量 cballot 中并且永远不会减少。在领导人更换期间，我们还使用额外的选票变量选票</p>
+<p>一个过程维护与多次 2PC 协议中相同的变量（图 1）和一些其他的。分片中的每个进程要么是分片的领导者，要么是追随者。如果领导者失败，则其中一个追随者接管。状态变量记录进程是领导者、追随者还是处于领导者更改期间使用的特殊恢复状态。使用整数选票表示特定进程充当领导者的一段时间。对于 b ≥ 1 的选票，过程领导者 (b) = ((b - 1) mod (2 f + 1)) 是选票的领导者。我们使用整组整数作为选票，因为给定的进程可能多次扮演领导者的角色。在任何给定时间，一个进程都参与一个单一的投票，该投票存储在一个变量 cballot 中并且永远不会减少。在领导人更换期间，我们还使用额外的选票变量选票</p>
 <p>与图 2b 中所示的普通协议不同，我们的协议不执行共识以将 DECISION 消息的内容持久保存在分片中。相反，交易的最终决定被异步发送给每个相关分片的成员。这意味着不同的分片成员可能会在不同的时间收到关于交易的决定。由于对交易的最终决定会影响在认证顺序中跟随它的交易的投票计算（第 3 节），因此在不同的分片成员上计算对后续交易的投票可能会产生不同的结果。为了解决这个问题，在我们的协议中，只有领导者构建认证顺序并计算投票。追随者是被动的：他们只是复制领导者的决定。一旦分片的领导者收到最终决定，就会在分片的投票计算中考虑它。</p>
 <h2 id="相关工作">相关工作</h2>
 <h2 id="结论">结论</h2>
