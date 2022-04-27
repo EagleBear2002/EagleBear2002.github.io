@@ -560,10 +560,14 @@ p <span class="token operator">=</span> <span class="token keyword">new</span> A
 	<span class="token function">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 		<span class="token operator">:</span> <span class="token function">indirect_int</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token punctuation">&#125;</span>
 	<span class="token operator">~</span><span class="token function">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">delete</span> <span class="token operator">&amp;</span>indirect_int<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
-	<span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span> indirect_int<span class="token operator">++</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span> <span class="token comment">// 编译通过， const 成员函数可以修改引用成员变量</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	<span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">&#123;</span>
+        indirect_int<span class="token operator">++</span><span class="token punctuation">;</span>  <span class="token comment">// 编译通过， const 成员函数可以修改引用成员变量</span>
+        <span class="token keyword">const_cast</span><span class="token operator">&lt;</span>A<span class="token operator">*</span><span class="token operator">></span> <span class="token keyword">this</span> <span class="token operator">-></span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// 编译通过，强制通过地址修改对象内容</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><code>mutable</code> 关键字修饰的变量，可以在 const 成员函数中修改。</p>
+<h2 id="静态成员">静态成员</h2>
+<p>静态成员由类对象共享，有唯一的拷贝，遵循类访问控制。</p>
 <h2 id="继承">继承</h2>
 <h3 id="继承机制">继承机制</h3>
 <p>基于目标代码的复用。对事物进行分类，派生类是基类的具体化，把事物（概念）以层次结构表示出来，有利于 描述和解决问题。</p>
