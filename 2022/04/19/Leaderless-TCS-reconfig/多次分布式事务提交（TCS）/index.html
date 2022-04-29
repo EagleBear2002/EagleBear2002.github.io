@@ -9,7 +9,7 @@
 	
 	<title>
 	
-		多次分布式事务提交 | 
+		多次分布式事务提交（TCS） | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -218,9 +218,9 @@ var _hmt = _hmt || [];
                         
                 <ul>
                     <li class="file active">
-                        <a href="/2022/04/19/Leaderless-TCS-reconfig/%E5%A4%9A%E6%AC%A1%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4/">
+                        <a href="/2022/04/19/Leaderless-TCS-reconfig/%E5%A4%9A%E6%AC%A1%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4%EF%BC%88TCS%EF%BC%89/">
                             
-                                多次分布式事务提交
+                                多次分布式事务提交（TCS）
                             
                         </a>
                     </li>
@@ -282,7 +282,7 @@ var _hmt = _hmt || [];
 	<!-- 引入正文 -->
 	<div id="content">
 		<h1 id="article-title">
-    多次分布式事务提交
+    多次分布式事务提交（TCS）
 </h1>
 <div class="article-meta">
     
@@ -321,76 +321,85 @@ var _hmt = _hmt || [];
 
 <div id="article-content">
     <p><span class="math display">\[
-\def\T{\mathcal{T}}
-\def\D{\mathcal{D}}
-\def\P{\mathcal{P}}
-\def\S{\mathcal{S}}
-\def\l{\mathcal{l}}
 \def\ABORT{\text{ABORT}}
+\def\ACCEPT{\text{ACCEPT}}
+\def\ACCEPTACK{\text{ACCEPT\_ACK}}
+\def\act{\text{act}}
+\def\ballot{\text{ballot}}
+\def\certify{\text{certify}}
+\def\client{\text{client}}
 \def\COMMIT{\text{COMMIT}}
+\def\committed{\text{committed}}
+\def\coord{\text{coord}}
+\def\dec{\text{dec}}
+\def\DECIDED{\text{DECIDED}}
+\def\decide{\text{decide}}
+\def\DECISION{\text{DECISION}}
+\def\decision{\text{decision}}
+\def\FOLLOWER{\text{FOLLOWER}}
+\def\follower{\text{follower}}
+\def\l{\mathcal{l}}
+\def\LEADER{\text{LEADER}}
+\def\leader{\text{leader}}
+\def\D{\mathcal{D}}
+\def\next{\text{next}}
+\def\Obj{\text{Obj}}
+\def\P{\mathcal{P}}
+\def\phase{\text{phase}}
 \def\PREPARE{\text{PREPARE}}
 \def\PREPARED{\text{PREPARED}}
 \def\PREPAREACK{\text{PREPARE\_ACK}}
-\def\certify{\text{certify}}
-\def\decide{\text{decide}}
-\def\decision{\text{decision}}
-\def\client{\text{client}}
-\def\shards{\text{shards}}
 \def\proc{\text{proc}}
-\def\Obj{\text{Obj}}
-\def\Val{\text{Val}}
-\def\act{\text{act}}
-\def\txn{\text{txn}}
-\def\dec{\text{dec}}
-\def\next{\text{next}}
-\def\vote{\text{vote}}
-\def\phase{\text{phase}}
+\def\RECOVERING{\text{RECOVERING}}
+\def\S{\mathcal{S}}
+\def\shards{\text{shards}}
 \def\START{\text{START}}
-\def\DECIDED{\text{DECIDED}}
-\def\DECISION{\text{DECISION}}
-\def\coord{\text{coord}}
-\def\committed{\text{committed}}
+\def\status{\text{status}}
+\def\T{\mathcal{T}}
+\def\txn{\text{txn}}
+\def\Val{\text{Val}}
 \def\Ver{\text{Ver}}
+\def\vote{\text{vote}}
 \]</span></p>
 <p><strong>摘要</strong></p>
 <p>原子事务提交（ACP）是一个和一致性相似的单次协议问题，旨在模拟易出错的分布式系统的事务提交协议属性。我们认为，ACP 限制太多以至于不能捕获现代事务数据存储的复杂性，其中提交协议和并发控制集成，并且他们对不同事务的执行是相互依赖的。作为替代方案，我们引入了传输认证服务（TCS），一个新的正式问题，它通过集成的并发控制来捕获多发事务提交协议的安全保证。TCS 由可实例化的认证函数参数化，以支持常见的隔离级别，如可串行化和快照隔离。然后，我们推导出一个可证明正确性的弹性崩溃协议，用于通过连续改进来实现 TCS。我们的协议比主流方法实现了更好的时间复杂度，主流方法在 Paxos 风格的复制之上分两阶段提交。</p>
 <h2 id="概论">概论</h2>
 <p>现代数据存储通常被需要管理大量数据，同时为用户提供严格的事务保证。它们通过将数据划分为独立管理的<em>分片</em>和容错性来实现可伸缩性，方法是在一组服务器上复制每个分片。实现这样的系统需要复杂的协议来确保分布式事务满足通常称为 ACID 的所需属性的组合：原子性，一致性，隔离性和持久性。</p>
 <p>传统上，分布式计算文献将实现这些属性的方法抽象为单独的问题：特别是保证原子性的原子提交问题（ACP）和保证隔离性的并发控制（CC）。ACP正式化作为一个一次性协议问题，其中涉及事务的多个分片需要就其最终结果作出决策：如果所有分片都投票提交，则决策<em>提交</em>，否则<em>放弃</em>。并发控制负责确保全局历史符合所需的隔离级别。在典型的实现中，每个分片跟踪事务访问的本地对象，并根据本地观察到的与其他活动事务的冲突确定其对事务结果的投票（提交或放弃）。虽然 ACP 和 CC 都必须在任何现实的事务处理系统中解决，但它们在现有文献中被视为不相交的。特别是，ACP 的解决方案将投票视为问题的输入，并把与负责产生投票的 CC 进行交互这件事遗留在问题范围之外。</p>
-<p>然而，这种分离过于简单，无法捕捉到许多实际实现的复杂性，其中提交协议和并发控制紧密集成，因此可能会以微妙的方式相互影响。例如，考虑经典的<em>两阶段提交</em>（2PC）协议，用于解决可靠进程之间的 ACP。事务处理系统通常为每个事务执行一个 2PC 实例。当管理分片 <span class="math inline">\(s\)</span> 的进程 <span class="math inline">\(p_i\)</span> 收到一个事务 <span class="math inline">\(t\)</span> 时，它会执行一个本地并发控制检查并相应地投票提交或中止 <span class="math inline">\(t\)</span>。不同进程的投票 <span class="math inline">\(t\)</span> 被聚合，然后最终决定分发给所有进程。如果 <span class="math inline">\(p_i\)</span> 投票支持 <span class="math inline">\(t\)</span>，只要它不知道对 <span class="math inline">\(t\)</span> 的最终决定，它就必须保守地假定 <span class="math inline">\(t\)</span> 已提交。这可能会导致 <span class="math inline">\(p_i\)</span> 在另一个 2PC 实例中为与 <span class="math inline">\(t\)</span> 冲突的事务 <span class="math inline">\(t&#39;\)</span> 投票中止，即使最终 <span class="math inline">\(t\)</span> 被中止。在这种情况下，一个 2PC 实例（对于 <span class="math inline">\(t&#39;\)</span>）的结果取决于另一个实例（对于 <span class="math inline">\(t\)</span>）执行的内部结构和使用的并发控制策略。</p>
+<p>然而，这种分离过于简单，无法捕捉到许多实际实现的复杂性，其中提交协议和并发控制紧密集成，因此可能会以微妙的方式相互影响。例如，考虑经典的<em>两阶段提交</em>（2PC）协议，用于解决可靠进程之间的 ACP。事务处理系统通常为每个事务执行一个 2PC 实例。当管理分片 <span class="math inline">\(s\)</span> 的进程 <span class="math inline">\(p_i\)</span> 收到一个事务 <span class="math display">\[t\]</span> 时，它会执行一个本地并发控制检查并相应地投票提交或中止 <span class="math display">\[t\]</span>。不同进程的投票 <span class="math display">\[t\]</span> 被聚合，然后最终决定分发给所有进程。如果 <span class="math inline">\(p_i\)</span> 投票支持 <span class="math display">\[t\]</span>，只要它不知道对 <span class="math display">\[t\]</span> 的最终决定，它就必须保守地假定 <span class="math display">\[t\]</span> 已提交。这可能会导致 <span class="math inline">\(p_i\)</span> 在另一个 2PC 实例中为与 <span class="math display">\[t\]</span> 冲突的事务 <span class="math display">\[t$&#39;$ 投票中止，即使最终 \]</span>t<span class="math display">\[ 被中止。在这种情况下，一个 2PC 实例（对于 \]</span>t<span class="math inline">\(&#39;\)</span>）的结果取决于另一个实例（对于 <span class="math display">\[t\]</span>）执行的内部结构和使用的并发控制策略。</p>
 <p>目前，缺乏一个正式的框架来捕捉实际实现的这些复杂方面使得它们难以理解和证明。在本文中，我们迈出了弥合这一差距的第一步。我们介绍了事务认证服务（TCS，第 2 节），这是一个新的正式问题，用于捕获具有集成并发控制的多次事务提交协议的安全保证。TCS 暴露了一个简单的接口，允许客户端通过一个返回提交或放弃的 <span class="math inline">\(\certify\)</span> 请求提交事务以进行认证。TCS 旨在用于具有乐观并发控制的事务处理系统的上下文中，其中首先乐观地执行事务，然后将结果（例如，读取和写入集）提交给 TCS 以进行认证。与 ACP 相比，TCS 对重复调用 <span class="math inline">\(\certify\)</span> 的数量或其并发性没有任何限制。因此，它自然有助于将事务提交和并发控制之间的交互形式化。为此，TCS 由一个认证函数参数化，该函数封装了所需隔离级别的并发控制策略，例如可串行化和快照隔离。然后通过要求其认证决策与认证功能一致来制定 TCS 的正确性。</p>
 <p>我们利用 TCS 开发一个正式的框架，用于构建具有可定制隔离级别的可证明正确的多次事务提交协议。我们框架的核心是一个新的<em>多次两阶段提交协议</em>（第 3 节）。它形式化了经典 2PC 如何与许多实际事务处理系统中的并发控制交互，其方式在提供的隔离级别中是参数化的。该协议还用作派生更复杂的 TCS 实现的模板。我们证明了多次两阶段提交协议正确地实现了具有给定认证功能的 TCS，前提是每个分片使用的并发控制策略与此函数匹配。</p>
 <p>接下来，我们提出了一个<em>崩溃容错</em> TCS 实现，并通过证明它模拟多次 2PC（第 4 节）来确定其正确性。使 2PC 容错的一种常见方法是让每个分片使用复制协议（例如 Paxos）来模拟可靠的 2PC 进程。与最近的工作类似，我们的实现通过将 2PC 和 Paxos 编织在一起来优化该方案的时间复杂度。特别是，我们的协议避免持续复制 2PC 协调者，以换取协调者单方面中止事务的能力。反过来，这允许消除普通容错 2PC 中所需的 Paxos 一致性，以在分片上保留对事务的最终决策：如果发生故障，可以从分片的当前状态重建决策。与以前遵循相同设计的协议相比，我们的协议在隔离级别上是通用的，并且经过严格证明是正确的。因此，它可以作为未来分布式事务提交实现的参考解决方案。此外，我们协议的一个变体具有与一致性和非阻塞原子提交的下限相匹配的时间复杂度。</p>
 <p>我们协议的一个特性使得证明其正确性变得特别微妙，即避免就事务的最终决策达成共识，而是将决策异步传播到相关的分片副本。这意味着不同的分片副本可能在不同的时间收到决策，因此它们的状态可能不一致。为了解决这个问题，在我们的协议中，投票由单个分片<em>领导者</em>根据可用的信息在本地计算； 其他进程仅存储投票。这种被动复制方法在设计从领导者故障中恢复的方式并证明其正确性时要小心。</p>
 <h2 id="事务确认服务tcs">事务确认服务（TCS）</h2>
 <h3 id="接口">接口</h3>
-<p><em>事务认证服务</em> (TCS) 接受来自 <span class="math inline">\(\T\)</span> 的事务并从 <span class="math inline">\(\D = \{ \ABORT, \COMMIT\}\)</span> 产生<em>决策</em>。客户端使用两种类型的<em>操作</em>与 TCS 交互：形式为 <span class="math inline">\(\certify(t)\)</span> 的认证请求，其中 <span class="math inline">\(t \in \T\)</span>，以及形式为 <span class="math inline">\(\decision(t, d)\)</span> 的响应，其中 <span class="math inline">\(d \in \D\)</span>。</p>
-<p>在本文中，我们关注使用（向后）乐观并发控制的事务处理系统。因此，我们假设提交给 TCS 的事务包括其乐观执行产生的所有信息。例如，考虑一个事务系统管理集合 <span class="math inline">\(\Obj\)</span> 中具有集合 <span class="math inline">\(\Val\)</span> 中的值的<em>对象</em>，其中事务可以对对象执行读取和写入。这些对象与一个完全有序的<em>版本</em>集合 <span class="math inline">\(\Ver\)</span> 相关联，该集合具有一个可区分的最低版本 <span class="math inline">\(v_0\)</span>。那么提交给 TCS 的每个事务 <span class="math inline">\(t\)</span> 可能与以下数据相关联：</p>
+<p><em>事务认证服务</em> (TCS) 接受来自 <span class="math inline">\(\T\)</span> 的事务并从 <span class="math inline">\(\D = \{ \ABORT, \COMMIT\}\)</span> 产生<em>决策</em>。客户端使用两种类型的<em>操作</em>与 TCS 交互：形式为 <span class="math inline">\(\certify(\)</span>t<span class="math inline">\()\)</span> 的认证请求，其中 $<span class="math inline">\(t\)</span> $，以及形式为 <span class="math inline">\(\decision(\)</span>t<span class="math inline">\(, d)\)</span> 的响应，其中 <span class="math inline">\(d \in \D\)</span>。</p>
+<p>在本文中，我们关注使用（向后）乐观并发控制的事务处理系统。因此，我们假设提交给 TCS 的事务包括其乐观执行产生的所有信息。例如，考虑一个事务系统管理集合 <span class="math inline">\(\Obj\)</span> 中具有集合 <span class="math inline">\(\Val\)</span> 中的值的<em>对象</em>，其中事务可以对对象执行读取和写入。这些对象与一个完全有序的<em>版本</em>集合 <span class="math inline">\(\Ver\)</span> 相关联，该集合具有一个可区分的最低版本 <span class="math inline">\(v_0\)</span>。那么提交给 TCS 的每个事务 <span class="math display">\[t\]</span> 可能与以下数据相关联：</p>
 <ul>
-<li>读集 <span class="math inline">\(R(t) \subseteq \Obj \times \Ver\)</span>：<span class="math inline">\(t\)</span> 读取的对象及其版本的集合，每个对象包含一个版本。</li>
-<li>写集 <span class="math inline">\(W(t) \subseteq \Obj \times \Val\)</span>：<span class="math inline">\(t\)</span> 写入的具有其值的对象集合，其中每个对象包含一个值。我们要求任何写入的对象也已被读取：<span class="math inline">\(\forall (x, \_) \in W(t).(x, \_) \in R(t)\)</span>。</li>
-<li>提交版本 <span class="math inline">\(V_c(t) \in \Ver\)</span>：分配给 <span class="math inline">\(t\)</span> 写入的版本。我们要求此版本高于读取的任何版本：<span class="math inline">\(\forall(\_,v) \in R(t).V_c(t)&gt;v\)</span>。</li>
+<li>读集 <span class="math inline">\(R(\)</span>t<span class="math inline">\() \subseteq \Obj \times \Ver\)</span>：<span class="math display">\[t\]</span> 读取的对象及其版本的集合，每个对象包含一个版本。</li>
+<li>写集 <span class="math inline">\(W(\)</span>t<span class="math inline">\() \subseteq \Obj \times \Val\)</span>：<span class="math display">\[t\]</span> 写入的具有其值的对象集合，其中每个对象包含一个值。我们要求任何写入的对象也已被读取：<span class="math inline">\(\forall (x, \_) \in W(\)</span>t<span class="math inline">\().(x, \_) \in R(\)</span>t<span class="math inline">\()\)</span>。</li>
+<li>提交版本 <span class="math inline">\(V_c(\)</span>t<span class="math inline">\() \in \Ver\)</span>：分配给 <span class="math display">\[t\]</span> 写入的版本。我们要求此版本高于读取的任何版本：<span class="math inline">\(\forall(\_,v) \in R(\)</span>t<span class="math inline">\().V_c(\)</span>t<span class="math inline">\()&gt;v\)</span>。</li>
 </ul>
 <h3 id="认证函数">认证函数</h3>
-<p>TCS 由认证函数 <span class="math inline">\(f:2^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 参数化，该函数封装了所需隔离级别的并发控制策略。结果 <span class="math inline">\(f(T, t)\)</span> 是给定先前提交的事务 <span class="math inline">\(T\)</span> 的集合对事务 <span class="math inline">\(t\)</span> 的决策。我们要求 <span class="math inline">\(f\)</span> 在以下意义上是<em>分布式</em>的： <span class="math display">\[
+<p>TCS 由认证函数 <span class="math inline">\(f:2^{\mathcal{T}} \times \mathcal{T} \to \mathcal{D}\)</span> 参数化，该函数封装了所需隔离级别的并发控制策略。结果 $f(T, <span class="math inline">\(t\)</span>)$ 是给定先前提交的事务 <span class="math inline">\(T\)</span> 的集合对事务 <span class="math display">\[t\]</span> 的决策。我们要求 <span class="math inline">\(f\)</span> 在以下意义上是<em>分布式</em>的： <span class="math display">\[
 \forall T_1, T_2, t. f(T_1 \cup T_2, t) = f(T_1, t) \sqcap f(T_2, t) \tag 1
-\]</span> 其中操作符 <span class="math inline">\(\sqcap\)</span> 定义如下：<span class="math inline">\(\COMMIT \sqcap \COMMIT= \COMMIT\)</span> 并且对任何 <span class="math inline">\(d\)</span>，<span class="math inline">\(d \sqcap \ABORT = \ABORT\)</span> 这个要求是合理的，因为 <span class="math inline">\(f(T, t)\)</span> 的通用定义分别检查 <span class="math inline">\(t\)</span> 是否与 <span class="math inline">\(T\)</span> 中的每个事务发生冲突。</p>
-<p>例如，给定上述事务域，以下认证函数封装了可串行化的经典并发控制策略： <span class="math inline">\(f(T, t) = \COMMIT\)</span> 当且仅当 <span class="math inline">\(t\)</span> 读取的版本都没有被 <span class="math inline">\(T\)</span> 中的事务覆盖，即， <span class="math display">\[
+\]</span> 其中操作符 <span class="math inline">\(\sqcap\)</span> 定义如下：<span class="math inline">\(\COMMIT \sqcap \COMMIT= \COMMIT\)</span> 并且对任何 <span class="math inline">\(d\)</span>，<span class="math inline">\(d \sqcap \ABORT = \ABORT\)</span> 这个要求是合理的，因为 $f(T, <span class="math inline">\(t\)</span>)$ 的通用定义分别检查 <span class="math display">\[t\]</span> 是否与 <span class="math inline">\(T\)</span> 中的每个事务发生冲突。</p>
+<p>例如，给定上述事务域，以下认证函数封装了可串行化的经典并发控制策略： $f(T, <span class="math inline">\(t\)</span>) = $ 当且仅当 <span class="math display">\[t\]</span> 读取的版本都没有被 <span class="math inline">\(T\)</span> 中的事务覆盖，即， <span class="math display">\[
 \forall x,v.(x,v) \in R(t) \Rightarrow (\forall t&#39;. \in T.(x, \_) \in W(t&#39;) \Rightarrow Vc(t&#39;) \le v). \tag 2
-\]</span> 快照隔离 (SI) 的认证函数类似，但将认证检查限制在事务 <span class="math inline">\(t\)</span> 写入的对象：<span class="math inline">\(f(T, t) = \COMMIT\)</span> 当且仅当 <span class="math display">\[
+\]</span> 快照隔离 (SI) 的认证函数类似，但将认证检查限制在事务 <span class="math display">\[t\]</span> 写入的对象：$f(T, <span class="math inline">\(t\)</span>) = $ 当且仅当 <span class="math display">\[
 \forall x,v.(x,v) \in R(t) \wedge (x, \_) \in W(t) \Rightarrow (\forall t&#39; \in T.(x, \_) \in W(t&#39;) \Rightarrow V_c(t&#39;) \le v). \tag 3
 \]</span> 很容易检查认证函数 (2) 和 (3) 是分布式的。</p>
 <h3 id="历史">历史</h3>
-<p>我们使用<em>历史</em>来表示 TCS 执行——验证和决定动作的有限序列，使得每个事务最多出现一次作为 <span class="math inline">\(\certify\)</span> 的参数，并且每个决定动作都是对前一个验证动作的响应。对于历史 <span class="math inline">\(h\)</span>，我们让 <span class="math inline">\(\act(h)\)</span> 是 <span class="math inline">\(h\)</span> 中的动作集合。对于动作 <span class="math inline">\(a\)</span>，<span class="math inline">\(a&#39; \in \act(h)\)</span>，当 <span class="math inline">\(a\)</span> 出现在 <span class="math inline">\(h\)</span> 中的 <span class="math inline">\(a&#39;\)</span> 之前，我们写 <span class="math inline">\(a \prec_h a&#39;\)</span>。如果其中的每个 <span class="math inline">\(\certify\)</span> 动作都具有匹配的 <span class="math inline">\(\decide\)</span> 动作，则历史 <span class="math inline">\(h\)</span> 是<em>完整的</em>。如果一个完整的历史由连续的 <span class="math inline">\(\certify\)</span> 和匹配 <span class="math inline">\(\decide\)</span> 动作对组成，则该历史是<em>连续的</em>。如果 <span class="math inline">\(h\)</span> 包含 <span class="math inline">\(\decision(t, \COMMIT)\)</span>，则事务 <span class="math inline">\(t\)</span> 在历史 <span class="math inline">\(h\)</span> 中<em>提交</em>。我们用 <span class="math inline">\(\committed(h)\)</span> 表示 <span class="math inline">\(h\)</span> 到对应在 <span class="math inline">\(h\)</span> 中提交的事务的动作的投影。对于完整的历史 <span class="math inline">\(h\)</span>，<span class="math inline">\(h\)</span> 的<em>线性化</em> <span class="math inline">\(\mathcal{l}\)</span> 是一个顺序历史，使得：</p>
+<p>我们使用<em>历史</em>来表示 TCS 执行——验证和决定动作的有限序列，使得每个事务最多出现一次作为 <span class="math inline">\(\certify\)</span> 的参数，并且每个决定动作都是对前一个验证动作的响应。对于历史 <span class="math inline">\(h\)</span>，我们让 <span class="math inline">\(\act(h)\)</span> 是 <span class="math inline">\(h\)</span> 中的动作集合。对于动作 <span class="math inline">\(a\)</span>，<span class="math inline">\(a&#39; \in \act(h)\)</span>，当 <span class="math inline">\(a\)</span> 出现在 <span class="math inline">\(h\)</span> 中的 <span class="math inline">\(a&#39;\)</span> 之前，我们写 <span class="math inline">\(a \prec_h a&#39;\)</span>。如果其中的每个 <span class="math inline">\(\certify\)</span> 动作都具有匹配的 <span class="math inline">\(\decide\)</span> 动作，则历史 <span class="math inline">\(h\)</span> 是<em>完整的</em>。如果一个完整的历史由连续的 <span class="math inline">\(\certify\)</span> 和匹配 <span class="math inline">\(\decide\)</span> 动作对组成，则该历史是<em>连续的</em>。如果 <span class="math inline">\(h\)</span> 包含 <span class="math inline">\(\decision(\)</span>t<span class="math inline">\(, \COMMIT)\)</span>，则事务 <span class="math display">\[t\]</span> 在历史 <span class="math inline">\(h\)</span> 中<em>提交</em>。我们用 <span class="math inline">\(\committed(h)\)</span> 表示 <span class="math inline">\(h\)</span> 到对应在 <span class="math inline">\(h\)</span> 中提交的事务的动作的投影。对于完整的历史 <span class="math inline">\(h\)</span>，<span class="math inline">\(h\)</span> 的<em>线性化</em> <span class="math inline">\(\mathcal{l}\)</span> 是一个顺序历史，使得：</p>
 <ol type="1">
 <li><span class="math inline">\(h\)</span> 和 <span class="math inline">\(l\)</span> 包含相同的动作</li>
-<li><span class="math inline">\(\forall t, t&#39;. \decide(t, \_) \prec_ h \certify(t&#39;) \Rightarrow \decide(t, \_) \prec_l \certify(t&#39;).\)</span></li>
+<li>$<span class="math inline">\(t\)</span>, <span class="math inline">\(t\)</span>'. (<span class="math inline">\(t\)</span>, _) _ h (<span class="math inline">\(t\)</span>') (<span class="math inline">\(t\)</span>, _) _l (<span class="math inline">\(t\)</span>').$</li>
 </ol>
 <h3 id="tcs-正确性">TCS 正确性</h3>
-<p>一个完整的序列历史 <span class="math inline">\(h\)</span> 对于一个认证函数 <span class="math inline">\(f\)</span> 是合法的，如果它的证明决定是根据 <span class="math inline">\(f\)</span> 计算的： <span class="math inline">\(\forall a = \decide(t, d) \in \act(h). d = f(\{t&#39; \mid \decide(t&#39;, \COMMIT) \prec_h a \}, t).\)</span></p>
+<p>一个完整的序列历史 <span class="math inline">\(h\)</span> 对于一个认证函数 <span class="math inline">\(f\)</span> 是合法的，如果它的证明决定是根据 <span class="math inline">\(f\)</span> 计算的： <span class="math inline">\(\forall a = \decide(\)</span>t<span class="math inline">\(, d) \in \act(h). d = f(\{\)</span>t<span class="math inline">\(&#39; \mid \decide(\)</span>t$', ) _h a }, <span class="math inline">\(t\)</span>).$</p>
 <p>如果 <span class="math inline">\(h \mid \committed(h)\)</span> 具有合法的线性化，则历史 h 关于 f 是<em>正确的</em>。如果所有历史记录都是正确的，则 TCS 实现对于 <span class="math inline">\(f\)</span> 是<em>正确的</em>。</p>
 <h3 id="使用-tcs-规范">使用 TCS 规范</h3>
-<p>可以在事务处理系统 (TPS) 中轻松使用正确的 TCS。例如，考虑前面定义的事务域。基于乐观并发控制的典型 TPS 将确保提交的认证事务读取数据库中已经存在的版本。形式上，这意味着对于由 TCS 接口的动作引起的每个历史 <span class="math inline">\(h\)</span>，该命题成立：如果 <span class="math inline">\(t\)</span> 是一个事务，使得 <span class="math inline">\(\certify(t)\)</span> 发生在 <span class="math inline">\(h\)</span> 中，并且 <span class="math inline">\((x,v) \in R(t)\)</span>，那么存在一个事务 <span class="math inline">\(t&#39;\)</span> 使得 <span class="math inline">\((x, \_) \in W(t&#39;) \wedge V_c(t&#39;) = v\)</span>，并且 <span class="math inline">\(h\)</span> 在 <span class="math inline">\(\certify(t)\)</span> 之前包含了 <span class="math inline">\(\decision(t , \COMMIT)\)</span>。很容易看出，这意味着如果 <span class="math inline">\(h\)</span> 对于可序列化性 (2) 的认证函数是正确的，那么按照 <span class="math inline">\(h\)</span> 的合法线性化的规定，对提交的事务进行排序会产生正确的序列历史：由事务 <span class="math inline">\(t\)</span> 读取的每个对象的值是由最近的先前事务写入该对象的值。因此，关于认证功能（2）正确的 TCS 确实可以用于实现 可序列化的 TPS。</p>
+<p>可以在事务处理系统 (TPS) 中轻松使用正确的 TCS。例如，考虑前面定义的事务域。基于乐观并发控制的典型 TPS 将确保提交的认证事务读取数据库中已经存在的版本。形式上，这意味着对于由 TCS 接口的动作引起的每个历史 <span class="math inline">\(h\)</span>，该命题成立：如果 <span class="math display">\[t\]</span> 是一个事务，使得 <span class="math inline">\(\certify(\)</span>t<span class="math inline">\()\)</span> 发生在 <span class="math inline">\(h\)</span> 中，并且 <span class="math inline">\((x,v) \in R(\)</span>t<span class="math inline">\()\)</span>，那么存在一个事务 <span class="math display">\[t$&#39;$ 使得 $(x, \_) \in W($t$&#39;) \wedge V_c($t$&#39;) = v$，并且 $h$ 在 $\certify($t$)$ 之前包含了 $\decision($t$ , \COMMIT)$。很容易看出，这意味着如果 $h$ 对于可序列化性 (2) 的认证函数是正确的，那么按照 $h$ 的合法线性化的规定，对提交的事务进行排序会产生正确的序列历史：由事务 \]</span>t$$ 读取的每个对象的值是由最近的先前事务写入该对象的值。因此，关于认证功能（2）正确的 TCS 确实可以用于实现 可序列化的 TPS。</p>
 <h2 id="多次-2pc-和本地分片认证函数">多次 2PC 和本地分片认证函数</h2>
 <p>我们现在展示经典两阶段提交 (2PC) 协议的多次版本，它是每个分片使用的并发控制策略中的参数。然后，我们证明该协议实现了由给定认证函数参数化的正确事务认证服务，前提是每个分片的并发控制与该函数匹配。与 2PC 一样，我们的协议假设过程可靠。在下一节中，我们通过证明它模拟多次 2PC 的行为来确定允许崩溃的协议的正确性。</p>
 <h3 id="系统模型">系统模型</h3>
@@ -404,14 +413,14 @@ dec<span class="token punctuation">[</span><span class="token punctuation">]</sp
 <figure>
 <img src="/.io//Fig1.png" alt="Fig1"><figcaption aria-hidden="true">Fig1</figcaption>
 </figure>
-<p>为了验证事务 <span class="math inline">\(t\)</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 6 行）。管理分片的进程将收到的所有事务安排到一个总的认证订单中，存储在一个数组 <span class="math inline">\(\txn\)</span> 中；<span class="math inline">\(\next\)</span> 变量指向数组中最后一个填充的插槽。收到事务 <span class="math inline">\(t\)</span>（第 8 行）后，进程将 <span class="math inline">\(t\)</span> 存储在 <span class="math inline">\(\txn\)</span> 的下一个空闲槽中。该进程还计算其<em>投票</em>，说明是 <span class="math inline">\(\COMMIT\)</span> 还是 <span class="math inline">\(\ABORT\)</span> 事务，并将其存储在数组 <span class="math inline">\(\vote\)</span> 中。我们按照以下方式解释投票计算；直观地说，投票是由事务 <span class="math inline">\(t\)</span> 是否与之前收到的事务冲突来决定的。在管理分片 <span class="math inline">\(s\)</span> 的进程收到 <span class="math inline">\(t\)</span> 后，我们说 <span class="math inline">\(t\)</span> 在 <span class="math inline">\(s\)</span> 处<em>准备好</em>。该进程在数组 <span class="math inline">\(\phase\)</span> 跟踪事务状态，其条目最初存储 <span class="math inline">\(\START\)</span>，一旦事务准备好，就会更改为 <span class="math inline">\(\PREPARED\)</span>。准备好事务 <span class="math inline">\(t\)</span> 后，该过程发送一个 <span class="math inline">\(\PREPAREACK\)</span> 消息，其中包含其在认证顺序中的位置和给 <span class="math inline">\(t\)</span> 的<em>协调者</em>的投票。该过程由该函数确定： <span class="math inline">\(\coord: \T \to \P\)</span> 使得 <span class="math inline">\(\forall t.\coord(t) \in \proc(\shards(t))\)</span>。</p>
-<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从其每个分片 <span class="math inline">\(s\)</span> 接收到针对 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\PREPAREACK\)</span> 消息就会采取行动，该消息携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 14 行）。协调者使用 <span class="math inline">\(\sqcap\)</span> 算子（第 2 节）计算关于 <span class="math inline">\(t\)</span> 的最终决定，并将其以 <span class="math inline">\(\DECISION\)</span> 消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18 行），它将决定存储在 <span class="math inline">\(\dec\)</span> 数组中，并将事务的阶段推进到 <span class="math inline">\(\DECIDED\)</span>。请注意，我们不允许协调者单方面中止事务：这可以最大限度地减少我们在第 4 节中介绍的协议的容错版本中的延迟。</p>
+<p>为了验证事务 <span class="math display">\[t\]</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 6 行）。管理分片的进程将收到的所有事务安排到一个总的认证订单中，存储在一个数组 <span class="math inline">\(\txn\)</span> 中；<span class="math inline">\(\next\)</span> 变量指向数组中最后一个填充的插槽。收到事务 <span class="math display">\[t\]</span>（第 8 行）后，进程将 <span class="math display">\[t\]</span> 存储在 <span class="math inline">\(\txn\)</span> 的下一个空闲槽中。该进程还计算其<em>投票</em>，说明是 <span class="math inline">\(\COMMIT\)</span> 还是 <span class="math inline">\(\ABORT\)</span> 事务，并将其存储在数组 <span class="math inline">\(\vote\)</span> 中。我们按照以下方式解释投票计算；直观地说，投票是由事务 <span class="math display">\[t\]</span> 是否与之前收到的事务冲突来决定的。在管理分片 <span class="math inline">\(s\)</span> 的进程收到 <span class="math display">\[t\]</span> 后，我们说 <span class="math display">\[t\]</span> 在 <span class="math inline">\(s\)</span> 处<em>准备好</em>。该进程在数组 <span class="math inline">\(\phase\)</span> 跟踪事务状态，其条目最初存储 <span class="math inline">\(\START\)</span>，一旦事务准备好，就会更改为 <span class="math inline">\(\PREPARED\)</span>。准备好事务 <span class="math display">\[t\]</span> 后，该过程发送一个 <span class="math inline">\(\PREPAREACK\)</span> 消息，其中包含其在认证顺序中的位置和给 <span class="math display">\[t\]</span> 的<em>协调者</em>的投票。该过程由该函数确定： <span class="math inline">\(\coord: \T \to \P\)</span> 使得 $<span class="math inline">\(t\)</span>.(<span class="math inline">\(t\)</span>) ((<span class="math inline">\(t\)</span>))$。</p>
+<p>事务 <span class="math display">\[t\]</span> 的协调者一旦从其每个分片 <span class="math inline">\(s\)</span> 接收到针对 <span class="math display">\[t\]</span> 的 <span class="math inline">\(\PREPAREACK\)</span> 消息就会采取行动，该消息携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 14 行）。协调者使用 <span class="math inline">\(\sqcap\)</span> 算子（第 2 节）计算关于 <span class="math display">\[t\]</span> 的最终决定，并将其以 <span class="math inline">\(\DECISION\)</span> 消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18 行），它将决定存储在 <span class="math inline">\(\dec\)</span> 数组中，并将事务的阶段推进到 <span class="math inline">\(\DECIDED\)</span>。请注意，我们不允许协调者单方面中止事务：这可以最大限度地减少我们在第 4 节中介绍的协议的容错版本中的延迟。</p>
 <h3 id="投票计算">投票计算</h3>
 <p>管理分片 <span class="math inline">\(s\)</span> 的进程将投票计算为两个<em>分片本地认证函数</em> <span class="math inline">\(f_s:s^{\T} \times \T \to \D\)</span> 和 <span class="math inline">\(g_s:s^{\T} \times \T \to \D\)</span> 的结合。与第 2 节的认证函数不同，分片本地认证函数仅用于检查由 <span class="math inline">\(s\)</span> 管理的对象上的冲突。他们将已经决定在分片上提交的事务集以及仅准备提交的事务集作为第一个参数（第 11 行）。我们要求上述函数是分布式的，类似于（1）。</p>
-<p>例如，考虑第 2 节中给出的事务模型。并假设对象集 <span class="math inline">\(\Obj\)</span> 在分片之间进行分区：<span class="math inline">\(\Obj = \uplus _{s \in \S} \Obj_s\)</span>。那么为可串行化定义分片本地认证函数的一种可能方法如下：<span class="math inline">\(f_s(T, t) = \COMMIT\)</span> 当且仅当： <span class="math display">\[
+<p>例如，考虑第 2 节中给出的事务模型。并假设对象集 <span class="math inline">\(\Obj\)</span> 在分片之间进行分区：<span class="math inline">\(\Obj = \uplus _{s \in \S} \Obj_s\)</span>。那么为可串行化定义分片本地认证函数的一种可能方法如下：$f_s(T, <span class="math inline">\(t\)</span>) = $ 当且仅当： <span class="math display">\[
 \forall x \in \Obj_s . \forall v.(x, v) \in R(t) \Rightarrow  (\forall t&#39; \in T.(x,\_)\in W(t&#39;) \Rightarrow V_c(t&#39;) \le v), \tag 4
 \]</span></p>
-<p>并且 <span class="math inline">\(g_s(T, t) = \COMMIT\)</span> 当且仅当： <span class="math display">\[
+<p>并且 $g_s(T, <span class="math inline">\(t\)</span>) = $ 当且仅当： <span class="math display">\[
 \forall x \in \Obj_s. \forall v. \\
 ((x, \_)\in R(t) \Rightarrow (\forall t&#39; \in T.(x,\_)\notin W(t&#39;))) \wedge \\
 ((x, \_)\in W(t) \Rightarrow (\forall t&#39; \in T.(x,\_)\notin R(t&#39;))) \tag 5
@@ -423,15 +432,21 @@ dec<span class="token punctuation">[</span><span class="token punctuation">]</sp
 <p>图1中的协议在21行和24行有两个额外的函数，它们并不确定性地执行。在第4部分我们将展示，这些是为了抽象协议能够捕捉乐观容错TCS实现的行为。因为进程被破坏，这些执行可能临时丢失和最终决策有关的信息，并且之后从相关的分片的投票重构它。同时，正如我们之前解释过的，决策的丢失可能影响到一些投票计算。21行的函数遗忘某一事务的决策（而不是投票）。24行的函数允许进程向协调者重新发送他们知道的投票，这些协调者之后会重新发送最终决策（14行）。这让遗忘决策的进程从相关分片存储的投票重构它。</p>
 <h3 id="正确性">正确性</h3>
 <p>如果 <span class="math inline">\(f_s\)</span> 和 <span class="math inline">\(g_s\)</span> 给出的本地分片确认并发控制与（6）-（8）描述的全局认证函数 <span class="math inline">\(f\)</span> 给出的分片不可知并发控制相关，下面的定理确定了多次 2PC 的正确性。</p>
+<p>定理略。</p>
 <h2 id="容错提交协议">容错提交协议</h2>
 <h3 id="系统模型-1">系统模型</h3>
 <p>我们现在通过允许进程因崩溃而失败（即永久停止执行）来削弱上一节的假设。 我们仍然假设进程是通过可靠的 FIFO 通道连接的，在以下意义上：消息按 FIFO 顺序传递，并且非故障进程之间的消息保证最终传递。 每个分片 <span class="math inline">\(s\)</span> 现在由一组 <span class="math inline">\(2k+1\)</span> 个进程管理，其中最多 <span class="math inline">\(k\)</span> 个可能失败。我们称这组中的一组 <span class="math inline">\(k+1\)</span> 个进程为 <span class="math inline">\(s\)</span> 的法定人数。对于一个分片 <span class="math inline">\(s\)</span>，我们将 <span class="math inline">\(\proc(s)\)</span> 重新定义为管理此分片的一组进程。为简单起见，我们假设管理不同分片的进程组是不相交的。</p>
-<h3 id="香草协议">香草协议</h3>
-<p>在上述模型中实现 TCS 的一种直接方法是使用状态机复制使分片模拟多次 2PC 中的可靠过程； 这通常基于共识协议，例如 Paxos。 在这种情况下，永远不会忘记交易的最终决定，因此不会模拟第 21 行和第 24 行的处理程序。 尽管这种方法被多个系统使用，但多名研究人员观察到，由此产生的协议需要大量不必要的消息延迟。 即，图 2a 中的多次 2PC 的每个动作都需要额外往返同一分片中的一组进程以保持其效果，从而产生图 2b 中的消息流图。 请注意，协调者的操作也必须被复制，因为如果协调者宕机，多次 2PC 将阻塞。 生成的协议需要 7 次消息延迟，客户端才能了解交易决策。</p>
+<h3 id="一般协议">一般协议</h3>
+<p>在上述模型中实现 TCS 的一种直接方法是使用状态机复制使分片模拟多次 2PC 中的可靠过程； 这通常基于共识协议，例如 Paxos。在这种情况下，永远不会忘记事务的最终决定，因此不会模拟第 21 行和第 24 行的处理程序。尽管这种方法被多个系统使用，但多名研究人员观察到，由此产生的协议需要大量不必要的消息延迟。即，图 2a 中的多次 2PC 的每个动作都需要额外往返同一分片中的一组进程以保持其效果，从而产生图 2b 中的消息流图。 请注意，协调者的操作也必须被复制，因为如果协调者宕机，多次 2PC 将阻塞。生成的协议需要 7 次消息延迟，客户端才能了解事务决策。</p>
 <h3 id="优化的协议概述">优化的协议概述</h3>
-<p>在图 5 中，我们给出了一个提交协议，该协议通过将跨分片的 multi-shot 2PC 和每个分片内的类 Paxos 协议编织在一起来减少消息延迟的数量。我们从代码中省略了与消息重传相关的细节。我们在图 2c 中说明了协议的消息流，并在图 6 中总结了其正确性证明中使用的关键不变量</p>
-<p>一个过程维护与多次 2PC 协议中相同的变量（图 1）和一些其他的。分片中的每个进程要么是分片的领导者，要么是追随者。如果领导者失败，则其中一个追随者接管。状态变量记录进程是领导者、追随者还是处于领导者更改期间使用的特殊恢复状态。使用整数选票表示特定进程充当领导者的一段时间。对于 b ≥ 1 的选票，过程领导者 (b) = ((b - 1) mod (2 f + 1)) 是选票的领导者。我们使用整组整数作为选票，因为给定的进程可能多次扮演领导者的角色。在任何给定时间，一个进程都参与一个单一的投票，该投票存储在一个变量 cballot 中并且永远不会减少。在领导人更换期间，我们还使用额外的选票变量选票</p>
-<p>与图 2b 中所示的普通协议不同，我们的协议不执行共识以将 DECISION 消息的内容持久保存在分片中。相反，交易的最终决定被异步发送给每个相关分片的成员。这意味着不同的分片成员可能会在不同的时间收到关于交易的决定。由于对交易的最终决定会影响在认证顺序中跟随它的交易的投票计算（第 3 节），因此在不同的分片成员上计算对后续交易的投票可能会产生不同的结果。为了解决这个问题，在我们的协议中，只有领导者构建认证顺序并计算投票。追随者是被动的：他们只是复制领导者的决定。一旦分片的领导者收到最终决定，就会在分片的投票计算中考虑它。</p>
+<p>在图 5 中，我们给出了一个提交协议，该协议通过将跨分片的多次 2PC 和每个分片内的类 Paxos 协议编织在一起来减少消息延迟的数量。 我们从代码中省略了与消息重传相关的细节。我们在图 2c 中说明了协议的消息流，并在图 6 中总结了其正确性证明中使用的关键不变量。</p>
+<p>一个进程维护与多次 2PC 协议中相同的变量（图 1）和一些额外的变量。 分片中的每个进程要么是分片的领导者，要么是追随者。 如果领导者失败，则其中一个追随者接管。<span class="math inline">\(\status\)</span> 变量记录进程是 <span class="math inline">\(\LEADER\)</span> 状态、<span class="math inline">\(\FOLLOWER\)</span> 状态，还是处于领导者更改期间使用的特殊 <span class="math inline">\(\RECOVERING\)</span> 状态。 使用整数 <span class="math inline">\(\ballot\)</span> 表示特定进程充当领导者的一段时间。 对于 <span class="math inline">\(b \ge 1\)</span> 的选票，进程 <span class="math inline">\(\leader(b) = ((b - 1) \mod (2 f + 1))\)</span> 是选票的领导者。我们使用整组整数作为选票，因为给定的进程可能多次扮演领导者的角色。 在任何给定时间，一个进程都参与一个单一的投票，该投票存储在一个变量 <span class="math inline">\(cballot\)</span> 中并且永远不会减少。在领导者更换期间，我们还使用额外的选票变量 <span class="math inline">\(\ballot\)</span>。</p>
+<p>与图 2b 中所示的一般协议不同，我们的协议不执行共识以将 <span class="math inline">\(\DECISION\)</span> 消息的内容持久保存在分片中。相反，事务的最终决定被异步发送给每个相关分片的成员。这意味着不同的分片成员可能会在不同的时间收到关于事务的决定。由于对事务的最终决定会影响在认证顺序中跟随它的事务的投票计算（第 3 节），因此在不同的分片成员上计算对后续事务的投票可能会产生不同的结果。为了解决这个问题，在我们的协议中，只有领导者构建认证顺序并计算投票。追随者是被动的：他们只是复制领导者的决定。一旦分片的领导者收到最终决定，就会在分片的投票计算中考虑它。</p>
+<h3 id="无故障案例">无故障案例</h3>
+<p>为了验证事务 <span class="math inline">\(t\)</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 10 行）。 进程 <span class="math inline">\(p_i\)</span> 仅在它是其分片 <span class="math inline">\(s_0\)</span> 的领导者时才处理消息（第 12 行）。 我们推迟描述当另一个进程 <span class="math inline">\(p_j\)</span> 正在向 <span class="math inline">\(p_i\)</span> 重新发送 <span class="math inline">\(\PREPARE\)</span> 消息（第 13 行）以及 <span class="math inline">\(p_i\)</span> 过去已经收到 <span class="math inline">\(t\)</span> 时（第 15 行）的情况。</p>
+<p>在接收到 <span class="math inline">\(\PREPARE(t)\)</span> 后，领导者 <span class="math inline">\(p_i\)</span> 首先确定一个进程 <span class="math inline">\(p\)</span>，它将作为 <span class="math inline">\(t\)</span> 的协调者。如果领导者第一次收到 <span class="math inline">\(t\)</span>（第 17 行），那么与多镜头 2PC 类似，它附加 <span class="math inline">\(t\)</span>到认证订单并根据本地可用信息计算投票。领导者接下来执行 Paxos 的“阶段 2”的类似操作，试图说服其分片 <span class="math inline">\(s_0\)</span> 接受它的提议。为此，它向 <span class="math inline">\(s_0\)</span> 发送 <span class="math inline">\(\ACCEPT\)</span> 消息（包括它自己，为了统一），这类似于 Paxos 的“2a”消息（第 23 行）。该消息携带领导者的选票、事务 <span class="math inline">\(t\)</span>、它在认证顺序中的位置、投票和 <span class="math inline">\(t\)</span> 的协调者的身份。领导者代码确保图 6 中的<em>不变量 1</em>：在给定的选票 b 中，可以将唯一的事务-投票对分配给认证顺序中的插槽 <span class="math inline">\(k\)</span>。</p>
+<p>只有当一个进程参与相应的投票（第 25 行）时，它才会处理 <span class="math inline">\(\ACCEPT\)</span> 消息。如果进程之前没有听说过 <span class="math inline">\(t\)</span>，它会存储事务和投票，并将事务的阶段推进到准备就绪。然后它向 <span class="math inline">\(t\)</span> 的协调器发送 <span class="math inline">\(\ACCEPTACK\)</span> 消息，类似于 Paxos 的“2b”消息。这确认该过程已接受事务和投票。追随者的认证顺序始终是追随者所在选票的领导者的认证顺序的前缀，如不变量 2 所示。当追随者接收到 <span class="math inline">\(\ACCEPT\)</span> 消息时，由于通道的 FIFO 排序，该不变量被保留。</p>
+<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从它的每个分片 s ∈ shards(<span class="math inline">\(t\)</span>) 接收到 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\ACCEPTACK\)</span> 消息的法定人数就会采取行动，这些分片携带 s 的投票 ds（第 31 行）。协调器计算关于 <span class="math inline">\(t\)</span> 的最终决策，并将其在 <span class="math inline">\(\DECISION\)</span> 消息中发送给客户端和每个相关分片。当一个进程收到一个事务的决定时（第 35 行），该进程将它存储起来并将事务的阶段推进到决定。请注意，与 Sect 中的多镜头 2PC 协议一样。 3、协调者不能单方面中止事务。一旦事务的最终决定被传递给分片的领导者，它就会在该分片的未来投票计算中被考虑在内。以可序列化（4）和（5）的分片本地函数为例，如果写入对象 x 的事务最终决定中止，那么将此决定传递给领导者可能会允许另一个写入 x 的事务提交.</p>
 <h2 id="相关工作">相关工作</h2>
 <h2 id="结论">结论</h2>
 <p>在本文中，我们迈出了在现代事务处理系统中构建分布式事务提交理论的第一步，该理论捕获了原子提交和并发控制之间的交互。我们提出了一个事务认证服务的新问题，以及一个在可靠进程之间解决它的抽象协议。由此，我们系统地推导出了一个可证明正确的优化容错协议。</p>
