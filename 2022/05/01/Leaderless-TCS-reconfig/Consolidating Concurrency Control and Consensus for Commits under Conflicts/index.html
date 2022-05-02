@@ -8,6 +8,8 @@
 	<!-- title -->
 	
 	<title>
+	
+		Consolidating Concurrency Control and Consensus for Commits under Conflicts | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -215,21 +217,10 @@ var _hmt = _hmt || [];
                         </a>
                         
                 <ul>
-                    <li class="file">
-                        <a href="/2022/04/19/Leaderless-TCS-reconfig/%E5%A4%9A%E6%AC%A1%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4/">
+                    <li class="file active">
+                        <a href="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
                             
-                                多次分布式事务提交
-                            
-                        </a>
-                    </li>
-                    <div class="article-toc" style="display: none;"></div>
-                </ul>
-            
-                <ul>
-                    <li class="file">
-                        <a href="/2022/05/01/Leaderless-TCS-reconfig/%E5%B7%A9%E5%9B%BA%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6%E5%92%8C%E5%86%B2%E7%AA%81%E4%B8%8B%E6%8F%90%E4%BA%A4%E7%9A%84%E5%85%B1%E8%AF%86/">
-                            
-                                巩固并发控制和冲突下提交的共识
+                                Consolidating Concurrency Control and Consensus for Commits under Conflicts
                             
                         </a>
                     </li>
@@ -238,9 +229,20 @@ var _hmt = _hmt || [];
             
                 <ul>
                     <li class="file">
-                        <a href="/2022/04/25/Leaderless-TCS-reconfig/%E7%AE%80%E5%8D%95%20Paxos/">
+                        <a href="/2022/04/19/Leaderless-TCS-reconfig/Multi-shot%20Distributed%20Transaction%20Commit/">
                             
-                                简单 Paxos
+                                Multi-shot Distributed Transaction Commit
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/25/Leaderless-TCS-reconfig/Paxos%20Made%20Simple/">
+                            
+                                Paxos Made Simple
                             
                         </a>
                     </li>
@@ -301,46 +303,92 @@ var _hmt = _hmt || [];
 
 	<!-- 引入正文 -->
 	<div id="content">
-		<div id="index">
-	
-		<div class="index-li">
-			<a href="/2022/04/19/Leaderless-TCS-reconfig/%E5%A4%9A%E6%AC%A1%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4/">
-				<h2 class="index-title">
-					多次分布式事务提交
-				</h2>
-				<div class="index-brief">
-					\[
-\def\ABORT{\text{ABORT}}
-\def\ACCEPT{\text{ACCEPT}}
-\def\ACCEPTACK{\text{ACCEPT\_ACK}}
-\def\act{\text{act}}
-\def\ballot{\text{ballot}}
-\def\c
-					...
-				</div>
-			</a>
-                <div class="article-meta">
-				    <span>2022-04-19</span>
-                    
-                            
-                                
-                                    <span>
-                                        <i class="fa fa-folder" aria-hidden="true"></i>
-                                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
-										
-                                    </span>
-                                
-                            
-                    
-                </div>
-		</div>	
-	
-	
-	<div id="index-paginator">
-		
-	</div>
+		<h1 id="article-title">
+    Consolidating Concurrency Control and Consensus for Commits under Conflicts
+</h1>
+<div class="article-meta">
+    
+    <span>EagleBear2002</span>
+    <span>2022-05-01 14:19:00</span>
+    <!-- <span>2022-05-02 10:21:12</span> -->
+    <div id="article-categories">
+        
+            <span>Categories：</span>
+            
+                
+                    <span>
+                        <i class="fa fa-folder" aria-hidden="true">
+                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
+                        </i>
+                        
+                    </span>
+                
+            
+        
+
+        
+            <span>Tags：</span>
+            
+        
+    </div>
+
 </div>
 
+<div id="article-content">
+    <p><strong>摘要</strong></p>
+<p>传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确保交易的序列化图是非循环的。我们在 Janus 的设计中利用了这种洞察力，这是一个统一的并发控制和共识协议。 Janus 的目标是编写为存储过程的一次性事务，这是一种常见但受限制的事务类。像 MDCC 和 TAIR 一样，Janus 可以在一次往返中提交此类中的不冲突事务。与 MDCC 和 TAPIR 不同，Janus 避免了由于争用而中止：只要网络运行良好并且每个服务器副本的大多数都处于活动状态，它最多在两次往返中提交此类中的冲突事务。</p>
+<p>我们将 Janus 与分层设计和 TAIR 在此类中的各种工作负载下进行比较。我们的评估表明，在无竞争的微基准测试中，Janus 的吞吐量是分层系统的 5 倍，是 TAPIR 吞吐量的 90%。当工作负载竞争时，Janus 提供比基线低得多的延迟和更高的吞吐量（高达 6.8 倍）。</p>
+<h2 id="简介">简介</h2>
+<p>可扩展、可用且高度一致的分布式事务通常是通过在 Paxos 共识协议复制的数据存储分片之上分层传统并发控制协议来实现的。将数据分片成许多可以由不同服务器存储和服务的小子集提供了可扩展性。尽管服务器出现故障，但通过共识复制每个分片可提供可用性。尽管不同事务的数据访问存在冲突，但使用 USENIX 关联并发控制跨复制分片协调事务可提供强一致性。这种方法在实践中很常用。例如，Spanner 实现了两阶段锁定 (2PL) 和两阶段提交 (2PC)，其中数据和锁都由 Paxos 复制。作为另一个例子，Percolator 实现了机会并发控制 (OCC) 的变体，它在 BigTable 之上使用 2PC，它依赖于主备份复制和 Paxos。</p>
+<p>当用于广域存储时，分层方法会导致两次跨数据中心协调，串行：一次通过并发控制协议确保事务一致性（严格的可串行化），另一次通过共识协议以确保副本一致性（线性化）。这种双重协调是不必要的，可以通过将并发控制和共识合并到一个统一的协议中来消除。 MDCC [16] 和 TAIR [51] 分别展示了统一方法如何提供读取提交和严格的可串行化隔离级别。两种协议都乐观地尝试在一次广域往返中提交和复制事务。但是，如果并发事务之间存在冲突，它们会中止并重试，这会在争用情况下显着降低性能。这种担忧对于广域存储更为明显：由于交易需要更长的时间才能完成，争用的数量也相应增加。</p>
+<p>本文提出了构建容错分布式事务的 Janus 协议。与 TAIR 和 MDCC 一样，Janus 可以在没有争用的情况下在一次跨数据中心往返中提交和复制事务。面对并发冲突事务的干扰，Janus 最多额外增加一个 跨数据中心往返提交。</p>
+<p>Janus 的关键洞察力是实现事务一致性的严格序列化和复制一致性的线性化都可以映射到相同的底层抽象。 特别是，两者都要求交易的执行历史等价于一些线性的总订单。 可以通过基于执行历史构建序列化图来检查这种等价性。 图中的每个顶点对应一个事务。 由于复制或冲突的数据访问，每条边代表两个事务之间的依赖关系。 具体来说，如果事务 T1 和 T2 对某些数据项进行冲突访问，那么如果负责冲突数据项的分片在 T2 之前执行或复制 T1，则存在一条边 T1 → T2。 如果该图中没有循环，则可以找到严格可串行化和线性化的等效线性总阶。</p>
+
+</div>
+
+
+    <div class="post-guide">
+        <div class="item left">
+            
+        </div>
+        <div class="item right">
+            
+                <a href="/2022/04/29/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6-%E8%92%8B%E5%AD%A6%E6%A8%A1/">
+                    政治经济学-蒋学模
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+<script>
+    
+    
+</script>
 	</div>
 	<div id="footer">
 	<p>
