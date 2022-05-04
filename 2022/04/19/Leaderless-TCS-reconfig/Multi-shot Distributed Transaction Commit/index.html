@@ -321,7 +321,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-19 16:05:31</span>
-    <!-- <span>2022-05-02 14:41:28</span> -->
+    <!-- <span>2022-05-04 10:11:27</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -472,7 +472,11 @@ dec<span class="token punctuation">[</span><span class="token punctuation">]</sp
 <p>为了验证事务 <span class="math inline">\(t\)</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 10 行）。 进程 <span class="math inline">\(p_i\)</span> 仅在它是其分片 <span class="math inline">\(s_0\)</span> 的领导者时才处理消息（第 12 行）。 我们推迟描述当另一个进程 <span class="math inline">\(p_j\)</span> 正在向 <span class="math inline">\(p_i\)</span> 重新发送 <span class="math inline">\(\PREPARE\)</span> 消息（第 13 行）以及 <span class="math inline">\(p_i\)</span> 过去已经收到 <span class="math inline">\(t\)</span> 时（第 15 行）的情况。</p>
 <p>在接收到 <span class="math inline">\(\PREPARE(t)\)</span> 后，领导者 <span class="math inline">\(p_i\)</span> 首先确定一个进程 <span class="math inline">\(p\)</span>，它将作为 <span class="math inline">\(t\)</span> 的协调者。如果领导者第一次收到 <span class="math inline">\(t\)</span>（第 17 行），那么与多镜头 2PC 类似，它附加 <span class="math inline">\(t\)</span>到认证订单并根据本地可用信息计算投票。领导者接下来执行 Paxos 的“阶段 2”的类似操作，试图说服其分片 <span class="math inline">\(s_0\)</span> 接受它的提议。为此，它向 <span class="math inline">\(s_0\)</span> 发送 <span class="math inline">\(\ACCEPT\)</span> 消息（包括它自己，为了统一），这类似于 Paxos 的“2a”消息（第 23 行）。该消息携带领导者的选票、事务 <span class="math inline">\(t\)</span>、它在认证顺序中的位置、投票和 <span class="math inline">\(t\)</span> 的协调者的身份。领导者代码确保图 6 中的<em>不变量 1</em>：在给定的选票 b 中，可以将唯一的事务-投票对分配给认证顺序中的插槽 <span class="math inline">\(k\)</span>。</p>
 <p>只有当一个进程参与相应的投票（第 25 行）时，它才会处理 <span class="math inline">\(\ACCEPT\)</span> 消息。如果进程之前没有听说过 <span class="math inline">\(t\)</span>，它会存储事务和投票，并将事务的阶段推进到准备就绪。然后它向 <span class="math inline">\(t\)</span> 的协调器发送 <span class="math inline">\(\ACCEPTACK\)</span> 消息，类似于 Paxos 的“2b”消息。这确认该过程已接受事务和投票。追随者的认证顺序始终是追随者所在选票的领导者的认证顺序的前缀，如不变量 2 所示。当追随者接收到 <span class="math inline">\(\ACCEPT\)</span> 消息时，由于通道的 FIFO 排序，该不变量被保留。</p>
-<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从它的每个分片 <span class="math inline">\(s \in \shards(t)\)</span> 接收到 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\ACCEPTACK\)</span> 消息的法定人数就会采取行动，这些分片携带 s 的投票 ds（第 31 行）。协调器计算关于 <span class="math inline">\(t\)</span> 的最终决策，并将其在 <span class="math inline">\(\DECISION\)</span> 消息中发送给客户端和每个相关分片。当一个进程收到一个事务的决定时（第 35 行），该进程将它存储起来并将事务的阶段推进到决定。请注意，与 Sect 中的多镜头 2PC 协议一样。 3、协调者不能单方面中止事务。一旦事务的最终决定被传递给分片的领导者，它就会在该分片的未来投票计算中被考虑在内。以可序列化（4）和（5）的分片本地函数为例，如果写入对象 x 的事务最终决定中止，那么将此决定传递给领导者可能会允许另一个写入 x 的事务提交.</p>
+<p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从它的每个分片 <span class="math inline">\(s \in \shards(t)\)</span> 接收到 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\ACCEPTACK\)</span> 消息的法定人数就会采取行动，这些分片携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 31 行）。协调器计算关于 <span class="math inline">\(t\)</span> 的最终决策，并将其在 <span class="math inline">\(\DECISION\)</span> 消息中发送给客户端和每个相关分片。当一个进程收到一个事务的决定时（第 35 行），该进程将它存储起来并将事务的阶段推进到决定。请注意，与第 3 节中的多镜头 2PC 协议一样。协调者不能单方面中止事务。一旦事务的最终决定被传递给分片的领导者，它就会在该分片的未来投票计算中被考虑在内。以可序列化（4）和（5）的分片本地函数为例，如果写入对象 <span class="math inline">\(x\)</span> 的事务最终决定中止，那么将此决定传递给领导者可能会允许另一个写入 <span class="math inline">\(x\)</span> 的事务提交。</p>
+<h3 id="领导者恢复">领导者恢复</h3>
+<h3 id="协调者恢复">协调者恢复</h3>
+<h3 id="优化">优化</h3>
+<h3 id="协议正确性">协议正确性</h3>
 <h2 id="相关工作">相关工作</h2>
 <h2 id="结论">结论</h2>
 <p>在本文中，我们迈出了在现代事务处理系统中构建分布式事务提交理论的第一步，该理论捕获了原子提交和并发控制之间的交互。我们提出了一个事务认证服务的新问题，以及一个在可靠进程之间解决它的抽象协议。由此，我们系统地推导出了一个可证明正确的优化容错协议。</p>
