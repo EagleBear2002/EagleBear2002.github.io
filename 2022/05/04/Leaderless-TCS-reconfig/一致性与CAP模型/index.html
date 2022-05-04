@@ -343,7 +343,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-04 14:05:00</span>
-    <!-- <span>2022-05-04 14:38:12</span> -->
+    <!-- <span>2022-05-04 15:40:18</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -398,6 +398,38 @@ var _hmt = _hmt || [];
 <li>需要有全局时钟，来实现所谓的“最近”。因为没有全局一致的时间，两个独立进程没有相同的“最近”概念。</li>
 <li>任何一次读取都能读到这个“最近”的值</li>
 </ul>
+<p>下图是一个线性一致性的例子，集合当中的元素是该操作可能返回的值。</p>
+<figure>
+<img src="/.io//image-20220504143843178.png" alt="image-20220504143843178"><figcaption aria-hidden="true">image-20220504143843178</figcaption>
+</figure>
+<p>线性一致性代价高昂，甚至 CPU 都不会使用线性一致性。</p>
+<blockquote>
+<p>常见误区：使用一致性算法可以实现线性一致，如 Paxos 和 Raft 等。</p>
+<p>Raft 算法值保证了复制 log，未保证如何将 log 写入状态机。</p>
+</blockquote>
+<h3 id="顺序一致性">顺序一致性</h3>
+<p>顺序一致性放弃了全局时钟的约束，改为分布式逻辑时钟实现。指所有进程以相同的顺序看到所有的修改。</p>
+<p>可以使用一致性算法保证顺序 一致性。</p>
+<figure>
+<img src="/.io//image-20220504151700842.png" alt="image-20220504151700842"><figcaption aria-hidden="true">image-20220504151700842</figcaption>
+</figure>
+<h3 id="因果一致性">因果一致性</h3>
+<p>仅要求有因果关系的操作顺序是一致的，没有因果关系的操作顺序是随机的。</p>
+<ul>
+<li>本地顺序：本进程中，事务执行顺序即为本地因果顺序</li>
+<li>异地顺序：如果读操作返回的是写操作的值，那么该写操作在顺序上一定在读操作之前</li>
+<li>和时钟向量一样里面定义的一样，如果<span class="math inline">\(a &gt; b \wedge b &gt; c \Rightarrow a &gt; c\)</span> 。</li>
+</ul>
+<figure>
+<img src="/.io//image-20220504151606962.png" alt="image-20220504151606962"><figcaption aria-hidden="true">image-20220504151606962</figcaption>
+</figure>
+<p>因果相关的写操作，加入逻辑时钟：</p>
+<figure>
+<img src="/.io//image-20220504151626434.png" alt="image-20220504151626434"><figcaption aria-hidden="true">image-20220504151626434</figcaption>
+</figure>
+<h2 id="事务隔离级别与一致性模型">事务隔离级别与一致性模型</h2>
+<p>ACID 和 CAP 中的 C 都是一致性。后者指的是线性一致性。</p>
+<p>事务隔离是描述并行事务之间的行为，而一致性是描述非并行事务之间的行为。</p>
 
 </div>
 
