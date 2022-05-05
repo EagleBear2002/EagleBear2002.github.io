@@ -8,6 +8,8 @@
 	<!-- title -->
 	
 	<title>
+	
+		一致性与CAP模型 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -292,7 +294,7 @@ var _hmt = _hmt || [];
                         </a>
                         
                 <ul>
-                    <li class="file">
+                    <li class="file active">
                         <a href="/2022/05/04/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/05-%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8ECAP%E6%A8%A1%E5%9E%8B/">
                             
                                 05-一致性与CAP模型
@@ -356,100 +358,151 @@ var _hmt = _hmt || [];
 
 	<!-- 引入正文 -->
 	<div id="content">
-		<div id="index">
-	
-		<div class="index-li">
-			<a href="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
-				<h2 class="index-title">
-					Consolidating Concurrency Control and Consensus for Commits under Conflicts
-				</h2>
-				<div class="index-brief">
-					摘要
-传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确
-					...
-				</div>
-			</a>
-                <div class="article-meta">
-				    <span>2022-05-01</span>
-                    
-                            
-                                
-                                    <span>
-                                        <i class="fa fa-folder" aria-hidden="true"></i>
-                                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
-										
-                                    </span>
-                                
-                            
-                    
-                </div>
-		</div>	
-	
-		<div class="index-li">
-			<a href="/2022/04/25/Leaderless-TCS-reconfig/Paxos%20Made%20Simple/">
-				<h2 class="index-title">
-					Paxos Made Simple
-				</h2>
-				<div class="index-brief">
-					引言
-用于实现容错分布式系统的 Paxos 算法一直被认为难以理解，这可能是因为对许多读者来说最初的介绍是希腊语。事实上，它是最简单、最明显的分布式算法之一。 它的核心是一种共识算法—— The part-time parliament 中的“synod”算法。下一节表明，这种共识算法几乎不可避免
-					...
-				</div>
-			</a>
-                <div class="article-meta">
-				    <span>2022-04-25</span>
-                    
-                            
-                                
-                                    <span>
-                                        <i class="fa fa-folder" aria-hidden="true"></i>
-                                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
-										
-                                    </span>
-                                
-                            
-                    
-                </div>
-		</div>	
-	
-		<div class="index-li">
-			<a href="/2022/04/19/Leaderless-TCS-reconfig/Multi-shot%20Distributed%20Transaction%20Commit/">
-				<h2 class="index-title">
-					Multi-shot Distributed Transaction Commit
-				</h2>
-				<div class="index-brief">
-					\[
-\def\ABORT{\text{ABORT}}
-\def\ACCEPT{\text{ACCEPT}}
-\def\ACCEPTACK{\text{ACCEPT\_ACK}}
-\def\act{\text{act}}
-\def\ballot{\text{ballot}}
-\def\c
-					...
-				</div>
-			</a>
-                <div class="article-meta">
-				    <span>2022-04-19</span>
-                    
-                            
-                                
-                                    <span>
-                                        <i class="fa fa-folder" aria-hidden="true"></i>
-                                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
-										
-                                    </span>
-                                
-                            
-                    
-                </div>
-		</div>	
-	
-	
-	<div id="index-paginator">
-		
-	</div>
+		<h1 id="article-title">
+    一致性与CAP模型
+</h1>
+<div class="article-meta">
+    
+    <span>EagleBear2002</span>
+    <span>2022-05-04 14:05:00</span>
+    <!-- <span>2022-05-05 12:21:30</span> -->
+    <div id="article-categories">
+        
+            <span>Categories：</span>
+            
+                
+                    <span>
+                        <i class="fa fa-folder" aria-hidden="true">
+                        <a href="/categories/分布式数据库/">分布式数据库</a>
+                        </i>
+                        
+                    </span>
+                
+            
+        
+
+        
+            <span>Tags：</span>
+            
+        
+    </div>
+
 </div>
 
+<div id="article-content">
+    <h2 id="一致性是高可用的必备条件">一致性是高可用的必备条件</h2>
+<p>分布式数据库的节点并不总是处于活动状态且相互能够通信的。系统高可用性是分布式数据库一个极其重要的特性。</p>
+<p>为了使系统能够高度可用，系统需要被设计成允许一个或多个节点的崩溃或不可访问。</p>
+<p>高可用必须要尽可能满足<strong>业务连续性</strong>和<strong>数据一致性</strong>这两个指标。第三个因素网络分区会对可用性产生影响。</p>
+<h2 id="cap-理论与注意事项">CAP 理论与注意事项</h2>
+<p><strong>可用性</strong>是用于衡量系统能够成功处理每个请求并做出相应的能力。</p>
+<ol type="1">
+<li>希望每个操作都保持一致性（原子一致或线性一致性）</li>
+<li>希望在容忍网络分区的同时，实现一致性和可用性</li>
+</ol>
+<p><em>可用性</em>要求任何无故障的节点都可以提供服务；<em>一致性</em>要求结果需要线性一致</p>
+<p>CAP 理论认为，异步系统无法满足可用性要求，并且在存在网络分区的情况下，无法实现同时保证可用性和（线性）一致性的系统。</p>
+<p><strong>CP 系统</strong>：一致且容忍分区的系统，更倾向于减少服务时间，而不是将不一致的数据提供出去。一些面向交易场景构建的 NewSQL 数据库倾向于这种策略。场景实现思路是引入共识算法，需要大多数节点参与进来，才能保证一致性。</p>
+<p><strong>AP 系统</strong>：可用且容忍分区的系统，放宽了对一致性的要求，并允许在请求期间提供可能不一致的值。一般是列示存储，NoSQL 数据库会倾向于 AP，如 Apache Cassandra，会通过不同级别的一致性模式调整来提供高一致性方案。只要一个副本就能启动，数据库会始终接受写入和读取服务。</p>
+<p>CA 系统不存在。</p>
+<p>CAP 理论讨论的是网络分区，而不是节点崩溃或任何其他类型的故障。即使所有节点都在运行，也可能存在不一致性问题，因为存在连接性问题。</p>
+<h2 id="一致性模型">一致性模型</h2>
+<p>一致性模型是分布式系统的经典内容。</p>
+<p><strong>滞后性</strong>：数据改变的时刻与其副本接收到数据的时刻之间的差异</p>
+<p><strong>顺序性</strong>：各种操作在系统所有副本上执行的顺序状态</p>
+<p>为了推理操作顺序并指出真正的结果，必须定义<strong>一致性模型</strong>来保障顺序性。<em>保障</em>是将一致性模型是为用户与数据库之间的一种约定。由强到弱介绍一致性：</p>
+<h3 id="严格一致性">严格一致性</h3>
+<p>严格的一致性类似于不存在复制过程。任何节点的任何写入都可立即用于所有节点的后续读取。</p>
+<p>该模型现实当中无法满足。分布式数据库不可能一瞬间同步所有变化。</p>
+<h3 id="线性一致性">线性一致性</h3>
+<p>线性一致性是最严格的且可实现的单对象但操作一致性模型。需要满足新写入的数据一旦被读取出来，那么所有后续的操作应该能读到这个数据。</p>
+<ul>
+<li>需要有全局时钟，来实现所谓的“最近”。因为没有全局一致的时间，两个独立进程没有相同的“最近”概念。</li>
+<li>任何一次读取都能读到这个“最近”的值</li>
+</ul>
+<p>下图是一个线性一致性的例子，集合当中的元素是该操作可能返回的值。</p>
+<figure>
+<img src="/.io//image-20220504143843178.png" alt="image-20220504143843178"><figcaption aria-hidden="true">image-20220504143843178</figcaption>
+</figure>
+<p>线性一致性代价高昂，甚至 CPU 都不会使用线性一致性。</p>
+<blockquote>
+<p>常见误区：使用一致性算法可以实现线性一致，如 Paxos 和 Raft 等。</p>
+<p>Raft 算法值保证了复制 log，未保证如何将 log 写入状态机。</p>
+</blockquote>
+<h3 id="顺序一致性">顺序一致性</h3>
+<p>顺序一致性放弃了全局时钟的约束，改为分布式逻辑时钟实现。指所有进程以相同的顺序看到所有的修改。</p>
+<p>可以使用一致性算法保证顺序一致性。</p>
+<figure>
+<img src="/.io//image-20220504151700842.png" alt="image-20220504151700842"><figcaption aria-hidden="true">image-20220504151700842</figcaption>
+</figure>
+<h3 id="因果一致性">因果一致性</h3>
+<p>仅要求有因果关系的操作顺序是一致的，没有因果关系的操作顺序是随机的。</p>
+<ul>
+<li>本地顺序：本进程中，事务执行顺序即为本地因果顺序</li>
+<li>异地顺序：如果读操作返回的是写操作的值，那么该写操作在顺序上一定在读操作之前</li>
+<li>和时钟向量一样里面定义的一样，如果 <span class="math inline">\(a &gt; b \wedge b &gt; c \Rightarrow a &gt; c\)</span> 。</li>
+</ul>
+<figure>
+<img src="/.io//image-20220504151606962.png" alt="image-20220504151606962"><figcaption aria-hidden="true">image-20220504151606962</figcaption>
+</figure>
+<p>因果相关的写操作，加入逻辑时钟：</p>
+<figure>
+<img src="/.io//image-20220504151626434.png" alt="image-20220504151626434"><figcaption aria-hidden="true">image-20220504151626434</figcaption>
+</figure>
+<h2 id="事务隔离级别与一致性模型">事务隔离级别与一致性模型</h2>
+<p>ACID 和 CAP 中的 C 都是一致性。后者指的是线性一致性。</p>
+<p>事务隔离是描述并行事务之间的行为，而一致性是描述非并行事务之间的行为。</p>
+
+</div>
+
+
+    <div class="post-guide">
+        <div class="item left">
+            
+                <a href="/2022/05/05/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/10-%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86%E4%B8%8E%E6%81%A2%E5%A4%8D%EF%BC%88%E4%B8%8A%EF%BC%89/">
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    10-事务处理与恢复（上）
+                </a>
+            
+        </div>
+        <div class="item right">
+            
+                <a href="/2022/05/04/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98/">
+                    数据库设计问题
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+<script>
+    
+    
+</script>
 	</div>
 	<div id="footer">
 	<p>
