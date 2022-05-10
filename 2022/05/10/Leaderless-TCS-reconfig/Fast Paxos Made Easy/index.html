@@ -442,7 +442,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-10 12:26:55</span>
-    <!-- <span>2022-05-10 15:40:12</span> -->
+    <!-- <span>2022-05-10 16:16:30</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -467,7 +467,7 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <h2 id="摘要">摘要</h2>
+    <p><strong>摘要</strong></p>
 <p>分布式共识是分布式系统最重要的构建块之一。 Fast Paxos 是用于分布式共识的 Paxos 算法的最新变体之一。 Fast Paxos 允许接受者在快速轮次中单方面对其选择的值进行投票，从而消除了达成共识的沟通步骤。作为权衡，协调者必须建立一个大于 Classic Paxos 中使用的简单多数的法定人数。本文介绍了 Fast Paxos 算法的理论、实现和综合性能评估。与 Lamport 的原始文章相比，该理论以更易于理解的方式描述。特别是，导出了一个易于实现的协调器取值规则。在实现状态机复制的 Fast Paxos 时，开发了许多附加机制来应对实际场景。此外，实验表明 Fast Paxos 最适合在单客户端配置中使用。即使在局域网中存在两个或多个并发客户端也会导致频繁的冲突，这将降低系统吞吐量并增加客户端所经历的平均响应时间。由于频繁的冲突，Fast Paxos 在存在中到大量并发客户端的情况下实际上比 Classic Paxos 表现更差。</p>
 <p><strong>关键词</strong>：分布式共识、端到端延迟、容错、概率密度函数、仲裁要求、状态机复制、系统吞吐量</p>
 <h2 id="概论">概论</h2>
@@ -475,8 +475,13 @@ var _hmt = _hmt || [];
 <blockquote>
 <p>只有当存在一个 <span class="math inline">\(k-quorum R\)</span> 使得 RTQ 中的每个接受者 a 的 <span class="math inline">\(vr(a) = k\)</span> 和 <span class="math inline">\(vv(a) = v\)</span> 时，才在第 <span class="math inline">\(k\)</span> 轮中选择了一个值。</p>
 </blockquote>
-<p>这里 <span class="math inline">\(Q\)</span> 指的是当前轮的法定人数，<span class="math inline">\(k\)</span> 是最近一轮的接受者 <span class="math inline">\(a\)</span> 投票的轮数，<span class="math inline">\(k-quorum\)</span> 是指在第 <span class="math inline">\(k\)</span> 轮中使用的法定人数，<span class="math inline">\(vr(a)\)</span> 是指接受者 <span class="math inline">\(a\)</span> 已投票的轮的轮数，而 <span class="math inline">\(vv(a)\)</span> 指的是该投票中包含的值。 <span class="math inline">\(O4(v)\)</span> 为真当且仅当上述观察对于值 <span class="math inline">\(v\)</span> 的某轮 <span class="math inline">\(k\)</span> 为真。</p>
+<p>这里 <span class="math inline">\(Q\)</span> 指的是当前轮的法定人数，<span class="math inline">\(k\)</span> 是最近一轮的接受者 <span class="math inline">\(a\)</span> 投票的轮数，<span class="math inline">\(k-quorum\)</span> 是指在第 <span class="math inline">\(k\)</span> 轮中使用的法定人数，<span class="math inline">\(vr(a)\)</span> 是指接受者 <span class="math inline">\(a\)</span> 已投票的轮的轮数，而 <span class="math inline">\(vv(a)\)</span> 指的是该投票中包含的值<span class="math inline">\(O4(v)\)</span> 为真当且仅当上述观察对于值 <span class="math inline">\(v\)</span> 的某轮 <span class="math inline">\(k\)</span> 为真。</p>
 <p>正如我们所见，要评估这一观察结果，必须检查之前的每一轮 <span class="math inline">\(k\)</span>，并确定轮 <span class="math inline">\(k\)</span> 是否存在满足对 <span class="math inline">\(v\)</span> 的特定约束的 <span class="math inline">\(k-quorum\)</span>。这意味着协调器要评估是否 一个值 <span class="math inline">\(v\)</span> 满足 <span class="math inline">\(O4(v)\)</span>，它必须在每一轮中从系统的每个接受者那里收集投票，这在异步环境中根本不实用。</p>
+<p>在本文中，我们为协调者介绍了一个更易于实现的值选择规则，并提供了对仲裁要求的更直观推理，两者都无需评估 <span class="math inline">\(O4(v)\)</span>。为了证明所提出的值选择规则的实用性，我们提出了一个用于状态机复制的 Fast Paxos 实现。我们表明，需要许多额外的机制来应对实际情况。此外，我们使用我们的研究原型对 Fast Paxos 进行了全面评估。我们的实验表明，Fast Paxos 最适合在单客户端配置中使用。即使在局域网中存在两个或多个并发客户端也会导致频繁的冲突，这将降低系统吞吐量并增加客户端所经历的平均响应时间。由于频繁的冲突，Fast Paxos 在存在中到大量并发客户端的情况下实际上比 Classic Paxos 表现更差。</p>
+<p>本文的其余部分组织如下。第 2 节描述了 Fast Paxos 以及 Classic Paxos 及其变体中使用的系统模型。第 3 节定义了分布式共识解决方案的安全性和活跃性要求。第 4 节和第 5 节介绍 Classic Paxos 及其在状态机复制（称为 Multi-Paxos）中的应用，作为 Fast Paxos 的基础。在第 6 节中，我们描述了 Fast Paxos 和我们的理论贡献。在第 7 节和第 8 节中，我们报告了 Fast Paxos 的实施和性能评估的细节。我们以关于相关工作和结束语的最后两节来结束这篇文章。</p>
+<h2 id="系统模型">系统模型</h2>
+<p>我们考虑一个具有多个进程的分布式系统，其中任何一个都可能提出一个值。一个进程可以以三个角色之一参与分布式共识算法（例如 Classic Paxos 和 Fast Paxos）：<em>提议者</em>，<em>接受者</em>，或<em>学习者</em>。提议者是提出要被他人选择和学习的值的人。接受者参与对提议的值的协议谈判。学习者是学习已选择的值的人。请注意，角色是逻辑分类的，一个进程可以承担多个角色，例如，一个进程可以同时充当提议者和接受者。</p>
+<p>在客户端-服务器系统中，客户端将他们的请求发送到服务器进行处理，并期望收到相应的回复。 当使用服务器的状态机复制时，必须确保所有副本以相同的总顺序传递和执行请求。 对于每个请求，其总顺序构成了需要在副本之间达成分布式共识的值。 为了确定每个请求的总顺序，通常将其中一个副本指定为主副本，并负责确定总顺序。 因此，要达成一致的价值通常由客户端和主节点共同贡献（即，他们共同作为提议者）。 主节点也称为协调节点。</p>
 
 </div>
 
