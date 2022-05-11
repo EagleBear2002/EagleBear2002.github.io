@@ -130,9 +130,9 @@ var _hmt = _hmt || [];
                         
                 <ul>
                     <li class="file">
-                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.1-C++%E5%8E%86%E5%8F%B2/">
+                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/1.1-C++%E5%8E%86%E5%8F%B2/">
                             
-                                2.1-C++历史
+                                1.1-C++历史
                             
                         </a>
                     </li>
@@ -453,7 +453,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-11 09:56:08</span>
-    <!-- <span>2022-05-11 10:13:03</span> -->
+    <!-- <span>2022-05-11 13:17:48</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -505,7 +505,15 @@ var _hmt = _hmt || [];
 <p>如上文第 2.4.2 节所述，Paxos 共识算法中正常情况下的通信模式为： <span class="math display">\[
 提议者 \to 领导者 \to 接受者 \to 学习者
 \]</span> 在 Fast Paxos 中，提议者绕过领导者直接将其提议发送给接受者。 这可以节省一条消息延迟（和一条消息）。 我现在解释它是如何工作的。 但首先，我需要以一种小而重要的方式概括 Paxos 算法。</p>
-<p>Paxos 算法在上面根据多数集进行了说明，其中多数集包含大多数接受者。 如果在第 <span class="math inline">\(i\)</span> 轮中有多数接受者投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 轮中选择值 <span class="math inline">\(v\)</span>。 多数集所需的唯一属性是任何两个多数集都具有非空交集。 该算法通过假设任意两个称为 quorum 的集合的集合来简单概括，这样任何两个 quorum 都具有非空交集，并在第 2 节中简单地将“majority set”替换为“quorum”。</p>
+<p>Paxos 算法在上面根据多数集进行了说明，其中多数集包含大多数接受者。 如果在第 <span class="math inline">\(i\)</span> 轮中有多数接受者投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 轮中选择值 <span class="math inline">\(v\)</span>。 多数集所需的唯一属性是任何两个多数集都具有非空交集。 该算法通过假设任意两个称为法定人数的集合的集合来简单概括，这样任何两个法定人数都具有非空交集，并在第 2 节中简单地将“majority set”替换为“法定人数”。</p>
+<p>我们可以通过允许法定人数集取决于轮数来进一步推广该算法。 也就是说，我们假设对于每个轮数 <span class="math inline">\(i\)</span>，有一组称为 i-quorum 的接受者集合。 如果某个 i-quorum 中的所有接受者在第 <span class="math inline">\(i\)</span> 轮中投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 轮中选择值 <span class="math inline">\(v\)</span>。 同样，保持一致性所需的唯一要求是任何两个仲裁都具有非空交集。 这意味着对于任何整数 <span class="math inline">\(i\)</span> 和 j，任何 i-quorum 和任何 j-quorum 都有非空交集。 对算法的必要更改是显而易见的。 例如，在图 1 中，Q 应该是 i-quorum，而不是多数集。 我不会费心明确地重写算法。</p>
+<p>在第 2.3 节的进度属性中，“多数集”应该替换为什么并不明显。 这将在下面的第 3.3 节中讨论。</p>
+<h3 id="基本算法-1">基本算法</h3>
+<p>我现在描述第 2.2 节的基本 Paxos 算法对 Fast Paxos 的推广。 它只保证安全。 稍后会考虑进度和成本。 在 Fast Paxos 中，整数分为快速整数和经典整数。 一轮被称为快速或经典，取决于它的数量。 与以前一样，回合分两个阶段进行，但有两个不同之处：</p>
+<ul>
+<li>协调器在阶段2a 中选择值的规则被修改如下所述。</li>
+<li>在一个快速的第 <span class="math inline">\(i\)</span> 轮中，如果协调者可以在阶段2a 中选择任何提议的值，那么它可以代替选择单个值，而是向接受者发送一个称为any 消息的特殊阶段2a 消息。 当接受者收到阶段 2a 任何消息时，它可以将任何提议者的提议值的消息视为具有该值的普通第 <span class="math inline">\(i\)</span> 阶段 2a 消息。 （但是，对于单个值，它可能只执行一次第 <span class="math inline">\(i\)</span> 阶段 2b 动作。）</li>
+</ul>
 
 </div>
 
