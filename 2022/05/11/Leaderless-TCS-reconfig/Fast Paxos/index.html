@@ -464,7 +464,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-11 09:56:08</span>
-    <!-- <span>2022-05-12 10:59:29</span> -->
+    <!-- <span>2022-05-12 12:04:51</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -518,30 +518,72 @@ var _hmt = _hmt || [];
 <p>如果所有代理都没有故障，即使它们都失败并重新启动，也必须有可能取得进展。 由于可以在代理失败之前学习到一个值，因此代理必须有一些稳定的存储，可以在失败和重新启动后幸存下来。 我假设代理在重新启动时会从稳定的存储中恢复其状态，因此代理的故障与它的简单暂停没有区别。 因此没有必要明确地对故障进行建模。</p>
 <h3 id="安全">安全</h3>
 <h4 id="基本算法">基本算法</h4>
+<p>我首先描述一个简单版本的 Paxos 共识算法，它满足共识的安全要求。 它在第 2.3 节中扩展到也满足进度属性的完整算法。</p>
+<p>实现一致性要求不选择两个不同的值。 由于一个接受者在任何一轮中最多投票接受一个值，并且任何两个多数都包含一个共同的接受者，因此不可能在同一轮中选择两个不同的值。 但是，接受者可以在不同的轮次中投票接受不同的值。 实现一致性的难点在于确保在不同的轮次中不会选择不同的值。</p>
+<p>实现一致性要求不选择两个不同的值。 由于一个接受者在任何一轮中最多投票接受一个值，并且任何两个多数都包含一个共同的接受者，因此不可能在同一轮中选择两个不同的值。 但是，接受者可以在不同的轮次中投票接受不同的值。 实现一致性的难点在于确保在不同的轮次中不会选择不同的值。</p>
+<p>尽管我们根据接受者曾经投过的所有票来推断算法，但接受者不必记住这些票。 一个接受者 <span class="math inline">\(a\)</span> 只维护以下数据：</p>
+<ul>
+<li><span class="math inline">\(rnd[a]\)</span>：<span class="math inline">\(a\)</span> 参加过的编号最高的轮次，初始为 0。（由于 0 不是轮次，所以 <span class="math inline">\(rnd[a] = 0\)</span> 表示 没有参加任何轮次。）</li>
+<li><span class="math inline">\(vrnd[a]\)</span>：<span class="math inline">\(a\)</span> 投票的编号最高的轮次，初始为 0。（因此，<span class="math inline">\(rnd[a] \le rnd[a]\)</span> 始终为真。）</li>
+<li><span class="math inline">\(vval[a]\)</span>：<span class="math inline">\(a\)</span> 在回合 <span class="math inline">\(vrnd[a]\)</span> 中投票接受的值； 它的初始值（当 <span class="math inline">\(vrnd[a] = 0\)</span> 时）无关紧要。</li>
+</ul>
+<p>Paxos 假设有一组<em>协调者</em>代理。 协调者和接受者的角色通常由同一个进程扮演。 对于每一轮 <span class="math inline">\(i\)</span>，一些协调者被预先分配为第 <span class="math inline">\(i\)</span> 轮的协调者。此外，每个协调者都被指定为无限多轮的协调者。 提案人将他们的提案发送给协调者。 如下所述，第 <span class="math inline">\(i\)</span> 轮的协调者选择一个它试图在该轮中选择的值。 每个协调者 <span class="math inline">\(c\)</span> 维护以下数据：</p>
+<ul>
+<li><span class="math inline">\(crnd[c]\)</span>：<span class="math inline">\(c\)</span> 开始的编号最高的一轮，最初为 0。</li>
+<li><span class="math inline">\(cval[c]\)</span>：<span class="math inline">\(c\)</span> 为回合 <span class="math inline">\(crnd[c]\)</span> 选择的值，或者如果 <span class="math inline">\(c\)</span> 尚未为该回合选择一个值，则为特殊值 <span class="math inline">\(none\)</span>。 它的初始值无关紧要。</li>
+</ul>
+<p>如果在第 <span class="math inline">\(i\)</span> 轮中，学习者从大多数接受者那里收到阶段 2b 的消息，宣布他们在第 <span class="math inline">\(i\)</span> 轮中都投票给了 <span class="math inline">\(v\)</span>，那么它就会学习到一个值 <span class="math inline">\(v\)</span>。</p>
+<p>第 <span class="math inline">\(i\)</span> 轮在以下阶段进行，其中 <span class="math inline">\(c\)</span> 是该轮的协调者。</p>
+<ol type="1">
+<li><ol type="a">
+<li><p>如果 <span class="math inline">\(crnd[c] &lt; i\)</span>，则 <span class="math inline">\(c\)</span> 通过将 <span class="math inline">\(crnd[c]\)</span> 设置为 <span class="math inline">\(i\)</span>，将 <span class="math inline">\(cval[c]\)</span> 设置为 <span class="math inline">\(none\)</span> 来开始第 <span class="math inline">\(i\)</span> 轮，并向每个接受者 <span class="math inline">\(a\)</span> 发送消息，请求 <span class="math inline">\(a\)</span> 参与第 <span class="math inline">\(i\)</span> 轮。</p></li>
+<li><p>如果接受者 <span class="math inline">\(a\)</span> 收到参与第 <span class="math inline">\(i\)</span> 轮的请求并且 <span class="math inline">\(i &gt; rnd[a]\)</span>，则 <span class="math inline">\(a\)</span> 将 <span class="math inline">\(rnd[a]\)</span> 设置为 <span class="math inline">\(i\)</span>，并向协调者 <span class="math inline">\(c\)</span> 发送包含轮数 <span class="math inline">\(i\)</span> 和 <span class="math inline">\(vrnd[a]\)</span> 和 <span class="math inline">\(vval[a]\)</span> 的当前值的消息。如果 <span class="math inline">\(i \le rnd[a]\)</span>（因此 <span class="math inline">\(a\)</span> 已经开始第 <span class="math inline">\(i\)</span> 轮或更高编号的轮），则 <span class="math inline">\(a\)</span> 忽略该请求。</p></li>
+</ol></li>
+<li><ol type="a">
+<li>如果 <span class="math inline">\(crnd[c] = i\)</span> （所以 <span class="math inline">\(c\)</span> 还没有开始更高编号的一轮），<span class="math inline">\(cval[c] = none\)</span> （所以 <span class="math inline">\(c\)</span> 还没有执行这一轮的阶段 2a），并且 <span class="math inline">\(c\)</span> 已经收到阶段来自大多数接受者的第 <span class="math inline">\(i\)</span> 轮的 1b 消息；然后根据下面描述的规则，<span class="math inline">\(c\)</span> 使用这些消息的内容来选择一个值 <span class="math inline">\(v\)</span>，将 <span class="math inline">\(cval[c]\)</span> 设置为 <span class="math inline">\(v\)</span>，并向接受者发送一条消息，要求他们在第 <span class="math inline">\(i\)</span> 轮投票接受 <span class="math inline">\(v\)</span>。</li>
+<li>如果一个接受者 <span class="math inline">\(a\)</span> 在第 <span class="math inline">\(i\)</span> 轮收到一个投票接受一个值 <span class="math inline">\(v\)</span> 的请求，并且 <span class="math inline">\(i \ge rnd[a]\)</span>并且 <span class="math inline">\(vrnd[a] \ne i\)</span>；然后 <span class="math inline">\(a\)</span> 在第 <span class="math inline">\(i\)</span> 轮投票接受 <span class="math inline">\(v\)</span>，将 <span class="math inline">\(vrnd[a]\)</span> 和 <span class="math inline">\(rnd[a]\)</span> 设置为 <span class="math inline">\(i\)</span>，将 <span class="math inline">\(cval[a]\)</span> 设置为 <span class="math inline">\(v\)</span>，并向所有学习者发送消息，宣布其第 <span class="math inline">\(i\)</span> 轮投票。 如果 <span class="math inline">\(i &lt; rnd[a]\)</span> 或 <span class="math inline">\(vrnd[a] = i\)</span>（因此 <span class="math inline">\(a\)</span> 已开始更高编号的一轮或已在此轮中投票），则 <span class="math inline">\(a\)</span> 忽略该请求。</li>
+</ol></li>
+</ol>
+<p>协调者可以随时为新的轮数执行阶段 1a 动作。 但是，该操作的启用条件会阻止协调者开始一个比它已经开始的数字低的一轮。 不同的轮次可以同时执行，但是如果接受者收到（并采取行动）更高编号轮次的消息，它将停止参与轮次。 请求接受不同值的阶段 2a 消息可以在不同的轮次中发送。 但是，阶段 2a 动作的启用条件和轮次对协调者的唯一分配确保了在同一轮次中不能发送具有不同值的阶段 2a 消息。</p>
 <h4 id="在阶段-2a-中选择一个值">在阶段 2a 中选择一个值</h4>
 <h3 id="进展">进展</h3>
 <h4 id="progress-属性">Progress 属性</h4>
 <h4 id="完整算法">完整算法</h4>
+<p>我现在扩展上述算法，使其满足进度属性。首先，协调者和接受者的动作修改如下：</p>
+<ul>
+<li>CA1. 如果接受者 <span class="math inline">\(a\)</span> 收到第 <span class="math inline">\(i\)</span> 轮的阶段 1a 或 2a 消息，且 <span class="math inline">\(i &lt; rnd[a]\)</span> 并且第 <span class="math inline">\(rnd[a]\)</span> 轮的协调者不是第 <span class="math inline">\(i\)</span> 轮的协调者，则 <span class="math inline">\(a\)</span> 向第 <span class="math inline">\(i\)</span> 轮的协调者发送一条特殊消息，指示那一轮 <span class="math inline">\(rnd[a]\)</span> 开始了。(如果 <span class="math inline">\(i &lt; rnd[a]\)</span> 并且回合 <span class="math inline">\(i\)</span> 和 <span class="math inline">\(rnd[a]\)</span> 具有相同的协调者，则回合 <span class="math inline">\(i\)</span> 消息已过时并被忽略。)</li>
+<li>CA2. 只有当协调者 <span class="math inline">\(c\)</span> 认为自己是当前的领导者时，它才会执行一个动作。只有当 <span class="math inline">\(crnd[c] = 0\)</span> 或者它已经知道已经开始了一轮 <span class="math inline">\(j\)</span> 时，它才开始新一轮 <span class="math inline">\(i\)</span>，对于 <span class="math inline">\(crnd[c] &lt; j &lt; i\)</span> 的某些 <span class="math inline">\(j\)</span>。</li>
+</ul>
+<p>由于任何消息都可能丢失，因此代理可能必须重新传输消息以确保它们最终被传递。我修改算法：</p>
+<ul>
+<li>CA3. 每个接受者不断地重新发送它发送的最后一个阶段 1b 或 2b 消息；任何认为自己是领导者的协调者不断向每个接受者重新发送它发送的最后一个阶段 1a 或 2a 消息；并且每个提出了值的提议者不断地将该提议重新发送给每个协调者。</li>
+</ul>
+<p>CA3 要求代理发送无限的消息序列。第 2.4 节解释了如何停止这种无休止的消息重传。到目前为止描述的动作说明了代理应该尝试执行的动作。我们不能指望一个失败的代理人成功地做任何事情。我们所能期待的是：</p>
+<ul>
+<li>CA4. 一个无故障的代理最终会执行它应该执行的任何操作。 例如，CA3 和 CA4 意味着当接受者 a 没有故障时，它最终必须重新发送它发送的最后一个阶段 1b 或 2b 消息。 CA4 不禁止有缺陷的代理执行操作。</li>
+</ul>
 <h4 id="过程证明">过程证明</h4>
 <h3 id="实施注意事项">实施注意事项</h3>
 <h4 id="减少消息数量">减少消息数量</h4>
 <h4 id="经典-paxos-的成本">经典 Paxos 的成本</h4>
 <h2 id="paxos-加速">Paxos 加速</h2>
-<p>如上文第 2.4.2 节所述，Paxos 共识算法中正常情况下的通信模式为： <span class="math display">\[
+<p>如上文第 2.4.2 节所述，Paxos 共识算法中正常情况下的通信模式为：</p>
+<p><span class="math display">\[
 提议者 \to 领导者 \to 接受者 \to 学习者
-\]</span> 在 Fast Paxos 中，提议者绕过领导者直接将其提议发送给接受者。这可以节省一条消息延迟（和一条消息）。我现在解释它是如何工作的。但首先，我需要以一种小而重要的方式概括 Paxos 算法。</p>
+\]</span></p>
+<p>在 Fast Paxos 中，提议者绕过领导者直接将其提议发送给接受者。这可以节省一条消息延迟（和一条消息）。我现在解释它是如何工作的。但首先，我需要以一种小而重要的方式概括 Paxos 算法。</p>
 <p>Paxos 算法在上面根据多数集进行了说明，其中多数集包含大多数接受者。如果在第 <span class="math inline">\(i\)</span> 轮中有多数接受者投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 轮中选择值 <span class="math inline">\(v\)</span>。多数集所需的唯一属性是任何两个多数集都具有非空交集。该算法通过假设任意两个称为法定人数的集合的集合来简单概括，这样任何两个法定人数都具有非空交集，并在第 2 节中简单地将“majority set”替换为“法定人数”。</p>
 <p>我们可以通过允许法定人数集取决于轮数来进一步推广该算法。也就是说，我们假设对于每个轮数 <span class="math inline">\(i\)</span>，有一组称为 i-quorum 的接受者集合。如果某个 i-quorum 中的所有接受者在第 <span class="math inline">\(i\)</span> 轮中投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 轮中选择值 <span class="math inline">\(v\)</span>。同样，保持一致性所需的唯一要求是任何两个仲裁都具有非空交集。这意味着对于任何整数 <span class="math inline">\(i\)</span> 和 j，任何 i-quorum 和任何 j-quorum 都有非空交集。对算法的必要更改是显而易见的。例如，在图 1 中，Q 应该是 i-quorum，而不是多数集。我不会费心明确地重写算法。</p>
 <p>在第 2.3 节的进度属性中，“多数集”应该替换为什么并不明显。这将在下面的第 3.3 节中讨论。</p>
 <h3 id="基本算法-1">基本算法</h3>
 <p>我现在描述第 2.2 节的基本 Paxos 算法对 Fast Paxos 的推广。它只保证安全。稍后会考虑进度和成本。在 Fast Paxos 中，整数分为快速整数和经典整数。一轮被称为快速或经典，取决于它的数量。与以前一样，轮分两个阶段进行，但有两个不同之处：</p>
 <ul>
-<li>协调器在阶段 2a 中选择值的规则被修改如下所述。</li>
+<li>协调者在阶段 2a 中选择值的规则被修改如下所述。</li>
 <li>在一个快速的第 <span class="math inline">\(i\)</span> 轮中，如果协调者可以在阶段2a 中选择任何提议的值，那么它可以代替选择单个值，而是向接受者发送一个称为any 消息的特殊阶段2a 消息。当接受者收到阶段 2a 任何消息时，它可以将任何提议者的提议值的消息视为具有该值的普通第 <span class="math inline">\(i\)</span> 阶段 2a 消息。（但是，对于单个值，它可能只执行一次第 <span class="math inline">\(i\)</span> 阶段 2b 动作。）</li>
 </ul>
 <p>回想一下，在正常情况下，协调者 <span class="math inline">\(c\)</span> 收到的所有阶段 1b 消息都表明在该轮中没有接受者投票，因此 <span class="math inline">\(c\)</span> 可以选择阶段 2a 中的任何建议值。因此，快速轮的正常情况是 <span class="math inline">\(c\)</span> 发送阶段 2a 任何消息。这通常在为该算法实例提出任何值之前，选择 <span class="math inline">\(c\)</span> 作为领导者时完成。然后，接受者等待来自提议者的提议消息，并将其接收到的第一个消息视为来自 <span class="math inline">\(c\)</span> 的普通阶段 2a 消息。</p>
 <p>经典轮的工作方式与经典 Paxos 中的相同。协调者选择接受者可以投票的值，因此不同的接受者不能在同一轮中投票接受不同的值。在快速轮中情况并非如此。如果协调者在快速轮中发送阶段 2a 任何消息，则每个接受者独立决定将哪个提议消息作为阶段 2a 消息。因此，不同的接受者可以在快速轮次中投票接受不同的值。</p>
-<p>协调者在阶段 2a 中选择值的规则不再保证一致性，即使对于经典轮也是如此。事实上，这条规则根本不再适用。图 1 中的规则声明断言，如果 <span class="math inline">\(k \ne 0\)</span>，则 <span class="math inline">\(V\)</span> 包含单个元素。如果 <span class="math inline">\(k\)</span> 是一个快速整数，这就不再适用了。必须修改在阶段 2a 中选择值 v 的规则。</p>
+<p>协调者在阶段 2a 中选择值的规则不再保证一致性，即使对于经典轮也是如此。事实上，这条规则根本不再适用。图 1 中的规则声明断言，如果 <span class="math inline">\(k \ne 0\)</span>，则 <span class="math inline">\(V\)</span> 包含单个元素。如果 <span class="math inline">\(k\)</span> 是一个快速整数，这就不再适用了。必须修改在阶段 2a 中选择值 <span class="math inline">\(v\)</span> 的规则。</p>
 
 </div>
 
