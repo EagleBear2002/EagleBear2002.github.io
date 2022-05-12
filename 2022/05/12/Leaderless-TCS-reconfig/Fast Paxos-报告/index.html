@@ -464,7 +464,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-12 10:02:08</span>
-    <!-- <span>2022-05-12 21:31:56</span> -->
+    <!-- <span>2022-05-12 21:34:23</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -585,6 +585,45 @@ var _hmt = _hmt || [];
 <li>|Qf|≥N-⌈N/4⌉≥⌈3N/4⌉</li>
 </ul>
 <p>证明请参考：一致性算法中的节点下限.</p>
+<h2 id="冲突recovery">冲突Recovery</h2>
+<p>作为优化，Acceptor在投票Value时也应该发送到Leader，这样Leader就很容易能发现冲突。Leader如果在Round i发现冲突，可以很容易地开始Roun i+1，从Phase1a开始重新执行Classic Paxos过程。</p>
+<p>但这个其实可以进一步优化，我们首先考虑下面这个事实： 如果Leader重启了Round i+1，并且收到了i-Quorum个Acceptor发送的Phase1b消息，则该消息明确了两件事情：</p>
+<ol type="1">
+<li>报告Acceptor a参与投票的最大Round和对应的Value</li>
+<li>承诺不会对小于i+1的Round作出投票</li>
+</ol>
+<p>假如Acceptor a也参与了Round i的投票，则a的Phase1b消息同样明确了上述两件事情，并且会把对应的Round，Value在Phase2b中发送给Leader（当然还有Learner），一旦Acceptor a执行了Phase2b，则也同时表明a将不会再对小于i+1的Round进行投票。</p>
+<p>也就是说，Round i的Phase2b与Round i+1的Phase1b有同样的含义，也暗含着如果Leader收到了Round i的Phase2b，则可直接开始Round i+1的Phase2a。</p>
+<p>经过整理，产生了两种解决冲突(Recovery)的方法：</p>
+<p><strong>基于协调者的Recovery（推荐）</strong></p>
+<p>如果Leader在Round i 中收到了(i+1)-Quorum个Acceptor的Phase2b消息，并且发现冲突，则根据O4(v)选取一个value，直接执行Round i+1的Phase2a；否则，从Phase1a开始重新执行Round i+1.</p>
+<p><strong>基于非协调的Recovery</strong></p>
+<p>作为基于协调Recovery的扩展，非协调要求Acceptor把Phase2b消息同时发送给其他Quorum Acceptor，由每个Acceptor直接执行Round i+1的Phase2a，但这要求i-Quorum与(i+1)-Quorum必须相同，并且遵循相同选择value的规则。</p>
+<p>这种方式的好处是Acceptor直接执行Round i+1的Phase2a，无需经过Leader，节省了一个通信步骤，缺点是Acceptor同时也作为Proposer，搞的过于复杂。</p>
+<p>下面是对Fast Paxos算法流程的详细理解（基于协调者的Recovery）：</p>
+<ul>
+<li>Phase1a：Leader提交proposal到Acceptor‍</li>
+<li>Phase1b：Acceptor回应已经参与投票的最大Proposer编号和选择的Value‍</li>
+<li>Phase2a：Leader收集Acceptor的返回值</li>
+<li>Phase2a.1：如果Acceptor无返回值，则发送一个Any消息给Acceptor，之后Acceptor便等待Proposer提交Value，进入Fast Round流程，Leader退出</li>
+<li>Phase2a.1.1：各个Proposer提交对序号进行累加并组装Proposal，提交给Acceptor</li>
+<li>Phase2a.1.2：Acceptor忽略序号，按照2a.1阶段产生的Round-Number进行表决。</li>
+<li>Phase2a.1.2.1: 当表决在冲突之前完成了多数派判断，则决议完成，交给Leaner，其他node进行学习。</li>
+<li>Phase2a.1.2.1: 当表决时发现冲突，也就是不同的Proposal到达Acceptor，则开始解决冲突：唤醒Leader，同时给Leader发送消息，包含所有Proposal、Quorum，进入Phase2a.3流程。</li>
+<li>Phase2a.2：如果有返回值</li>
+<li>Phase2a.2.1 如果仅存在一个Value，则作为结果提交</li>
+<li>Phase2a.2.2 如果存在多个Value，则根据O4(v)选取符合条件的一个</li>
+<li>Phase2a.2.3 如果存在多个结果并且没有符合O4(v)的Value，则自由决定一个。</li>
+<li>Phase2a.3：Leader进入Round i+1阶段，执行步骤根据Quorum的数量，计算</li>
+<li>Phase2a.3.1：如果Leader在Round i 中收到了(i+1)-Quorum个Acceptor的确认消息(应该是满足多数派)，则根据O4(v)选取一个value，直接执行Round i+1的Phase2a；</li>
+<li>Phase2a.3.2：否则，从Phase1a开始重新执行Round i+1 Phase2b：Acceptor把表决结果发送到Learner（包括Leader）</li>
+</ul>
+<p>Fast Paxos基本是本着乐观锁的思路：如果存在冲突，则进行补偿。其中Leader起到一个初始化Progress和解决冲突的作用，如果Progress一直执行良好，则Leader将始终不参与一致性过程。</p>
+<p>因此Fast Paxos理论上只需要2个通信步骤，而Classic Paxos需要3个，但Fast Paxos在解决冲突时有至少需要1个通信步骤，在高并发的场景下，冲突的概率会非常高，冲突解决的成本也会很大。</p>
+<p>另外，Fast Paxos把Client深度引入算法中，致使其架构远没Classic Paxos那么清晰，也没Classic Paxos容易扩展。</p>
+<blockquote>
+<p>Multi Paxos里提议都由leader提出，因而不存在一次决议出现多个value，Fast Paxos里由proposer直接提议，一次决议里可能有多个proposer提议、出现多个value，即出现提议冲突(collision)。leader起到初始化决议进程(progress)和解决冲突的作用，当冲突发生时leader重新参与决议过程。</p>
+</blockquote>
 
 </div>
 
