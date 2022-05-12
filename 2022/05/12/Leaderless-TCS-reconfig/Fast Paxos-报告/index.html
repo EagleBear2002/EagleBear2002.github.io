@@ -9,7 +9,7 @@
 	
 	<title>
 	
-		categories | 
+		Fast Paxos-报告 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -261,7 +261,7 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file">
+                    <li class="file active">
                         <a href="/2022/05/12/Leaderless-TCS-reconfig/Fast%20Paxos-%E6%8A%A5%E5%91%8A/">
                             
                                 Fast Paxos-报告
@@ -458,66 +458,121 @@ var _hmt = _hmt || [];
 	<!-- 引入正文 -->
 	<div id="content">
 		<h1 id="article-title">
-	<i class="fa fa-folder-open" aria-hidden="true"></i>CATEGORIES
+    Fast Paxos-报告
 </h1>
-<h2 id="article-title">
-	目前共计 6 个分类
-</h2>
+<div class="article-meta">
+    
+    <span>EagleBear2002</span>
+    <span>2022-05-12 10:02:08</span>
+    <!-- <span>2022-05-12 10:52:40</span> -->
+    <div id="article-categories">
+        
+            <span>Categories：</span>
+            
+                
+                    <span>
+                        <i class="fa fa-folder" aria-hidden="true">
+                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
+                        </i>
+                        
+                    </span>
+                
+            
+        
 
-<div id="article-content">
-	<ul>
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/C-高级程序设计/">C++高级程序设计(3)</a>
-                </span>
-            </li>
-          
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/CMU-数据库系统/">CMU-数据库系统(3)</a>
-                </span>
-            </li>
-          
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig(6)</a>
-                </span>
-            </li>
-          
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/互联网计算/">互联网计算(1)</a>
-                </span>
-            </li>
-          
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/分布式数据库/">分布式数据库(6)</a>
-                </span>
-            </li>
-          
-      
-          
-            <li class="menu-item">
-                <span>
-                    <a href="/categories/政治经济学/">政治经济学(4)</a>
-                </span>
-            </li>
-          
-      
-	</ul>
+        
+            <span>Tags：</span>
+            
+        
+    </div>
+
 </div>
 
+<div id="article-content">
+    <h2 id="classic-paxos">Classic Paxos</h2>
+<h3 id="参与角色">参与角色</h3>
+<p>从一般的 Client/Server 来考虑，Client其实承担了Proposer和Learner的作用，而Server则扮演Acceptor的角色，因此下面重新描述了Paxos算法中的几个角色：</p>
+<ul>
+<li>Client/Proposer/Learner：负责提案并执行提案。</li>
+<li>Coordinator：Proposer协调者，可为多个，Client通过Coordinator进行提案。</li>
+<li>Leader：在众多的Coordinator中指定一个作为Leader。</li>
+<li>Acceptor：负责对Proposal进行投票表决。</li>
+</ul>
+<h3 id="算法流程">算法流程</h3>
+<ul>
+<li>Phase 1a： Leader提交proposal到Acceptor</li>
+<li>Phase 2b：Acceptor回应已经参与投票的最大Proposer编号和选择的Value</li>
+<li>Phase 2a：Leader收集Acceptor的返回值
+<ul>
+<li>Phase 2a.1：如果Acceptor无返回值，则自由决定一个</li>
+<li>Phase 2a.2：如果有返回值，则选择Proposer编号最大的一个</li>
+</ul></li>
+<li>Phase 2b：Acceptor把表决结果发送到Learner</li>
+</ul>
+<figure>
+<img src="/.io//SouthEast.png" alt="Classics Paxos交互图"><figcaption aria-hidden="true">Classics Paxos交互图</figcaption>
+</figure>
+<h2 id="fast-paxos">Fast Paxos</h2>
+<p>很明显，在Phase2a.1中，如果Leader可以自由决定一个Value，则可以让Proposer提交这个Value，自己则退出通信过程。只要之后的过程运行正常，Leader始终不参与通信，一直有Proposer直接提交Value到Acceptor，从而把Classic Paxos的三阶段通信减少为两阶段，这便是Fast Paxos的由来。因此，我们形式化下Fast Paxos的几个阶段：</p>
+<ul>
+<li>Phase1a：Leader提交proposal到Acceptor</li>
+<li>Phase1b：Acceptor回应已经参与投票的最大Proposer编号和选择的Value</li>
+<li>Phase2a：Leader收集Acceptor的返回值
+<ul>
+<li>Phase2a.1：如果Acceptor无返回值，则发送一个Any消息给Acceptor，之后Acceptor便等待Proposer提交Value</li>
+<li>Phase2a.2：如果有返回值，则根据规则选取一个</li>
+</ul></li>
+<li>Phase2b：Acceptor把表决结果发送到Learner（包括Leader）</li>
+</ul>
+<figure>
+<img src="/.io//SouthEast-16523212768523.png" alt="Fast Paxos交互图"><figcaption aria-hidden="true">Fast Paxos交互图</figcaption>
+</figure>
+
+</div>
+
+
+    <div class="post-guide">
+        <div class="item left">
+            
+        </div>
+        <div class="item right">
+            
+                <a href="/2022/05/11/Leaderless-TCS-reconfig/Fast%20Paxos/">
+                    Fast Paxos
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+<script>
+    
+    
+</script>
 	</div>
 	<div id="footer">
 	<p>
