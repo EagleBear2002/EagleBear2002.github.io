@@ -464,7 +464,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-12 10:02:08</span>
-    <!-- <span>2022-05-12 20:29:10</span> -->
+    <!-- <span>2022-05-12 21:31:56</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -492,18 +492,18 @@ var _hmt = _hmt || [];
     <h2 id="概念与定义">概念与定义</h2>
 <p>先明确一些定义：</p>
 <ul>
-<li><p><strong>Quorum</strong>：在 Classic Paxos 中一直通过多数派（Majority）来保证算法的正确性，对多数派再进一步抽象化，称为“Quorum”，要求任意两个Quorum之间有交集（从而间接表达了majority的含义）。</p></li>
-<li><p><strong>Round</strong>：在 Classic Paxos 中，提议者每次提案都用一个全序的编号表示，如果执行顺利，该编号的Proposal在经历Phase1，Phase2后最终会执行成功。 在 Fast Paxos 称这个带编号的Proposal的执行过程为“Round”。</p></li>
-<li><p><strong>i-Quorum</strong>：在 Classic Paxos 执行过程中，一般不会明确区分每次Round执行的Quorum，虽然也可以为每个Round指定一个Quorum。在 Fast Paxos 中会通过i-Quorum明确指定Round i需要的Quorum。</p></li>
-<li><p><strong>Classic Round</strong>：执行 Classic Paxos 的Round称为Classic Round。</p></li>
-<li><p>** 快速回合 **：如果领导者发送了Any消息，则认为后续通信是一个 快速回合 ；若领导者未发送Any消息，还是跟之前一样通信，则后续行为仍然是Classic Round。根据Lamport描述，Classic Round和 快速回合 可通过Round Number进行加以区分。</p></li>
+<li><strong>Quorum</strong>：在 Classic Paxos 中一直通过多数派（Majority）来保证算法的正确性，对多数派再进一步抽象化，称为“Quorum”，要求任意两个Quorum之间有交集（从而间接表达了majority的含义）。</li>
+<li><strong>Round</strong>：在 Classic Paxos 中，提议者每次提案都用一个全序的编号表示，如果执行顺利，该编号的Proposal在经历Phase1，Phase2后最终会执行成功。在 Fast Paxos 称这个带编号的Proposal的执行过程为“Round”。</li>
+<li><strong>i-Quorum</strong>：在 Classic Paxos 执行过程中，一般不会明确区分每次Round执行的Quorum，虽然也可以为每个Round指定一个Quorum。在 Fast Paxos 中会通过i-Quorum明确指定Round i需要的Quorum。</li>
+<li><strong>Classic Round</strong>：执行 Classic Paxos 的Round称为Classic Round。</li>
+<li><strong>Fast Round</strong>：如果领导者发送了Any消息，则认为后续通信是一个快速回合；若领导者未发送Any消息，还是跟之前一样通信，则后续行为仍然是Classic Round。根据Lamport描述，Classic Round和 快速回合 可通过Round Number进行加以区分。</li>
 </ul>
 <h2 id="classic-paxos">Classic Paxos</h2>
 <h3 id="参与角色">参与角色</h3>
 <p>从一般的 Client/Server 来考虑，Client其实承担了提议者和Learner的作用，而Server则扮演接受者的角色，因此下面重新描述了Paxos算法中的几个角色：</p>
 <ul>
 <li>Client/提议者/Learner：负责提案并执行提案。</li>
-<li>Coordinator：提议者协调者，可为多个，Client通过Coordinator进行提案。</li>
+<li>Coordinator：提议者的协调者，可为多个，Client通过Coordinator进行提案。</li>
 <li>领导者：在众多的Coordinator中指定一个作为领导者。</li>
 <li>接受者：负责对Proposal进行投票表决。</li>
 </ul>
@@ -566,6 +566,25 @@ var _hmt = _hmt || [];
 <li>第2句话的含义是，Round-Number的产生是一次Accept的结果，也就有一个对应的Quorum(假设为Quorum-Q)。</li>
 <li>进而从这个Quorum-Q中去分析，得到一个Quorum-R,它的条件是R中的所有Acceptor都对同一个value作出投票。</li>
 </ol>
+<h2 id="确定quorum">确定Quorum</h2>
+<p>根据上面描述，为了防止一次Fast Round选择多个Value，Quorum需要满足下面两个条件：</p>
+<ul>
+<li>任意两个Classic Quorum有交集</li>
+<li>任意一个Classic Quorum与任意两个Fast Quorum有交集</li>
+</ul>
+<p>不妨设总Acceptor数为N，Classic Round运行的最大失败Acceptor数为F，Fast Round允许的失败数为E，即N-F构成Classic Round的一个Quorum，N-E构成Fast Round的一个Quorum。</p>
+<p>上面两个条件等价于：</p>
+<ul>
+<li>N&gt;2F</li>
+<li>N&gt;2E+F</li>
+</ul>
+<p>设Qc,Qf分别为Classic和Fast Round的Quorum大小，经过整理可得两个下限结果：</p>
+<ul>
+<li>|Qc| = |Qf| ≥ N − ⌈N/3⌉ + 1 ≥ ⌊2N/3⌋ + 1</li>
+<li>|Qc| ≥N-⌈N/2⌉+1 = ⌈N/2⌉+1</li>
+<li>|Qf|≥N-⌈N/4⌉≥⌈3N/4⌉</li>
+</ul>
+<p>证明请参考：一致性算法中的节点下限.</p>
 
 </div>
 
