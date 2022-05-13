@@ -438,6 +438,17 @@ var _hmt = _hmt || [];
             
                 <ul>
                     <li class="file">
+                        <a href="/2022/05/13/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%BA%94%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%9A%84%E6%B5%81%E9%80%9A%E8%BF%87%E7%A8%8B/">
+                            
+                                第五章-资本的流通过程
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
                         <a href="/2022/05/08/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%A7%AF%E7%B4%AF/">
                             
                                 第四章-资本积累
@@ -464,7 +475,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-12 10:02:08</span>
-    <!-- <span>2022-05-12 21:35:16</span> -->
+    <!-- <span>2022-05-13 08:57:09</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -539,7 +550,7 @@ var _hmt = _hmt || [];
 <h3 id="any-消息">any 消息</h3>
 <p>在正常情况下，Leader若可以自由决定一个值，应该发生一条Phase2a消息，其中包含了选择的值，但此时却发送了一条无值的Any消息。接受者在接收到Any消息后可做一些开始 快速回合 的初始化工作，等待提议者提交真正的值。Any消息的意思是接受者可以做任意的处理。</p>
 <p>因此，一个 快速回合 包括两个阶段：由Any消息开始的阶段和由提议者提交值的结束阶段，而Leader只是起到一个初始化过程的作用，如果没有错误发生，Leader将退出之后的通信中过程。</p>
-<h3 id="冲突">冲突</h3>
+<h2 id="冲突">冲突</h2>
 <p>在 Classic Paxos 中，接受者投票的value都是Leader选择好的，所以不存在同一Round中投票多个值的场景，从而保证了一致性。但在快速回合中因为<strong>允许多个提议者同时提交不同的值到接受者</strong>，这将导致在 快速回合 中没有任何value被作为最终决议，这也称为“冲突”（Collision） 。</p>
 <p>提议者提交的回合编号是全序的，不同的提议者提交的回合编号肯定不一样，同一提议者不可能在同一回合中提交不同的值，那为什么还会有同一 快速回合 中有多个值的情况？原因在于 快速回合 与经典回合区别，当 快速回合 开始后，会被分配一个唯一的 Round Number，之后无论多少个提议者提交值都是基于这个 Round Number，而不管提议者提交的Round是否全序。比如，快速回合编号为10，提议者1提交了（11，1），提议者2提交了（12，2），但对 快速回合 来说存在（10，1，2）两个值。</p>
 <p>因为冲突的存在，会导致Phase2a.2的选择非常困难，原因是：</p>
@@ -555,8 +566,8 @@ var _hmt = _hmt || [];
 <p>这个问题也可表述为：<strong>R中的所有Acceptor都对v作出投票，并且Q∩R≠φ，因为如果Q∩R=φ，则Round i 将无法得知投票结果。</strong></p>
 <p>因此如果保证下面两个条件：</p>
 <ol type="1">
-<li>每个Acceptor在同一Fast Round中仅投票一个Value.</li>
-<li><span class="math inline">\(Q \cap R_v \cap R_w \ne \Phi\)</span>.</li>
+<li>每个Acceptor在同一Fast Round中仅投票一个Value</li>
+<li><span class="math inline">\(Q \cap R_v \cap R_w \ne \Phi\)</span></li>
 </ol>
 <p>则v、w不可能同时被选择。</p>
 <p>换言之：</p>
@@ -578,15 +589,15 @@ var _hmt = _hmt || [];
 <li>N&gt;2F</li>
 <li>N&gt;2E+F</li>
 </ul>
-<p>设Qc,Qf分别为Classic和Fast Round的Quorum大小，经过整理可得两个下限结果：</p>
+<p>设Qc,Qf分别为Classic Round和Fast Round的Quorum大小，经过整理可得两个下限结果：</p>
 <ul>
 <li>|Qc| = |Qf| ≥ N − ⌈N/3⌉ + 1 ≥ ⌊2N/3⌋ + 1</li>
 <li>|Qc| ≥N-⌈N/2⌉+1 = ⌈N/2⌉+1</li>
 <li>|Qf|≥N-⌈N/4⌉≥⌈3N/4⌉</li>
 </ul>
-<p>证明请参考：一致性算法中的节点下限.</p>
+<p>证明请参考：一致性算法中的节点下限。</p>
 <h2 id="冲突recovery">冲突Recovery</h2>
-<p>作为优化，Acceptor在投票Value时也应该发送到Leader，这样Leader就很容易能发现冲突。Leader如果在Round i发现冲突，可以很容易地开始Roun i+1，从Phase1a开始重新执行Classic Paxos过程。</p>
+<p>作为优化，Acceptor在投票Value时也应该发送到Leader，这样Leader就很容易能发现冲突。Leader如果在Round i发现冲突，可以很容易地开始Round i+1，从Phase1a开始重新执行Classic Paxos过程。</p>
 <p>但这个其实可以进一步优化，我们首先考虑下面这个事实： 如果Leader重启了Round i+1，并且收到了i-Quorum个Acceptor发送的Phase1b消息，则该消息明确了两件事情：</p>
 <ol type="1">
 <li>报告Acceptor a参与投票的最大Round和对应的Value</li>
@@ -630,6 +641,11 @@ var _hmt = _hmt || [];
 
     <div class="post-guide">
         <div class="item left">
+            
+                <a href="/2022/05/13/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%BA%94%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%9A%84%E6%B5%81%E9%80%9A%E8%BF%87%E7%A8%8B/">
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    第五章-资本的流通过程
+                </a>
             
         </div>
         <div class="item right">
