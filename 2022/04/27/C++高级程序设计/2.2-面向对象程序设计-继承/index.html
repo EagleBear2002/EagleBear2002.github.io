@@ -519,7 +519,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-27 10:19:23</span>
-    <!-- <span>2022-05-19 15:37:09</span> -->
+    <!-- <span>2022-05-19 16:15:21</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -857,6 +857,134 @@ p-&gt;f();	 &#x2F;&#x2F; B::f,b.B::g<span aria-hidden="true" class="line-numbers
 <li>默认前期绑定</li>
 <li>后期绑定需显式指出 virtual</li>
 </ol>
+<h3 id="final-和-override">final 和 override</h3>
+<ul>
+<li>override：希望以虚函数的形式写（编译器报错，防止漏写 virtual 问题）</li>
+<li>final：不可以再次重写</li>
+</ul>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">B</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">f1</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">f2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">void</span> <span class="token function">f3</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">f5</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token keyword">final</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">D</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token class-name">B</span></span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">void</span> <span class="token function">f1</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token keyword">override</span><span class="token punctuation">;</span>  <span class="token comment">//正确： f1与基类中的f1 匹配</span>
+	<span class="token keyword">void</span> <span class="token function">f2</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>		  <span class="token comment">//错误： B没有形如f2(int) 的函数。int f2()？</span>
+	<span class="token keyword">void</span> <span class="token function">f3</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>			  <span class="token comment">//错误： f3不是虚函数</span>
+	<span class="token keyword">void</span> <span class="token function">f4</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">override</span><span class="token punctuation">;</span>			  <span class="token comment">//错误： B没有名为f4的函数</span>
+	<span class="token keyword">void</span> <span class="token function">f5</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>				  <span class="token comment">//错误： B已经将f5声明成final</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="纯虚函数和抽象类">纯虚函数和抽象类</h3>
+<h4 id="纯虚函数java中的接口">纯虚函数(Java中的接口)</h4>
+<ol type="1">
+<li>声明时在函数原型后面加上 <strong>= 0</strong>：<code>virtual int f() = 0;</code></li>
+<li><strong>往往</strong>只给出函数声明，不给出实现：可以给出实现，通过函数外进行定义(但是不好访问，因为查到是0)</li>
+</ol>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">int f() &#x3D; 0;
+int f()&#123;
+    Base::f;&#x2F;&#x2F;显式调用基类中纯虚函数的定义
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="抽象类">抽象类</h4>
+<ol type="1">
+<li>至少包含一个纯虚函数</li>
+<li>不能用于创建对象:抽象类类似一个接口，提供一个框架</li>
+<li>为派生类提供框架，派生类提供抽象基类的所有成员函数的实现</li>
+</ol>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class AbstractClass &#123;
+    public:
+        virtual int f() &#x3D; 0; 
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h5 id="示例一figure">示例一：Figure</h5>
+<p><img src="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2/4.png"></p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">Figure* a[100];	 &#x2F;&#x2F; Figure基类，不会被创建出来
+a[0] &#x3D; new Rectangle();
+a[1] &#x3D; new Ellipse();
+a[2] &#x3D; new Line();
+for (int i &#x3D; 0; i &lt; num_of_figures; i++) &#123;
+	a[i]-&gt;display();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>基于接口的复用，而不是基于实现的复用</li>
+</ul>
+<h4 id="抽象工厂模式">抽象工厂模式</h4>
+<p><img src="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2/5.png"></p>
+<ul>
+<li>Step1：提供Windows GUI类库：WinButton</li>
+</ul>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">WinButton *pb &#x3D; new WinButton();
+pb-&gt;SetStyle();
+WinLabel *pl &#x3D; new WinLabel();
+pl-&gt;SetText();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>Step2：增加对Mac的支持:MacButton，MacLabel</li>
+</ul>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">MacButton *pb &#x3D; new MacButton();
+pb-&gt;SetStyle();
+MacLabel *pl &#x3D; new MacLabel();
+pl-&gt;SetText();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>Step3：增加用户跨平台设计的支持，将Button抽象出来</li>
+</ul>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">Button* pb &#x3D; new MacButton();
+pb-&gt;SetStyle();
+Label* pl &#x3D; new MacLabel();
+pl-&gt;SetText();
+&#x2F;&#x2F;创建工厂来保证创建的正确性
+class AbstractFactory &#123;
+   public:
+	virtual Button* CreateButton() &#x3D; 0;
+	virtual Label* CreateLabel() &#x3D; 0;
+&#125;;
+class MacFactory : public AbstractFactory &#123;
+   public:
+	MacButton* CreateButton() &#123; return new MacButton; &#125;
+	MacLabel* CreateLabel() &#123; return new MacLabel; &#125;
+&#125;;
+class WinFactory : public AbstractFactory &#123;
+   public:
+	WinButton* CreateButton() &#123; return new WinButton; &#125;
+	WinLabel* CreateLabel() &#123; return new WinLabel; &#125;
+&#125;;
+class Button;  &#x2F;&#x2F; Abstract Class
+class MacButton : public Button &#123;&#125;;
+class WinButton : public Button &#123;&#125;;
+class Label;  &#x2F;&#x2F; Abstract Class
+class MacLabel : public Label &#123;&#125;;
+class WinLabel : public Label &#123;&#125;;
+
+AbstractFactory* fac;
+switch (style) &#123;
+	case MAC:
+		fac &#x3D; new MacFactory;
+		break;
+	case WIN:
+		fac &#x3D; new WinFactory;
+		break;
+&#125;
+
+Button* button &#x3D; fac-&gt;CreateButton();
+Label* Label &#x3D; fac-&gt;CreateLabel();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>抽象工厂模式的类图 <img src="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2/6.png"></li>
+</ul>
+<h3 id="虚析构函数">虚析构函数</h3>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class B &#123;&#125;;
+class D : public B &#123;&#125;;
+B* p &#x3D; new D;
+delete p;  &#x2F;&#x2F;如果B和D的属性是相同的，则没有什么问题
+
+class mystring &#123;&#125;;
+class B &#123;&#125;;
+class D : public B &#123;
+	mystring name;
+&#125;;
+B* p &#x3D; new D;
+delete p;  &#x2F;&#x2F;有问题，因为 D 中比 B 多一个 mystring；如果析构函数不是虚函数，则没有办法正确调用 D 的析构函数；调用派生类析构函数 -&gt; 调用成员对象的析构函数 -&gt; 基类的析构函数<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ol type="1">
+<li>如果有继承的话，最好使用虚析构函数，在调用析构的函数，会<strong>先</strong>调用基类的析构函数，所以:</li>
+<li>在析构函数中，只需要析构派生类自己的资源就可以了</li>
+</ol>
 <h3 id="定义">定义</h3>
 <ol type="1">
 <li>虚函数是指一个类中你希望重载的成员函数，但你使用一个基类指针或引用指向一个继承类对象的时候，调用一个虚函数时，实际调用的就是继承类的版本。</li>
@@ -871,46 +999,49 @@ p-&gt;f();	 &#x2F;&#x2F; B::f,b.B::g<span aria-hidden="true" class="line-numbers
 <li>注意:<strong>如基类中被定义为虚成员函数，则派生类中对其重定义的成员函数均为虚函数</strong>，也就是派生类中的对应函数可以不写虚函数。</li>
 </ol>
 <pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
-using  namespace std;
+using namespace std;
 
-class Parent&#123;
-    public:
-        char data[20];
-        void Function1();
-        virtual void Function2();   &#x2F;&#x2F; 这里声明Function2是虚函数
+class Parent &#123;
+   public:
+	char data[20];
+	void Function1();
+	virtual void Function2();  &#x2F;&#x2F; 这里声明Function2是虚函数
 &#125; parent;
-void Parent::Function1()&#123;
-    printf(&quot;This is parent,function1\n&quot;);
+void Parent::Function1() &#123;
+	printf(&quot;This is parent,function1\n&quot;);
 &#125;
-void Parent::Function2()&#123;
-    printf(&quot;This is parent,function2\n&quot;);
+void Parent::Function2() &#123;
+	printf(&quot;This is parent,function2\n&quot;);
 &#125;
-class Child:public Parent&#123;
-    void Function1();
-    void Function2();
+class Child : public Parent &#123;
+	void Function1();
+	void Function2();
 &#125; child;
-void Child::Function1()&#123;
-    printf(&quot;This is child,function1\n&quot;);
+void Child::Function1() &#123;
+	printf(&quot;This is child,function1\n&quot;);
 &#125;
-void Child::Function2()&#123;
-    printf(&quot;This is child,function2\n&quot;);
+void Child::Function2() &#123;
+	printf(&quot;This is child,function2\n&quot;);
 &#125;
-int main(int argc, char* argv[])&#123;
-    Parent *p;  　　　　　&#x2F;&#x2F; 定义一个基类指针
-    if(_getch()&#x3D;&#x3D;&#39;c&#39;)    &#x2F;&#x2F; 如果输入一个小写字母c    
-        p&#x3D;&amp;child;        &#x2F;&#x2F; 指向继承类对象
-    else    
-        p&#x3D;&amp;parent;       &#x2F;&#x2F; 否则指向基类对象
-    p-&gt;Function1();  　　 &#x2F;&#x2F; 这里在编译时会直接给出Parent::Function1()的入口地址。 
-    p-&gt;Function2();   　　&#x2F;&#x2F; 注意这里，执行的是哪一个Function2？
-    return 0;
+int main(int argc, char* argv[]) &#123;
+	Parent* p;
+	&#x2F;&#x2F; 定义一个基类指针
+	if (_getch() &#x3D;&#x3D; &#39;c&#39;)  &#x2F;&#x2F; 如果输入一个小写字母c
+		p &#x3D; &amp;child;		  &#x2F;&#x2F; 指向继承类对象
+	else
+		p &#x3D; &amp;parent;  &#x2F;&#x2F; 否则指向基类对象
+	p-&gt;Function1();
+	&#x2F;&#x2F; 这里在编译时会直接给出Parent::Function1()的入口地址。
+	p-&gt;Function2();
+	&#x2F;&#x2F; 注意这里，执行的是哪一个Function2？
+	return 0;
 &#125;
 &#x2F;&#x2F;输入c，输出:
-&#x2F;&#x2F;This is parent,function1
-&#x2F;&#x2F;This is child,function2
+&#x2F;&#x2F; This is parent,function1
+&#x2F;&#x2F; This is child,function2
 &#x2F;&#x2F;输入非c，输出:
-&#x2F;&#x2F;This is parent,function1
-&#x2F;&#x2F;This is parent,function2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#x2F;&#x2F; This is parent,function1
+&#x2F;&#x2F; This is parent,function2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="限制">限制</h3>
 <ul>
 <li>类的成员函数才可以是虚函数</li>
