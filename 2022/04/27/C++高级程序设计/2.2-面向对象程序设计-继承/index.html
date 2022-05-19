@@ -519,7 +519,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-27 10:19:23</span>
-    <!-- <span>2022-05-19 14:19:42</span> -->
+    <!-- <span>2022-05-19 15:37:09</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -582,9 +582,7 @@ var _hmt = _hmt || [];
 <p>构造函数、拷贝构造函数、析构函数不能被继承。这些函数是管理对象的资源的，而派生类往往比基类有更多的资源。</p>
 <p>继承方式不影响派生类对基类的访问，影响派生类用户对基类的访问。</p>
 <h3 id="访问控制">访问控制</h3>
-<ol type="1">
-<li>public、private：访问权限只和基类中的访问权限有关</li>
-</ol>
+<p>public、private：访问权限只和基类中的访问权限有关</p>
 <h4 id="public">public</h4>
 <ol type="1">
 <li>public：<code>class Undergraduated_Student: public Student</code></li>
@@ -603,6 +601,36 @@ var _hmt = _hmt || [];
 <li>派生类不可以访问<strong>基类中的对象</strong>的protected的属性。</li>
 <li><strong>派生类含有基类的所有成员变量</strong></li>
 </ol>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>public</th>
+<th>protected</th>
+<th>private</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>public 继承</td>
+<td>public</td>
+<td>protected</td>
+<td>不可见</td>
+</tr>
+<tr class="even">
+<td>private 继承</td>
+<td>private</td>
+<td>private</td>
+<td>不可见</td>
+</tr>
+<tr class="odd">
+<td>protected 继承</td>
+<td>protected</td>
+<td>protected</td>
+<td>不可见</td>
+</tr>
+</tbody>
+</table>
 <h2 id="继承的初始化">继承的初始化</h2>
 <ol type="1">
 <li>派生类对象的初始化
@@ -660,34 +688,23 @@ class B: public A&#123;
 <h2 id="虚函数">虚函数</h2>
 <h3 id="类型相容">类型相容</h3>
 <ol type="1">
-<li>类、类型:</li>
-<li>类型相容:
-<ol type="1">
-<li>类型相容是指完全相同的(别名)</li>
+<li>类型相容</li>
+<li>类型相容是指完全相同的（别名）</li>
 <li>一个类型是另一个类型的子类型(int -&gt; long int)</li>
-</ol></li>
-<li>赋值相容(不会丢失信息):对于类型相同的变量才有
-<ol type="1">
+<li>赋值相容(不会丢失信息):对于类型相同的变量才有</li>
 <li>如果类型相同可以直接赋值</li>
 <li>子类型可以赋值给父类型</li>
-</ol></li>
-<li>问题:a和b都是类，a、b什么类型时，a = b合法(赋值相容)？B是A的子类型的时候
+<li>问题：a 和 b 都是类，a、b什么类型时，a = b 合法(赋值相容)？B 是 A 的子类型的时候</li>
+</ol>
+<p><code>A a; B b; class B: public A;</code></p>
+<p>对象的身份发生变化（a 和 b 都代表栈上对应大小的内存），B 类型对象变为了 A 类型的对象，属于派生类的属性已不存在，发生<strong>对象切片</strong>行为（将派生类对象赋值给基类对象）</p>
 <ul>
-<li><code>A a; B b; class B: public A</code>
-<ul>
-<li>对象的身份发生变化(a和b都代表栈上对应大小的内存),B类型对象变为了A类型的对象</li>
-<li>属于派生类的属性已不存在</li>
-<li>将派生类对象赋值给基类对象-&gt;对象切片</li>
-</ul></li>
-<li><code>A a = b</code>:调用拷贝构造函数</li>
-<li><code>const A &amp;a</code>:函数必然包含的拷贝构造函数中的参数</li>
-<li><code>B* pb;  A* pa = pb; class B: public A</code>
-<ul>
-<li>因为是赋值相容的，所以可以指针赋值</li>
-<li>这种情况类似Java</li>
-</ul></li>
-<li><code>B  b; A &amp; a=b; class B: public A</code>：对象身份没有发生变化(还是B)</li>
-</ul></li>
+<li><code>A a = b</code> 调用拷贝构造函数</li>
+<li><code>const A &amp;a</code> 函数必然包含的拷贝构造函数中的参数</li>
+<li><code>B* pb; A* pa = pb; class B: public A;</code> 因为是赋值相容的，所以可以指针赋值，这种情况类似 Java</li>
+<li><code>B b; A &amp;a=b; class B: public A;</code>：对象身份没有发生变化（还是 B）</li>
+</ul>
+<ol type="1">
 <li>把派生类对象赋值给基类对象，基类的引用或指针可以引用或指向派生类对象，不严谨的说，可以说让父类指向子类</li>
 <li>传参的时候尽量不要拷贝传参(存在对象切片问题)，而是使用引用传参。</li>
 </ol>
@@ -717,8 +734,8 @@ A *p_a &#x3D; &amp;b;    &#x2F;&#x2F;OK
 B &amp;r_b &#x3D; a;     &#x2F;&#x2F;Error
 B *p_b &#x3D; &amp;a；   &#x2F;&#x2F;Error
 &#x2F;&#x2F;以下两个部分基本是一致的
-func1(A&amp; a)&#123;a.f();&#125;
-func2(A *pa)&#123;pa-&gt;f();&#125;
+func1(A&amp; a) &#123; a.f(); &#125;
+func2(A *pa) &#123; pa-&gt;f(); &#125;
 func1(b);&#x2F;&#x2F;A::f
 func2(&amp;b);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <ol type="1">
@@ -783,52 +800,51 @@ A *p;
 <li>时间:需要通过虚函数表查找对应函数地址，多调用</li>
 </ul></li>
 </ul>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class A&#123;
-    public:
-	    A() &#123; f();&#125;
-	    virtual void f();
-	    void g();
-		void h()&#123;
-            f();
-            g();
-        &#125;
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class A &#123;
+   public:
+	A() &#123; f(); &#125;
+	virtual void f();
+	void g();
+	void h() &#123;
+		f();
+		g();
+	&#125;
 &#125;;
-class B: public A
-&#123;   public:
-	    void f();
-	    void g();
-&#125;;	
+class B : public A &#123;
+   public:
+	void f();
+	void g();
+&#125;;
 &#x2F;&#x2F;直到构造函数返回之后，对象方可正常使用
 &#x2F;&#x2F;函数调用顺序，重要考试题，依据虚函数表
-B b;      &#x2F;&#x2F; A::A()，A::f, B::B()
-&#x2F;&#x2F;为什么调用A的f而不是B的？因为名空间以及B没有构造。 
-A *p&#x3D; &amp;b;
-p-&gt;f();   &#x2F;&#x2F;B::f   
-p-&gt;g();   &#x2F;&#x2F;A::g，g是静态绑定
-p-&gt;h();   &#x2F;&#x2F;A::h, B::f, A::g<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+B b;  &#x2F;&#x2F; A::A()，A::f, B::B()
+&#x2F;&#x2F;为什么调用A的f而不是B的？因为名空间以及B没有构造。
+A* p &#x3D; &amp;b;
+p-&gt;f();	 &#x2F;&#x2F; B::f
+p-&gt;g();	 &#x2F;&#x2F; A::g，g是静态绑定
+p-&gt;h();	 &#x2F;&#x2F; A::h, B::f, A::g<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <ul>
-<li>尽量不要在构造函数中调用虚函数</li>
-<li>此时的虚函数就是和构造函数名空间相同</li>
+<li>尽量不要在构造函数中调用虚函数，此时的虚函数就是和构造函数名空间相同</li>
 <li>h()函数是非虚接口
 <ul>
-<li>有不同的实现:调用了虚函数和非虚函数</li>
+<li>有不同的实现：调用了虚函数和非虚函数</li>
 <li>可以替换部分的实现</li>
 <li>可以使得非虚函数具有虚函数的特性(让全局函数具有多态:将全局函数做成非虚接口)</li>
 </ul></li>
 </ul>
-<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class A&#123;
-    public:
-        virtual void f() ;
-        void g() ;
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class A &#123;
+   public:
+	virtual void f();
+	void g();
 &#125;;
-class B: public A&#123;
-    public:
-        void f(B* const this) &#123; g(); &#125;&#x2F;&#x2F;this g() this-&gt;g();
-        void g() ;
+class B : public A &#123;
+   public:
+	void f(B* const this) &#123; g(); &#125;	&#x2F;&#x2F; this g() this-&gt;g();
+	void g();
 &#125;;
 B b;
 A* p &#x3D; &amp;b;
-p-&gt;f();&#x2F;&#x2F;B::f,b.B::g<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+p-&gt;f();	 &#x2F;&#x2F; B::f,b.B::g<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <ul>
 <li>g()是静态绑定</li>
 <li>虚函数中调用非虚函数:所有版本是和虚函数<strong>一致</strong>的</li>
