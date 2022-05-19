@@ -161,6 +161,17 @@ var _hmt = _hmt || [];
                     <div class="article-toc" style="display: none;"></div>
                 </ul>
             
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/19/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.3-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-%E5%A4%9A%E6%80%81/">
+                            
+                                2.3-面向对象程序设计-多态
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
                     </li>
 
                 </ul>
@@ -250,10 +261,10 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file active">
-                        <a href="/2022/05/12/Leaderless-TCS-reconfig/Fast%20Paxos-%E6%8A%A5%E5%91%8A/">
+                    <li class="file">
+                        <a href="/2022/05/11/Leaderless-TCS-reconfig/Fast%20Paxos/">
                             
-                                Fast Paxos-报告
+                                Fast Paxos
                             
                         </a>
                     </li>
@@ -261,10 +272,10 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file">
-                        <a href="/2022/05/11/Leaderless-TCS-reconfig/Fast%20Paxos/">
+                    <li class="file active">
+                        <a href="/2022/05/12/Leaderless-TCS-reconfig/Fast%20Paxos%20Report/">
                             
-                                Fast Paxos
+                                Fast Paxos Report
                             
                         </a>
                     </li>
@@ -508,7 +519,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-12 10:02:08</span>
-    <!-- <span>2022-05-19 08:38:31</span> -->
+    <!-- <span>2022-05-19 14:19:42</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -588,7 +599,7 @@ var _hmt = _hmt || [];
 <p>提议者提交的回合编号是全序的，不同的提议者提交的回合编号肯定不一样，同一提议者不可能在同一回合中提交不同的值，那为什么还会有同一 快速回合 中有多个值的情况？原因在于 快速回合 与经典回合区别，当 快速回合 开始后，会被分配一个唯一的 Round Number，之后无论多少个提议者提交值都是基于这个 Round Number，而不管提议者提交的Round是否全序。比如，快速回合编号为10，提议者1提交了（11，1），提议者2提交了（12，2），但对 快速回合 来说存在（10，1，2）两个值。</p>
 <p>因为冲突的存在，会导致Phase2a.2的选择非常困难，原因是：</p>
 <blockquote>
-<p>在 Classic Paxos 中，如果接受者返回多个值，只要排序，选择最高的编号对应的值即可，因为 Classic Paxos 中的值都是有Leader选择后在Phase2a中发送的，因此最高编号的值肯定只有一个。但在 Fast Paxos 中，最高编号的值会发现多个，比如（10，1，2）。假如当前Leader正在执行第i个Classic Round(i-Quorum为Q) ，得到接受者反馈的最高编号为k，有两个value：v、w，说明 快速回合 k 存在两个k-Quorum，Rv,Rw。</p>
+<p>在 Classic Paxos 中，如果接受者返回多个值，只要排序，选择最高的编号对应的值即可，因为 Classic Paxos 中的值都是由Leader选择后在Phase2a中发送的，因此最高编号的值肯定只有一个。但在 Fast Paxos 中，最高编号的值会发现多个，比如（10，1，2）。假如当前Leader正在执行第i个Classic Round(i-Quorum为Q) ，得到接受者反馈的最高编号为k，有两个value：v、w，说明 快速回合 k 存在两个k-Quorum，Rv,Rw。</p>
 </blockquote>
 <p>这里有一个O4(v)的算法。</p>
 <h2 id="o4v算法">O4(v)算法</h2>
@@ -600,7 +611,7 @@ var _hmt = _hmt || [];
 <p>因此如果保证下面两个条件：</p>
 <ol type="1">
 <li>每个Acceptor在同一Fast Round中仅投票一个Value</li>
-<li><span class="math inline">\(Q \cap R_v \cap R_w \ne \Phi\)</span></li>
+<li><span class="math inline">\(Q \cap R_v \cap R_w \ne \emptyset\)</span></li>
 </ol>
 <p>则v、w不可能同时被选择。</p>
 <p>换言之：</p>
