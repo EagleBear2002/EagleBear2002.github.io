@@ -508,7 +508,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-27 10:19:23</span>
-    <!-- <span>2022-05-14 23:42:58</span> -->
+    <!-- <span>2022-05-19 08:38:31</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -765,7 +765,13 @@ string <span class="token operator">&amp;&amp;</span>s <span class="token operat
 <h3 id="创建对象">创建对象</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span><span class="token operator">*</span> a <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">;</span>
 A<span class="token operator">*</span> p <span class="token operator">=</span> <span class="token keyword">new</span> A<span class="token punctuation">;</span> <span class="token comment">// 调用默认构造函数</span>
-A<span class="token operator">*</span> q <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">A</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 调用A(1)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+A<span class="token operator">*</span> q <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token function">A</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 调用A(1)</span>
+
+
+
+<span class="token keyword">int</span> <span class="token operator">*</span>p1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// 默认不进行初始化</span>
+<span class="token keyword">int</span> <span class="token operator">*</span>p2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 进行默认初始化</span>
+<span class="token keyword">int</span> <span class="token operator">*</span>p3 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span> <span class="token comment">// 进行显式对应函数初始化</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="对象删除">对象删除</h3>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">delete</span> intPtr<span class="token punctuation">;</span>
 intPtr <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -841,7 +847,9 @@ singleton<span class="token operator">*</span> singleton <span class="token doub
 <h2 id="友元">友元</h2>
 <h3 id="描述-4">描述</h3>
 <p>对象外部不能访问该类的私有成员。需要通过私有方法，会降低对私有成员的访问效率，缺乏灵活性。</p>
+<p>友元可以访问 <code>private</code> 和 <code>protected</code> 的成员。</p>
 <p>友元函数、友元类、友元类成员函数。</p>
+<p>一个全局函数是一个类的友元，如果在这之前没有声明也是可以进行声明友元函数。</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">B</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">C</span> <span class="token punctuation">&#123;</span>
@@ -852,9 +860,10 @@ singleton<span class="token operator">*</span> singleton <span class="token doub
 	<span class="token keyword">friend</span> <span class="token keyword">class</span> <span class="token class-name">B</span><span class="token punctuation">;</span>		 <span class="token comment">//友元类</span>
 	<span class="token keyword">friend</span> <span class="token keyword">void</span> <span class="token class-name">C</span><span class="token double-colon punctuation">::</span><span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>	 <span class="token comment">//友元类成员函数</span>
 <span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>友元类函数在完整的类声明出现前不能声明友元函数。因为数据的一致性：避免对应类里面没有这个函数（也就是C的完整定义必须有）并且成员函数依赖于类</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Vector</span><span class="token punctuation">;</span> <span class="token comment">// 两个相互适使用的类</span>
 <span class="token keyword">class</span> <span class="token class-name">Matrix</span> <span class="token punctuation">&#123;</span>
-	<span class="token keyword">friend</span> <span class="token keyword">void</span> <span class="token function">multiply</span><span class="token punctuation">(</span>Matrix<span class="token operator">&amp;</span> m<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> v<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> r<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 此处参数必须写 Vector&amp;, 而不能写 Vextor，因为之前没有 Vector 类的完整声明，不知道类的大小，无法拷贝空间</span>
+	<span class="token keyword">friend</span> <span class="token keyword">void</span> <span class="token function">multiply</span><span class="token punctuation">(</span>Matrix<span class="token operator">&amp;</span> m<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> v<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> r<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 此处参数必须写 Vector&amp;, 而不能写 Vector，因为之前没有 Vector 类的完整声明，不知道类的大小，无法拷贝空间</span>
 <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
 <span class="token keyword">class</span> <span class="token class-name">Vector</span> <span class="token punctuation">&#123;</span>
 	<span class="token keyword">friend</span> <span class="token keyword">void</span> <span class="token function">multiply</span><span class="token punctuation">(</span>Matrix<span class="token operator">&amp;</span> m<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> v<span class="token punctuation">,</span> Vector<span class="token operator">&amp;</span> r<span class="token punctuation">)</span><span class="token punctuation">;</span>
