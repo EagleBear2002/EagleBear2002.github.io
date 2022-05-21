@@ -519,7 +519,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-27 10:19:23</span>
-    <!-- <span>2022-05-19 16:32:30</span> -->
+    <!-- <span>2022-05-21 15:43:05</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -631,7 +631,7 @@ var _hmt = _hmt || [];
 </tr>
 </tbody>
 </table>
-<h2 id="继承的初始化">继承的初始化</h2>
+<h3 id="继承的初始化">继承的初始化</h3>
 <ol type="1">
 <li>派生类对象的初始化
 <ul>
@@ -759,7 +759,7 @@ func2(&amp;b);<span aria-hidden="true" class="line-numbers-rows"><span></span><s
 <p>动态绑定(Late Binding)</p>
 <ol type="1">
 <li>晚绑定是指编译器或者解释器在运行前不知道对象的类型，使用晚绑定，无需检查对象的类型，只需要检查对象是否支持特性和方法即可。</li>
-<li>c++中晚绑定常常发生在使用<code>virtual</code>声明成员函数</li>
+<li>c++中晚绑定常常发生在使用 <code>virtual</code>声明成员函数</li>
 <li>运行时刻确定，依据对象的实际类型(动态)</li>
 <li>灵活性高、<strong>效率低</strong></li>
 <li>动态绑定函数也就是虚函数。</li>
@@ -1091,7 +1091,7 @@ p_a1<span class="token operator">-></span><span class="token function">f</span><
 char *q &#x3D; *((char *)p_a1 - 4); 
 (*q)(p_a1, *q+4); <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p><img src="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2/9-16529486941414.png"></p>
-<h3 id="虚函数的分类">虚函数的分类</h3>
+<h3 id="函数的分类">函数的分类</h3>
 <pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class Shape &#123;
     public:
         virtual void draw() const &#x3D; 0;
@@ -1116,6 +1116,159 @@ char *q &#x3D; *((char *)p_a1 - 4);
 <ul>
 <li><strong>必须同时</strong>继承接口和实现代码</li>
 </ul>
+<h3 id="继承类型">继承类型</h3>
+<h4 id="public-inheritance-公有继承">public inheritance 公有继承</h4>
+<ol type="1">
+<li>确定 public inheritance，是真正意义的"IS_A"关系：派生类就是基类，超类中所拥有的性质在子类中仍然成立</li>
+<li>Require No more，Promiss No Less(LSP)里氏替换原则:里氏替换原则没有给出实现</li>
+<li><strong>不要定义与继承而来的非虚成员函数同名的成员函数</strong></li>
+</ol>
+<h5 id="penguin问题">Penguin问题</h5>
+<p>软件外包的时候不知道是谁写的，无法修改客户代码</p>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F;Penguin问题:详见软工二
+class FlyingBird;
+class NonFlyingBird;
+virtual void fly() &#123; error(&quot;Penguins can&#39;t fly!&quot;); &#125; &#x2F;&#x2F; 如果 penguin:bird 不符合里氏替换原则<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h5 id="契约式设计">契约式设计</h5>
+<p>每个方法在调用前，应该校验传入参数的正确性，正确才能进行调用，否则是违反契约的。</p>
+<ol type="1">
+<li>前置条件：子类方法相比于父类中部被覆盖方法相同或更加宽松（能调用父类一定能调用子类）</li>
+<li>后置条件：子类方法相比于父类中部被覆盖方法相同或更加严格（调用子类不出错，调用父类一定不出错）</li>
+</ol>
+<h5 id="长方形问题">长方形问题</h5>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; v1
+class Rectangle &#123;
+   public:
+	void setHeight(int);
+	void setWidth(int);
+	int height() const;	 &#x2F;&#x2F;不修改的声明为 const 方便常对象调用
+	int width() const;
+&#125;;
+
+class Square : public Rectangle &#123;
+   public:
+	void setLength(int);
+
+   private:	 &#x2F;&#x2F;设置为private可以避免父类的方法被单独调用
+	void setHeight(int);
+	void setWidth(int);	 &#x2F;&#x2F;可以单独改变一条边
+&#125;;
+assert(s.width() &#x3D;&#x3D; s.height());  &#x2F;&#x2F;前后校验不变式
+
+&#x2F;&#x2F; 通过基类指针调用函数修改一条变长，违反里氏替换原则
+Square s(1, 1);
+Rectangle* p &#x3D; &amp;s;
+p-&gt;setHeight(10);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// v2 添加虚函数声明</span>
+<span class="token keyword">class</span> <span class="token class-name">Rectangle</span> <span class="token punctuation">&#123;</span>
+   <span class="token keyword">public</span><span class="token operator">:</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">setHeight</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">setWidth</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> <span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> <span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Square</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Rectangle</span></span> <span class="token punctuation">&#123;</span>
+   <span class="token keyword">public</span><span class="token operator">:</span>
+	<span class="token keyword">void</span> <span class="token function">setLength</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+   <span class="token keyword">public</span><span class="token operator">:</span>	<span class="token comment">//注意是public的</span>
+	<span class="token keyword">void</span> <span class="token function">setHeight</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">void</span> <span class="token function">setWidth</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>	 <span class="token comment">//可以单独改变一条边</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token comment">//问题</span>
+<span class="token comment">//如下的操作如果传入了正方形(对于使用了这一套继承体系的代码)</span>
+<span class="token keyword">void</span> <span class="token function">Widen</span><span class="token punctuation">(</span>Rectangle<span class="token operator">&amp;</span> r<span class="token punctuation">,</span> <span class="token keyword">int</span> w<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">int</span> oldHeight <span class="token operator">=</span> r<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	r<span class="token punctuation">.</span><span class="token function">setWidth</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> w<span class="token punctuation">)</span><span class="token punctuation">;</span>	<span class="token comment">// set被重写过</span>
+	<span class="token function">assert</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> oldHeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// v3</span>
+<span class="token keyword">class</span> <span class="token class-name">Rectangle</span> <span class="token punctuation">&#123;</span>
+   <span class="token keyword">public</span><span class="token operator">:</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">setHeight</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">setWidth</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> <span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+	<span class="token keyword">int</span> <span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token function">assert</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> s<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name">Square</span> <span class="token operator">:</span> <span class="token base-clause"><span class="token keyword">public</span> <span class="token class-name">Rectangle</span></span> <span class="token punctuation">&#123;</span>
+   <span class="token keyword">public</span><span class="token operator">:</span>
+	<span class="token keyword">void</span> <span class="token function">setLength</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+   <span class="token keyword">private</span><span class="token operator">:</span>	 <span class="token comment">//修改为private</span>
+			 <span class="token comment">//在编译的时候决定，确定函数位置</span>
+	<span class="token keyword">void</span> <span class="token function">setHeight</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">void</span> <span class="token function">setWidth</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>	 <span class="token comment">//可以单独改变一条边</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token function">assert</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> s<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">void</span> <span class="token function">Widen</span><span class="token punctuation">(</span>Rectangle<span class="token operator">&amp;</span> r<span class="token punctuation">,</span> <span class="token keyword">int</span> w<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">int</span> oldHeight <span class="token operator">=</span> r<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	r<span class="token punctuation">.</span><span class="token function">setWidth</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">width</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> w<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token comment">//我们直接修改对应方法为private，这样子调用会直接报错</span>
+	<span class="token comment">//问题:访问控制是编译的时候进行处理的，之后运行的时候该怎么调用就怎么调用</span>
+	<span class="token comment">// public和private的访问控制是编译时确定的，而不是虚函数运行时决定</span>
+	<span class="token comment">//编译的时候检查rectangle是public的，没有问题，通过。之后调用的时候发现是虚函数，然后从虚函数表能找到private的函数，并且调用。</span>
+	<span class="token function">assert</span><span class="token punctuation">(</span>r<span class="token punctuation">.</span><span class="token function">height</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> oldHeight<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>访问控制仅仅是检查这个成员时是否属于当前对象声明的静态部分中可访问，和实际运行时时刻无关。</li>
+<li>只要通过编译检查，对于public和private没有任何问题</li>
+<li>最终的问题:想要满足里氏替换原则，派生类的条件应该比基类更加弱，而这个是更强</li>
+</ul>
+<h5 id="不要定义与继承而来的非虚成员函数同名的成员函数">不要定义与继承而来的非虚成员函数同名的成员函数</h5>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class B &#123;  
+class D: public B &#123; 
+    public:
+        void mf();
+&#125;;
+D x;
+B* pB &#x3D; &amp;x;
+pB-&gt;mf();&#x2F;&#x2F;B:mf
+D* pD &#x3D; &amp;x;
+pD-&gt;mf();&#x2F;&#x2F;D:mf<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ol type="1">
+<li>对于一个对象，在不同的指针的情况下会表示出来不同的行为，这是很麻烦的。</li>
+<li>运行时不要出现不一致的</li>
+</ol>
+<h4 id="private-inheritance-私有继承">private inheritance 私有继承</h4>
+<ol type="1">
+<li>特别含义:Implemented-in-term-of 用继承来实现某个功能
+<ul>
+<li>需要使用Base Class中的protected成员，或重载virtual function</li>
+<li>表示不希望一个Base Class被client使用，否则会使用公有继承</li>
+<li>利用一些已经存在的代码，只是在实现中使用到了基类</li>
+</ul></li>
+<li>在设计层面无意义，只用于<strong>实现</strong>层面，只是复用实现的方式，接口是被忽略的</li>
+<li>实际上是Has-A关系</li>
+<li>如果两个类的继承是私有的，则不能在派生类外将派生类转换成基类对象。</li>
+</ol>
+<h3 id="和组合的联系">和组合的联系</h3>
+<ol type="1">
+<li>尽可能用组合，万不得已用继承</li>
+</ol>
+<h4 id="情况一">情况一</h4>
+<p>需要使用protected和重载virtual function</p>
+<h5 id="情况二">情况二</h5>
+<ol type="1">
+<li>我们需要尽可能复用，并且减少内存的占用。</li>
+<li>如果没有静态成员、虚函数、虚基类，那么一个类是被认为是一个空的类，而方法是定义在代码区。对象不占用空间。</li>
+<li>技术上:所有的独立对象必须有一个大小，不然会导致两个指针指向一个地址。</li>
+<li>Example:算法的类图，如果使用组合，依据会生成生成一个指针</li>
+</ol>
+<h5 id="example">Example</h5>
+<ol type="1">
+<li>目的是为了重定义eat函数</li>
+<li>私有继承不能将派生类转换成基类对象</li>
+<li>可以强制转换(提供方法)</li>
+</ol>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class CHumanBeing &#123; … &#125;;
+class CStudent:private CHumanBeing &#123; … &#125;;
+void eat(const CHumanBeing &amp; h) &#123; … &#125;
+CHumanBeing a;CStudent b;
+eat(a);
+eat(b);&#x2F;&#x2F;Error<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="多继承">多继承</h2>
 <h3 id="定义-1">定义</h3>
 <ol type="1">
@@ -1213,7 +1366,7 @@ class D: B, C;<span aria-hidden="true" class="line-numbers-rows"><span></span><s
 <li>大体上来讲，C++ 一个类本身对这几个运算符就已经有了相应的解释了。</li>
 <li>如果将这四种符号进行友元全局重载，则会出现一些冲突</li>
 <li>下标和箭头运算符为什么？有保留调用顺序，我们希望能保留原来的顺序，而全局不能要求，而成员函数的this就可以解决这个问题</li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30781107/article/details/98147938">参考</a></li>
+<li><code>&lt;a href = "https://blog.csdn.net/weixin_30781107/article/details/98147938"&gt;</code>参考<code>&lt;/a&gt;</code></li>
 </ul>
 <p>操作符重载的哲理:尽量让事情有效率，但不是过度有效率（返回引用），每次就是返回一个拷贝，而不是引用。</p>
 <h3 id="操作符-的重载">操作符 = 的重载</h3>
