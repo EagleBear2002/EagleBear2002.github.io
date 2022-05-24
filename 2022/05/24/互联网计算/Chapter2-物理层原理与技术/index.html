@@ -9,7 +9,7 @@
 	
 	<title>
 	
-		隔离级别 | 
+		Chapter2-物理层原理与技术 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -338,7 +338,7 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file">
+                    <li class="file active">
                         <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Chapter2-%E7%89%A9%E7%90%86%E5%B1%82%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF/">
                             
                                 Chapter2-物理层原理与技术
@@ -426,7 +426,7 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file active">
+                    <li class="file">
                         <a href="/2022/05/02/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
                             
                                 隔离级别
@@ -535,25 +535,16 @@ var _hmt = _hmt || [];
 	<!-- 引入正文 -->
 	<div id="content">
 		<h1 id="article-title">
-    隔离级别
+    Chapter2-物理层原理与技术
 </h1>
 <div class="article-meta">
     
     <span>EagleBear2002</span>
-    <span>2022-05-02 11:55:50</span>
+    <span>2022-05-24 11:48:48</span>
     <!-- <span>2022-05-24 12:01:13</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
-            
-                
-                    <span>
-                        <i class="fa fa-folder" aria-hidden="true">
-                        <a href="/categories/分布式数据库/">分布式数据库</a>
-                        </i>
-                        
-                    </span>
-                
             
         
 
@@ -566,30 +557,14 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <p><em>ANSI SQL</em>标准定义了 4 种事务隔离级别来避免 3 种数据不一致的问题。事务等级从高到低，分别为：<strong>序列化</strong>（Serializable）、<strong>可重复读</strong>（Repeatable Read）、<strong>已提交读</strong>（Read Committed）和<strong>未提交读</strong>（Read Uncommitted）。</p>
-<p>分布式数据库打破了传统数据库的一致性原则，<strong>线性化</strong>（Linearizability）则是要解决分布式系统中<strong>多副本的一致性读写问题</strong>。</p>
-<h2 id="序列化">序列化</h2>
-<p>串行化解决的是数据库中多个事务的隔离性问题。在一个事务内，针对同一个对象读到的永远是同一个值，哪怕其它事务已经提交了新值。所以显然，有可能读到的是旧值。</p>
-<p>在不同的事务之间，互相不干扰。每个事务都认为自己就是唯一的事务。实际上是多个事务并发在执行。<strong>可串行化核心是要保证并发执行的多个事务最终的效果与按某个特性顺序串行化地执行这些事务的效果一致</strong>。但至于与什么特定顺序一致， 则不保证。</p>
-<p>例如，有三个事务 <span class="math inline">\(T_1\)</span>，<span class="math inline">\(T_2\)</span> 和 <span class="math inline">\(T_3\)</span> 并发在执行。如果串行化顺序地执行这三个事务，则可能的组合有6种。串行化只会保证这三个事务并发执行的最终结果肯定与其中一种组合的结果一致，但具体是哪种组合，则不保证。<strong>这种跨事务的正确性，则需要应用层自己来解决</strong>。</p>
-<p>从数据库的角度来看，能做到串行化的隔离级别，已经是级别非常高的要求了。本质上其解决的是数据的正确性的问题，保证不会由于多个事务并发执行，而导致出现不正确的数据。</p>
-<p>解决串行化的核心技术包括两阶段锁(2PL)以及多版本并发控制(MVCC)。</p>
-<h2 id="可重复读">可重复读</h2>
-<p>一个事务一旦开始，事务过程中所读取的所有数据不允许被其他事务修改。</p>
-<p>该隔离级别<strong>不可避免“幻影读”</strong>。</p>
-<p>因为它只“保护”了它读取的数据不被修改，但是其他数据会被修改。如果其他数据被修改后恰好满足了当前事务的过滤条件（where语句），那么就会发生“幻影读”的情况。</p>
-<h2 id="已提交读">已提交读</h2>
-<p>一个事务能读取到其他事务提交过的数据。</p>
-<p>一个事务在处理过程中如果重复读取某一个数据，而且这个数据恰好被其他事务修改并提交了，那么当前重复读取数据的事务就会出现同一个数据前后不同的情况。</p>
-<p>在这个隔离级别<strong>会发生“不可重复读”</strong>。</p>
-<h2 id="未提交读">未提交读</h2>
-<p>一个事务能读取到其他事务修改过，但是还没有提交的(Uncommitted)的数据。</p>
-<p>数据被其他事务修改过，但还没有提交，就存在着回滚的可能性，这时候读取这些“未提交”数据的情况就是“脏读”。</p>
-<p>在这个隔离级别<strong>会发生“脏读”</strong>。</p>
-<h2 id="线性化">线性化</h2>
-<p>线性化则是要解决分布式系统中<strong>多副本的一致性读写问题</strong>。为了高可用性，一般数据都会有多个副本，分布在多个节点中。这就造成一个潜在的问题，针对某个对象，有可能刚刚写入新值，而紧接着读取该对象时，却读到了一个旧值。</p>
-<p>线性化核心就是要解决这个问题，一旦某个对象写入了新值，之后读取这个对象时肯定会读取到最新的值。对于用户来说，仿佛系统中只有一个副本。所以<strong>线性化本质上实现的是强一致性</strong>。</p>
-<p>可串行化和可线性化是正交的概念，数据库可以同时支持可串行化与线性化，被称为<strong>严格的可串行化</strong>或者<strong>强的单副本可串行化</strong>。</p>
+    <h2 id="物理层的基本概念">物理层的基本概念</h2>
+<h2 id="数据通信基础知识">数据通信基础知识</h2>
+<h2 id="物理层下面的传输媒体">物理层下面的传输媒体</h2>
+<h3 id="导引型传输媒体">导引型传输媒体</h3>
+<h4 id="双绞线twisted-pair">双绞线（twisted pair）</h4>
+<h4 id="同轴电缆coaxial-cable">同轴电缆（coaxial cable）</h4>
+<h4 id="光缆fiber">光缆（fiber）</h4>
+<p>抗雷电和电磁干扰性能好</p>
 
 </div>
 
@@ -597,16 +572,16 @@ var _hmt = _hmt || [];
     <div class="post-guide">
         <div class="item left">
             
-                <a href="/2022/05/04/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/05-%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8ECAP%E6%A8%A1%E5%9E%8B/">
+                <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Chapter4-%E7%BD%91%E7%BB%9C%E5%B1%82%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF/">
                     <i class="fa fa-angle-left" aria-hidden="true"></i>
-                    一致性与CAP模型
+                    Chapter4-网络层原理与技术
                 </a>
             
         </div>
         <div class="item right">
             
-                <a href="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
-                    Consolidating Concurrency Control and Consensus for Commits under Conflicts
+                <a href="/2022/05/19/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.3-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-%E5%A4%9A%E6%80%81/">
+                    2.3-面向对象程序设计-多态
                     <i class="fa fa-angle-right" aria-hidden="true"></i>
                 </a>
             
