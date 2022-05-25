@@ -221,17 +221,6 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file">
-                        <a href="/2022/04/19/Hello%20World/">
-                            
-                                Hello World
-                            
-                        </a>
-                    </li>
-                    <div class="article-toc" style="display: none;"></div>
-                </ul>
-            
-                <ul>
                     <li class="directory">
                         <a href="#" class="directory">
                             <i class="fa fa-plus-square-o"></i>
@@ -405,9 +394,9 @@ var _hmt = _hmt || [];
             
                 <ul>
                     <li class="file">
-                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Lecture08-Routing%20Protocols(RIP%20and%20OSPF)/">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Lecture08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/">
                             
-                                Lecture08-Routing Protocols(RIP and OSPF)
+                                Lecture08-路由协议
                             
                         </a>
                     </li>
@@ -640,7 +629,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-01 14:19:00</span>
-    <!-- <span>2022-05-25 20:19:06</span> -->
+    <!-- <span>2022-05-25 21:00:07</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -694,17 +683,17 @@ var _hmt = _hmt || [];
 <p>分层设计在概念上很简单，但不能提供最佳性能。当一个协议叠加在另一个协议之上时，一致性所需的协调会连续发生两次；一次在并发控制层，然后再一次在共识层。这会导致额外的延迟，这对于广域存储来说尤其昂贵。这种观察并不新鲜，TAIR 和 MDCC 已经提出了这一观察结果，指出分层存在过度协调的问题。</p>
 <p>并发控制和共识的统一可以减少协调的开销。这种统一是可能的，因为并发控制的一致性模型（严格的可串行化）和共识（线性化的）具有很大的相似性。具体来说，两者都试图满足冲突操作之间的排序约束，以确保与线性总排序等价。表 1 对现有系统用于处理事务执行/提交期间和复制期间发生的冲突的技术进行了分类。如图所示，乐观方案依赖于中止和重试，而保守方案旨在避免代价高昂的中止。在保守的方案中，共识协议依赖（Paxos）领导者来分配复制操作的顺序，而事务协议使用逐项锁定。</p>
 <figure>
-<img src="/.io//table-1.png" alt="table-1"><figcaption aria-hidden="true">table-1</figcaption>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/table-1.png" alt="table-1"><figcaption aria-hidden="true">table-1</figcaption>
 </figure>
 <p>为了统一并发控制和共识，必须使用通用的协调方案以相同的方式处理这两种类型的冲突。这种设计要求排除了基于领导者的协调，因为依赖单个领导者分配排序的分布式事务不能很好地扩展。 MDCC 和 TAPIR 通过依赖中止和重试来实现并发控制和共识的统一。这种乐观的方法最适合低竞争的工作负载。我们工作的目标是开发一种统一的方法，该方法可以通过避免中止而在竞争中很好地工作。</p>
 <h3 id="并发控制和共识的统一方法">并发控制和共识的统一方法</h3>
 <p>我们能否设计一个统一的并发控制和共识，并使用一个通用的协调策略来最小化代价高昂的中止？一个关键的观察是并发控制和复制所需的排序约束都可以通过相同的序列化图抽象来捕获。在序列化图中，顶点表示事务，有向边表示由于两种类型的冲突而导致的事务之间的依赖关系。严格的可串行化和线性化都可以简化为检查该图是否没有循环。</p>
 <p>Janus 试图通过跟踪冲突操作的依赖关系来显式捕获初步序列化图，而不立即执行它们。潜在的复制或事务冲突都表现为初步图中的循环。图 2a 中的循环是由于复制期间的冲突：在服务器 <span class="math inline">\(S_x\)</span> 上，<span class="math inline">\(T_1\)</span> 对数据项 <span class="math inline">\(X\)</span> 的写入在 <span class="math inline">\(T_2\)</span> 对 <span class="math inline">\(X\)</span> 的写入之前到达，导致 <span class="math inline">\(T_1 \rightarrow T_2\)</span>。相反的到达顺序发生在不同的服务器副本 <span class="math inline">\(S&#39;_ x\)</span> 上，导致 <span class="math inline">\(T_1 \leftarrow T_2\)</span>。图 2b 中的循环是由于事务冲突造成的：服务器 <span class="math inline">\(S_x\)</span> 在 <span class="math inline">\(T_2\)</span> 对 item-x 的写入之前收到 <span class="math inline">\(T_1\)</span> 对 item-x 的写入，而服务器 <span class="math inline">\(S_y\)</span> 以相反的顺序接收对 item-y 的写入。为了确保无周期序列化图和无中止执行，Janus 在执行之前确定性地对周期中涉及的事务进行重新排序。</p>
 <figure>
-<img src="/.io//figure-1.png" alt="figure-1"><figcaption aria-hidden="true">figure-1</figcaption>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-1.png" alt="figure-1"><figcaption aria-hidden="true">figure-1</figcaption>
 </figure>
 <figure>
-<img src="/.io//figure-2.png" alt="figure-2"><figcaption aria-hidden="true">figure-2</figcaption>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-2.png" alt="figure-2"><figcaption aria-hidden="true">figure-2</figcaption>
 </figure>
 <p>为了理解统一的优势和挑战，我们通过一个具体的例子来对比 Janus 的工作流程和 OCC + MultiPaxos 的工作流程。示例交易，<span class="math inline">\(T_1\)</span>：<code>x++; y++;</code>，由两部分组成，每一部分都是一个递增 item-x 或 item-y 的存储过程。</p>
 <p>图 1a 显示了 OCC + MultiPaxos 如何执行和提交 <span class="math inline">\(T_1\)</span>。首先，<span class="math inline">\(T_1\)</span> 的协调者将这两部分分派给 item-x 和 item-y 各自的 Paxos 领导者，它们恰好位于不同的数据中心。领导者执行片段并在本地缓冲写入。为了提交 <span class="math inline">\(T_1\)</span>，协调器向 Paxos 领导者发送 2PC-prepare 请求，Paxos 领导者执行 OCC 验证并将 x 和 y 的新值复制给其他人。因为这些片段是存储过程，我们可以结合调度和 2PC-prepare 消息，以便协调器可以在没有冲突的情况下在两个跨数据中心往返中执行和提交 <span class="math inline">\(T_1\)</span>。假设并发事务 <span class="math inline">\(T_2\)</span> 也尝试增加相同的两个计数器。<span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 的调度消息（或 2PC-prepares）可能由不同的 Paxos 领导者以不同的顺序处理，导致 <span class="math inline">\(T_1\)</span> 和/或 <span class="math inline">\(T_2\)</span> 中止并重试。另一方面，因为 Paxos 领导者对复制施加了排序，所以 item-x（或 item-y）的所有副本都一致地处理 <span class="math inline">\(T_1\)</span> 或 <span class="math inline">\(T_2\)</span> 的写入，但代价是额外的广域往返。</p>

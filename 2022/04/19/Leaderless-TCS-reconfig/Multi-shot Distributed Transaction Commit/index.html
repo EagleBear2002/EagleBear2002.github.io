@@ -221,17 +221,6 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file">
-                        <a href="/2022/04/19/Hello%20World/">
-                            
-                                Hello World
-                            
-                        </a>
-                    </li>
-                    <div class="article-toc" style="display: none;"></div>
-                </ul>
-            
-                <ul>
                     <li class="directory">
                         <a href="#" class="directory">
                             <i class="fa fa-plus-square-o"></i>
@@ -405,9 +394,9 @@ var _hmt = _hmt || [];
             
                 <ul>
                     <li class="file">
-                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Lecture08-Routing%20Protocols(RIP%20and%20OSPF)/">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/Lecture08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/">
                             
-                                Lecture08-Routing Protocols(RIP and OSPF)
+                                Lecture08-路由协议
                             
                         </a>
                     </li>
@@ -640,7 +629,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-19 16:05:31</span>
-    <!-- <span>2022-05-25 20:19:06</span> -->
+    <!-- <span>2022-05-25 21:00:07</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -756,7 +745,7 @@ txn<span class="token punctuation">[</span><span class="token punctuation">]</sp
 vote<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">(</span>from N to <span class="token punctuation">&#123;</span>COMMIT<span class="token punctuation">,</span> ABORT<span class="token punctuation">&#125;</span><span class="token punctuation">)</span>
 dec<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">(</span>from N to <span class="token punctuation">&#123;</span>COMMIT<span class="token punctuation">,</span> ABORT<span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <figure>
-<img src="/.io//Fig1.png" alt="Fig1"><figcaption aria-hidden="true">Fig1</figcaption>
+<img src="/2022/04/19/Leaderless-TCS-reconfig/Multi-shot%20Distributed%20Transaction%20Commit/Fig1.png" alt="Fig1"><figcaption aria-hidden="true">Fig1</figcaption>
 </figure>
 <p>为了验证事务 <span class="math inline">\(t\)</span>，客户端在 <span class="math inline">\(\PREPARE\)</span> 消息中将其发送到相关分片（第 6 行）。管理分片的进程将收到的所有事务安排到一个总的认证订单中，存储在一个数组 <span class="math inline">\(\txn\)</span> 中；<span class="math inline">\(\next\)</span> 变量指向数组中最后一个填充的插槽。收到事务 <span class="math inline">\(t\)</span>（第 8 行）后，进程将 <span class="math inline">\(t\)</span> 存储在 <span class="math inline">\(\txn\)</span> 的下一个空闲槽中。该进程还计算其<em>投票</em>，说明是 <span class="math inline">\(\COMMIT\)</span> 还是 <span class="math inline">\(\ABORT\)</span> 事务，并将其存储在数组 <span class="math inline">\(\vote\)</span> 中。我们按照以下方式解释投票计算；直观地说，投票是由事务 <span class="math inline">\(t\)</span> 是否与之前收到的事务冲突来决定的。在管理分片 <span class="math inline">\(s\)</span> 的进程收到 <span class="math inline">\(t\)</span> 后，我们说 <span class="math inline">\(t\)</span> 在 <span class="math inline">\(s\)</span> 处<em>准备好</em>。该进程在数组 <span class="math inline">\(\phase\)</span> 跟踪事务状态，其条目最初存储 <span class="math inline">\(\START\)</span>，一旦事务准备好，就会更改为 <span class="math inline">\(\PREPARED\)</span>。准备好事务 <span class="math inline">\(t\)</span> 后，该过程发送一个 <span class="math inline">\(\PREPAREACK\)</span> 消息，其中包含其在认证顺序中的位置和给 <span class="math inline">\(t\)</span> 的<em>协调者</em>的投票。该过程由该函数确定： <span class="math inline">\(\coord: \T \to \P\)</span> 使得 <span class="math inline">\(\forall t.\coord(t) \in \proc(\shards(t))\)</span>。</p>
 <p>事务 <span class="math inline">\(t\)</span> 的协调者一旦从其每个分片 <span class="math inline">\(s\)</span> 接收到针对 <span class="math inline">\(t\)</span> 的 <span class="math inline">\(\PREPAREACK\)</span> 消息就会采取行动，该消息携带 <span class="math inline">\(s\)</span> 的投票 <span class="math inline">\(d_s\)</span>（第 14 行）。协调者使用 <span class="math inline">\(\sqcap\)</span> 算子（第 2 节）计算关于 <span class="math inline">\(t\)</span> 的最终决定，并将其以 <span class="math inline">\(\DECISION\)</span> 消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18 行），它将决定存储在 <span class="math inline">\(\dec\)</span> 数组中，并将事务的阶段推进到 <span class="math inline">\(\DECIDED\)</span>。请注意，我们不允许协调者单方面中止事务：这可以最大限度地减少我们在第 4 节中介绍的协议的容错版本中的延迟。</p>
@@ -771,7 +760,7 @@ dec<span class="token punctuation">[</span><span class="token punctuation">]</sp
 ((x, \_)\in W(t) \Rightarrow (\forall t&#39; \in T.(x,\_)\notin R(t&#39;))) \tag 5
 \]</span></p>
 <figure>
-<img src="/.io//Fig2.png" alt="Fig2"><figcaption aria-hidden="true">Fig2</figcaption>
+<img src="/2022/04/19/Leaderless-TCS-reconfig/Multi-shot%20Distributed%20Transaction%20Commit/Fig2.png" alt="Fig2"><figcaption aria-hidden="true">Fig2</figcaption>
 </figure>
 <h3 id="遗忘和回忆决策">遗忘和回忆决策</h3>
 <p>图1中的协议在21行和24行有两个额外的函数，它们并不确定性地执行。在第4部分我们将展示，这些是为了抽象协议能够捕捉乐观容错TCS实现的行为。因为进程被破坏，这些执行可能临时丢失和最终决策有关的信息，并且之后从相关的分片的投票重构它。同时，正如我们之前解释过的，决策的丢失可能影响到一些投票计算。21行的函数遗忘某一事务的决策（而不是投票）。24行的函数允许进程向协调者重新发送他们知道的投票，这些协调者之后会重新发送最终决策（14行）。这让遗忘决策的进程从相关分片存储的投票重构它。</p>
@@ -813,11 +802,6 @@ dec<span class="token punctuation">[</span><span class="token punctuation">]</sp
             
         </div>
         <div class="item right">
-            
-                <a href="/2022/04/19/Hello%20World/">
-                    Hello World
-                    <i class="fa fa-angle-right" aria-hidden="true"></i>
-                </a>
             
         </div>
     </div>
