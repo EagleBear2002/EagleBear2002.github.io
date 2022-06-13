@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-13 20:13:39</span> -->
+    <!-- <span>2022-06-13 20:34:27</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1098,9 +1098,76 @@ var _hmt = _hmt || [];
 <h2 id="第三章-关系数据库标准语言-sql">第三章-关系数据库标准语言 SQL</h2>
 <p>SQL 结构化查询语言，是关系数据库的标准语言。集数据定义语言（DDL），数据操纵语言（DML），数据控制语言（DCL）功能于一体。</p>
 <p>仅有 9 个动词：<code>CREATE, DROP, ALTER, SELECT, INSERT, UPDATE, DELETE, GRANT, REVOKE</code></p>
+<h3 id="sql-与关系数据库">SQL 与关系数据库</h3>
 <figure>
 <img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220613201245493.png" alt="SQL 对关系数据库模式的支持"><figcaption aria-hidden="true">SQL 对关系数据库模式的支持</figcaption>
 </figure>
+<p>基本表是本身独立存在的表。一个关系对应一个基本表，一个或多个基本表对应一个存储文件，一个表可以带若干索引。</p>
+<p>视图时从一个或几个基本表导出的表。数据库中只存放视图的定义而不存放视对应的数据。用户可以在视图上再定义视图。</p>
+<h3 id="层次化的数据库对象命名机制">层次化的数据库对象命名机制</h3>
+<ol type="1">
+<li><p>一个关系数据库管理系统的实例（Instance）中可以建立多个数据库（database）</p></li>
+<li><p>一个数据库中可以建立多个模式（schema）</p></li>
+<li><p>一个模式下通常包括多个表（table）、视图（view）和索引（index）等数据库对象</p></li>
+</ol>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220613201757227.png" alt="层次化的数据库对象命名机制的层次结构"><figcaption aria-hidden="true">层次化的数据库对象命名机制的层次结构</figcaption>
+</figure>
+<h3 id="数据定义">数据定义</h3>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220613201858206.png" alt="SQL的数据定义语句"><figcaption aria-hidden="true">SQL的数据定义语句</figcaption>
+</figure>
+<h4 id="定义模式">定义模式</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">CREATE SCHEMA &lt;schemaName&gt; AUTHORIZATION &lt;username&gt; [&lt;table_defination_clause&gt; | &lt;view_defination_clause&gt; | &lt;authorization_defination_clause&gt;]
+
+&#x2F;&#x2F; 示例
+CREATE SCHEMA &quot;S_T&quot; AUTHORIZATION WANG;
+CREATE SCHEMA AUTHORIZATION WANG; &#x2F;&#x2F; 未指定模式名，默认为用户名
+CREATE SCHEMA TEST AUTHORIZATION ZHANG;
+CREATE TABLE TAB1 (
+    COL1 SMALLINT,
+    COL2 INT,
+    COL3 CHAR(20),
+    COL4 NUMERIC(10,3),
+    COL5 DECIMAL(5,2)
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="删除模式">删除模式</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">DROP SCHEMA &lt;schemaName&gt; &lt;CASCADE | RESTRICT&gt;
+
+DROP SCHEMA WANG CASCADE; &#x2F;&#x2F; 只能删除空表，否则拒绝执行
+DROP SCHEMA ZHANG CASCADE; &#x2F;&#x2F; 删除模式和模式中的数据库对象<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="定义基本表">定义基本表</h3>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">CREATE TABLE &lt;tableName&gt; (
+    &lt;colName&gt; &lt;datatype&gt; [&lt;col_integrity_constraints&gt;]
+    [,&lt;colName&gt; &lt;datatype&gt; [&lt;col_integrity_constraints&gt;]]
+    ...
+    [,&lt;table_integrity_constraints&gt;]
+);
+
+CREATE TABLE Student (
+    Sno CHAR(9) PRIMARY KEY, &#x2F;* 列级完整性约束条件,Sno是主码*&#x2F; &#x2F;* Sname取唯一值*&#x2F;
+    Sname CHAR(20) UNIQUE,
+    Ssex CHAR(2),
+    Sage SMALLINT,
+    Sdept CHAR(20)
+);
+
+CREATE TABLE Course (
+    Cno CHAR(4) PRIMARY KEY,
+    Cname CHAR(40) NOT NULL,
+    Cpno CHAR(4),
+    Ccredit SMALLINT,
+    FOREIGN KEY (Cpno) REFERENCES Course(Cno)
+);
+
+CREATE TABLE SC (
+    Sno CHAR(9),
+    Cno CHAR(4),
+    Grade SMALLINT,
+    PRIMARY KEY (Sno,Cno), &#x2F;* 主码由两个属性构成，必须作为表级完整性进行定义*&#x2F;
+    FOREIGN KEY (Sno) REFERENCES Student(Sno), &#x2F;* 表级完整性约束条件，Sno是外码，被参照表是Student *&#x2F;
+    FOREIGN KEY (Cno)REFERENCES Course(Cno) &#x2F;* 表级完整性约束条件， Cno是外码，被参照表是Course*&#x2F;
+);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
