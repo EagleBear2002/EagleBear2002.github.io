@@ -8,8 +8,6 @@
 	<!-- title -->
 	
 	<title>
-	
-		23-分布式 OLTP 数据库 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -228,7 +226,7 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
-                    <li class="file active">
+                    <li class="file">
                         <a href="/2022/04/24/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/23-%E5%88%86%E5%B8%83%E5%BC%8F%20OLTP%20%E6%95%B0%E6%8D%AE%E5%BA%93/">
                             
                                 23-分布式 OLTP 数据库
@@ -974,227 +972,45 @@ var _hmt = _hmt || [];
 
 	<!-- 引入正文 -->
 	<div id="content">
-		<h1 id="article-title">
-    23-分布式 OLTP 数据库
-</h1>
-<div class="article-meta">
-    
-    <span>EagleBear2002</span>
-    <span>2022-04-24 14:41:15</span>
-    <!-- <span>2022-06-13 18:18:48</span> -->
-    <div id="article-categories">
-        
-            <span>Categories：</span>
-            
-                
-                    <span>
-                        <i class="fa fa-folder" aria-hidden="true">
-                        <a href="/categories/CMU-数据库系统/">CMU-数据库系统</a>
-                        </i>
-                        
-                    </span>
-                
-            
-        
-
-        
-            <span>Tags：</span>
-            
-        
-    </div>
-
+		<div id="index">
+	
+		<div class="index-li">
+			<a href="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">
+				<h2 class="index-title">
+					课程总结
+				</h2>
+				<div class="index-brief">
+					本文档持续更新，有勘误请小窗
+第一章-绪论
+数据：数据库中存储的基本对象，是描述事物的符号记录。
+数据的含义称为语义，数据与其语义是不可分的。
+数据库是长期储存在计算机内、有组织的、可共享的大量数据的集合。
+数据库系统的构成：数据库、数据库管理系统（DBMS，及其应用开发工具），应用程序，
+					...
+				</div>
+			</a>
+                <div class="article-meta">
+				    <span>2022-06-13</span>
+                    
+                            
+                                
+                                    <span>
+                                        <i class="fa fa-folder" aria-hidden="true"></i>
+                                        <a href="/categories/数据管理基础/">数据管理基础</a>
+										
+                                    </span>
+                                
+                            
+                    
+                </div>
+		</div>	
+	
+	
+	<div id="index-paginator">
+		
+	</div>
 </div>
 
-<div id="article-content">
-    <h2 id="oltp-和-olap">OLTP 和 OLAP</h2>
-<p>在线事务处理 (OLTP)：</p>
-<ul>
-<li>短期读/写事务。</li>
-<li>占地面积小。</li>
-<li>重复操作。</li>
-</ul>
-<p>在线分析处理 (OLAP)：</p>
-<ul>
-<li>长时间运行的只读查询。</li>
-<li>复杂连接。</li>
-<li>探索性查询。</li>
-</ul>
-<p>我们还没有讨论如何确保所有节点都同意提交一个事务，然后确保它在我们决定应该提交的情况下确实提交。</p>
-<ul>
-<li>如果一个节点发生故障会发生什么？</li>
-<li>如果我们的消息迟到了怎么办？</li>
-<li>如果我们不等待每个节点都同意会发生什么？</li>
-</ul>
-<h3 id="重要假设">重要假设</h3>
-<p>我们可以假设分布式 DBMS 中的所有节点都表现良好并且在同一个管理域下。</p>
-<blockquote>
-<p>如果我们告诉一个节点提交一个事务，那么它将提交该事务（如果没有失败）。</p>
-</blockquote>
-<p>如果您不信任分布式 DBMS 中的其他节点，则需要为事务使用拜占庭容错协议（区块链）。</p>
-<h2 id="原子提交协议">原子提交协议</h2>
-<p>当多节点事务完成时，DBMS 需要询问所有涉及的节点是否可以安全提交。</p>
-<p>例如：</p>
-<ul>
-<li><em>两阶段提交</em></li>
-<li>三阶段提交（未使用）</li>
-<li><em>Paxos</em></li>
-<li>Raft</li>
-<li>ZAB（Apache Zookeeper）</li>
-<li>时间戳复制（Viewstamp Replication）</li>
-</ul>
-<h3 id="两阶段提交2pc">两阶段提交（2PC）</h3>
-<h4 id="pc-过程">2PC 过程</h4>
-<h4 id="pc-的优化">2PC 的优化</h4>
-<p>提前准备投票：如果您已知发送到某远程节点的查询是您将在此执行的最后一个查询，那么该节点还将返回他们对准备阶段的投票以及查询结果。</p>
-<p>准备后的早期确认：如果所有节点都投票提交一个事务，协调器可以在提交阶段完成之前，向客户端发送一个确认：它们的事务是成功的。</p>
-<h4 id="pc-故障处理">2PC 故障处理</h4>
-<p>每个节点在非易失性存储日志中记录每个阶段的结果。</p>
-<p>如果协调者崩溃了怎么办？</p>
-<blockquote>
-<p>参与者必须决定做什么。</p>
-</blockquote>
-<p>如果参与者崩溃了怎么办？</p>
-<blockquote>
-<p>如果尚未发送确认，则协调者假定它以中止响应。</p>
-</blockquote>
-<h3 id="paxos">Paxos</h3>
-<h4 id="过程">过程</h4>
-<p>协调者提出结果（例如，提交或中止）然后参与者投票决定该结果是否应该成功的共识协议。 如果大多数参与者都可用并且在最好的情况下具有可证明的最小消息延迟，则不会阻止。</p>
-<h4 id="multi-paxos">Multi-Paxos</h4>
-<p>如果系统选举了一个负责在一段时间内提议更改的领导者，那么它可以跳过提议阶段。每当出现故障时回退到完整的 Paxos。</p>
-<p>系统会使用另一轮 Paxos 定期更新领导者。</p>
-<h3 id="pc-和-paxos">2PC 和 Paxos</h3>
-<p><strong>2PC</strong>：如果在发送准备消息后协调者宕机，则放弃事务，直到协调者恢复。</p>
-<p><strong>Paxos</strong>：如果大多数参与者还活着，则不会阻塞，只要有足够长的时间没有进一步的失败。</p>
-<h2 id="复制">复制</h2>
-<p>DBMS 可以跨冗余节点复制数据以提高可用性。</p>
-<p>设计决策：</p>
-<ul>
-<li>副本配置</li>
-<li>传播方案</li>
-<li>传播时序</li>
-<li>更新方法</li>
-</ul>
-<h3 id="复制方案">复制方案</h3>
-<p><strong>方法 #1：主节点-副本</strong></p>
-<ul>
-<li>所有更新都转到每个对象的指定主节点。</li>
-<li>主节点在没有原子提交协议的情况下将更新传播到其副本。</li>
-<li>可能允许只读事务访问副本。</li>
-<li>如果主节点宕机，则举行选举以选择新的主节点。</li>
-</ul>
-<p><strong>方法 #2：多主节点</strong></p>
-<ul>
-<li>事务可以更新任何副本的数据对象。</li>
-<li>副本必须使用原子提交协议相互同步。</li>
-</ul>
-<h3 id="k-safety">K-SAFETY</h3>
-<p>K-safety 是确定复制数据库容错的阈值。K 表示每个数据对象必须始终可用的副本数。如果副本数量低于此阈值，则 DBMS 将停止执行并使其自身脱机。</p>
-<h3 id="传播方案">传播方案</h3>
-<p>当一个事务在复制数据库上提交时，DBMS 决定是否必须等待该事务的更改传播到其他节点，然后才能向应用程序发送确认。</p>
-<p>传播级别：</p>
-<ul>
-<li>同步（强一致性）</li>
-<li>异步（最终一致性）</li>
-</ul>
-<p><strong>方法 #1：同步传播</strong>：主服务器向副本发送更新，然后等待他们确认他们已完全应用（即记录）更改。</p>
-<p><strong>方法 #2：异步传播</strong>：主节点立即向客户端返回确认，而无需等待副本应用更改。</p>
-<h3 id="传播时间">传播时间</h3>
-<p><strong>方法 #1：持续传播</strong></p>
-<ul>
-<li>DBMS 在生成日志消息时立即发送它们。</li>
-<li>还需要发送提交/放弃消息。</li>
-</ul>
-<p><strong>方法 #2：提交时传播</strong></p>
-<ul>
-<li>DBMS 仅在事务提交后将事务的日志消息发送到副本。</li>
-<li>不要浪费时间为中止的事务发送日志记录。</li>
-<li>假设事务的日志记录完全符合内存。</li>
-</ul>
-<h3 id="主动与被动">主动与被动</h3>
-<p><strong>方法 #1：主动-主动</strong></p>
-<ul>
-<li>一个事务在每个副本上独立执行。</li>
-<li>最后需要检查事务是否在每个副本上得到相同的结果。</li>
-</ul>
-<p><strong>方法 #2：主动-被动</strong></p>
-<ul>
-<li>每个事务在单个位置执行并将更改传播到副本。</li>
-<li>可以进行物理或逻辑复制。</li>
-<li>不同于主节点-副本与多主节点</li>
-</ul>
-<h2 id="一致性问题-cap">一致性问题 (CAP)</h2>
-<p><em>CAP 定理</em>：由<em>Eric Brewer</em>提出，在 2002 年被证明，分布式系统不可能总是：</p>
-<ul>
-<li>一致（Consistency）：可线性化</li>
-<li>始终可用（Availability）：所有 up 节点都可以满足所有请求。</li>
-<li>网络分区容错（Partition Tolerant）：尽管消息丢失，仍然可以正常运行。</li>
-</ul>
-<p><strong>OLTP DBMS 中的 CAP</strong></p>
-<p>DBMS 如何处理故障决定了它们支持 CAP 定理的哪些元素。传统/NewSQL DBMS：在大多数节点重新连接之前停止允许更新；NoSQL DBMS：提供在节点重新连接后解决冲突的机制。</p>
-<h2 id="联合数据库">联合数据库</h2>
-<p>我们假设分布式系统中的节点运行相同的 DBMS 软件。但组织经常在其应用程序中运行许多不同的 DBMS。如果我们可以为所有数据提供一个接口，那就太好了。</p>
-<p>将多个 DBMS 连接到一个逻辑系统中的分布式架构。查询可以访问任何位置的数据。</p>
-<p>这很难，没有人能做好：</p>
-<ul>
-<li>不同的数据模型、查询语言、限制。</li>
-<li>没有简单的方法来优化查询</li>
-<li>大量数据复制（坏）。</li>
-</ul>
-<h2 id="总结">总结</h2>
-<p>我们假设分布式 DBMS 中的节点是友好的。</p>
-<p>区块链数据库假设节点是对抗性的。 这意味着您必须使用不同的协议来提交事务。</p>
-
-</div>
-
-
-    <div class="post-guide">
-        <div class="item left">
-            
-                <a href="/2022/04/24/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/24-%E5%88%86%E5%B8%83%E5%BC%8F%20OLAP%20%E6%95%B0%E6%8D%AE%E5%BA%93/">
-                    <i class="fa fa-angle-left" aria-hidden="true"></i>
-                    24-分布式 OLAP 数据库
-                </a>
-            
-        </div>
-        <div class="item right">
-            
-                <a href="/2022/04/23/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/22-%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AF%BC%E8%AE%BA/">
-                    22-分布式数据库导论
-                    <i class="fa fa-angle-right" aria-hidden="true"></i>
-                </a>
-            
-        </div>
-    </div>
-
-
-
-
-
-    
-    <script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-      processEscapes: true,
-      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i=0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
-    }
-  });
-</script>
-    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-
-
-<script>
-    
-    
-</script>
 	</div>
 	<div id="footer">
 	<p>
