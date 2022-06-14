@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 20:40:27</span> -->
+    <!-- <span>2022-06-14 20:57:50</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1777,6 +1777,68 @@ SELECT Sno, Cno, Grade
 FROM SC
 WHERE Grade &gt; (SELECT AVG(Grade) FROM SC);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
+<h3 id="存取控制">存取控制</h3>
+<p>自主存取控制（Discretionary Access Control ，简称DAC）。</p>
+<p>数据库管理员：</p>
+<ol type="1">
+<li>拥有所有对象的所有权限</li>
+<li>根据实际情况不同的权限授予不同的用户</li>
+</ol>
+<p>用户：</p>
+<ol type="1">
+<li>拥有自己建立的对象的全部的操作权限</li>
+<li>可以使用GRANT，把权限授予其他用户</li>
+</ol>
+<p>被授权的用户：如果具有“继续授权”的许可，可以把获得的权限再授予其他用户。</p>
+<p>所有授予出去的权力在必要时又都可用 <code>REVOKE</code> 语句收回。</p>
+<p>发出 <code>GRANT</code> 的用户：</p>
+<ol type="1">
+<li>数据库管理员数据库对象创建者（即属主 Owner）</li>
+<li>拥有该权限的用户</li>
+</ol>
+<p>接受权限的用户：</p>
+<ol type="1">
+<li>一个或多个具体用户</li>
+<li><code>PUBLIC</code>（即全体用户）</li>
+</ol>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614204722386.png" alt="关系数据库系统中的存取权限"><figcaption aria-hidden="true">关系数据库系统中的存取权限</figcaption>
+</figure>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># GRANT语句的一般格式：
+# WITH GRANT OPTION子句：可以再授予其他用户，不允许循环授权
+GRANT &lt;权限&gt;[,&lt;权限&gt;]... ON &lt;对象类型&gt; &lt;对象名&gt;[,&lt;对象类型&gt; &lt;对象名&gt;]… TO &lt;用户&gt;[,&lt;用户&gt;]...
+[WITH GRANT OPTION ];
+
+# [例4.1] 把查询Student表权限授给用户U1
+GRANT SELECT ON TABLE Student
+    TO U1;
+
+# [例4.2] 把对Student表和Course表的全部权限授予用户U2和U3
+GRANT ALL PRIVILIGES ON TABLE Student,Course
+TO U2,U3;
+
+# [例4.3] 把对表SC的查询权限授 予所有用户
+GRANT SELECT ON TABLE SC
+    TO PUBLIC;
+
+# [例4.4] 把查询Student表和修改 学生学号的权限授给用户U4
+GRANT UPDATE (Sno), SELECT ON TABLE Student
+    TO U4;
+
+# [例4.5] 把对表SC的INSERT权限授予U5用 户，并允许他再将此权限授予其他用户
+GRANT INSERT ON TABLE SC TO U5
+    WITH GRANT OPTION;
+
+# [例4.6]
+GRANT INSERT ON TABLE SC TO U6
+    WITH GRANT OPTION;
+
+# [例4.7]同样，U6还可以将此权限授予U7， 但U7不能再传播此权限。
+GRANT INSERT ON TABLE SC
+    TO U7;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614205657112.png" alt="执行后用户权限定义"><figcaption aria-hidden="true">执行后用户权限定义</figcaption>
+</figure>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
 <h2 id="第七章-数据库设计">第七章-数据库设计</h2>
