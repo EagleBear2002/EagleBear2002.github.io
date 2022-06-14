@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 11:25:54</span> -->
+    <!-- <span>2022-06-14 11:50:39</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1483,6 +1483,62 @@ WHERE NOT EXISTS(  # 学生201215122选修了而学生 x 没有选的课程
                   AND SCZ.Cno &#x3D; SCY.Cno
             )
     );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="集合查询">集合查询</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.64] 查询计算机科学系的学生及年龄不大于19岁的学生。
+SELECT *
+FROM Student
+WHERE Sdept &#x3D; &#39;CS&#39;
+UNION
+SELECT *
+FROM Student
+WHERE Sage &lt;&#x3D; 19;
+
+# [例 3.65] 查询选修了课程1或者选修了课程2的学生。
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;1&#39;
+UNION
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;2&#39;;
+
+# [例3.66] 查询计算机科学系的学生与年龄不大于19岁的学生的交集。
+SELECT *
+FROM Student
+WHERE Sdept &#x3D; &#39;CS&#39; INTERSECT
+SELECT *
+FROM Student
+WHERE Sage &lt;&#x3D; 19;
+
+# [例 3.66] 实际上就是查询计算机科学系中年龄不大于19岁的学生。
+SELECT *
+FROM Student
+WHERE Sdept &#x3D; &#39;CS&#39;
+  AND Sage &lt;&#x3D; 19;
+
+# [例 3.67]查询既选修了课程1又选修了课程 2的学生。
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;1&#39; INTERSECT
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;2&#39;;
+
+# [例3.67]也可以表示为：
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;1&#39;
+  AND Sno IN (
+    SELECT Sno
+    FROM SC
+    WHERE Cno &#x3D; &#39;2&#39;
+);
+
+# [例3.68]实际上是查询 计算机科学系中年龄大于19岁的学生
+SELECT *
+FROM Student
+WHERE Sdept &#x3D; &#39;CS&#39;
+  AND Sage &gt; 19;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
