@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 10:04:41</span> -->
+    <!-- <span>2022-06-14 11:25:54</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1331,9 +1331,158 @@ FROM Student
 LEFT OUT JOIN SC ON (Student.Sno&#x3D;SC.Sno);
 
 &#x2F;* [例3.54]查询每个学生的学号、姓名、选修 的课程名及成绩 *&#x2F;
-SELECT Student.Sno, Sname, Cname, Grade FROM Student, SC, Course &#x2F;*多表连接*&#x2F;
+SELECT Student.Sno, Sname, Cname, Grade
+FROM Student, SC, Course &#x2F;*多表连接*&#x2F;
 WHERE Student.Sno &#x3D; SC.Sno
-AND SC.Cno &#x3D; Course.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+AND SC.Cno &#x3D; Course.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="嵌套查询">嵌套查询</h4>
+<p>上层的查询块称为外层查询或父查询，下层查询块称为内层查询或子查询。</p>
+<p>SQL语言允许多层嵌套查询，即一个子查询中还可以嵌套其他子查询。</p>
+<p>子查询的限制：<strong><em>不能使用 <code>ORDER BY</code> 子句</em></strong>。有些嵌套查询可以用连接运算替代，<strong>谨慎使用嵌套查询</strong>。</p>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.55] 查询与“刘晨” 在同一个系学习的学生。
+# 不相关子查询
+SELECT Sno, Sname, Sdept
+FROM Student
+WHERE Sdept IN (
+    SELECT Sdept
+    FROM Student
+    WHERE Sname &#x3D; &#39;刘晨&#39;
+);
+
+# 自身链接
+SELECT S1.Sno, S1.Sname, S1.Sdept
+FROM Student S1,
+     Student S2
+WHERE S1.Sdept &#x3D; S2.Sdept
+  AND S2.Sname &#x3D; &#39;刘晨&#39;;
+
+# [例 3.56]查询选修了课程名为“信息系统”的学生学号和姓名
+SELECT Sno, Sname
+WHERE Sno IN (
+    SELECT Sno
+    FROM SC
+    WHERE Cno IN (
+        SELECT Cno
+        FROM Course
+        WHERE Cname &#x3D; &#39;信息系统&#39;
+    )
+);
+
+# 用连接查询实现[例 3.56]
+SELECT Sno, Sname
+FROM Student,
+     SC,
+     Course
+WHERE Student.Sno &#x3D; SC.Sno
+  AND SC.Cno &#x3D; Course.Cno
+  AND Course.Cname &#x3D; &#39;信息系统&#39;;
+
+# 在[例 3.55]中，由于一个学生只可能在一个系学习，则 可以用 &#x3D; 代替IN：
+SELECT Sno, Sname, Sdept
+FROM Student
+WHERE Sdept &#x3D; (
+    SELECT Sdept
+    FROM Student
+    WHERE Sname &#x3D; &#39;刘晨&#39;
+);
+
+# [例 3.57 ]找出每个学生超过他选修课程平 均成绩的课程号。
+SELECT Sno, Cno
+FROM SC x
+WHERE Grade &gt;&#x3D; (SELECT AVG（Grade） FROM SC y WHERE y.Sno &#x3D; x.Sno);
+
+# [例 3.58] 查询非计算机科学系中比 计算机科学系任意一个学生年龄小 的学生姓名和年龄
+# 嵌套查询
+SELECT Sname, Sage
+FROM Student
+WHERE Sage &lt; ANY (SELECT Sage FROM Student WHERE Sdept &#x3D; &#39; CS &#39;)
+  AND Sdept &lt;&gt; &#39;CS&#39;;
+
+# 用聚集函数实现[例 3.58]
+SELECT Sname, Sage
+FROM Student
+WHERE Sage &lt; (SELECT MAX(Sage) FROM Student WHERE Sdept &#x3D; &#39;CS &#39;)
+  AND Sdept &lt;&gt; &#39;CS&#39;;
+
+# [例 3.59] 查询非计算机科学系 中比计算机科学系所有学生年龄都小的学生姓名及年龄。
+# 方法一：用ALL谓词
+SELECT Sname, Sage
+FROM Student
+WHERE Sage &lt; ALL (SELECT Sage FROM Student WHERE Sdept &#x3D; &#39;CS&#39;)
+  AND Sdept &lt;&gt; &#39;CS&#39;;
+
+# 方法二：用聚集函数
+SELECT Sname, Sage
+FROM Student
+WHERE Sage &lt; (SELECT MIN(Sage) FROM Student WHERE Sdept &#x3D; &#39;CS&#39;)
+  AND Sdept &lt;&gt; &#39;CS&#39;;
+
+# [例 3.60]查询所有选修了1号课程的学生姓名。
+SELECT Sname
+FROM Student
+WHERE EXISTS(
+              SELECT *
+              FROM SC
+              WHERE Sno &#x3D; Student.Sno
+                AND Cno &#x3D; &#39;1&#39;
+          );
+
+#  [例 3.61] 查询没有选修1号课程的学生姓名。
+SELECT Sname
+FROM Student
+WHERE NOT EXISTS(
+        SELECT *
+        FROM SC
+        WHERE Sno &#x3D; Student.Sno
+          AND Cno &#x3D; &#39;1&#39;
+    );
+
+# [例 3.55]查询与“刘晨”在同一 个系学习的学生。
+SELECT Sno, Sname, Sdept
+FROM Student S1
+WHERE EXISTS(
+              SELECT *
+              FROM Student S2
+              WHERE S2.Sdept &#x3D; S1.Sdept
+                AND S2.Sname &#x3D; &#39;刘晨&#39;
+          );
+
+# [例 3.62] 查询选修了全部课程的学生姓名。
+# 即，不存在没有修过的课程
+SELECT Sname
+FROM Student
+WHERE NOT EXISTS(
+        SELECT *
+        FROM Course
+        WHERE NOT EXISTS(
+                SELECT * FROM SC WHERE Sno &#x3D; Student.Sno AND Cno &#x3D; Course.Cno
+            )
+    );
+
+# [例 3.62] 改
+SELECT Sname
+FROM student
+WHERE Sno IN (
+    SELECT Sno
+    FROM SC
+    Group by Sno
+    HAVING count(*) &#x3D; (SELECT count(*) FROM course)
+);
+
+# [例 3.63]查询至少选修了学生 201215122选修的全部课程的学生号码。
+# 不存在这样的课程y，学生201215122选修了y，而学生x没有选。
+SELECT DISTINCT Sno
+FROM SC SCX
+WHERE NOT EXISTS(  # 学生201215122选修了而学生 x 没有选的课程
+        SELECT *
+        FROM SC SCY
+        WHERE SCY.Sno &#x3D; &#39;201215122&#39; AND NOT EXISTS(
+                SELECT *  # 学生 x 选修的课程 y
+                FROM SC SCZ
+                WHERE SCZ.Sno &#x3D; SCX.Sno
+                  AND SCZ.Cno &#x3D; SCY.Cno
+            )
+    );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
