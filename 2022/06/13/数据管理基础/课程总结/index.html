@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 10:00:45</span> -->
+    <!-- <span>2022-06-14 10:04:41</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1293,19 +1293,19 @@ GROUP BY Cno;
 &#x2F;* HAVING短语与WHERE子句的 区别：
 	作用对象不同
 	WHERE子句作用于基表或视图，从中选择满足条件的元组
-	HAVING短语作用于组，从中选择满足条件的组。
-*&#x2F;
+	HAVING短语作用于组，从中选择满足条件的组。*&#x2F;
 SELECT Sno FROM SC
 GROUP BY Sno
 HAVING COUNT(*) &gt; 3;
 
 SELECT Sno, AVG(Grade) FROM SC GROUP BY Sno
-HAVING AVG(Grade) &gt;&#x3D; 90;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+HAVING AVG(Grade) &gt;&#x3D; 90;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <figure>
 <img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220613210755589.png" alt="常用的查询条件"><figcaption aria-hidden="true">常用的查询条件</figcaption>
 </figure>
 <h4 id="链接查询">链接查询</h4>
-<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">SELECT Student.*, SC.* FROM Student, SC
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">&#x2F;* [例 3.49] 查询每个学生及其选修课程的情况 *&#x2F;
+SELECT Student.*, SC.* FROM Student, SC
 WHERE Student.Sno &#x3D; SC.Sno;
 
 &#x2F;* 对上例使用自然连接 *&#x2F;
@@ -1317,7 +1317,23 @@ FROM Student, SC
 WHERE Student.Sno &#x3D; SC.Sno AND SC.Cno&#x3D;&#39;2&#39; AND SC.Grade &gt; 90;
 
 SELECT FIRST.Cno, SECOND.Cpno FROM Course FIRST, Course SECOND
-WHERE FIRST.Cpno &#x3D; SECOND.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+WHERE FIRST.Cpno &#x3D; SECOND.Cno;
+
+&#x2F;* 查询每一门课的间接先修课（即先修课的 先修课）*&#x2F;
+SELECT FIRST.Cno, SECOND.Cpno
+FROM Course FIRST, Course SECOND
+WHERE FIRST.Cpno &#x3D; SECOND.Cno;
+
+&#x2F;* [例 3.53] 改写 [例 3.49] 
+	左外连接：列出左表中所有的元组 *&#x2F;
+SELECT Student.Sno, Sname, Ssex, Sage, Sdept, Cno, Grade
+FROM Student
+LEFT OUT JOIN SC ON (Student.Sno&#x3D;SC.Sno);
+
+&#x2F;* [例3.54]查询每个学生的学号、姓名、选修 的课程名及成绩 *&#x2F;
+SELECT Student.Sno, Sname, Cname, Grade FROM Student, SC, Course &#x2F;*多表连接*&#x2F;
+WHERE Student.Sno &#x3D; SC.Sno
+AND SC.Cno &#x3D; Course.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
