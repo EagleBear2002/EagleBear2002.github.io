@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 18:37:38</span> -->
+    <!-- <span>2022-06-14 20:34:53</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1184,7 +1184,7 @@ ALTER TABLE Course ADD UNIQUE(Cname);<span aria-hidden="true" class="line-number
 <h3 id="删除基本表">删除基本表</h3>
 <pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">DROP TABLE &lt;tableName&gt; [RESTRICT | CASCADE];
 
-DROP TABLE Student CASCADE; &#x2F;* 有其他对象依赖该表，不能删除 *&#x2F;
+DROP TABLE Student RESTRICT; &#x2F;* 有其他对象依赖该表，不能删除 *&#x2F;
 DROP TABLE Student CASCADE; &#x2F;* 索引、视图、触发器等一并删除 *&#x2F;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="索引">索引</h3>
 <p>不在考试范围</p>
@@ -1539,9 +1539,235 @@ SELECT *
 FROM Student
 WHERE Sdept &#x3D; &#39;CS&#39;
   AND Sage &gt; 19;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="数据更新">数据更新</h3>
+<h4 id="数据插入">数据插入</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">INSERT INTO &lt;表名&gt; [(&lt;属性列1&gt;[, &lt;属性列2 &gt;...)]
+VALUES (&lt;常量1&gt; [, &lt;常量2&gt;]... );
+
+# [例3.69]将一个新学生元组（学号： 201215128;姓名：陈冬;性别：男; 所在系：IS;年龄：18岁）插入到 Student表中。
+INSERT INTO Student (Sno, Sname, Ssex, Sdept, Sage)
+VALUES (&#39;201215128&#39;, &#39;陈冬&#39;, &#39;男&#39;, &#39;IS&#39;, 18);
+
+# [例3.70]将学生张成民的信息插入 到Student表中。
+INSERT INTO Student
+VALUES (&#39;201215126&#39;, &#39;张成民&#39;, &#39;男&#39;, 18, &#39;CS&#39;);
+
+# [例3.71] 插入一条选课记录 （ &#39;200215128&#39;,&#39;1 &#39;）。
+INSERT INTO SC(Sno, Cno)
+VALUES (&#39;201215128&#39;, &#39;1&#39;);
+
+# 或者
+INSERT INTO SC
+VALUES (&#39;201215128&#39;, &#39;1&#39;, NULL);
+
+# [例3.72] 对每一个系，求学生的平均年龄，并把结果存入数据库
+CREATE TABLE Dept_age
+(
+    Sdept CHAR(15) Avg_age SMALLINT
+);
+INSERT INTO Dept_age(Sdept, Avg_age)
+SELECT Sdept.AVG(Sage)
+FROM Student
+GROUP BY Sdept;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="数据修改">数据修改</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">UPDATE &lt;表名&gt;
+SET &lt;列名&gt;&#x3D;&lt;表达式&gt;[, &lt;列名&gt;&#x3D;&lt;表达式&gt;].
+..[WHERE &lt;条件&gt;];
+
+# [例3.73] 将学生201215121的年龄改为22 岁
+UPDATE Student
+SET Sage &#x3D; 22
+WHERE Sno &#x3D; &#39; 201215121 &#39;;
+
+# [例3.74] 将所有学生的年龄增加1岁。
+UPDATE Student
+SET Sage &#x3D; Sage + 1;
+
+# [例3.75] 将计算机科学系全体学生的成绩置零。
+UPDATE SC
+SET Grade &#x3D; 0
+WHERE Sno IN (SELETE Sno FROM Student WHERE Sdept &#x3D; &#39;CS&#39;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="数据删除">数据删除</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">DELETE
+FROM &lt;表名&gt; [WHERE &lt;条件&gt;];
+
+# [例3.76] 删除学号为201215128的学生记录。
+DELETE
+FROM Student
+WHERE Sno &#x3D; &#39;201215128&#39;;
+
+# [例3.77] 删除所有的学生选课记录。
+DELETE
+FROM SC;
+
+# [例3.78] 删除计算机科学系所有学生的选课记录。
+DELETE
+FROM SC
+WHERE Sno IN (SELETE Sno FROM Student WHERE Sdept&#x3D; &#39;CS&#39;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="sql-中的空值">SQL 中的空值</h3>
 <p>判断空值用 <code>IS NULL</code> 或 <code>IS NOT NULL</code>。</p>
 <p>有 <code>NOT NULL</code> 限制的 <code>UNIQUE</code> 属性不能为空值，码不能为空值。</p>
+<p>空值与其他值的算术运算结果为空值，空值与其他值的比较运算结果为 <code>UNKNOWN</code>。</p>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614183941402.png" alt="逻辑运算符真值表"><figcaption aria-hidden="true">逻辑运算符真值表</figcaption>
+</figure>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.83] 选出选修1号课程的不及格的学生以及缺考的学生。
+SELECT Sno
+FROM SC
+WHERE Grade &lt; 60
+  AND Cno &#x3D; &#39;1&#39;
+UNION
+SELECT Sno
+FROM SC
+WHERE Grade IS NULL
+  AND Cno &#x3D; &#39;1&#39;;
+  
+# 或者
+SELECT Sno
+FROM SC
+WHERE Cno &#x3D; &#39;1&#39;
+  AND (Grade &lt; 60 OR Grade IS NULL);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="视图">视图</h3>
+<p>数据只存放视图的定义，不存放视图对应的数据。</p>
+<h4 id="定义视图">定义视图</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">CREATE VIEW &lt;视图名&gt; [(&lt;列名&gt; [,&lt;列名&gt;]...)]
+AS &lt;子查询&gt; [WITH CHECK OPTION];
+# WITH CKECK OPTION 表示对视图进行更新操作时要保证更新后的行满足谓词条件（即子查询中的条件）
+
+# [例3.85]建立信息系学生 的视图，并要求进行修改 和插入操作时仍需保证该 视图只有信息系的学生。
+CREATE VIEW IS_Student AS
+SELECT Sno, Sname, Sage
+FROM Student
+WHERE Sdept &#x3D; &#39;IS&#39;
+WITH CHECK OPTION;
+
+# [例3.86] 建立信息系选修了1号课程的学生的视图（包括学号、 姓名、成绩）。
+CREATE VIEW IS_S1(Sno, Sname, Grade) AS
+SELECT Student.Sno, Sname, Grade
+FROM Student,
+     SC
+WHERE Sdept &#x3D; &#39;IS&#39;
+  AND Student.Sno &#x3D; SC.Sno
+  AND SC.Cno &#x3D; &#39;1&#39;;
+
+# [例3.87] 建立信息系选修 了1号课程且成绩在90分 以上的学生的视图。
+CREATE VIEW IS_S2 AS
+SELECT Sno, Sname, Grade
+FROM IS_S1
+WHERE Grade &gt;&#x3D; 90;
+
+# [例3.88] 定义一个反映学 生出生年份的视图。
+CREATE VIEW BT_S(Sno, Sname, Sbirth) AS
+SELECT Sno, Sname, 2014 - Sage
+FROM Student;
+
+# [例3.89] 将学生的学号及平 均成绩定义为一个视图
+CREATE VIEW S_G(Sno, Gavg) AS
+SELECT Sno, AVG(Grade)
+FROM SC
+GROUP BY Sno;
+
+# [例3.90]将Student表中所有女生记 录定义为一个视图
+# 修改基表Student的结构后，Student表与 F_Student视图 的映象关系被破坏，导致该视图不能正确工作。
+CREATE VIEW F_Student(F_Sno, name, sex, age, dept) AS
+SELECT * &#x2F;*不指定属性列*&#x2F;
+FROM Student
+WHERE Ssex &#x3D; &#39;女&#39;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="删除视图">删除视图</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">DROP VIEW &lt;视图名&gt;[CASCADE];
+
+# [例3.91 ] 删除视图BT_S和IS_S1
+DROP VIEW BT_S; &#x2F;*成功执行*&#x2F;
+DROP VIEW IS_S1; &#x2F;*拒绝执行*&#x2F;
+DROP VIEW IS_S1 CASCADE;
+# 成功执行<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="查询视图">查询视图</h4>
+<p><strong>视图消解法</strong>：进行有效性检查，从数据字典中取出视图的定义，把定义中的子查询和用户的查询结合起来，转换成等价的对基本表的查询，执行修正后的查询。</p>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例3.92] 在信息系学生的视 图中找出年龄小于20岁的学生。
+SELECT Sno, Sage
+FROM IS_Student
+WHERE Sage &lt; 20;
+# 视图消解转换后的查询语句为：
+SELECT Sno, Sage
+FROM Student
+WHERE Sdept &#x3D; &#39;IS&#39;
+  AND Sage &lt; 20;
+
+# [例3.93] 查询选修了1号课 程的信息系学生
+SELECT IS_Student.Sno, Sname
+FROM IS_Student,
+     SC
+WHERE IS_Student.Sno &#x3D; SC.Sno
+  AND SC.Cno &#x3D; &#39;1&#39;;
+  
+# [例3.94]在S_G视图中查询平均成 绩在90分以上的学生学号和平均成绩
+SELECT *
+FROM S_G
+WHERE Gavg &gt;&#x3D; 90;
+
+# S_G视图的子查询定义：
+SELECT Sno, AVG(Grade)
+FROM SC
+GROUP BY Sno;
+
+# 错误：
+SELECT Sno，AVG(Grade)
+FROM SC
+WHERE AVG(Grade) &gt;&#x3D; 90
+GROUP BY Sno;
+
+# 正确：
+SELECT Sno, AVG(Grade)
+FROM SC
+GROUP BY Sno
+HAVING AVG(Grade) &gt;&#x3D; 90;
+
+# 或者使用派生表
+SELECT *
+FROM (SELECT Sno, AVG(Grade) FROM SC GROUP BY Sno) AS S_G(Sno, Gavg)
+WHERE Gavg &gt;&#x3D; 90;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h4 id="更新视图">更新视图</h4>
+<p>允许对行列子集视图进行更新，对其他类型视图的更新不同系统有不同限制。</p>
+<p>更新视图的限制：一些视图是不可更新的，因为对这些视图的更新不能唯一地有意义地转换成对相应基本表的更新。</p>
+<p>一个不允许更新的视图上定义的视图也不允许更新。</p>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例3.95] 将信息系学生视图IS_Student中学 号”201215122”的学生姓名改为”刘辰”。
+UPDATE IS_Student
+SET Sname&#x3D; &#39;刘辰&#39;
+WHERE Sno &#x3D; &#39;201215122&#39;;
+# 转换后的语句：
+UPDATE Student
+SET Sname&#x3D; &#39;刘辰&#39;
+WHERE Sno &#x3D; &#39;201215122&#39;
+  AND Sdept &#x3D; &#39;IS&#39;;
+
+# [例3.96] 向信息系学生视图IS_S中插入一个新的学生 记录，其中学号为”201215129”，姓名为”赵新”，年龄 为20岁
+INSERT INTO IS_Student
+VALUES (&#39;201215129&#39;, &#39;赵新&#39;, 20);
+# 转换为对基本表的更新：
+INSERT INTO Student(Sno, Sname, Sage, Sdept)
+VALUES (&#39;200215129&#39;, &#39;赵新&#39;, 20, &#39;IS&#39;);
+
+# [例3.97]删除信息系学生视图IS_Student中学号 为”201215129”的记录
+DELETE
+FROM IS_Student
+WHERE Sno &#x3D; &#39;201215129&#39;;
+# 转换为对基本表的更新：
+DELETE
+FROM Student
+WHERE Sno &#x3D; &#39;201215129&#39;
+  AND Sdept &#x3D; &#39;IS&#39;;
+
+# 例3.89定义的视图S_G为不可更新视图。
+# 这个对视图的更新无法转换成对基本表SC的更新
+UPDATE S_G
+SET Gavg&#x3D;90
+WHERE Sno &#x3D; &#39;201215121&#39;;
+
+# 将SC中成绩在平均成绩之上的元组定义成一个视图
+CREATE VIEW GOOD_SC AS
+SELECT Sno, Cno, Grade
+FROM SC
+WHERE Grade &gt; (SELECT AVG(Grade) FROM SC);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
