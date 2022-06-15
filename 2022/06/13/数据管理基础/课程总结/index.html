@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-14 20:57:50</span> -->
+    <!-- <span>2022-06-15 09:24:13</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1777,7 +1777,7 @@ SELECT Sno, Cno, Grade
 FROM SC
 WHERE Grade &gt; (SELECT AVG(Grade) FROM SC);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="第四章-数据库安全性">第四章-数据库安全性</h2>
-<h3 id="存取控制">存取控制</h3>
+<h3 id="自主存取控制">自主存取控制</h3>
 <p>自主存取控制（Discretionary Access Control ，简称DAC）。</p>
 <p>数据库管理员：</p>
 <ol type="1">
@@ -1791,6 +1791,7 @@ WHERE Grade &gt; (SELECT AVG(Grade) FROM SC);<span aria-hidden="true" class="lin
 </ol>
 <p>被授权的用户：如果具有“继续授权”的许可，可以把获得的权限再授予其他用户。</p>
 <p>所有授予出去的权力在必要时又都可用 <code>REVOKE</code> 语句收回。</p>
+<h4 id="grant">GRANT</h4>
 <p>发出 <code>GRANT</code> 的用户：</p>
 <ol type="1">
 <li>数据库管理员数据库对象创建者（即属主 Owner）</li>
@@ -1837,7 +1838,100 @@ GRANT INSERT ON TABLE SC TO U6
 GRANT INSERT ON TABLE SC
     TO U7;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <figure>
-<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614205657112.png" alt="执行后用户权限定义"><figcaption aria-hidden="true">执行后用户权限定义</figcaption>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614205657112.png" alt="执行例4.1~4.7后用户权限定义"><figcaption aria-hidden="true">执行例4.1~4.7后用户权限定义</figcaption>
+</figure>
+<h4 id="revoke">REVOKE</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># REVOKE语句的一般格式为：
+REVOKE &lt;权限&gt;[,&lt;权限&gt;]... ON &lt;对象类型&gt; &lt;对象名&gt;[,&lt;对象类型&gt;&lt;对象名&gt;]...
+FROM &lt;用户&gt;[,&lt;用户&gt;]...[CASCADE | RESTRICT];
+
+# [例4.8] 把用户U4修改学 生学号的权限收回
+REVOKE UPDATE (Sno) ON TABLE Student
+    FROM U4;
+
+# [例4.9] 收回所有用户对表 SC的查询权限
+REVOKE SELECT ON TABLE SC
+    FROM PUBLIC;
+
+# [例4.10] 把用户U5对SC表的 INSERT权限收回
+# 将用户U5的INSERT权限收回的 时候使用CASCADE，则同时收 回U6或U7的INSERT权限，否则拒绝执行该语句
+# 如果U6或U7还从其他用户处获 得对SC表的INSERT权限，则他 们仍具有此权限，系统只收回直接或间接从U5处获得的权限
+REVOKE INSERT ON TABLE SC
+    FROM U5 CASCADE;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614210030873.png" alt="执行例4.8~4.10后用户权限定义"><figcaption aria-hidden="true">执行例4.8~4.10后用户权限定义</figcaption>
+</figure>
+<h4 id="创建数据库模式的权限">创建数据库模式的权限</h4>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># 该命令不是 SQL 标准
+CREATE USER &lt;username&gt; [WITH][DBA | RESOURCE | CONNECT];<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>只有系统的超级用户才有权创建 一个新的数据库用户。</p>
+<ol type="1">
+<li><code>CONNECT</code> 权限：如没有指定创建的新用户的权限，默认该用户拥有该权限。不能创建新用户， 不能创建模式，也不能创建基本表，只能登录数据库。</li>
+<li><code>RESOURCE</code> 权限：能创建基本表和视图，成为所创建对象的属主。但不能创建模式，不能创建新的用户。</li>
+<li><code>DBA</code> 权限：是系统中的超级用户，可以创建新的用户、创建模式、创建基本表和视图等；DBA拥有对所有数据库对象的存取权限，还可以把这些权限授予一般用户。</li>
+</ol>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220614210815480.png" alt="权限与可执行的操作对照表"><figcaption aria-hidden="true">权限与可执行的操作对照表</figcaption>
+</figure>
+<h4 id="数据库角色">数据库角色</h4>
+<p>数据库角色：被命名的一组与数据库操作相关的权限，角色是权限的集合，可以为一组具有相同权限的用户创建一个角色简化授权的过程。</p>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># 角色的创建
+CREATE ROLE &lt;角色名&gt;;
+# 给角色授权
+GRANT &lt;权限&gt;[,&lt;权限&gt;]... ON &lt;对象类型&gt;对象名 TO &lt;角色&gt;[,&lt;角色&gt;]...;
+
+# 将一个角色授予其他的角色或用户
+# 该语句把角色授予某用户，或授予另 一个角色
+# 授予者是角色的创建者或拥有在这个角色上的ADMIN OPTION
+# 指定了WITH ADMIN OPTION则获得某种权限的角色或用户还可以把这种权限授予其他角色
+GRANT &lt;角色1&gt;[,&lt;角色2&gt;]… TO &lt;角色或用户&gt;[,&lt;角色或用户&gt;]... [WITH ADMIN OPTION];
+
+# 角色权限的收回
+# 用户可以回收角色的权限，从而修改角色拥有的权限
+# REVOKE执行者是角色的创建者或拥有在这个（些）角色上的ADMIN OPTION
+REVOKE &lt;权限&gt;[,&lt;权限&gt;]... ON &lt;对象类型&gt; &lt;对象名&gt; FROM &lt;角色&gt;[,&lt;角色&gt;]...;
+
+# [例4.11] 通过角色来实现将一组权限授予一个用户。
+CREATE ROLE R1;
+GRANT SELECT, UPDATE, INSERT ON TABLE Student
+    TO R1;
+GRANT R1 TO 王平,张明,赵玲;
+REVOKE R1 FROM 王平;
+
+# [例4.12] 角色的权限修改
+GRANT DELETE ON TABLE Student
+TO R1;
+
+# [例4.13] 使R1减少了SELECT权限
+REVOKE SELECT ON TABLE Student
+FROM R1；<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="强制存取控制">强制存取控制</h3>
+<p>强制存取控制（Mandatory Access Control，简称 MAC）</p>
+<ol type="1">
+<li>每一个数据对象被标以一定的密级</li>
+<li>每一个用户也被授予某一个级别的许可证</li>
+<li>对于任意一个对象，只有具有合法许可证的用户才可以存取</li>
+</ol>
+<p>主体的敏感度标记称为许可证级别（Clearance Level），客体的敏感度标记称为密级（Classification Level）。</p>
+<p>敏感度标记分成若干级别</p>
+<ul>
+<li>绝密（Top Secret，TS）</li>
+<li>机密（Secret，S）</li>
+<li>可信（Confidential，C）</li>
+<li>公开（Public，P）</li>
+<li>TS&gt;=S&gt;=C&gt;=P</li>
+</ul>
+<p>强制存取控制规则：</p>
+<ol type="1">
+<li>仅当主体的许可证级别大于或等于客体的密级时， 该主体才能读取相应的客体</li>
+<li>仅当主体的许可证级别小于或等于客体的密级时，该主体才能写相应的客体</li>
+</ol>
+<blockquote>
+<p>规则 1 的必要性是明显的。</p>
+<p>规则 2 是为了防止把数据的密级从高流向低。如许可证级别为 TS 的主体读取密级为 TS 的客体并以密级 P 写回，造成数据泄露。在规则 2 下，用户可以把写入的对象赋予高于自己许可证级别的密级，一旦数据被写入，该用户自己也不能读取该数据了。</p>
+</blockquote>
+<figure>
+<img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220615091728509.png" alt="安全检查示意图"><figcaption aria-hidden="true">安全检查示意图</figcaption>
 </figure>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
