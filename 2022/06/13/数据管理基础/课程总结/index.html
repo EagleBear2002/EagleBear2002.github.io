@@ -981,7 +981,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-13 16:51:07</span>
-    <!-- <span>2022-06-15 09:24:13</span> -->
+    <!-- <span>2022-06-15 09:45:08</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1934,6 +1934,77 @@ FROM R1；<span aria-hidden="true" class="line-numbers-rows"><span></span><span>
 <img src="/2022/06/13/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/image-20220615091728509.png" alt="安全检查示意图"><figcaption aria-hidden="true">安全检查示意图</figcaption>
 </figure>
 <h2 id="第五章-数据库完整性">第五章-数据库完整性</h2>
+<h3 id="用户定义的完整性">用户定义的完整性</h3>
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例5.7] Student表的Ssex只允许取“男”或“女”。
+CREATE TABLE Student
+(
+    Sno   CHAR(9) PRIMARY KEY,
+    Sname CHAR(8) NOT NULL,
+    Ssex  CHAR(2) CHECK (Ssex IN (&#39;男&#39;, &#39;女&#39;)), &#x2F;*性别属性Ssex只允许取&#39;男&#39;或&#39;女&#39; *&#x2F;
+    Sage  SMALLINT,
+    Sdept CHAR(20)
+);
+
+# [例5.8] SC表的Grade的值应该在0和100之间。
+CREATE TABLE SC
+(
+    Sno   CHAR(9),
+    Cno   CHAR(4),
+    Grade SMALLINT CHECK (Grade &gt;&#x3D; 0 AND Grade &lt;&#x3D; 100), &#x2F;*Grade取值范围是0到100*&#x2F;
+    PRIMARY KEY (Sno, Cno),
+    FOREIGN KEY (Sno) REFERENCES Student (Sno),
+    FOREIGN KEY (Cno) REFERENCES Course (Cno)
+);
+
+# [例5.9]当学生的性别是男时，其名字不能以Ms.打头。
+CREATE TABLE Student
+(
+    Sno   CHAR(9),
+    Sname CHAR(8) NOT NULL,
+    Ssex  CHAR(2) CHECK (Ssex IN (&#39;男&#39;, &#39;女&#39;)),
+    Sage  SMALLINT,
+    Sdept CHAR(20),
+    PRIMARY KEY (Sno),
+    CHECK (Ssex &#x3D; &#39;女&#39; OR Sname NOT LIKE &#39;Ms.%&#39;) &#x2F;*定义了元组中Sname和 Ssex两个属性值之间的约束条件*&#x2F;
+);
+
+# [例5.10]建立学生登记表Student，要求学号在90000~99999之间，姓名不能 取空值，年龄小于30，性别只能是“男”或“女”。
+CREATE TABLE Student
+(
+    Sno   NUMERIC(6) CONSTRAINT C1 CHECK (Sno BETWEEN 90000 AND 99999),
+    Sname CHAR(20) CONSTRAINT C2 NOT NULL,
+    Sage  NUMERIC(3) CONSTRAINT C3 CHECK (Sage &lt; 30),
+    Ssex  CHAR(2) CONSTRAINT C4 CHECK (Ssex IN ( ‘男’,&#39;女&#39;)),
+    CONSTRAINT StudentKey PRIMARY KEY (Sno)
+);
+
+# [例5.11]建立教师表TEACHER，要求每个教师的应发工资不低于3000元。应 发工资是工资列Sal与扣除项Deduct之和。
+CREATE TABLE TEACHER
+(
+    Eno    NUMERIC(4) PRIMARY KEY, &#x2F;*在列级定义主码*&#x2F;
+    Ename  CHAR(10),
+    Job    CHAR(8),
+    Sal    NUMERIC(7, 2),
+    Deduct NUMERIC(7, 2),
+    Deptno NUMERIC(2),
+    CONSTRAINT TEACHERFKey FOREIGN KEY (Deptno)
+        REFERENCES DEPT (Deptno),
+    CONSTRAINT C1 CHECK (Sal + Deduct &gt;&#x3D; 3000)
+);
+
+# [例5.12]去掉例5.10 Student表中对性别的限制。
+ALTER TABLE Student
+    DROP CONSTRAINT C4;
+# [例5.13] 修改表Student中的约束条件，要求学号改为在900000~999999之间，年龄由小于 30改为小于40 可以先删除原来的约束条件，再增加新的约束条件
+ALTER TABLE Student
+    DROP CONSTRAINT C1;
+ALTER TABLE Student
+    ADD CONSTRAINT C1 CHECK (Sno BETWEEN 900000 AND 999999);
+ALTER TABLE Student
+    DROP CONSTRAINT C3;
+ALTER TABLE Student
+    ADD CONSTRAINT C3 CHECK (Sage &lt; 40);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="触发器">触发器</h3>
 <h2 id="第六章-关系数据理论">第六章-关系数据理论</h2>
 <h2 id="第七章-数据库设计">第七章-数据库设计</h2>
 <h2 id="第八章-数据库编程">第八章-数据库编程</h2>
