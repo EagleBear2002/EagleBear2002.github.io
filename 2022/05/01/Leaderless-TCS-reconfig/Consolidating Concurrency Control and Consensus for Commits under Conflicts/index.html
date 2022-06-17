@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+	
+	<!-- title -->
+	
+	<title>
+	
+		Consolidating Concurrency Control and Consensus for Commits under Conflicts | 
+	 
+	EagleBear2002&#39;s Blog
+	</title>
+	
+	<!-- keywords,description -->
+	 
+
+	<!-- favicon -->
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+	
+
+
+	<!-- search -->
+	<script>
+		var searchEngine = "https://www.google.com/search?q=";
+		if(typeof searchEngine == "undefined" || searchEngine == null || searchEngine == ""){
+			searchEngine = "https://www.google.com/search?q=";
+		}
+		var homeHost = "eaglebear2002.github.io";
+		if(typeof homeHost == "undefined" || homeHost == null || homeHost == ""){
+			homeHost = window.location.host;
+		}
+	</script>
+
+
+	
+<link rel="stylesheet" href="/css/main.css">
+
+	
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/darcula.min.css">
+
+	
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+
+	
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+	
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+	
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+
+	
+<script src="https://cdn.jsdelivr.net/npm/jquery-pjax@2.0.1/jquery.pjax.min.js"></script>
+
+	
+<script src="/js/main.js"></script>
+
+	
+		
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage/dist/av-min.js"></script>
+
+		
+<script src="https://cdn.jsdelivr.net/npm/valine@v1.4.14/dist/Valine.min.js"></script>
+
+	
+	
+		<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+	
+<meta name="generator" content="Hexo 6.1.0"></head>
+
+<body>
+	<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?3efe99c287df5a1d6f0d02d187e403c1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+<header id="header">
+    <a id="title" href="/" class="logo">EagleBear2002's Blog</a>
+
+	<ul id="menu">
+		<li class="menu-item">
+			<a href="/about" class="menu-item-link">ABOUT</a>
+		</li>
+
+		<li class="menu-item">
+			<a href="/tags" class="menu-item-link">TAGS</a>
+		</li>
+
+		<li class="menu-item">
+			<a href="/categories" class="menu-item-link">CATEGORIES</a>
+		</li>
+
+		<li class="menu-item">
+			<a href="https://github.com/EagleBear2002" class="menu-item-link" target="_blank">
+				<i class="fa fa-github fa-2x"></i>
+			</a>
+		</li>
+	</ul>
+</header>
+
+	<div id="sidebar">
+    <button id="sidebar-toggle" class="toggle"><i class="fa fa-arrow-right " aria-hidden="true"></i></button>
+
+    <div id="site-toc">
+        <input id="search-input" class="search-input" type="search" placeholder="按回车全站搜索">
+        <div id="tree">
+            
+
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            C++高级程序设计
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/1.1-C++%E5%8E%86%E5%8F%B2/">
+                            
+                                1.1-C++历史
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/29/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/1.2-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95/">
+                            
+                                1.2-基本语法
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/30/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/1.3-%E5%87%BD%E6%95%B0/">
+                            
+                                1.3-函数
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.1-%E5%B0%81%E8%A3%85/">
+                            
+                                2.1-封装
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.2-%E7%BB%A7%E6%89%BF/">
+                            
+                                2.2-继承
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/19/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/2.3-%E5%A4%9A%E6%80%81/">
+                            
+                                2.3-多态
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/30/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/C++11%E6%96%B0%E7%89%B9%E6%80%A7/">
+                            
+                                C++11新特性
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            CMU-数据库系统
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/23/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/22-%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AF%BC%E8%AE%BA/">
+                            
+                                22-分布式数据库导论
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/24/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/23-%E5%88%86%E5%B8%83%E5%BC%8F%20OLTP%20%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                23-分布式 OLTP 数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/24/CMU-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F/24-%E5%88%86%E5%B8%83%E5%BC%8F%20OLAP%20%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                24-分布式 OLAP 数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            Leaderless-TCS-reconfig
+                        </a>
+                        
+                <ul>
+                    <li class="file active">
+                        <a href="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
+                            
+                                Consolidating Concurrency Control and Consensus for Commits under Conflicts
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/10/Leaderless-TCS-reconfig/Fast%20Paxos%20Made%20Easy/">
+                            
+                                Fast Paxos Made Easy
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/12/Leaderless-TCS-reconfig/Fast%20Paxos%20Report/">
+                            
+                                Fast Paxos Report
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/11/Leaderless-TCS-reconfig/Fast%20Paxos/">
+                            
+                                Fast Paxos
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/19/Leaderless-TCS-reconfig/Multi-shot%20Distributed%20Transaction%20Commit/">
+                            
+                                Multi-shot Distributed Transaction Commit
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/25/Leaderless-TCS-reconfig/Paxos%20Made%20Simple/">
+                            
+                                Paxos Made Simple
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/13/%E4%B8%80%E4%BA%9B%E6%91%98%E6%8A%84/">
+                            
+                                一些摘抄
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/06/%E4%B8%AD%E5%9B%BD%E8%BF%91%E7%8E%B0%E4%BB%A3%E5%8F%B2%E7%BA%B2%E8%A6%81/">
+                            
+                                中国近现代史纲要
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            互联网计算
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/26/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/01-%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E5%8F%8A%E5%85%B6%E5%8F%82%E8%80%83%E6%A8%A1%E5%9E%8B/">
+                            
+                                01-计算机网络及其参考模型
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/02-%E7%89%A9%E7%90%86%E5%B1%82%E5%8E%9F%E7%90%86%E5%8F%8A%E6%8A%80%E6%9C%AF/">
+                            
+                                02-物理层原理及技术
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/03-%E5%B1%80%E5%9F%9F%E7%BD%91%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF/">
+                            
+                                03-局域网数据链路层原理与技术
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/04-%E7%BD%91%E7%BB%9C%E5%B1%82%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF/">
+                            
+                                04-网络层原理与技术
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/05-%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8E%9F%E7%90%86%E4%B8%8E%E6%8A%80%E6%9C%AF/">
+                            
+                                05-传输层原理与技术
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/06-%E4%BC%9A%E8%AF%9D%E3%80%81%E8%A1%A8%E7%A4%BA%E3%80%81%E5%BA%94%E7%94%A8%E5%B1%82/">
+                            
+                                06-会话、表示、应用层
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/07-%E8%B7%AF%E7%94%B1%E4%B8%8E%E8%B7%AF%E7%94%B1%E5%99%A8/">
+                            
+                                07-路由与路由器
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/">
+                            
+                                08-路由协议
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/24/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/09-%E5%B1%80%E5%9F%9F%E7%BD%91%E4%BA%A4%E6%8D%A2%E4%B8%8EVLAN/">
+                            
+                                09-局域网交换与VLAN
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/10-%E5%B9%BF%E5%9F%9F%E7%BD%91/">
+                            
+                                10-广域网
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/11-%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/">
+                            
+                                11-网络安全
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/%E5%90%8D%E8%AF%8D%E5%88%86%E6%9E%90%E6%80%BB%E7%BB%93/">
+                            
+                                名词分析总结
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            分布式数据库
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/04/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/05-%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8ECAP%E6%A8%A1%E5%9E%8B/">
+                            
+                                05-一致性与CAP模型
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/05/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/10-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B4%A9%E6%BA%83%E6%81%A2%E5%A4%8D/">
+                            
+                                10-数据库崩溃恢复
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/05/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/11-%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/">
+                            
+                                11-并发控制
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/05/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/13-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98/">
+                            
+                                13-分布式系统设计问题
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/05/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/20-%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/">
+                            
+                                20-共识算法
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/02/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+                            
+                                隔离级别
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            历史唯物主义原理
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/14/%E5%8E%86%E5%8F%B2%E5%94%AF%E7%89%A9%E4%B8%BB%E4%B9%89%E5%8E%9F%E7%90%86/%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E4%BA%BA%E7%B1%BB%E7%A4%BE%E4%BC%9A%E5%92%8C%E8%87%AA%E7%84%B6%E7%95%8C/">
+                            
+                                第二章-人类社会和自然界
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            政治经济学
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/04/29/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6%E7%9A%84%E5%AF%B9%E8%B1%A1/">
+                            
+                                第一章-政治经济学的对象
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/07/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%B8%89%E7%AB%A0-%E8%B5%84%E6%9C%AC%E5%92%8C%E5%89%A9%E4%BD%99%E4%BB%B7%E5%80%BC/">
+                            
+                                第三章-资本和剩余价值
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/07/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E5%95%86%E5%93%81%E5%92%8C%E8%B4%A7%E5%B8%81/">
+                            
+                                第二章-商品和货币
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/13/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%BA%94%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%9A%84%E6%B5%81%E9%80%9A%E8%BF%87%E7%A8%8B/">
+                            
+                                第五章-资本的流通过程
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/08/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%A7%AF%E7%B4%AF/">
+                            
+                                第四章-资本积累
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            数据管理基础
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/01-%E7%BB%AA%E8%AE%BA/">
+                            
+                                01-绪论
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/02-%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                02-关系数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/03-%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A0%87%E5%87%86%E8%AF%AD%E8%A8%80%20SQL/">
+                            
+                                03-关系数据库标准语言 SQL
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/04-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AE%89%E5%85%A8%E6%80%A7/">
+                            
+                                04-数据库安全性
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/05-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AE%8C%E6%95%B4%E6%80%A7/">
+                            
+                                05-数据库完整性
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/06-%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E7%90%86%E8%AE%BA/">
+                            
+                                06-关系数据理论
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/07-%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1/">
+                            
+                                07-数据库设计
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/10-%E6%95%B0%E6%8D%AE%E5%BA%93%E6%81%A2%E5%A4%8D%E6%8A%80%E6%9C%AF/">
+                            
+                                10-数据库恢复技术
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/16/%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80/11-%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6/">
+                            
+                                11-并发控制
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+                <ul>
+                    <li class="directory">
+                        <a href="#" class="directory">
+                            <i class="fa fa-plus-square-o"></i>
+                            软件工程与计算II
+                        </a>
+                        
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/26/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/00-%E9%A2%98%E7%9B%AE/">
+                            
+                                00-题目
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/01-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+                            
+                                01-软件工程基础
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/02-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%8F%91%E5%B1%95/">
+                            
+                                02-软件工程的发展
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/03-%E5%AE%9E%E4%BE%8B%E9%A1%B9%E7%9B%AE%E6%8F%8F%E8%BF%B0/">
+                            
+                                03-实例项目描述
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/04-%E9%A1%B9%E7%9B%AE%E5%90%AF%E5%8A%A8/">
+                            
+                                04-项目启动
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/05-%E9%9C%80%E6%B1%82%E5%9F%BA%E7%A1%80/">
+                            
+                                05-需求基础
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/06-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95/">
+                            
+                                06-需求分析方法
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/07-%E9%9C%80%E6%B1%82%E6%96%87%E6%A1%A3%E5%8C%96%E4%B8%8E%E9%AA%8C%E8%AF%81/">
+                            
+                                07-需求文档化与验证
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/08-%E8%BD%AF%E4%BB%B6%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80/">
+                            
+                                08-软件设计基础
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/09-%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E5%9F%BA%E7%A1%80/">
+                            
+                                09-软件体系结构基础
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/10-%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E5%BB%BA/">
+                            
+                                10-软件体系结构设计与构建
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/11-%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92%E8%AE%BE%E8%AE%A1/">
+                            
+                                11-人机交互设计
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/12-%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1/">
+                            
+                                12-详细设计
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/13-%E6%A8%A1%E5%9D%97%E5%8C%96%E4%B8%8E%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F/">
+                            
+                                13-模块化与信息隐藏
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/14-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96/">
+                            
+                                14-面向对象的模块化
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/15-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F/">
+                            
+                                15-面向对象的信息隐藏
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/16-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+                            
+                                16-设计模式
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/17-%E8%BD%AF%E4%BB%B6%E6%9E%84%E9%80%A0/">
+                            
+                                17-软件构造
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/18-%E4%BB%A3%E7%A0%81%E8%AE%BE%E8%AE%A1/">
+                            
+                                18-代码设计
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/19-%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95/">
+                            
+                                19-软件测试
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/20-%E8%BD%AF%E4%BB%B6%E4%BA%A4%E4%BB%98/">
+                            
+                                20-软件交付
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/21-%E8%BD%AF%E4%BB%B6%E7%9A%84%E7%BB%B4%E6%8A%A4%E4%B8%8E%E6%BC%94%E5%8C%96/">
+                            
+                                21-软件的维护与演化
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/22-%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B%E6%A8%A1%E5%9E%8B/">
+                            
+                                22-软件开发过程模型
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/05/31/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/23-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E8%81%8C%E4%B8%9A%E5%9F%BA%E7%A1%80/">
+                            
+                                23-软件工程职业基础
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/10/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/24-%E5%A4%8D%E4%B9%A0%E6%8F%90%E7%BA%B2/">
+                            
+                                24-复习提纲
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                    </li>
+
+                </ul>
+            
+        </div>
+    </div>
+</div>
+
+	<!-- 引入正文 -->
+	<div id="content">
+		<h1 id="article-title">
+    Consolidating Concurrency Control and Consensus for Commits under Conflicts
+</h1>
+<div class="article-meta">
+    
+    <span>EagleBear2002</span>
+    <span>2022-05-01 14:19:00</span>
+    <!-- <span>2022-06-17 15:05:57</span> -->
+    <div id="article-categories">
+        
+            <span>Categories：</span>
+            
+                
+                    <span>
+                        <i class="fa fa-folder" aria-hidden="true">
+                        <a href="/categories/Leaderless-TCS-reconfig/">Leaderless-TCS-reconfig</a>
+                        </i>
+                        
+                    </span>
+                
+            
+        
+
+        
+            <span>Tags：</span>
+            
+        
+    </div>
+
+</div>
+
+<div id="article-content">
+    <p><strong>摘要</strong></p>
+<p>传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确保交易的序列化图是非循环的。我们在 Janus 的设计中利用了这种洞察力，这是一个统一的并发控制和共识协议。 Janus 的目标是编写为存储过程的一次性事务，这是一种常见但受限制的事务类。像 MDCC 和 TAIR 一样，Janus 可以在一次往返中提交此类中的不冲突事务。与 MDCC 和 TAPIR 不同，Janus 避免了由于争用而中止：只要网络运行良好并且每个服务器副本的大多数都处于活动状态，它最多在两次往返中提交此类中的冲突事务。</p>
+<p>我们将 Janus 与分层设计和 TAPIR 在此类中的各种工作负载下进行比较。我们的评估表明，在无竞争的微基准测试中，Janus 的吞吐量是分层系统的 5 倍，是 TAPIR 吞吐量的 90%。当工作负载竞争时，Janus 提供比基线低得多的延迟和更高的吞吐量（高达 6.8 倍）。</p>
+<h2 id="简介">简介</h2>
+<p>可扩展、可用且高度一致的分布式事务通常是通过在 Paxos 共识协议复制的数据存储分片之上分层传统并发控制协议来实现的。将数据分片成许多可以由不同服务器存储和服务的小子集提供了可扩展性。尽管服务器出现故障，但通过共识复制每个分片可提供可用性。尽管不同事务的数据访问存在冲突，但使用 USENIX 关联并发控制跨复制分片协调事务可提供强一致性。这种方法在实践中很常用。例如，Spanner 实现了两阶段锁定 (2PL) 和两阶段提交 (2PC)，其中数据和锁都由 Paxos 复制。作为另一个例子，Percolator 实现了机会并发控制 (OCC) 的变体，它在 BigTable 之上使用 2PC，它依赖于主备份复制和 Paxos。</p>
+<p>当用于广域存储时，分层方法会导致两次跨数据中心协调，按照顺序是：一次通过并发控制协议确保事务一致性（严格的可串行化），另一次通过共识协议以确保副本一致性（线性化）。这种双重协调是不必要的，可以通过将并发控制和共识合并到一个统一的协议中来消除。 MDCC 和 TAIR 分别展示了统一方法如何提供读取提交和严格的可串行化隔离级别。两种协议都乐观地尝试在一次广域往返中提交和复制事务。但是，如果并发事务之间存在冲突，它们会中止并重试，这会在争用情况下显著降低性能。这种担忧对于广域存储更为明显：由于交易需要更长的时间才能完成，争用的数量也相应增加。</p>
+<p>本文提出了构建容错分布式事务的 Janus 协议。与 TAIR 和 MDCC 一样，Janus 可以在没有争用的情况下在一次跨数据中心往返中提交和复制事务。面对并发冲突事务的干扰，Janus 最多需要一个额外的跨数据中心往返来提交。</p>
+<p>Janus 的关键洞察力是实现事务一致性的严格序列化和复制一致性的线性化都可以映射到相同的底层抽象。特别是，两者都要求交易的执行历史等价于一些线性的总订单。可以通过基于执行历史构建序列化图来检查这种等价性。图中的每个顶点对应一个事务。由于复制或冲突的数据访问，每条边代表两个事务之间的依赖关系。具体来说，如果事务 <span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 对某些数据项进行冲突访问，那么如果负责冲突数据项的分片在 <span class="math inline">\(T_2\)</span> 之前执行或复制 <span class="math inline">\(T_1\)</span>，则存在一条边 <span class="math inline">\(T_1 \to T_2\)</span>。如果该图中没有循环，则可以找到严格可串行化和线性化的等效线性总阶。</p>
+<p>Janus 以两种方式确保非循环序列化图。首先，Janus 通过跟踪冲突事务到达复制每个分片的服务器时的依赖关系来捕获初步图表。事务 <span class="math inline">\(T\)</span> 的协调器然后从复制每个分片的足够大的仲裁服务器收集和传播 <span class="math inline">\(T\)</span> 的依赖关系。<span class="math inline">\(T\)</span> 的实际执行被推迟，直到协调者确定 <span class="math inline">\(T\)</span> 的所有参与分片都获得了 <span class="math inline">\(T\)</span> 的所有依赖项。其次，虽然基于事务到达顺序的依赖关系图可能包含循环，但 <span class="math inline">\(T\)</span> 的参与分片重新排序事务以相同的确定顺序循环以确保非循环序列化图。这提供了严格的可串行化，因为所有服务器都以相同的顺序执行冲突的事务。</p>
+<p>在没有争用的情况下，所有参与的分片都可以在一次跨数据中心往返中获得 <span class="math inline">\(T\)</span> 的所有依赖项。在存在争用的情况下，可能会出现两种类型的冲突：一种是不同事务之间的冲突，另一种是在同一事务的复制过程中。<strong>不同事务之间的冲突</strong>仍然可以在<strong>单个跨数据中心往返</strong>中处理。它们在依赖图中表现为循环，并通过确保确定性执行重新排序来处理。然而，在<strong>复制同一事务期间出现的冲突</strong>需要<strong>第二次跨数据中心往返</strong>，以在不同服务器副本之间就事务的依赖项集达成共识。这两种情况都不需要 Janus 中止事务。因此，只要网络和机器故障不会共同阻止每个服务器副本的大多数进行通信，<strong>Janus 总是在面对争用时最多提交两次跨数据中心往返</strong>。</p>
+<p>Janus 的基本协议及其始终提交的能力假设了一类常见的事务性工作负载：编写为存储过程的一次性事务。存储过程经常被使用并将事务逻辑发送到服务器以作为片段执行，而不是让客户端在简单地向服务器读取和写入数据时执行逻辑。一次性事务排除了将一个片段的执行输出用作在不同服务器上执行的片段的输入。一次性事务足以应付许多工作负载，包括流行和规范的 TPC-C 基准。虽然可以扩展 Janus 的设计以支持一般事务，但这样做的代价是额外的服务器间消息和中止的可能性。</p>
+<p>这种依赖跟踪和执行重新排序的方法已分别应用于并发控制和共识。 Janus 的洞见是并发控制和共识都可以使用一个通用的依赖图来实现合并而不中止。</p>
+<p>我们在事务键值存储系统中实现了 Janus。为了与现有协议进行比较，我们还在同一框架中实现了 2PL + MultiPaxos、OCC + MultiPaxos 和 TAIR。我们使用微基准和流行的 TPC-C 基准在多个可用区域的 Amazon EC2 上运行实验。我们的评估表明，在无竞争的微基准测试中，Janus 的吞吐量是分层系统的 5 倍，是 TAIR 吞吐量的 90%。当工作负载因倾斜或广域延迟而变得有争议时，Janus 通过消除中止提供比现有系统低得多的延迟和更高的吞吐量（高达 6.8 倍）。</p>
+<h2 id="概述">概述</h2>
+<p>本节描述了我们针对的系统设置，回顾了背景和动机，然后提供了 Janus 如何统一并发控制和共识的高级概述。</p>
+<h3 id="系统设置">系统设置</h3>
+<p>我们的目标是广域设置，其中数据跨服务器分片，每个数据分片复制到几个地理上独立的数据中心以确保可用性。我们假设每个数据中心都维护一个完整的数据副本，这是一种常见的设置。现有协议或 Janus 并不严格需要此假设。但是，它简化了关于提交事务所需的跨数据中心往返次数的性能讨论。</p>
+<p>我们采用将事务表示为存储过程的执行模型，这也是常用的。由于数据是跨机器分片的，因此事务由一系列存储过程（称为片段）组成，每个片段都访问属于单个分片的数据项。通过本地锁定，每个片段的执行相对于其他并发片段是原子的。存储过程执行模型对于 Janus 在争用下获得良好性能至关重要。由于 Janus 必须序列化冲突片段的执行，存储过程允许在服务器上执行，这比由客户端通过网络执行的执行效率高得多。</p>
+<h3 id="背景和动机">背景和动机</h3>
+<p>构建容错分布式事务的标准方法是在用于复制的共识协议之上对并发控制协议分层。分层设计解决了分布式事务存储面临的三个最重要的挑战：一致性、可扩展性和可用性。</p>
+<ul>
+<li><strong>一致性</strong>是指排除并发冲突操作的“不良”交错的能力。有两种冲突：第一种是含多个在不同数据分片上执行不可序列化数据访问的事务；第二种是事务在不同的副本服务器上以不同的顺序将其写入复制到相同的数据分片。并发控制处理第一种冲突以实现严格的可串行化；共识处理第二种以实现线性化。</li>
+<li><strong>可扩展性</strong>是指通过添加更多机器来提高性能的能力。并发控制协议自然地实现了可扩展性，因为它们对可以跨机器分区的单个数据项进行操作。相比之下，共识协议没有解决可扩展性问题，因为它们的状态机方法复制了副本服务器上的所有操作。</li>
+<li><strong>可用性</strong>是指从机器和网络故障（包括崩溃和任意消息延迟）中生存和恢复的能力。解决可用性挑战是共识协议的核心，而传统的并发控制并没有解决这个问题。</li>
+</ul>
+<p>因为并发控制和共识都只能解决上述三个挑战中的两个，所以很自然地一个在另一个之上以覆盖所有基础。例如，Spanner 在 Paxos 上分层 2PL/2PC。 Percolator 在 BigTable 上分层 OCC 的一个变体，它依赖于主备份复制和 Paxos。</p>
+<p>分层设计在概念上很简单，但不能提供最佳性能。当一个协议叠加在另一个协议之上时，一致性所需的协调会连续发生两次；一次在并发控制层，然后再一次在共识层。这会导致额外的延迟，这对于广域存储来说尤其昂贵。这种观察并不新鲜，TAIR 和 MDCC 已经提出了这一观察结果，指出分层存在过度协调的问题。</p>
+<p>并发控制和共识的统一可以减少协调的开销。这种统一是可能的，因为并发控制的一致性模型（严格的可串行化）和共识（线性化的）具有很大的相似性。具体来说，两者都试图满足冲突操作之间的排序约束，以确保与线性总排序等价。表 1 对现有系统用于处理事务执行/提交期间和复制期间发生的冲突的技术进行了分类。如图所示，乐观方案依赖于中止和重试，而保守方案旨在避免代价高昂的中止。在保守的方案中，共识协议依赖（Paxos）领导者来分配复制操作的顺序，而事务协议使用逐项锁定。</p>
+<figure>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/table-1.png" alt="table-1"><figcaption aria-hidden="true">table-1</figcaption>
+</figure>
+<p>为了统一并发控制和共识，必须使用通用的协调方案以相同的方式处理这两种类型的冲突。这种设计要求排除了基于领导者的协调，因为依赖单个领导者分配排序的分布式事务不能很好地扩展。 MDCC 和 TAPIR 通过依赖中止和重试来实现并发控制和共识的统一。这种乐观的方法最适合低竞争的工作负载。我们工作的目标是开发一种统一的方法，该方法可以通过避免中止而在竞争中很好地工作。</p>
+<h3 id="并发控制和共识的统一方法">并发控制和共识的统一方法</h3>
+<p>我们能否设计一个统一的并发控制和共识，并使用一个通用的协调策略来最小化代价高昂的中止？一个关键的观察是并发控制和复制所需的排序约束都可以通过相同的序列化图抽象来捕获。在序列化图中，顶点表示事务，有向边表示由于两种类型的冲突而导致的事务之间的依赖关系。严格的可串行化和线性化都可以简化为检查该图是否没有循环。</p>
+<p>Janus 试图通过跟踪冲突操作的依赖关系来显式捕获初步序列化图，而不立即执行它们。潜在的复制或事务冲突都表现为初步图中的循环。图 2a 中的循环是由于复制期间的冲突：在服务器 <span class="math inline">\(S_x\)</span> 上，<span class="math inline">\(T_1\)</span> 对数据项 <span class="math inline">\(X\)</span> 的写入在 <span class="math inline">\(T_2\)</span> 对 <span class="math inline">\(X\)</span> 的写入之前到达，导致 <span class="math inline">\(T_1 \rightarrow T_2\)</span>。相反的到达顺序发生在不同的服务器副本 <span class="math inline">\(S&#39;_ x\)</span> 上，导致 <span class="math inline">\(T_1 \leftarrow T_2\)</span>。图 2b 中的循环是由于事务冲突造成的：服务器 <span class="math inline">\(S_x\)</span> 在 <span class="math inline">\(T_2\)</span> 对 item-x 的写入之前收到 <span class="math inline">\(T_1\)</span> 对 item-x 的写入，而服务器 <span class="math inline">\(S_y\)</span> 以相反的顺序接收对 item-y 的写入。为了确保无周期序列化图和无中止执行，Janus 在执行之前确定性地对周期中涉及的事务进行重新排序。</p>
+<figure>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-1.png" alt="figure-1"><figcaption aria-hidden="true">figure-1</figcaption>
+</figure>
+<figure>
+<img src="/2022/05/01/Leaderless-TCS-reconfig/Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-2.png" alt="figure-2"><figcaption aria-hidden="true">figure-2</figcaption>
+</figure>
+<p>为了理解统一的优势和挑战，我们通过一个具体的例子来对比 Janus 的工作流程和 OCC + MultiPaxos 的工作流程。示例交易，<span class="math inline">\(T_1\)</span>：<code>x++; y++;</code>，由两部分组成，每一部分都是一个递增 item-x 或 item-y 的存储过程。</p>
+<p>图 1a 显示了 OCC + MultiPaxos 如何执行和提交 <span class="math inline">\(T_1\)</span>。首先，<span class="math inline">\(T_1\)</span> 的协调者将这两部分分派给 item-x 和 item-y 各自的 Paxos 领导者，它们恰好位于不同的数据中心。领导者执行片段并在本地缓冲写入。为了提交 <span class="math inline">\(T_1\)</span>，协调器向 Paxos 领导者发送 2PC-prepare 请求，Paxos 领导者执行 OCC 验证并将 x 和 y 的新值复制给其他人。因为这些片段是存储过程，我们可以结合调度和 2PC-prepare 消息，以便协调器可以在没有冲突的情况下在两个跨数据中心往返中执行和提交 <span class="math inline">\(T_1\)</span>。假设并发事务 <span class="math inline">\(T_2\)</span> 也尝试增加相同的两个计数器。<span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 的调度消息（或 2PC-prepares）可能由不同的 Paxos 领导者以不同的顺序处理，导致 <span class="math inline">\(T_1\)</span> 和/或 <span class="math inline">\(T_2\)</span> 中止并重试。另一方面，因为 Paxos 领导者对复制施加了排序，所以 item-x（或 item-y）的所有副本都一致地处理 <span class="math inline">\(T_1\)</span> 或 <span class="math inline">\(T_2\)</span> 的写入，但代价是额外的广域往返。</p>
+<p>图 1b 显示了 Janus 的工作流程。为了提交和执行<span class="math inline">\(T_1\)</span>，协调器经过三个阶段：PreAccept、Accept 和Commit，其中Accept 阶段可以跳过。在 PreAccept 中，协调器将 <span class="math inline">\(T_1\)</span> 的片段分派到其相应的副本服务器。与 OCC+MultiPaxos 不同，服务器不会立即执行这些片段，而只是在其本地依赖图中跟踪它们的到达顺序。服务器用 <span class="math inline">\(T_1\)</span> 的依赖信息回复协调器。如果有足够多的副本服务器回复相同的依赖关系，协调器可以跳过接受阶段，这发生在服务器副本之间没有争用时。否则，协调器将与服务器进行另一轮通信，以确保它们为 <span class="math inline">\(T_1\)</span> 获得相同的依赖关系。在 Commit 阶段，每个服务器根据它们的依赖关系执行事务。如果存在涉及 <span class="math inline">\(T_1\)</span> 的依赖循环，则服务器在循环中执行事务时遵循确定性顺序。一旦协调器从最近的服务器副本（通常位于本地数据中心）收到回复，它就可以将结果返回给用户</p>
+
+</div>
+
+
+    <div class="post-guide">
+        <div class="item left">
+            
+                <a href="/2022/05/02/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    隔离级别
+                </a>
+            
+        </div>
+        <div class="item right">
+            
+                <a href="/2022/04/29/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6%E7%9A%84%E5%AF%B9%E8%B1%A1/">
+                    第一章-政治经济学的对象
+                    <i class="fa fa-angle-right" aria-hidden="true"></i>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+    
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+<script>
+    
+    
+</script>
+	</div>
+	<div id="footer">
+	<p>
+	©2019-<span id="footerYear"></span> 
+	<a href="/">EagleBear2002</a> 
+	
+	
+		|
+		<span id="busuanzi_container_site_pv">
+			pv
+			<span id="busuanzi_value_site_pv"></span>
+		</span>
+		|
+		<span id="busuanzi_container_site_uv"> 
+			uv
+			<span id="busuanzi_value_site_uv"></span>
+		</span>
+	
+	<br>
+	Theme <a href="//github.com/wujun234/hexo-theme-tree" target="_blank">Tree</a>
+	by <a href="//github.com/wujun234" target="_blank">WuJun</a>
+	Powered by <a href="//hexo.io" target="_blank">Hexo</a>
+	</p>
+</div>
+<script type="text/javascript"> 
+	document.getElementById('footerYear').innerHTML = new Date().getFullYear() + '';
+</script>
+	<button id="totop-toggle" class="toggle"><i class="fa fa-angle-double-up" aria-hidden="true"></i></button>
+</body>
+</html>
