@@ -1069,7 +1069,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-16 15:50:19</span>
-    <!-- <span>2022-06-20 09:59:01</span> -->
+    <!-- <span>2022-06-20 10:23:22</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1207,6 +1207,9 @@ DROP TABLE Student CASCADE; # 索引、视图、触发器等一并删除 <span a
 <p>数据字典是关系数据库管理系统内部的一组系统表，它记录了数据库中所有定义信息：关系模式定义 ，视图定义，索引定义，完整性约束定义，各类用户对数据库的操作权限，统计信息等。</p>
 <h2 id="数据查询">数据查询</h2>
 <h3 id="单表查询">单表查询</h3>
+<p><code>HAVING</code> 短语与 <code>WHERE</code> 子句的区别：作用对象不同。</p>
+<p><code>WHERE</code> 子句作用于基表或视图，从中选择满足条件的元组。</p>
+<p><code>HAVING</code> 短语作用于组，从中选择满足条件的组。</p>
 <pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL">SELECT [ALL | DISTINCT] &lt;目标列表达式&gt; [,&lt;目标列表达式&gt;] ...
 	FROM &lt;tableName&gt; [,&lt;tableName&gt;] ... | (&lt;select_caluse&gt;)
 	[AS] &lt;alias&gt;
@@ -1375,22 +1378,21 @@ SELECT FIRST.Cno, SECOND.Cpno
 FROM Course FIRST, Course SECOND
 WHERE FIRST.Cpno &#x3D; SECOND.Cno;
 
-# [例 3.53] 改写 [例 3.49] 
-	左外连接：列出左表中所有的元组 
+# [例 3.53] 改写 [例 3.49]
+# 左外连接：列出左表中所有的元组 
 SELECT Student.Sno, Sname, Ssex, Sage, Sdept, Cno, Grade
-FROM Student
-LEFT OUT JOIN SC ON (Student.Sno&#x3D;SC.Sno);
+FROM Student LEFT OUT JOIN SC ON (Student.Sno &#x3D; SC.Sno);
 
 # [例3.54]查询每个学生的学号、姓名、选修 的课程名及成绩 
 SELECT Student.Sno, Sname, Cname, Grade
 FROM Student, SC, Course #多表连接
 WHERE Student.Sno &#x3D; SC.Sno
-AND SC.Cno &#x3D; Course.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+AND SC.Cno &#x3D; Course.Cno;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="嵌套查询">嵌套查询</h3>
 <p>上层的查询块称为外层查询或父查询，下层查询块称为内层查询或子查询。</p>
 <p>SQL 语言允许多层嵌套查询，即一个子查询中还可以嵌套其他子查询。如果子查询的查询条件不依赖于父查询，称为<strong>不相关子查询</strong>；否则称为<strong>相关子查询</strong>。</p>
 <p>子查询的限制：<strong><em>不能使用 <code>ORDER BY</code> 子句</em></strong>。有些嵌套查询可以用连接运算替代，<strong>谨慎使用嵌套查询</strong>。</p>
-<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.55] 查询与“刘晨” 在同一个系学习的学生。
+<pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.55] 查询与“刘晨”在同一个系学习的学生。
 # 不相关子查询
 SELECT Sno, Sname, Sdept
 FROM Student
@@ -1421,14 +1423,12 @@ WHERE Sno IN (
 
 # 用连接查询实现[例 3.56]
 SELECT Sno, Sname
-FROM Student,
-     SC,
-     Course
+FROM Student, SC, Course
 WHERE Student.Sno &#x3D; SC.Sno
   AND SC.Cno &#x3D; Course.Cno
   AND Course.Cname &#x3D; &#39;信息系统&#39;;
 
-# 在[例 3.55]中，由于一个学生只可能在一个系学习，则 可以用 &#x3D; 代替IN：
+# 在[例 3.55]中，由于一个学生只可能在一个系学习，则可以用 &#x3D; 代替 IN：
 SELECT Sno, Sname, Sdept
 FROM Student
 WHERE Sdept &#x3D; (
@@ -1437,17 +1437,25 @@ WHERE Sdept &#x3D; (
     WHERE Sname &#x3D; &#39;刘晨&#39;
 );
 
-# [例 3.57 ]找出每个学生超过他选修课程平 均成绩的课程号。
+# [例 3.57] 找出每个学生超过他选修课程均成绩的课程号。
 SELECT Sno, Cno
 FROM SC x
-WHERE Grade &gt;&#x3D; (SELECT AVG（Grade） FROM SC y WHERE y.Sno &#x3D; x.Sno);
+WHERE Grade &gt;&#x3D; (
+    SELECT AVG(Grade)
+    FROM SC y
+    WHERE y.Sno &#x3D; x.Sno
+);
 
-# [例 3.58] 查询非计算机科学系中比 计算机科学系任意一个学生年龄小 的学生姓名和年龄
+# [例 3.58] 查询非计算机科学系中比计算机科学系任意一个学生年龄小的学生姓名和年龄
 # 嵌套查询
 SELECT Sname, Sage
 FROM Student
-WHERE Sage &lt; ANY (SELECT Sage FROM Student WHERE Sdept &#x3D; &#39; CS &#39;)
-  AND Sdept &lt;&gt; &#39;CS&#39;;
+WHERE Sdept &lt;&gt; &#39;CS&#39;
+AND Sage &lt; ANY (
+    SELECT Sage
+    FROM Student
+    WHERE Sdept &#x3D; &#39;CS&#39;
+);
 
 # 用聚集函数实现[例 3.58]
 SELECT Sname, Sage
@@ -1455,7 +1463,7 @@ FROM Student
 WHERE Sage &lt; (SELECT MAX(Sage) FROM Student WHERE Sdept &#x3D; &#39;CS &#39;)
   AND Sdept &lt;&gt; &#39;CS&#39;;
 
-# [例 3.59] 查询非计算机科学系 中比计算机科学系所有学生年龄都小的学生姓名及年龄。
+# [例 3.59] 查询非计算机科学系中比计算机科学系所有学生年龄都小的学生姓名及年龄。
 # 方法一：用ALL谓词
 SELECT Sname, Sage
 FROM Student
@@ -1519,6 +1527,13 @@ WHERE Sno IN (
     Group by Sno
     HAVING count(*) &#x3D; (SELECT count(*) FROM course)
 );
+SELECT Sname
+FROM Student
+WHERE (SELECT COUNT(*) FROM course) &#x3D; (
+    SELECT COUNT(*) FROM SC 
+    GROUP BY Sno
+    HAVING SC.Sno &#x3D; Student.Sno
+);
 
 # [例 3.63]查询至少选修了学生 201215122选修的全部课程的学生号码。
 # 不存在这样的课程y，学生201215122选修了y，而学生x没有选。
@@ -1533,7 +1548,7 @@ WHERE NOT EXISTS(  # 学生201215122选修了而学生 x 没有选的课程
                 WHERE SCZ.Sno &#x3D; SCX.Sno
                   AND SCZ.Cno &#x3D; SCY.Cno
             )
-    );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="集合查询">集合查询</h3>
 <pre class="line-numbers language-SQL" data-language="SQL"><code class="language-SQL"># [例 3.64] 查询计算机科学系的学生及年龄不大于19岁的学生。
 SELECT *
