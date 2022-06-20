@@ -383,6 +383,50 @@ var _hmt = _hmt || [];
             
                 <ul>
                     <li class="file">
+                        <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/06-%E7%89%88%E6%9C%AC%E6%88%B3/">
+                            
+                                06-版本戳
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/08-%E9%94%AE%E5%80%BC%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                08-键值数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/09-%E6%96%87%E6%A1%A3%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                09-文档数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
+                        <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/">
+                            
+                                10-列族数据库
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
+                    <li class="file">
                         <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/NoSQL%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/">
                             
                                 NoSQL数据模型
@@ -1102,7 +1146,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-20 17:21:32</span>
-    <!-- <span>2022-06-20 20:30:22</span> -->
+    <!-- <span>2022-06-20 20:39:01</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1215,15 +1259,34 @@ var _hmt = _hmt || [];
 </ol>
 <p>与处理“持久性”的基本手段类似，也可以针对单个请求来指定其所需的持久性。</p>
 <h2 id="仲裁">仲裁</h2>
-<p>写入仲裁：处理请求所的节点越多，避免“不一致”问题的能力就越强，要想保“强一致性”(strong consistency)， 需要使用多少个节点才行?</p>
+<h3 id="写入仲裁">写入仲裁</h3>
+<p>处理请求所的节点越多，避免“不一致”问题的能力就越强，要想保“强一致性”(strong consistency)， 需要使用多少个节点才行?</p>
 <ol type="1">
 <li>对等式分布模型：如果发生两个相互冲突的写入操作，那么只有其中一个操作能为超过半数的节点所认可，<span class="math inline">\(W &gt; N / 2\)</span> 。即，参与写入操作的节点数（W），必须超过副本节点数（N）的一半。副本个数又称为“复制因子”</li>
 <li>主从式分布模型：只需要向主节点中写入数据</li>
 </ol>
-<p>读取仲裁：想要保证能够读到最新数据，必须与多少个节点联系才行?</p>
+<h3 id="读取仲裁">读取仲裁</h3>
+<p>想要保证能够读到最新数据，必须与多少个节点联系才行?</p>
 <ol type="1">
 <li>“对等式分布模型”：只有当 <span class="math inline">\(R+W&gt;N\)</span> 时，才能保证读取操作的“强一致性”。其中，执行读取操作时所需联系的节点数(R)，确认写入操作时所需征询的节点数(W)，以及复制因子(N)</li>
 <li>“主从式分布模型”：只需从主节点中读取数据</li>
+</ol>
+<h3 id="复制因子">复制因子</h3>
+<p>一个集群有 100 个节点，然而其“复制因子”可能仅仅是3，因为大部分数据都分布在各个"分片”之中。</p>
+<p>将“复制因子”设为3，就可以获得足够好的“故障恢复能力”了。</p>
+<ol type="1">
+<li><p>如果只有一个节点出错，那么仍然能够满足读取与写入所需的最小法定节点数。</p></li>
+<li><p>若是有自动均衡（automatic rebalancing）机制，那么用不了多久，集群中就会建立起第三个副本，在替代副本建立好之前，再次发生副本故障的概率很小。</p></li>
+</ol>
+<p>需要在“一致性”与“可用性”之间权衡，参与某个操作的节点数，可能会随着该操作的具体情况而改变。</p>
+<ol type="1">
+<li>在写入数据时，根据“一致性”与“可用性”这两个因素的重要程度，有一些更新操作可能需要获得足够的节点支持率才能执行，而另外一些则不需要。</li>
+<li>与之相似，某些读取操作可能更看中执行速度，而可以容忍过时数据，此时，它就可以少联系几个节点。</li>
+</ol>
+<p>通常需要协调考虑读、写两种情况：</p>
+<ol type="1">
+<li>假设需要快速且具备“强一致性”的读取操作，那么写入操作就要得到全部节点的确认才行，这样的话，只需联系一个节点，就能完成读取操作了(N=3，W=3，R=1)</li>
+<li>但是，这个方案意味着，写入操作会比较慢，因为它们必须得到全部三个节点确认之后，才能执行，而且此时连一个节点都不能出错。</li>
 </ol>
 
 </div>
@@ -1231,6 +1294,11 @@ var _hmt = _hmt || [];
 
     <div class="post-guide">
         <div class="item left">
+            
+                <a href="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/06-%E7%89%88%E6%9C%AC%E6%88%B3/">
+                    <i class="fa fa-angle-left" aria-hidden="true"></i>
+                    06-版本戳
+                </a>
             
         </div>
         <div class="item right">
