@@ -1135,7 +1135,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-20 20:38:41</span>
-    <!-- <span>2022-06-20 21:04:51</span> -->
+    <!-- <span>2022-06-20 21:26:59</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1160,16 +1160,40 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <h2 id="section"></h2>
+    <h2 id="何谓列族数据库">何谓列族数据库</h2>
 <figure>
-<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620112647934.png" alt="image-20220620112647934"><figcaption aria-hidden="true">image-20220620112647934</figcaption>
+<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620211851198.png" alt="image-20220620211851198"><figcaption aria-hidden="true">image-20220620211851198</figcaption>
 </figure>
 <figure>
-<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620112727953.png" alt="Cassandra数据库所使用的列族数据模型"><figcaption aria-hidden="true">Cassandra数据库所使用的列族数据模型</figcaption>
+<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620211859180.png" alt="image-20220620211859180"><figcaption aria-hidden="true">image-20220620211859180</figcaption>
 </figure>
 <figure>
-<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620112816840.png" alt="用Cassandra记录事件"><figcaption aria-hidden="true">用Cassandra记录事件</figcaption>
+<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620155513761.png" alt="列族存储"><figcaption aria-hidden="true">列族存储</figcaption>
 </figure>
+<h2 id="特性">特性</h2>
+<h2 id="适用案例">适用案例</h2>
+<h3 id="事件记录">事件记录</h3>
+<p>由于列族数据库可存放任意数据结构，所以它很适合用来保存应用程序状态或运行中遇到的错误等事件信息。</p>
+<p>在企业级环境下，所有应用程序都可以把事件写入 Cassandra 数据库。它们可以用 appname：timestamp（应用程序名：时间戳）作为行键，并使用自己需要的列。</p>
+<p>由于 Cassandra 的写入能力可扩展，所以在事件记录系统中使用它效果会很好。</p>
+<figure>
+<img src="/2022/06/20/NoSQL%E7%B2%BE%E7%B2%B9/10-%E5%88%97%E6%97%8F%E6%95%B0%E6%8D%AE%E5%BA%93/image-20220620211921111.png" alt="使用 Cassandra 记录事件"><figcaption aria-hidden="true">使用 Cassandra 记录事件</figcaption>
+</figure>
+<h3 id="内容管理系统与博客平台">内容管理系统与博客平台</h3>
+<p>使用列族，可以把博文的标签（tag）、类别（category）、链接（link）和 trackback 等属性放在不同的列中。</p>
+<p>评论信息既可以与上述内容放在同一行，也可以移到另一个键空间。</p>
+<p>同理，博客用户与实际博文亦可存于不同列族中。</p>
+<h3 id="计数器">计数器</h3>
+<p>在网络应用程序中，通常要统计某页面的访问人数并对其分类，以算出分析数据。此时可使用 CounterColumnType 来创建列族。</p>
+<p>创建好列族后，可以使用任意列记录网络应用程序中每个用户访问每一页面的次数。也可以用 CQL 增加计数器的值</p>
+<h3 id="限期">限期</h3>
+<p>可能需要向用户提供试用版，或是在网站上将某个广告条显示一定时间。这些功能可以通过带过期时限的列（expiringcolumn）来完成。</p>
+<p>这种列过了给定时限后，就会由 Cassandra 自动删除。这个时限叫做 TTL (Time To Live，生存时间），以秒为单位。经过 TTL 指定的时长后，这种列就被删掉了。程序若检测到此列不存在，则可收回用户访问权限或移除广告条。</p>
+<h2 id="不适用场合">不适用场合</h2>
+<p>需要以 ACID 事务执行写入及读取操作的系统。</p>
+<p>如果想让数据库根据查询结果来聚合数据（例如 SUM 或 AVG），那么得把每一行数据都读到客户端，并在此执行操作。</p>
+<p>在开发早期原型或刚开始试探某个技术方案时，不太适合用 Cassandra。开发初期无法确定查询模式的变化情况，而查询模式一旦改变，列族的设计也要随之修改。这将阻碍产品创新团队的工作并降低开发者的生产能力。</p>
+<p>在关系型数据库中，数据模式的修改成本很高，而这却降低了查询模式的修改成本。Cassandra 则与之相反，改变其查询模式要比改变其数据模式代价更高。</p>
 
 </div>
 
