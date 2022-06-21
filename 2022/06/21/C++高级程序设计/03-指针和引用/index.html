@@ -9,7 +9,7 @@
 	
 	<title>
 	
-		指针 | 
+		03-指针和引用 | 
 	 
 	EagleBear2002&#39;s Blog
 	</title>
@@ -162,6 +162,17 @@ var _hmt = _hmt || [];
                 </ul>
             
                 <ul>
+                    <li class="file active">
+                        <a href="/2022/06/21/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/03-%E6%8C%87%E9%92%88%E5%92%8C%E5%BC%95%E7%94%A8/">
+                            
+                                03-指针和引用
+                            
+                        </a>
+                    </li>
+                    <div class="article-toc" style="display: none;"></div>
+                </ul>
+            
+                <ul>
                     <li class="file">
                         <a href="/2022/04/27/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/21-%E5%B0%81%E8%A3%85/">
                             
@@ -210,28 +221,6 @@ var _hmt = _hmt || [];
                         <a href="/2022/06/21/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/README/">
                             
                                 README
-                            
-                        </a>
-                    </li>
-                    <div class="article-toc" style="display: none;"></div>
-                </ul>
-            
-                <ul>
-                    <li class="file active">
-                        <a href="/2022/06/21/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/%E6%8C%87%E9%92%88/">
-                            
-                                指针
-                            
-                        </a>
-                    </li>
-                    <div class="article-toc" style="display: none;"></div>
-                </ul>
-            
-                <ul>
-                    <li class="file">
-                        <a href="/2022/06/21/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/%E6%8C%87%E9%92%88-1/">
-                            
-                                指针-1
                             
                         </a>
                     </li>
@@ -1173,13 +1162,13 @@ var _hmt = _hmt || [];
 	<!-- 引入正文 -->
 	<div id="content">
 		<h1 id="article-title">
-    指针
+    03-指针和引用
 </h1>
 <div class="article-meta">
     
     <span>EagleBear2002</span>
     <span>2022-06-21 19:15:06</span>
-    <!-- <span>2022-06-21 19:38:07</span> -->
+    <!-- <span>2022-06-21 20:14:41</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1204,7 +1193,10 @@ var _hmt = _hmt || [];
 </div>
 
 <div id="article-content">
-    <h2 id="常量指针与指针常量">常量指针与指针常量</h2>
+    <h2 id="空指针">空指针</h2>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">NULL</span> <span class="token expression"><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token number">0</span><span class="token punctuation">)</span> </span><span class="token comment">// ANSI C</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">NULL</span> <span class="token expression"><span class="token number">0</span> </span><span class="token comment">// C++</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="常量指针与指针常量">常量指针与指针常量</h2>
 <table>
 <thead>
 <tr class="header">
@@ -1214,30 +1206,42 @@ var _hmt = _hmt || [];
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>const int p;</code></td>
-<td></td>
+<td><code>const int x;</code></td>
+<td>x 不可修改</td>
 </tr>
 <tr class="even">
-<td><code>const int *cp;</code></td>
-<td></td>
+<td><code>int *p;</code></td>
+<td>不能指向 const int</td>
 </tr>
 <tr class="odd">
-<td></td>
-<td></td>
+<td>常量指针：<code>const int *cp;</code></td>
+<td>*cp 不可修改，cp 可修改</td>
+</tr>
+<tr class="even">
+<td>指针常量：<code>int * const p;</code></td>
+<td>p 的指向不可修改，*p 可修改</td>
 </tr>
 </tbody>
 </table>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> c <span class="token operator">=</span> <span class="token number">128</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token operator">*</span> q <span class="token operator">=</span> <span class="token generic-function"><span class="token function">const_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token operator">&amp;</span>c<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//强制类型转换</span>
+<span class="token operator">*</span>q <span class="token operator">=</span> <span class="token number">111</span><span class="token punctuation">;</span><span class="token comment">//企图通过变量指针修改常量</span>
+cout <span class="token operator">&lt;&lt;</span> <span class="token string">" c "</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">&amp;</span>c <span class="token operator">&lt;&lt;</span> c <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span> <span class="token comment">// 这里的c是符号常量，所以在编译的时候，符号常量已经变为128了，相当于define</span>
+cout <span class="token operator">&lt;&lt;</span> <span class="token string">" q "</span> <span class="token operator">&lt;&lt;</span> <span class="token operator">&amp;</span>q <span class="token operator">&lt;&lt;</span> q <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+cout <span class="token operator">&lt;&lt;</span> <span class="token string">"*q "</span> <span class="token operator">&lt;&lt;</span> q <span class="token operator">&lt;&lt;</span> <span class="token operator">*</span>q <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+<span class="token comment">//Name   Addr     Value</span>
+<span class="token comment">//c    0012FF74    128</span>
+<span class="token comment">//q    0012FF70    0012FF74</span>
+<span class="token comment">//*q   0012FF74    111</span>
+<span class="token comment">//对于同一个地址0x0012FF74，输出了不同的值</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="引用">引用</h2>
+<p>函数返回值为引用时，<strong>不能返回局部变量的引用</strong>（但此操作能够通过编译）。</p>
 
 </div>
 
 
     <div class="post-guide">
         <div class="item left">
-            
-                <a href="/2022/06/21/C++%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/%E6%8C%87%E9%92%88-1/">
-                    <i class="fa fa-angle-left" aria-hidden="true"></i>
-                    指针
-                </a>
             
         </div>
         <div class="item right">
