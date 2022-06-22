@@ -1168,7 +1168,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-04-27 10:19:23</span>
-    <!-- <span>2022-06-21 20:14:41</span> -->
+    <!-- <span>2022-06-22 09:08:03</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1991,9 +1991,7 @@ class D： B, C;<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>如果有两个基类，两个类有一个相同名称的虚函数,比如B和C都有一个同名的虚函数，到底怎么做?不做要求</li>
 </ol>
 <h2 id="操作符重载">操作符重载</h2>
-<ul>
-<li>函数重载：名同，参数不同</li>
-</ul>
+<p>函数重载：名同，参数不同</p>
 <pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Counter</span> <span class="token punctuation">&#123;</span>
     <span class="token keyword">int</span> value<span class="token punctuation">;</span>
     <span class="token keyword">public</span>：
@@ -2008,14 +2006,30 @@ class D： B, C;<span aria-hidden="true" class="line-numbers-rows"><span></span>
             <span class="token keyword">return</span> temp<span class="token punctuation">;</span>
         <span class="token punctuation">&#125;</span>
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>不可以重载的操作符： <code>.</code> （成员访问操作符）、<code>.*</code> （成员指针访问运算符，如下）、<code>：：</code> （域操作符，后面不是变量）、<code>?：</code> （条件操作符，涉及到跳转，影响理解）、<code>sizeof</code>。</p>
+<p>不可以重载的操作符： <code>.</code> （成员访问操作符）、<code>.*</code> （成员指针访问运算符，如下）、<code>::</code> （域操作符，后面不是变量）、<code>?:</code> （条件操作符，涉及到跳转，影响理解）、<code>sizeof</code>。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">A</span> <span class="token punctuation">&#123;</span>
+	<span class="token keyword">int</span> x<span class="token punctuation">;</span>
+
+   <span class="token keyword">public</span><span class="token operator">:</span>
+	<span class="token function">A</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">)</span>
+		<span class="token operator">:</span> <span class="token function">x</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+	<span class="token keyword">void</span> <span class="token function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span>A<span class="token double-colon punctuation">::</span><span class="token operator">*</span>p_f<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    p_f <span class="token operator">=</span> <span class="token operator">&amp;</span>A<span class="token double-colon punctuation">::</span>f<span class="token punctuation">;</span>
+    A <span class="token function">a</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">(</span>a<span class="token punctuation">.</span><span class="token operator">*</span>p_f<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 通过编译</span>
+    <span class="token operator">*</span><span class="token function">p_f</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 编译错误</span>
+	<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>永远不要重载 <code>&amp;&amp;</code> 和 <code>||</code> ：短路运算会造成极大的问题。</p>
 <p>注意：<code>=</code>、<code>()</code>、<code>[]</code>、<code>-&gt;</code>不可以作为全局函数重载。</p>
 <ul>
 <li>大体上来讲，C++ 一个类本身对这几个运算符就已经有了相应的解释了。</li>
 <li>如果将这四种符号进行友元全局重载，则会出现一些冲突</li>
 <li>下标和箭头运算符为什么？有保留调用顺序，我们希望能保留原来的顺序，而全局不能要求，而成员函数的this就可以解决这个问题</li>
-<li><a href="https：//blog.csdn.net/weixin_30781107/article/details/98147938">参考</a></li>
 </ul>
 <p>操作符重载的哲理：尽量让事情有效率，但不是过度有效率（返回引用），每次就是返回一个拷贝，而不是引用。</p>
 <h3 id="操作符-的重载">操作符 = 的重载</h3>
@@ -2023,7 +2037,7 @@ class D： B, C;<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>默认赋值操作符重载函数</li>
 <li>逐个成员赋值</li>
 <li>对含有对象成员的类，该定义是递归的</li>
-<li>赋值操作符的重载不可以被继承：因为拷贝构造，派生出来的类有一些新的部分</li>
+<li>赋值操作符的重载<strong>不可以被继承</strong>：因为拷贝构造，派生出来的类有一些新的部分</li>
 <li>返回引用类型：返回*this的引用，支持链式赋值</li>
 <li>this引用应该是非常量引用，返回出来的是作为右值进行计算
 <ol type="1">
