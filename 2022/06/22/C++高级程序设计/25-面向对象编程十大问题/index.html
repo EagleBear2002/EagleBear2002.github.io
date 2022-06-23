@@ -1212,7 +1212,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-06-22 19:53:15</span>
-    <!-- <span>2022-06-23 10:09:43</span> -->
+    <!-- <span>2022-06-23 10:51:28</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1259,12 +1259,11 @@ var _hmt = _hmt || [];
 <li>使用方法：通过友元类对象的方法来完成创建、使用 <code>static</code> 方法完成创建</li>
 </ol>
 <h2 id="成员初始化表">成员初始化表</h2>
+<p>为什么引入成员初始化表？为什么初始化表执行次序只与类数据成员的定义次序相关？</p>
 <ol type="1">
-<li>为什么引入成员初始化表？为什么初始化表执行次序只与类数据成员的定义次序相关？
-<ul>
-<li>初始化列表中初始化的顺序与成员声明的顺序一致，与自己的声明顺序无关</li>
+<li>为了提高编译效率，减轻编译器负担</li>
+<li>按照成员定义次序初始化，可以达到提高编译效率的目的</li>
 <li>原则上的初始化顺序：就地初始化 &gt; 构造函数的初始化列表 &gt; 构造函数里的赋值（严格意义上不能成为初始化）</li>
-</ul></li>
 </ol>
 <pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">class CString &#123;
     char *p;
@@ -1273,18 +1272,25 @@ var _hmt = _hmt || [];
         CString(int x): size(x),p(new char[size]) &#123;&#125;    
     &#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="拷贝构造函数和赋值函数">拷贝构造函数和赋值函数</h2>
-<p>为什么引入拷贝构造函数、赋值函数？ 1. 拷贝函数：相同类型的类对象是通过拷贝构造函数来完成整个复制过程的，拷贝函数的拷贝过程没有处理静态数据成员</p>
+<p>为什么引入拷贝构造函数、赋值函数？</p>
+<ol type="1">
+<li>防止浅拷贝带来的问题，需要由程序员管理各种资源</li>
+<li>拷贝构造函数和赋值函数可以提高效率</li>
+</ol>
 <h2 id="后期绑定">后期绑定</h2>
 <p>什么是后期绑定？ C++ 如何实现虚函数？</p>
+<ol type="1">
+<li>运行时确定调用哪个函数的代码</li>
+<li>通过在对象头部加入虚函数表来实现后期动态绑定</li>
+</ol>
 <h2 id="虚函数">虚函数</h2>
 <p>何时使用虚函数？</p>
-<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">Shape</span> <span class="token punctuation">&#123;</span>
-	<span class="token keyword">public</span><span class="token operator">:</span><span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">draw</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
-	<span class="token keyword">virtual</span> <span class="token keyword">void</span> <span class="token function">error</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
-	<span class="token keyword">int</span> <span class="token function">objectID</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ol type="1">
+<li>当子类方法需要表现出不同行为的时候</li>
+</ol>
 <h2 id="继承方式">继承方式</h2>
 <p>public 继承和 non-pablic 继承意味着什么？</p>
+<p>non-public 继承在需要使使用 Base Class 中的 protected 成员，或重载 virtual function 时，同时不希望 Base Class 被客户代码使用。</p>
 <table>
 <thead>
 <tr class="header">
@@ -1302,25 +1308,46 @@ var _hmt = _hmt || [];
 <td>不可见</td>
 </tr>
 <tr class="even">
-<td>private 继承</td>
-<td>private</td>
-<td>private</td>
-<td>不可见</td>
-</tr>
-<tr class="odd">
 <td>protected 继承</td>
 <td>protected</td>
 <td>protected</td>
 <td>不可见</td>
 </tr>
+<tr class="odd">
+<td>private 继承</td>
+<td>private</td>
+<td>private</td>
+<td>不可见</td>
+</tr>
 </tbody>
 </table>
 <h2 id="重载注意事项">重载注意事项</h2>
-<p>为什么 <code>=, (), [], -&gt;</code> 不能作为全局函数重载？ 1. 大体上来讲，C++ 一个类本身对这几个运算符就已经有了相应的解释了。 2. 如果将这四种符号进行友元全局重载，则会出现一些冲突</p>
+<p>为什么 <code>=, (), [], -&gt;</code> 不能作为全局函数重载？ 1. 大体上来讲，C++ 一个类本身对这几个运算符就已经有了相应的解释了。 2. 如果将这四种符号进行友元全局重载，则会出现一些二义性冲突</p>
 <h2 id="返回引用">返回引用</h2>
 <p>什么时候成员函数能返回引用？</p>
+<ol type="1">
+<li>需要改变原有值</li>
+<li>节省空间、提高效率、避免多余拷贝</li>
+</ol>
 <h2 id="内存分配方式的重载">内存分配方式的重载</h2>
-<p>什么时候、如何重载 <code>new</code> 和 <code>delete</code>？ + 不允许重载：<code>void* operator new(size_t, void*); // 不允许重新定义这个版本</code></p>
+<p>什么时候、如何重载 <code>new</code> 和 <code>delete</code>？</p>
+<ol type="1">
+<li>需要程序员自己来管理内存的时候（需要多次调用原有 new/delete 的时候，嫌慢）</li>
+<li><code>new</code> 的重载可以有多个</li>
+</ol>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token operator">*</span><span class="token keyword">operator</span> <span class="token keyword">new</span><span class="token punctuation">(</span>size_t size<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token comment">// 调用方式：</span>
+A <span class="token operator">*</span>p <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> A<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<ol start="3" type="1">
+<li><code>delete</code> 的重载只能有⼀个。</li>
+</ol>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token keyword">operator</span> <span class="token keyword">delete</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>p<span class="token punctuation">,</span> size_t size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 第一个参数表示被撤销的对象地址，第二个参数可有可无，表示被撤销的参数的大小</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<ol start="4" type="1">
+<li><code>new/delete</code> 重载之后，就不能再使用预定义的</li>
+<li>重载的 <code>new/delete</code> 是静态成员，遵循类的访问控制，可继承</li>
+<li>允许进行全局重载，但是不推荐使用全局重载</li>
+</ol>
 
 </div>
 
