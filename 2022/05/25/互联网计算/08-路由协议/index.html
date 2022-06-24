@@ -1234,7 +1234,7 @@ var _hmt = _hmt || [];
     
     <span>EagleBear2002</span>
     <span>2022-05-25 09:23:22</span>
-    <!-- <span>2022-06-24 15:47:30</span> -->
+    <!-- <span>2022-06-24 16:11:49</span> -->
     <div id="article-categories">
         
             <span>Categories：</span>
@@ -1409,8 +1409,8 @@ Router<span class="token comment">#undebug all #（或 no debug all）：停止d
 <p>OSPF 网络类型 1. 广播多路复用网络，例如以太网 2. 点对点网络 3. 非广播多路复用网络（NBMA，Non-broadcast multi-access）</p>
 <p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/22.png"></p>
 <h3 id="dr-bdr">DR &amp; BDR</h3>
-<p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/24.png"></p>
 <h4 id="为什么要选择-dr-和-bdr">为什么要选择 DR 和 BDR？</h4>
+<p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/24.png"></p>
 <p>如上图，如果不选择 DR 和 BDR 会导致每一个路由器都和其他所有路由器交流（每个有10个连接）。每一个结点都要建立 10 = (5 * 4 / 2) 个链接，对于链路的复杂比较高，如果有了 DR 就只需要 4(n-1) 个连接。</p>
 <p>BDR 是 DR 的备份，其他路由器之间就不用通信了。如果有 DR 则只需要 4 条连接。DR 和 BDR 之间必然有连接。</p>
 <p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/23.png"></p>
@@ -1433,7 +1433,36 @@ Router<span class="token comment">#undebug all #（或 no debug all）：停止d
 <ol type="1">
 <li>OSPF 只有 5 个类型的报文</li>
 </ol>
-<p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/26.png"></p>
+<table>
+<thead>
+<tr class="header">
+<th>Fuction</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hello</td>
+<td>Hello</td>
+</tr>
+<tr class="even">
+<td>Database Description</td>
+<td>DBD</td>
+</tr>
+<tr class="odd">
+<td>Link-State Request</td>
+<td>LSR</td>
+</tr>
+<tr class="even">
+<td>Link-State Update</td>
+<td>LSU</td>
+</tr>
+<tr class="odd">
+<td>Link-State Acknowledgement</td>
+<td>LSAck</td>
+</tr>
+</tbody>
+</table>
 <ul>
 <li>DBD：LSA，发现没有发送 LSR</li>
 <li>由于传输要求比较高，所以设计了 LSAck</li>
@@ -1451,17 +1480,9 @@ Router<span class="token comment">#undebug all #（或 no debug all）：停止d
 <p>Hello 报文的 Type 字段设置为 1</p>
 <p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/27.png"></p>
 <h4 id="哪个路由器将成为-dr">哪个路由器将成为 DR？</h4>
-<p>TODO：LSA</p>
-<ol type="1">
-<li>优先级为第一关键字，路由器 ID 为第二关键字，最大的是 DR，第二大的是 BDR</li>
-<li>优先级：1-255，默认值：1</li>
-<li>路由器 ID
-<ol type="1">
-<li>环回 IP 地址（逻辑端口），避免端口宕机出现问题。（3 中描述的问题），需要手动配置</li>
-<li>如果没有环回 IP 地址，则接口 IP 为最高值地址（Active 的端口上的 IP 作为参考）</li>
-<li>如果接口出现故障，则路由器必须重新建立邻接关系并重新转换（readvertising）LSA</li>
-</ol></li>
-</ol>
+<p>优先级为第一关键字，Router ID 为第二关键字，最大的是 DR，第二大的是 BDR</p>
+<p>优先级：1-255，默认值：1</p>
+<p>如何决定 Router ID： 1. 如果有环回端口（loopback 端口，逻辑上的端口），将该端口 IP 地址作为 Router ID，以避免一般端口宕机出现问题；环回端口需要手动配置 2. 如果没有环回 IP 地址，则将物理接口的最高 IP 地址作为 Router ID（Active 的端口上的 IP 作为参考） 3. 如果接口出现故障，则路由器必须重新建立邻接关系并重新转换（re-advertising）LSA</p>
 <h3 id="ospf-操作的完整步骤">OSPF 操作的完整步骤</h3>
 <p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/29.png"></p>
 <ul>
@@ -1511,23 +1532,23 @@ Router<span class="token comment">#undebug all #（或 no debug all）：停止d
 <h4 id="步骤-2选举-dr-和-bdr">步骤 2：选举 DR 和 BDR</h4>
 <p><img src="/2022/05/25/%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/08-%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE/image-20220509125305605.png"></p>
 <ol type="1">
-<li>如果没有其他路由器联机，则该路由器将成为 DR。下一个要"启动"的路由器将是 BDR</li>
+<li>如果没有其他路由器联机，则该路由器将成为 DR。下一个要“启动”的路由器将是 BDR</li>
 <li>如果多个路由器（两个或更多）同时联机，则
 <ol type="1">
 <li>优先级最高的路由器成为 DR：优先级为零表示“从不 DR”</li>
-<li>如果存在平局，则具有最高路由器 ID 的路由器将成为 DR：路由器 ID 是最高的环回或接口 IP 地址</li>
-<li>具有第二高优先级或路由器 ID 的路由器成为 BDR</li>
+<li>如果存在平局，则具有最高 Router ID 的路由器将成为 DR： Router ID 是最高的环回或接口 IP 地址</li>
+<li>具有第二高优先级或 Router ID 的路由器成为 BDR</li>
 </ol></li>
 <li>如果 DR 无效，则 BDR 变为 DR</li>
 <li>然而
 <ol type="1">
-<li>如果新的 OSPF 路由器以更高的优先级或路由器 ID 加入网络，则当前的 DR 和 BDR <strong>不会更改</strong></li>
-<li>仅当当前 DR 失败时，它才成为新的 BDR；或者仅当当前 DR 和 BDR 失败时，才成为新的 DR</li>
+<li>如果新的 OSPF 路由器以更高的优先级或 Router ID 加入网络，则当前的 DR 和 BDR <strong>不会更改</strong></li>
+<li>仅当当前 DR 失败时，它才成为新的 BDR</li>
 </ol></li>
 </ol>
 <h4 id="步骤-3发现路线">步骤 3：发现路线</h4>
 <ol type="1">
-<li>这一步从 Ex Start 状态转换到完整状态</li>
+<li>这一步从 Ex Start 状态转换到 Full 状态</li>
 <li>路由器确定“主/从（master/slave）”关系</li>
 <li>多路复用网络中的 DR/BDR 交换 LSA，并且所有其他 DR 将其 Type 2 DBD 发送给 DR/BDR</li>
 <li>如有必要，路由器可以通过发送请求更多信息的 LSR 进入负载状态：所有路由器必须在“加载状态”中等待，直到完全更新请求的路由器</li>
