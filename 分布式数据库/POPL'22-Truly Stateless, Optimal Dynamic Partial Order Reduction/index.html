@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\rd{\textcolor{orange}{\overset{rd}\Longrightarrow}} \def\b{\textcolor{green}{\overset{b}\rightsquigarrow}} \def\rf{\textcolor{green}{\mathsf{rf}}} \def\po{\mathsf{po}} \def\porf{\po\rf} \def\i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="POPL&#39;22-Truly Stateless, Optimal Dynamic Partial Order Reduction">
+<meta property="og:url" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\rd{\textcolor{orange}{\overset{rd}\Longrightarrow}} \def\b{\textcolor{green}{\overset{b}\rightsquigarrow}} \def\rf{\textcolor{green}{\mathsf{rf}}} \def\po{\mathsf{po}} \def\porf{\po\rf} \def\i">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+<meta property="article:published_time" content="2024-03-28T12:51:00.000Z">
+<meta property="article:modified_time" content="2024-03-28T12:57:21.025Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>POPL'22-Truly Stateless, Optimal Dynamic Partial Order Reduction | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">36</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">358</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          POPL'22-Truly Stateless, Optimal Dynamic Partial Order Reduction
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-03-28 20:51:00 / 修改时间：20:57:21" itemprop="dateCreated datePublished" datetime="2024-03-28T20:51:00+08:00">2024-03-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">分布式数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\rd{\textcolor{orange}{\overset{rd}\Longrightarrow}}
+\def\b{\textcolor{green}{\overset{b}\rightsquigarrow}}
+\def\rf{\textcolor{green}{\mathsf{rf}}}
+\def\po{\mathsf{po}}
+\def\porf{\po\rf}
+\def\init{\mathsf{init}}
+\def\Event{\mathsf{Event}}
+\def\wwrr{\mathsf{w+w+rr}}
+\def\R{\mathsf{R}}
+\def\W{\mathsf{W}}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>动态偏序约简（DPOR）通过探索并发程序的所有交错直至某种等价关系（例如 Mazurkiewicz 迹等价）来<strong>验证并发程序</strong> 。这样做涉及空间和时间之间的复杂权衡。现有的 DPOR 算法要么是探索最优的（即仅精确探索每个等价类的交错），但可能使用程序大小的指数内存，要么保持多项式内存消耗，但可能会探索指数级的许多冗余交错。</p>
+<p>在本文中，我们表明可以两全其美：在线性内存消耗的情况下探索每个等价类的确切一个交错。我们的算法 TruSt 在 Coq 中形式化，不仅适用于顺序一致性，还适用于满足一些基本假设的任何弱内存模型，包括 TSO、PSO 和 RC11。此外，TruSt 的可并行性令人尴尬：它的不同探索选项没有共享状态，因此可以完全并行探索。因此，TruSt 在内存和/或时间方面优于最先进的技术。</p>
+<p>作者：</p>
+<ul>
+<li>Michalis Kokologiannakis, MPI-SWS, Germany</li>
+<li>Iason Marmanis, MPI-SWS, Germany</li>
+<li>Vladimir Gladstein, MPI-SWS, Germany and St Petersburg University/JetBrains Research, Russia</li>
+<li>Viktor Vafeiadis, MPI-SWS, Germany</li>
+</ul>
+<p>作者讲解该论文的一个视频：<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1UJ4m1x7yu/?spm_id_from=333.337.search-card.all.click&amp;vd_source=bd427f91dee5122f5f148ab719220125" class="uri">https://www.bilibili.com/video/BV1UJ4m1x7yu/?spm_id_from=333.337.search-card.all.click&amp;vd_source=bd427f91dee5122f5f148ab719220125</a></p>
+<p>相关文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/446927002" class="uri">https://zhuanlan.zhihu.com/p/446927002</a></p>
+<h2 id="introduction">INTRODUCTION</h2>
+<p>无状态模型检查（SMC）[Godefroid 1997; Musuvathi et al. 2008] 是一种用于验证有限尺寸的并发程序的有效验证技术。它是作为显式状态模型检查的替代方案而引入的，可以避免过多的内存消耗，因此有可能扩展到更大的程序。SMC 的工作原理是系统地探索给定并发程序的所有执行，而不存储它已经访问过的程序状态集。</p>
+<p>虽然 SMC 允许根据多项式内存要求来验证程序，但它有一个明显的缺点，即要探索的执行次数通常与程序大小成指数关系。因此，SMC 几乎总是与巧妙的动态偏序约简（DPOR）算法一起使用 [Abdulla et al. 2014; Flanagan et al. 2005; Kokologiannakis et al. 2019] 减少了需要探索的执行次数，以覆盖所有可能的程序行为。DPOR 将程序的执行跟踪根据某些关系分为等效类，例如 Mazurkiewicz 跟踪等价 [Mazurkiewicz 1987]，所有等效路径都表现出相同的可观察结果。然后，为了验证程序，只需从每个等价类中探索一条路径就足够了。</p>
+<p>然而，探索每个等价类的一个代表性执行轨迹（即最优）并不容易。 DPOR 算法（例如，[Abdulla et al 2015; 2014; 2016; Albert et al 2017; 2018; Chalupa et al 2017; Chatterjee et al 2019; Flanagan et al 2005; Kokologiannakis et al 2019; Zhang et al 2015] ）通常开始通过探索一个程序路径，每当他们检测到一对竞争的的访问时，他们就会以相反的顺序探索包含竞争的访问的其他跟踪，同时还保持某种状态以避免重新探索等效的执行跟踪。然而，现有算法要么不是最优的，这意味着即使对于具有 <span class="math inline">\(O(n)\)</span> 等价类（其中 <span class="math inline">\(n\)</span> 是程序的大小）的程序，它们也可能探索指数数量的跟踪，或者通过牺牲 SMC 的发明来实现最优性多项式内存消耗。事实上，大多数现代 DPOR 验证问题解决方案都选择第二种解决方案，即它们可能会消耗指数级的内存。</p>
+<p>在本文中，我们表明这种妥协是不必要的。我们开发了一种具有线性内存需求的探索最优 DPOR 算法。除了在时间和内存方面为 DPOR 提供可扩展的解决方案外，我们的算法，TruSt（Truly Stateless Model-checker）还具有另外两个大优势：</p>
+<ul>
+<li>这两项内容是参数化的：(1) 内存模型的选择，不仅支持顺序一致性 (SC) [Lamport 1979]，还支持各种弱内存模型，例如 TSO [Sewell et al 2010]、PSO [SPARC International Inc. 1994] 和 RC11 [Lahav et al 2017]，以及 (2) DPOR 等价关系的选择，支持 Shasha-Snir 等价 [Shasha et al 1988]（Mazurkiewicz 等价于弱内存模型）和读取等效性 [Chalupa et al 2017]。</li>
+<li>它对不同执行跟踪的探索绝对不共享任何状态，这意味着 TruSt 的并行性令人尴尬。这与现有的 DPOR 解决方案形成鲜明对比，后者的并行化需要共享以避免重复（例如，[Lång et al 2020]）。</li>
+</ul>
+<p>为了实现这一目标，我们以之前的工作为基础——尤其是 GenMC [Kokologiannakis et al 2019] ——并将程序执行表示为执行图 [Alglave et al 2014]。然而，我们从根本上改变了 DPOR 逆转恶意访问的条件。具体来说，我们限制只有当要删除的事件形成剩余执行的最大扩展时才发生反转——这是我们在本文中引入的一个新颖概念。我们证明最大扩展总是存在并且是唯一的，因此人们可以在不记录任何附加状态的情况下实现正确性和最优性。线性空间复杂度源于 TruSt 以递归深度优先的方式探索执行：递归深度受程序大小限制，每次递归调用都需要常数空间来表示其与当前执行图的差异，即大小也是线性的。</p>
+<p>总之，我们做出以下贡献：</p>
+<ul>
+<li><span class="math inline">\(\S2\)</span> 通过一系列示例，我们描述了现有 DPOR 解决方案的工作原理以及为什么保持最优性和多项式空间复杂性会带来相当大的挑战。</li>
+<li><span class="math inline">\(\S3\)</span> 我们提供了一个直观的说明，说明 TruSt 如何通过将程序执行表示为图形并使用极大值概念限制替代探索来克服这一挑战。我们的算法适用于任何受一些基本假设限制的内存模型。</li>
+<li><span class="math inline">\(\S4\)</span> 我们详细描述我们的算法，并证明（在 Coq 中）它是合理的、完整的和最优的。</li>
+<li><span class="math inline">\(\S5\)</span> 我们将 TruSt 的并行版本实现为验证 C/C++ 程序的工具。</li>
+<li><span class="math inline">\(\S6\)</span> 我们证明 TruSt 在内存和/或验证时间方面优于最先进的技术，并且它在多核机器上的扩展性非常好。</li>
+</ul>
+<h2 id="smc-dpor-a-troubled-marriage">SMC &amp; DPOR: A TROUBLED MARRIAGE</h2>
+<p>首先，为什么 SMC/DPOR 会遭受这种探索/内存权衡的困扰？为了回答这个问题，让我们首先回顾一下 DPOR 的基本原理。为了简化演示，在本节的其余部分中，我们假设顺序一致性（SC）的设置，并且使用的等价概念是 Mazurkiewicz 等价概念。在 <span class="math inline">\(\S 3\)</span>​ 中，我们提出了这些假设并得出了 TruSt，这是一种与内存模型无关的 DPOR，它既适用于类似 Mazurkiewicz 的等价类，也适用于更粗略的等价划分。</p>
+<h3 id="dpor-in-a-nutshell">DPOR in a Nutshell</h3>
+<p>正如简要提到的，DPOR 首先探索一个完整的程序交织，然后进入竞争检测阶段，当它识别出需要探索的进一步交织时。具体来说，它检测竞争的转换，如果以相反的顺序执行，将导致属于不同等价类的交错。然后，DPOR 以深度优先的方式一一探索这些替代方案。（在探索每个交错之后，运行竞争检测阶段，该阶段可以递归地生成要探索的进一步交错等等）</p>
+<p>我们用下面的 <span class="math inline">\(\wwrr\)</span> 示例来说明上述过程，其中每条指令都被赋予了不同的标签。</p>
+<p>$$ (1) x := 1  (2) y := 1 </p>
+<span class="math display">\[\begin{array}{c}
+(3) a := x \\
+(4) b := y \\
+\end{array}\]</span>
+<p>$$</p>
+<p>该程序有 12 个交错，分为 4 个 Mazurkiewicz 等价类。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240321153124529.png"></p>
+<blockquote>
+<p>TODO：上图中，红色的集合是睡眠集，蓝色的集合是每个转换的回溯集。</p>
+<p>基本思想：交换竞争的转换（操作），以寻找新的路径</p>
+</blockquote>
+<p>现在让我们看看 DPOR 如何生成该程序的所有四个 Mazurkiewicz 迹线。从空跟踪开始，DPOR 添加与程序转换相对应的事件，直到到达完整跟踪 ①，如图 1 所示。在此过程中，它会跟踪回溯集中每个步骤执行的转换，稍后它将记录任何替代探索选项。</p>
+<p>一旦第一个跟踪被完全探索，DPOR 就会启动竞争检测（<span class="math inline">\(\rd\)</span>）阶段，并寻找竞争的转换。在 Mazurkiewicz 等价下，如果两个转换访问相同的内存位置，并且其中至少一个是写指令，则它们是竞争的。每当 DPOR 检测到两个竞争的转换时，它就会用另一个可用的转换填充较早转换的<strong>回溯集</strong>（backtrack set），这将迫使它以相反的顺序考虑竞争指令。</p>
+<p>回到 <span class="math inline">\(\wwrr\)</span> 示例，有两对竞争的转换：<span class="math inline">\(\langle 1, 3 \rangle\)</span> 和 <span class="math inline">\(\langle 2, 4 \rangle\)</span>。对于前一对，DPOR 使用 (3) 填充初始状态的回溯集，可以执行该回溯集而不是跟踪的第一次转换。然而，对于后一对竞争，请注意不能执行 (4) 来代替 (2)，因为必须首先执行 (3)。因此， DPOR 使用 (3) 而不是 (4) 填充第二个转换的回溯集。（一般来说，当要记录在回溯集中的转换由于因果关系取决于某些先前的事件集而无法立即执行时，DPOR 会在回溯集中记录一些其他事件——通常但不一定是其中一个事件）。</p>
+<p>现在竞争检测阶段已经完成，DPOR 以深度优先的方式考虑替代探索选项。它通过将跟踪限制为仅包含在该转换之前触发的事件，然后触发尚未探索的转换，来定位其回溯集中存在未探索的转换的最新转换，并回溯（<span class="math inline">\(\b\)</span>）。对于 <span class="math inline">\(\wwrr\)</span>​，第一个这样的转变是第二个，因此 DPOR 首先尝试扭转 (2) 和 (4) 之间的竞争。然而，要做到这一点，在竞争逆转之前（即，直到执行 (4) 之后），不应执行 (2)。 DPOR 通过将 (2) 放入睡眠集（sleep set）中来实现此目的，然后执行程序的其余转换（从 (3) 开始，如回溯集所示）。如图 1 所示，(2) 在执行 (4)（或者更一般地说，任何竞争的转换）时从睡眠集中删除。</p>
+<p>此时，构建了第二个完整迹线（迹线 ②），并且 DPOR 再次启动竞争检测阶段。在此阶段中，检测到两个竞争：一个在转换 (1) 和 (3) 之间，一个在 (2) 和 (4) 之间。然而，这两个竞争都不会对后道设置产生任何影响。就第一个竞争而言，这几乎是预料之中的，因为 (3) 已经处于初始过渡的回溯组中。然而，也许令人惊讶的是，DPOR 也不会填充第三次转换的回溯集，尽管事实上 (2) 不属于那里的回溯集。原因是 (2) 处于该转换的睡眠集中。这表明这将“重新反转”正在反转的竞争（导致相当于迹线 ① 的跟踪），因此 DPOR 避免尝试一起反转第二个竞争。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240326205937234.png"></p>
+<p>随后，DPOR 进一步回溯（参见图 2）并探索第一次过渡的替代方案。由于已经探索了针对此转换触发 (1)，因此将 (1) 插入睡眠集，并触发 (3)。此时，(1) 立即从睡眠集中移除，因为它正在与 (3) 进行竞赛。然后，DPOR 可以继续使用 (1)、(2) 和 (4) 中的任何一个，但我们假设它首先选择 (4)，然后继续使用 (1) 和 (2)，最终导致迹线 ③。</p>
+<p>继续进行现在应该熟悉的竞争检测阶段，DPOR 注意到 (2) 与 (4) 处于数据竞争状态，因此将 (2) 插入第二个转换的回溯集中。</p>
+<p>最后，算法回溯到第二个转换并触发 (2) 而不是 (4)。然后加上 (1) 和 (4) ，得到迹线 ④。与之前一样，④ 的竞争检测阶段不会向回溯集添加任何新的转换，从而结束了对该程序的所有四个不同 Mazurkiewicz 等价类的代表性交错的探索。</p>
+<blockquote>
+<p>笔者将整个 DPOR 的搜索的过程用下图和伪代码表示。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">sleep_set;<br>traceback_set[];<br>procedure DPOR_DFS(u) &#123;<br>	find_valid_path();<br>	race_detection();<br>&#125;<br><br>procedure race_detection &#123;<br>	// add racy transitions into each traceback_set above<br>&#125;<br></code></pre></td></tr></table></figure>
+</blockquote>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240327154359756.png"></p>
+<h3 id="the-race-reversal-problem">The Race-Reversal Problem</h3>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240326205846966.png"></p>
+<p>到目前为止，DPOR 有一个很大的缺点：竞争逆转的方式不是预先确定的。当 DPOR 检测到两个事件 a 和 b 之间存在竞争且 a 在跟踪中出现在 b 之前时，它需要填充在 a 位置设置的回溯集。然而，如果 b 在 a 的位置不可触发（例如，因为它因果上取决于 a 之后添加的一些其他事件，这里所说的因果取决于具体使用的 DPOR），则会添加一个不同的事件。事实上，我们已经看到了这个问题的一个例子：在 <span class="math inline">\(\wwrr\)</span> 的第一条踪迹的竞争检测阶段，(3) （而不是 (4)）被添加到 (2) 的回溯集中，因为后者在那一点不可触发，因为它取决于转换 (3)。</p>
+<p>一般来说，DPOR 使用出现在跟踪中 a 和 b 之间的事件 c 填充在 a 处设置的回溯，并且不因果依赖于任何其他事件。当然，虽然将 b 本身（或来自同一线程的 b 的前驱）添加到 a 的回溯集确实有意义，但这并不总是可能的，因为 b 可能依赖于跨越许多不同线程的多个其他事件。</p>
+<p>竞争逆转机制中的这种<strong>非确定性</strong>有时会导致 DPOR 遇到执行阻塞。要查看这样的示例，请再次考虑 <span class="math inline">\(\S 2.1\)</span> 中的 <span class="math inline">\(\wwrr\)</span> 示例，但这一次假设在迹线 ① 的竞争检测阶段，<strong>将 (2) 添加到第一个转换的回溯集中（而不是 (3)）</strong>，如图 3 所示。在迹线 ② 的竞争检测过程中，DPOR 将发现与 <span class="math inline">\(\S 2.1\)</span> 探索中相同的竞争。然而，这一次有一个关键的区别：(1) 和 (3) 之间的竞争必须逆转。在 <span class="math inline">\(\S 2.1\)</span>​ 的运行中，(3) 已经位于第一个转换的回溯集中，因此在迹线 ② 的竞争检测阶段，DPOR 没有更改第一个转换的回溯集合。然而，在目前的探索中，(3) 并不属于第一次转变的回溯集。因此，DPOR 将其添加到此处，从而导致包含三个事件的回溯集。</p>
+<blockquote>
+<p>TODO：在上一段的示例中，(2) 和 (1) 并不竞争，为什么要把 (2) 添加到第一个转换的回溯集中？</p>
+</blockquote>
+<p>反过来，虽然对迹线 ②、③ 和 ④ 的探索与 <span class="math inline">\(\S 2.1\)</span> 中完全相同，但第一个转换的不同回溯集将导致无关的探索。事实上，如图 3 所示，DPOR 通过触发 (2) 作为第一个转换来开始探索。然而，所有其他可触发的转换都处于睡眠集中，这意味着这种无关的探索将被阻止。</p>
+<p>更一般地说，即使在这个示例中，基本 DPOR 算法仅探索一个阻塞执行，但也存在具有线性数量的 Mazurkiewicz 等价类的参数程序，其中 DPOR 探索指数级的许多阻塞执行 [Abdulla et al 2017; Nguyen et al. 2018]。以最佳方式解决上述竞争逆转问题（即，仅探索每个 Mazurkiewicz 等价类的一条迹线）是非常困难的。而且，即使有 DPOR 算法能够实现这种最优性 [Abdulla et al 2017; 2019; 2018; Aronis et al. 2018; Kokologiannakis et al. 2019; 2020]，正如我们很快就会看到的，所有此类解决方案都会遭受指数级的内存消耗。</p>
+<h3 id="exponential-cost-solutions-to-the-race-reversal-problem">Exponential-Cost Solutions to the Race-Reversal Problem</h3>
+<p>但现有的 DPOR 解决方案如何真正实现最优呢？这些技术背后的关键思想是不仅保存回溯集中的转换，而且保存转换序列。因此，每当 DPOR 试图逆转两个事件 a 和 b 之间的竞争（a 在跟踪中较早）时，它不必猜测应该将哪个转换添加到在 a 位置设置的回溯中；相反，它可以简单地添加一个包含 b 及其所有因果前身的序列，以便 a 和 b 之间的竞争精确逆转。通过这样做，它还可以摆脱睡眠集，该睡眠集仅用于不过早地触发转换（即在竞争逆转之前）。</p>
+<p>作为一个具体的例子，让我们简要讨论 Abdulla 等人 [2014] 的最优 DPOR 算法的探索过程在验证 <span class="math inline">\(\wwrr\)</span> 示例时有何不同。在迹线 ① 的竞争检测阶段，最优 DPOR 将添加序列 3 和 3.4 以分别反转 (1) 和 (3) 以及 (2) 和 (4) 之间的竞争。通过这样做，optimal-DPOR 可以精确地逆转程序中的所有竞争，并且还可以避免探索任何阻塞的执行。</p>
+<p>虽然保存转换序列足以保证最优性，但它可能导致指数内存消耗 [Abdulla et al 2014; Nguyen et al. 2018]。要查看这方面的示例，请考虑下面的 exp-mem 程序。</p>
+<p><span class="math display">\[
+\operatorname{fetch\_ add}(x,, 1)\left\|r_{1}:=\operatorname{fetch\_ add}(y,, 1)\right\| \ldots \| r_{N}:=\operatorname { fetch_add }(y,, 1)
+\]</span></p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240327145126821.png"></p>
+<p>该程序的问题在于，指数数量的转换序列将存储在第一个 x 访问的回溯集中，并且只有在 y 访问上的所有竞争都反转后才会探索这些序列。具体地，假设最优 DPOR 算法通过按从左到右的顺序执行程序线程来获得程序的第一条踪迹。在该跟踪的竞争检测阶段，由于两个 x 访问之间的竞争，第一个 x 访问的回溯集将填充转换序列 s。由于第二次 x 访问因果关系取决于之前对 y 的所有访问，因此 s 将包含第一次访问 x 后触发的所有转换。</p>
+<p>当然，s 的大小不是问题；然而，问题是 DPOR 还必须逆转 y 上的所有竞争。而且，更糟糕的是，对于每个反转，另一个（新的）转换序列将被插入到第一个 x 访问的回溯集中，因为它将与所有现有的 y 访问顺序不同。鉴于有 <span class="math inline">\(N!\)</span> 种 y 访问的排序方式，以及所有这些 <span class="math inline">\(N!\)</span> 在 x 上的竞争被逆转之前必须探索顺序（由于 DPOR 的类似 DFS 的性质），很明显，第一次 x 访问的回溯集将消耗指数量的内存。</p>
+<h2 id="trust-reconciling-smc-dpor">TruSt: RECONCILING SMC &amp; DPOR</h2>
+<p>在本节中，我们将描述 TruSt，这是我们的 DPOR 框架，它结合了三个关键功能：(1) 内存模型参数性、(2) 最优性和 (3) 多项式内存要求。在以下小节中，我们将逐步描述 TruSt 如何实现这些功能。为了避免混淆，我们对 TruSt 的每个“中间”版本使用不同的索引（即 TruSt<sub>0</sub>、TruSt<sub>1</sub>），直到我们在 <span class="math inline">\(\S 3.5\)</span> 中得到完整的算法。</p>
+<h3 id="trust0-representing-executions-as-graphs">TruSt<sub>0</sub>: Representing Executions as Graphs</h3>
+<p>为了支持弱内存模型，我们不能简单地将程序执行表示为交错，因为我们必须考虑此类模型允许的可能的重新排序。因此，我们将并发程序的执行表示为执行图 [Alglave et al 2014]，其中包含一组事件以及它们之间的一些关系。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240328151443629.png"></p>
+<p>我们对执行图的定义与文献中的大多数演示有两个不同之处。首先，它包含一个附加组件：总顺序 <span class="math inline">\(\le_G\)</span> ，TruSt 使用它来记录将事件添加到执行的顺序。其次，G 没有显式的程序顺序（<span class="math inline">\(\po\)</span>）组件。相反，<span class="math inline">\(\po\)</span> 是通过将事件表示为偏序来诱导的，该偏序根据同一线程的事件的序列号和所有非初始化事件之前的初始化事件进行排序。</p>
+<p><span class="math display">\[
+\po \triangleq \set{\langle \init, e\rangle | e \in \Event \setminus  \set{\init}} \cup\left\{\left\langle\left\langle t_{1}, i_{1}, l a b_{1}\right\rangle,\left\langle t_{2}, i_{2}, l a b_{2}\right\rangle\right\rangle \mid t_{1}=t_{2} \wedge i_{1}&lt;i_{2}\right\}
+\]</span></p>
+<p>我们将因果依赖关系 <span class="math inline">\(G.\porf\)</span> 定义为程序顺序和读取依赖的传递闭包。</p>
+<p><span class="math display">\[
+G.\porf \triangleq(\po \cap(G . E \times G . E) \cup\{\langle G . \rf(r), r\rangle \mid r \in G . R\})^{+}
+\]</span></p>
+<p>然后，程序 P 在内存模型 m 下的语义由满足 m 的一致性谓词的程序对应的执行图集合给出。一致性通常确保读取返回相对较新的值，并且写入的一致性顺序与程序顺序不矛盾。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240328160310045.png"></p>
+<p>作为示例，SC 下 <span class="math inline">\(\wwrr\)</span> 的一致执行图如图 4 所示。</p>
+<p>在显示图表时，我们遵循弱内存文献中的标准约定，将 <span class="math inline">\(\rf\)</span> 函数绘制为虚线箭头，指示从写入到读取的数据流（而不是从每次读取到相应写入的功能映射）。类似地，我们仅将非传递 <span class="math inline">\(\po\)</span> 边绘制为实心黑色箭头，并隐式保留事件的 t 和 i 分量。最后，我们通常不会从初始化事件到其他写入绘制共边。</p>
+<p>请注意，执行图包含 DPOR 使用的“等价类”概念。事实上，如图 4 所示，W+W+RR 在 SC 下有 4 个一致的执行图，尽管它有 12 个交错。尽管这些图引起的精确等价划分取决于内存模型定义和记录的关系，但请注意不同线程执行的操作在它们之间没有排序，并且默认情况下对不同变量的访问也是无序的。</p>
+<p>TruSt 可以为任何满足三个基本假设的内存模型 <span class="math inline">\(\mathrm{m}\)</span> 进行实例化：</p>
+<ul>
+<li>格式良好：一致性不取决于事件添加到图中的顺序（即，如果 <span class="math inline">\(G\)</span> 一致，则任何图 <span class="math inline">\(G^{\prime} \approx G\)</span> 也一致），并且，一致的图，<span class="math inline">\(\po\rf\)</span> 应该是非循环的（即事件不能循环依赖于自身）。</li>
+<li>前缀封闭性：将一致图限制为其事件的任何 porf-prefix-close 子集会产生一致图。前缀封闭性使 TruSt 能够增量地构建一致的图。</li>
+<li>最大可扩展性：如果以最大方式添加 <span class="math inline">\(\po\)</span>-maximal 事件到一致图，则可以保持一致性：对于写入来说是共同最大事件，对于读取来说是从共同最大写入中读取。直观上，如果线程有更多语句要执行，则执行程序永远不会被卡住：其余语句始终可以使用 SC 语义执行（特别是，每次读取都可以返回由最近的同一位置写入写入的值）。</li>
+</ul>
+<h3 id="trust0-partially-alleviating-the-race-reversal-problem">TruSt<sub>0</sub>: Partially Alleviating the Race-Reversal Problem</h3>
+<p>执行图使 TruSt<sub>0</sub> 能够执行两项关键优化，这两项优化共同使其能够以最佳方式扭转超过 50% 的竞争。</p>
+<p>第一个优化源于观察到 DPOR 的竞争检测阶段不需要在执行结束时发生，而是可以在每次将新事件添加到图中时增量执行。因此，每当将事件 b 添加到图中时，只需检查它是否与图中 G 中已有的某个事件 𝑎 冲突即可。给定图形表示，这样的检查是非常自然的，因为如果 b 是写入或读取事件，TruSt<sub>0</sub> 无论如何都必须确定 G 中的最后一个事件相同位置写入，以便分别更新 co 或 rf 组件。</p>
+<p>第二个优化在逆转竞争时利用写入的语义：即，写入仅影响可以从内存读取的值，而不影响任何程序线程的本地状态。因此，如果我们在写入事件 𝑎 和稍后的事件 b 之间存在竞争，我们不需要从执行图中删除任何事件。如果 b 是读事件，则改变 G.rf(b) 即可；而如果 b 是写入事件，则足以更改 𝑎 和 b 之间的余边，同时保持其他事件不变。</p>
+<blockquote>
+<p>下图中，粉色的集合是重访集。</p>
+</blockquote>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240328160903615.png"></p>
+<p>我们在 <span class="math inline">\(\wwrr\)</span> 示例中说明了这些优化（参见图 5）。与基于交错的 DPOR 类似，TruSt<sub>0</sub> 从初始图开始，并每次添加与程序指令相对应的事件。然而，与基于交错的 DPOR 相比，当 TruSt<sub>0</sub> 添加读取事件时，其射频选项不限于单个写入；相反，它们是由内存模型的一致性谓词决定的。例如，当 TruSt<sub>0</sub> 添加 <span class="math inline">\(\R(x)\)</span> 时，它读取 0 和 1 是一致的。因此，TruSt<sub>0</sub> 继续处理一个 rf 选项（例如 0），并将另一个选项记录在与读取相关的重访集（revisit set）中。（重访集在某种程度上类似于 <span class="math inline">\(\S 2\)</span> 的回溯集，但请注意，它将替代选项与最后添加到图中的事件相关联）以类似的方式，当添加 <span class="math inline">\(\R(y)\)</span> 时，它将读取一个可能的值（例如，0），而任何替代方案（在本例中为 1）将被添加到其重新访问集中。</p>
+<p>由于第一张图（图中 ①）已完成，TruSt<sub>0</sub> 以深度优先的方式回溯并探索任何记录的替代选项。然而，TruSt<sub>0</sub> 的回溯过程与基于交织的 DPOR 不同。当回溯以便 <span class="math inline">\(\R(y)\)</span> 从 <span class="math inline">\(\W(y, 1)\)</span> 读取时，TruSt<sub>0</sub> 回溯到添加 <span class="math inline">\(\R(y)\)</span> 的点，而不是返回到初始状态（如基于交错的 DPOR 所做的那样），并简单地更改其 rf 以便从 <span class="math inline">\(\W(y, 1)\)</span>，立即产生执行 ②。为了区分基于交织的 DPOR 和 TruSt<sub>0</sub> 的回溯过程，我们将 TruSt<sub>0</sub> 的回溯重访称为前向重访（forward revisit），这种优化的重访不会删除两个活跃事件之间添加的任何事件。</p>
+<p>其余的探索以类似的方式进行。执行 ② 完成后，TruSt<sub>0</sub> 重新访问 <span class="math inline">\(\R(x)\)</span> 并将其 rf 更改为 <span class="math inline">\(\W(x, 1)\)</span>，然后再次添加 <span class="math inline">\(\R(y)\)</span> 和 <span class="math inline">\(\W(y, 1)\)</span>，产生执行 ③，并通过另一次前向重新访问 <span class="math inline">\(\R(y)\)</span> 也执行 ④。</p>
+<p>TruSt<sub>0</sub> 能够以这种优化方式回溯的原因在于它检查一致性的方式。事实上，正是因为一致性不依赖于跟踪中不同事件的顺序，TruSt<sub>0</sub> 能够将冲突的读取和写入保留在图中，并且仅通过更改读取的 rf 边来逆转竞争。相比之下，基于交错的 DPOR 始终必须从跟踪中删除两个冲突事件（以及跟踪中稍后事件的因果前驱事件），以便稍后可以按正确的顺序重新添加它们。</p>
+<h3 id="trust0-the-backward-revisit-problem">TruSt<sub>0</sub>: The Backward Revisit Problem</h3>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240328203428755.png"></p>
+<p>我们刚刚看到了 TruSt<sub>0</sub> 如何通过更新执行图而不删除任何中间事件来解决前向重访的竞争逆转问题。然而，这种方法不适用于向后重新访问（backward revisits），即较早的事件是读取而较晚的事件是写入的情况，因为在读取和写入之间添加到图中的事件可能取决于读取的值因此需要将其删除。为了确保始终添加写入及其因果（<span class="math inline">\(\porf\)</span>）前驱，类似于 <span class="math inline">\(\S 2.3\)</span> 中的最佳 DPOR，TruSt<sub>0</sub> 将重访写入的 porf 前驱存储在读取的重访集中。</p>
+<p>我们再次使用 <span class="math inline">\(\wwrr\)</span> 示例来说明 TruSt<sub>0</sub> 对向后重访的处理，但现在假设程序事件按从右到左的顺序添加（参见图 6）。可以看到，TruSt<sub>0</sub> 逐一添加事件，直到最终到达执行 ①。当添加 <span class="math inline">\(\W(y, 1)\)</span> 时，TruSt<sub>0</sub> 注意到可以重新访问 <span class="math inline">\(\R(y)\)</span> 来从中读取，因此将一个项目添加到 <span class="math inline">\(\R(y)\)</span> 的重新访问集中，其中包含 <span class="math inline">\(\W(y, 1)\)</span> 的因果前缀。类似地，当添加 <span class="math inline">\(\W(x, 1)\)</span> 时，TruSt<sub>0</sub> 将因果前缀为 <span class="math inline">\(\W(x, 1)\)</span> 的项目添加到 <span class="math inline">\(\R(x)\)</span> 的重访集中。</p>
+<p>完成完整执行后，TruSt<sub>0</sub> 以深度优先的方式探索记录的重访。因此，它从 <span class="math inline">\(\R(y)\)</span> 的向后回顾开始，因此它限制图表仅包含 <span class="math inline">\(\R(y)\)</span> 之前添加的事件，以及 <span class="math inline">\(\W(y, 1)\)</span> 的 <span class="math inline">\(\porf\)</span> 前缀，即 <span class="math inline">\(\W(y, 1)\)</span> 本身。</p>
+<p>然后它添加 <span class="math inline">\(\W(x, 1)\)</span> 事件完成执行 ② 。请注意，此时，<span class="math inline">\(\R(x)\)</span> 的重访集中不需要记录任何内容，因为它已经包含 <span class="math inline">\(\W(x, 1)\)</span>。</p>
+<p>接下来，算法继续向后重新访问 <span class="math inline">\(\R(x)\)</span>。受限图现在仅包含第一个事件 <span class="math inline">\(\R(x)\)</span> 和没有任何其他因果前身的 <span class="math inline">\(\W(x, 1)\)</span>。然后它添加 <span class="math inline">\(\R(y)\)</span>（只能读取 0），然后添加 <span class="math inline">\(\W(y, 1)\)</span>，完成执行 ③ 并向后重新访问 <span class="math inline">\(\R(y)\)</span> 导致执行 ④。</p>
+<p>直观地，我们可以想象由从写入 w 向后重新访问读取 r 引起的图，就像添加 r 时，如果 w 的前缀已经存在于图中，就会发生向前重新访问 r。换句话说，如果我们在添加 r 之前添加了触发 w 所需的事件，那么 r 也可以从 w 读取。作为一个具体的例子，当 <span class="math inline">\(\W(x, 1)\)</span> 在图 6 中的执行 ② 之后重新访问 <span class="math inline">\(\R(x)\)</span> 时，我们从向后重访获得的图表有效地模拟了添加 <span class="math inline">\(\R(x)\)</span> 时 <span class="math inline">\(\W(x, 1)\)</span> 已经存在的场景。</p>
+<p>虽然保存前缀避免了 TruSt<sub>0</sub> 的睡眠集等构造，但仅靠它还不足以消除重新访问集的需要。要了解这一点，请考虑 <span class="math inline">\(\W(x, 1)\)</span> 在导致执行 ① 和 ② 的步骤中可以执行的向后重访。在这两种情况下，<span class="math inline">\(\W(x, 1)\)</span> 都可以重新访问 <span class="math inline">\(\R(x)\)</span> 并得出相同的图。然而，执行两次相同的向后重访显然会导致重复。重新访问集合对于防止此类重复是必要的。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/POPL'22-Truly%20Stateless,%20Optimal%20Dynamic%20Partial%20Order%20Reduction/image-20240328205138309.png"></p>
+<p>评论。事实上，在从图中删除相应的读取之前，重访集的任何项目都不能从集合中删除，如图 7 中的示例所示，为了简洁起见，我们不记录两次写入之间的 co 到 x 。假设 TruSt<sub>0</sub> 首先探索来自 <span class="math inline">\(\W(x, 1)\)</span> 的向后重访，然后在执行 1 后探索来自 <span class="math inline">\(\W(x, 2)\)</span> 的向后重访，当在执行 3 中重新添加 <span class="math inline">\(\W(x, 2)\)</span> 时，我们必须记住它过去已经重访过 <span class="math inline">\(\R(x)\)</span>。因此，一旦探索了这些项目，我们就无法从特定阅读的重访集中删除这些项目。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/SICOMP'97%20Testing%20Shared%20Memories/" rel="prev" title="SICOMP'97 Testing Shared Memories">
+      <i class="fa fa-chevron-left"></i> SICOMP'97 Testing Shared Memories
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#smc-dpor-a-troubled-marriage"><span class="nav-number">2.</span> <span class="nav-text">SMC &amp; DPOR: A TROUBLED MARRIAGE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dpor-in-a-nutshell"><span class="nav-number">2.1.</span> <span class="nav-text">DPOR in a Nutshell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#the-race-reversal-problem"><span class="nav-number">2.2.</span> <span class="nav-text">The Race-Reversal Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exponential-cost-solutions-to-the-race-reversal-problem"><span class="nav-number">2.3.</span> <span class="nav-text">Exponential-Cost Solutions to the Race-Reversal Problem</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#trust-reconciling-smc-dpor"><span class="nav-number">3.</span> <span class="nav-text">TruSt: RECONCILING SMC &amp; DPOR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#trust0-representing-executions-as-graphs"><span class="nav-number">3.1.</span> <span class="nav-text">TruSt0: Representing Executions as Graphs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trust0-partially-alleviating-the-race-reversal-problem"><span class="nav-number">3.2.</span> <span class="nav-text">TruSt0: Partially Alleviating the Race-Reversal Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trust0-the-backward-revisit-problem"><span class="nav-number">3.3.</span> <span class="nav-text">TruSt0: The Backward Revisit Problem</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">358</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear@smail.nju.edu.cn" title="E-Mail → mailto:eaglebear@smail.nju.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">同是 DC 坑里人：Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会人：Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家：崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君：YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人：wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民：IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者：ChestnutSilver</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.2m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">32:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
