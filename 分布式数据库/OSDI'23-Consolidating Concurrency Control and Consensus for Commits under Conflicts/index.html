@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确保交易的序列化图是非循环的。我们在 Janus 的设计中利用了这种洞察力，这是一个统一的并发控制和共识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSDI&#39;23-Consolidating Concurrency Control and Consensus for Commits under Conflicts">
+<meta property="og:url" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI'23-Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确保交易的序列化图是非循环的。我们在 Janus 的设计中利用了这种洞察力，这是一个统一的并发控制和共识">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI">
+<meta property="article:published_time" content="2022-05-01T06:19:00.000Z">
+<meta property="article:modified_time" content="2024-06-29T16:10:53.893Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI'23-Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OSDI'23-Consolidating Concurrency Control and Consensus for Commits under Conflicts | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">37</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">364</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI'23-Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OSDI'23-Consolidating Concurrency Control and Consensus for Commits under Conflicts
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-01 14:19:00" itemprop="dateCreated datePublished" datetime="2022-05-01T14:19:00+08:00">2022-05-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-06-30 00:10:53" itemprop="dateModified" datetime="2024-06-30T00:10:53+08:00">2024-06-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">分布式数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>摘要</strong></p>
+<p>传统的容错分布式事务是在 Paxos 共识协议之上的传统并发控制协议。这种方法提供了可扩展性、可用性和强一致性。然而，当用于广域存储时，这种方法会引发两次跨数据中心的连续协调：一次用于并发控制，然后一次用于共识。在本文中，我们主要观察到并发控制和共识所需的协调高度相似。具体来说，每个都试图确保交易的序列化图是非循环的。我们在 Janus 的设计中利用了这种洞察力，这是一个统一的并发控制和共识协议。 Janus 的目标是编写为存储过程的一次性事务，这是一种常见但受限制的事务类。像 MDCC 和 TAIR 一样，Janus 可以在一次往返中提交此类中的不冲突事务。与 MDCC 和 TAPIR 不同，Janus 避免了由于争用而中止：只要网络运行良好并且每个服务器副本的大多数都处于活动状态，它最多在两次往返中提交此类中的冲突事务。</p>
+<p>我们将 Janus 与分层设计和 TAPIR 在此类中的各种工作负载下进行比较。我们的评估表明，在无竞争的微基准测试中，Janus 的吞吐量是分层系统的 5 倍，是 TAPIR 吞吐量的 90%。当工作负载竞争时，Janus 提供比基线低得多的延迟和更高的吞吐量（高达 6.8 倍）。</p>
+<h2 id="简介">简介</h2>
+<p>可扩展、可用且高度一致的分布式事务通常是通过在 Paxos 共识协议复制的数据存储分片之上分层传统并发控制协议来实现的。将数据分片成许多可以由不同服务器存储和服务的小子集提供了可扩展性。尽管服务器出现故障，但通过共识复制每个分片可提供可用性。尽管不同事务的数据访问存在冲突，但使用 USENIX 关联并发控制跨复制分片协调事务可提供强一致性。这种方法在实践中很常用。例如，Spanner 实现了两阶段锁定 (2PL) 和两阶段提交 (2PC)，其中数据和锁都由 Paxos 复制。作为另一个例子，Percolator 实现了机会并发控制 (OCC) 的变体，它在 BigTable 之上使用 2PC，它依赖于主备份复制和 Paxos。</p>
+<p>当用于广域存储时，分层方法会导致两次跨数据中心协调，按照顺序是：一次通过并发控制协议确保事务一致性（严格的可串行化），另一次通过共识协议以确保副本一致性（线性化）。这种双重协调是不必要的，可以通过将并发控制和共识合并到一个统一的协议中来消除。 MDCC 和 TAIR 分别展示了统一方法如何提供读取提交和严格的可串行化隔离级别。两种协议都乐观地尝试在一次广域往返中提交和复制事务。但是，如果并发事务之间存在冲突，它们会中止并重试，这会在争用情况下显著降低性能。这种担忧对于广域存储更为明显：由于交易需要更长的时间才能完成，争用的数量也相应增加。</p>
+<p>本文提出了构建容错分布式事务的 Janus 协议。与 TAIR 和 MDCC 一样，Janus 可以在没有争用的情况下在一次跨数据中心往返中提交和复制事务。面对并发冲突事务的干扰，Janus 最多需要一个额外的跨数据中心往返来提交。</p>
+<p>Janus 的关键洞察力是实现事务一致性的严格序列化和复制一致性的线性化都可以映射到相同的底层抽象。特别是，两者都要求交易的执行历史等价于一些线性的总订单。可以通过基于执行历史构建序列化图来检查这种等价性。图中的每个顶点对应一个事务。由于复制或冲突的数据访问，每条边代表两个事务之间的依赖关系。具体来说，如果事务 <span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 对某些数据项进行冲突访问，那么如果负责冲突数据项的分片在 <span class="math inline">\(T_2\)</span> 之前执行或复制 <span class="math inline">\(T_1\)</span>，则存在一条边 <span class="math inline">\(T_1 \to T_2\)</span>。如果该图中没有循环，则可以找到严格可串行化和线性化的等效线性总阶。</p>
+<p>Janus 以两种方式确保非循环序列化图。首先，Janus 通过跟踪冲突事务到达复制每个分片的服务器时的依赖关系来捕获初步图表。事务 <span class="math inline">\(T\)</span> 的协调器然后从复制每个分片的足够大的仲裁服务器收集和传播 <span class="math inline">\(T\)</span> 的依赖关系。<span class="math inline">\(T\)</span> 的实际执行被推迟，直到协调者确定 <span class="math inline">\(T\)</span> 的所有参与分片都获得了 <span class="math inline">\(T\)</span> 的所有依赖项。其次，虽然基于事务到达顺序的依赖关系图可能包含循环，但 <span class="math inline">\(T\)</span> 的参与分片重新排序事务以相同的确定顺序循环以确保非循环序列化图。这提供了严格的可串行化，因为所有服务器都以相同的顺序执行冲突的事务。</p>
+<p>在没有争用的情况下，所有参与的分片都可以在一次跨数据中心往返中获得 <span class="math inline">\(T\)</span> 的所有依赖项。在存在争用的情况下，可能会出现两种类型的冲突：一种是不同事务之间的冲突，另一种是在同一事务的复制过程中。<strong>不同事务之间的冲突</strong>仍然可以在<strong>单个跨数据中心往返</strong>中处理。它们在依赖图中表现为循环，并通过确保确定性执行重新排序来处理。然而，在<strong>复制同一事务期间出现的冲突</strong>需要<strong>第二次跨数据中心往返</strong>，以在不同服务器副本之间就事务的依赖项集达成共识。这两种情况都不需要 Janus 中止事务。因此，只要网络和机器故障不会共同阻止每个服务器副本的大多数进行通信，<strong>Janus 总是在面对争用时最多提交两次跨数据中心往返</strong>。</p>
+<p>Janus 的基本协议及其始终提交的能力假设了一类常见的事务性工作负载：编写为存储过程的一次性事务。存储过程经常被使用并将事务逻辑发送到服务器以作为片段执行，而不是让客户端在简单地向服务器读取和写入数据时执行逻辑。一次性事务排除了将一个片段的执行输出用作在不同服务器上执行的片段的输入。一次性事务足以应付许多工作负载，包括流行和规范的 TPC-C 基准。虽然可以扩展 Janus 的设计以支持一般事务，但这样做的代价是额外的服务器间消息和中止的可能性。</p>
+<p>这种依赖跟踪和执行重新排序的方法已分别应用于并发控制和共识。 Janus 的洞见是并发控制和共识都可以使用一个通用的依赖图来实现合并而不中止。</p>
+<p>我们在事务键值存储系统中实现了 Janus。为了与现有协议进行比较，我们还在同一框架中实现了 2PL + MultiPaxos、OCC + MultiPaxos 和 TAIR。我们使用微基准和流行的 TPC-C 基准在多个可用区域的 Amazon EC2 上运行实验。我们的评估表明，在无竞争的微基准测试中，Janus 的吞吐量是分层系统的 5 倍，是 TAIR 吞吐量的 90%。当工作负载因倾斜或广域延迟而变得有争议时，Janus 通过消除中止提供比现有系统低得多的延迟和更高的吞吐量（高达 6.8 倍）。</p>
+<h2 id="概述">概述</h2>
+<p>本节描述了我们针对的系统设置，回顾了背景和动机，然后提供了 Janus 如何统一并发控制和共识的高级概述。</p>
+<h3 id="系统设置">系统设置</h3>
+<p>我们的目标是广域设置，其中数据跨服务器分片，每个数据分片复制到几个地理上独立的数据中心以确保可用性。我们假设每个数据中心都维护一个完整的数据副本，这是一种常见的设置。现有协议或 Janus 并不严格需要此假设。但是，它简化了关于提交事务所需的跨数据中心往返次数的性能讨论。</p>
+<p>我们采用将事务表示为存储过程的执行模型，这也是常用的。由于数据是跨机器分片的，因此事务由一系列存储过程（称为片段）组成，每个片段都访问属于单个分片的数据项。通过本地锁定，每个片段的执行相对于其他并发片段是原子的。存储过程执行模型对于 Janus 在争用下获得良好性能至关重要。由于 Janus 必须序列化冲突片段的执行，存储过程允许在服务器上执行，这比由客户端通过网络执行的执行效率高得多。</p>
+<h3 id="背景和动机">背景和动机</h3>
+<p>构建容错分布式事务的标准方法是在用于复制的共识协议之上对并发控制协议分层。分层设计解决了分布式事务存储面临的三个最重要的挑战：一致性、可扩展性和可用性。</p>
+<ul>
+<li><strong>一致性</strong>是指排除并发冲突操作的“不良”交错的能力。有两种冲突：第一种是含多个在不同数据分片上执行不可序列化数据访问的事务；第二种是事务在不同的副本服务器上以不同的顺序将其写入复制到相同的数据分片。并发控制处理第一种冲突以实现严格的可串行化；共识处理第二种以实现线性化。</li>
+<li><strong>可扩展性</strong>是指通过添加更多机器来提高性能的能力。并发控制协议自然地实现了可扩展性，因为它们对可以跨机器分区的单个数据项进行操作。相比之下，共识协议没有解决可扩展性问题，因为它们的状态机方法复制了副本服务器上的所有操作。</li>
+<li><strong>可用性</strong>是指从机器和网络故障（包括崩溃和任意消息延迟）中生存和恢复的能力。解决可用性挑战是共识协议的核心，而传统的并发控制并没有解决这个问题。</li>
+</ul>
+<p>因为并发控制和共识都只能解决上述三个挑战中的两个，所以很自然地一个在另一个之上以覆盖所有基础。例如，Spanner 在 Paxos 上分层 2PL/2PC。 Percolator 在 BigTable 上分层 OCC 的一个变体，它依赖于主备份复制和 Paxos。</p>
+<p>分层设计在概念上很简单，但不能提供最佳性能。当一个协议叠加在另一个协议之上时，一致性所需的协调会连续发生两次；一次在并发控制层，然后再一次在共识层。这会导致额外的延迟，这对于广域存储来说尤其昂贵。这种观察并不新鲜，TAIR 和 MDCC 已经提出了这一观察结果，指出分层存在过度协调的问题。</p>
+<p>并发控制和共识的统一可以减少协调的开销。这种统一是可能的，因为并发控制的一致性模型（严格的可串行化）和共识（线性化的）具有很大的相似性。具体来说，两者都试图满足冲突操作之间的排序约束，以确保与线性总排序等价。表 1 对现有系统用于处理事务执行/提交期间和复制期间发生的冲突的技术进行了分类。如图所示，乐观方案依赖于中止和重试，而保守方案旨在避免代价高昂的中止。在保守的方案中，共识协议依赖（Paxos）领导者来分配复制操作的顺序，而事务协议使用逐项锁定。</p>
+<p>为了统一并发控制和共识，必须使用通用的协调方案以相同的方式处理这两种类型的冲突。这种设计要求排除了基于领导者的协调，因为依赖单个领导者分配排序的分布式事务不能很好地扩展。 MDCC 和 TAPIR 通过依赖中止和重试来实现并发控制和共识的统一。这种乐观的方法最适合低竞争的工作负载。我们工作的目标是开发一种统一的方法，该方法可以通过避免中止而在竞争中很好地工作。</p>
+<h3 id="并发控制和共识的统一方法">并发控制和共识的统一方法</h3>
+<p>我们能否设计一个统一的并发控制和共识，并使用一个通用的协调策略来最小化代价高昂的中止？一个关键的观察是并发控制和复制所需的排序约束都可以通过相同的序列化图抽象来捕获。在序列化图中，顶点表示事务，有向边表示由于两种类型的冲突而导致的事务之间的依赖关系。严格的可串行化和线性化都可以简化为检查该图是否没有循环。</p>
+<p>Janus 试图通过跟踪冲突操作的依赖关系来显式捕获初步序列化图，而不立即执行它们。潜在的复制或事务冲突都表现为初步图中的循环。图 2a 中的循环是由于复制期间的冲突：在服务器 <span class="math inline">\(S_x\)</span> 上，<span class="math inline">\(T_1\)</span> 对数据项 <span class="math inline">\(X\)</span> 的写入在 <span class="math inline">\(T_2\)</span> 对 <span class="math inline">\(X\)</span> 的写入之前到达，导致 <span class="math inline">\(T_1 \rightarrow T_2\)</span>。相反的到达顺序发生在不同的服务器副本 <span class="math inline">\(S&#39;_ x\)</span> 上，导致 <span class="math inline">\(T_1 \leftarrow T_2\)</span>。图 2b 中的循环是由于事务冲突造成的：服务器 <span class="math inline">\(S_x\)</span> 在 <span class="math inline">\(T_2\)</span> 对 item-x 的写入之前收到 <span class="math inline">\(T_1\)</span> 对 item-x 的写入，而服务器 <span class="math inline">\(S_y\)</span> 以相反的顺序接收对 item-y 的写入。为了确保无周期序列化图和无中止执行，Janus 在执行之前确定性地对周期中涉及的事务进行重新排序。</p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI'23-Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-1.png"></p>
+<p><img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/OSDI'23-Consolidating%20Concurrency%20Control%20and%20Consensus%20for%20Commits%20under%20Conflicts/figure-2.png"></p>
+<p>为了理解统一的优势和挑战，我们通过一个具体的例子来对比 Janus 的工作流程和 OCC + MultiPaxos 的工作流程。示例交易，<span class="math inline">\(T_1\)</span>：<code>x++; y++;</code>，由两部分组成，每一部分都是一个递增 item-x 或 item-y 的存储过程。</p>
+<p>图 1a 显示了 OCC + MultiPaxos 如何执行和提交 <span class="math inline">\(T_1\)</span>。首先，<span class="math inline">\(T_1\)</span> 的协调者将这两部分分派给 item-x 和 item-y 各自的 Paxos 领导者，它们恰好位于不同的数据中心。领导者执行片段并在本地缓冲写入。为了提交 <span class="math inline">\(T_1\)</span>，协调器向 Paxos 领导者发送 2PC-prepare 请求，Paxos 领导者执行 OCC 验证并将 x 和 y 的新值复制给其他人。因为这些片段是存储过程，我们可以结合调度和 2PC-prepare 消息，以便协调器可以在没有冲突的情况下在两个跨数据中心往返中执行和提交 <span class="math inline">\(T_1\)</span>。假设并发事务 <span class="math inline">\(T_2\)</span> 也尝试增加相同的两个计数器。<span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 的调度消息（或 2PC-prepares）可能由不同的 Paxos 领导者以不同的顺序处理，导致 <span class="math inline">\(T_1\)</span> 和/或 <span class="math inline">\(T_2\)</span> 中止并重试。另一方面，因为 Paxos 领导者对复制施加了排序，所以 item-x（或 item-y）的所有副本都一致地处理 <span class="math inline">\(T_1\)</span> 或 <span class="math inline">\(T_2\)</span> 的写入，但代价是额外的广域往返。</p>
+<p>图 1b 显示了 Janus 的工作流程。为了提交和执行<span class="math inline">\(T_1\)</span>，协调器经过三个阶段：PreAccept、Accept 和 Commit，其中 Accept 阶段可以跳过。在 PreAccept 中，协调器将 <span class="math inline">\(T_1\)</span> 的片段分派到其相应的副本服务器。与 OCC+MultiPaxos 不同，服务器不会立即执行这些片段，而只是在其本地依赖图中跟踪它们的到达顺序。服务器用 <span class="math inline">\(T_1\)</span> 的依赖信息回复协调器。如果有足够多的副本服务器回复相同的依赖关系，协调器可以跳过接受阶段，这发生在服务器副本之间没有争用时。否则，协调器将与服务器进行另一轮通信，以确保它们为 <span class="math inline">\(T_1\)</span> 获得相同的依赖关系。在 Commit 阶段，每个服务器根据它们的依赖关系执行事务。如果存在涉及 <span class="math inline">\(T_1\)</span> 的依赖循环，则服务器在循环中执行事务时遵循确定性顺序。一旦协调器从最近的服务器副本（通常位于本地数据中心）收到回复，它就可以将结果返回给用户</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E8%92%8B%E5%AD%A6%E6%A8%A1%E3%80%8A%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6%E3%80%8B%E7%AC%AC%E4%B8%80%E7%AB%A0-%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6%E7%9A%84%E5%AF%B9%E8%B1%A1/" rel="prev" title="蒋学模《政治经济学》第一章-政治经济学的对象">
+      <i class="fa fa-chevron-left"></i> 蒋学模《政治经济学》第一章-政治经济学的对象
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/NoSQL-%E4%B8%80%E8%87%B4%E6%80%A7%E4%B8%8E%20CAP%20%E6%A8%A1%E5%9E%8B/" rel="next" title="NoSQL-一致性与 CAP 模型">
+      NoSQL-一致性与 CAP 模型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%AE%BE%E7%BD%AE"><span class="nav-number">2.1.</span> <span class="nav-text">系统设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E5%92%8C%E5%8A%A8%E6%9C%BA"><span class="nav-number">2.2.</span> <span class="nav-text">背景和动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6%E5%92%8C%E5%85%B1%E8%AF%86%E7%9A%84%E7%BB%9F%E4%B8%80%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">并发控制和共识的统一方法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">364</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear@smail.nju.edu.cn" title="E-Mail → mailto:eaglebear@smail.nju.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">同是 DC 坑里人：Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会人：Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家：崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君：YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人：wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民：IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者：ChestnutSilver</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.2m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">33:01</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

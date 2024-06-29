@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="概念与定义 先明确一些定义：  Quorum：在 Classic Paxos 中一直通过多数派（Majority）来保证算法的正确性，对多数派再进一步抽象化，称为“Quorum”，要求任意两个 Quorum 之间有交集（从而间接表达了 majority 的含义）。 Round：在 Classic Paxos 中，提议者每次提案都用一个全序的编号表示，如果执行顺利，该编号的 Proposal 在经历">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fast Paxos Report">
+<meta property="og:url" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="概念与定义 先明确一些定义：  Quorum：在 Classic Paxos 中一直通过多数派（Majority）来保证算法的正确性，对多数派再进一步抽象化，称为“Quorum”，要求任意两个 Quorum 之间有交集（从而间接表达了 majority 的含义）。 Round：在 Classic Paxos 中，提议者每次提案都用一个全序的编号表示，如果执行顺利，该编号的 Proposal 在经历">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/SouthEast.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/SouthEast-16523212768523.png">
+<meta property="article:published_time" content="2022-05-12T02:02:08.000Z">
+<meta property="article:modified_time" content="2024-06-29T16:10:53.877Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/SouthEast.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Fast Paxos Report | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">37</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">364</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fast Paxos Report
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-12 10:02:08" itemprop="dateCreated datePublished" datetime="2022-05-12T10:02:08+08:00">2022-05-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-06-30 00:10:53" itemprop="dateModified" datetime="2024-06-30T00:10:53+08:00">2024-06-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/" itemprop="url" rel="index"><span itemprop="name">分布式数据库</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="概念与定义">概念与定义</h2>
+<p>先明确一些定义：</p>
+<ul>
+<li><strong>Quorum</strong>：在 Classic Paxos 中一直通过多数派（Majority）来保证算法的正确性，对多数派再进一步抽象化，称为“Quorum”，要求任意两个 Quorum 之间有交集（从而间接表达了 majority 的含义）。</li>
+<li><strong>Round</strong>：在 Classic Paxos 中，提议者每次提案都用一个全序的编号表示，如果执行顺利，该编号的 Proposal 在经历 Phase1，Phase2 后最终会执行成功。在 Fast Paxos 称这个带编号的 Proposal 的执行过程为“Round”。</li>
+<li><strong>i-Quorum</strong>：在 Classic Paxos 执行过程中，一般不会明确区分每次 Round 执行的 Quorum，虽然也可以为每个 Round 指定一个 Quorum。在 Fast Paxos 中会通过 i-Quorum 明确指定 Round i 需要的 Quorum。</li>
+<li><strong>Classic Round</strong>：执行 Classic Paxos 的 Round 称为 Classic Round。</li>
+<li><strong>Fast Round</strong>：如果领导者发送了 Any 消息，则认为后续通信是一个快速回合；若领导者未发送 Any 消息，还是跟之前一样通信，则后续行为仍然是 Classic Round。根据 Lamport 描述，Classic Round 和快速回合可通过 Round Number 进行加以区分。</li>
+</ul>
+<h2 id="classic-paxos">Classic Paxos</h2>
+<h3 id="参与角色">参与角色</h3>
+<p>从一般的 Client/Server 来考虑，Client 其实承担了提议者和 Learner 的作用，而 Server 则扮演接受者的角色，因此下面重新描述了 Paxos 算法中的几个角色：</p>
+<ul>
+<li>Client/提议者/Learner：负责提案并执行提案。</li>
+<li>Coordinator：提议者的协调者，可为多个，Client 通过 Coordinator 进行提案。</li>
+<li>领导者：在众多的 Coordinator 中指定一个作为领导者。</li>
+<li>接受者：负责对 Proposal 进行投票表决。</li>
+</ul>
+<h3 id="算法流程">算法流程</h3>
+<ul>
+<li>Phase 1a： 领导者提交 proposal 到接受者</li>
+<li>Phase 2b：接受者回应已经参与投票的最大提议者编号和选择的值</li>
+<li>Phase 2a：领导者收集接受者的返回值
+<ul>
+<li>Phase 2a.1：如果接受者无返回值，则自由决定一个</li>
+<li>Phase 2a.2：如果有返回值，则选择提议者编号最大的一个</li>
+</ul></li>
+<li>Phase 2b：接受者把表决结果发送到 Learner</li>
+</ul>
+<figure>
+<img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/SouthEast.png" alt><figcaption>Classics Paxos 交互图</figcaption>
+</figure>
+<h2 id="fast-paxos">Fast Paxos</h2>
+<p>很明显，在 Phase2a.1 中，如果领导者可以自由决定一个值，则可以让提议者提交这个值，自己则退出通信过程。只要之后的过程运行正常，领导者始终不参与通信，一直有提议者直接提交值到接受者，从而把 Classic Paxos 的三阶段通信减少为两阶段，这便是 Fast Paxos 的由来。因此，我们形式化下 Fast Paxos 的几个阶段：</p>
+<ul>
+<li>Phase1a：领导者提交提议到接受者</li>
+<li>Phase1b：接受者回应已经参与投票的最大提议者编号和选择的值</li>
+<li>Phase2a：领导者收集接受者的返回值
+<ul>
+<li>Phase2a.1：如果接受者无返回值，则发送一个 Any 消息给接受者，之后接受者便等待提议者提交值</li>
+<li>Phase2a.2：如果有返回值，则根据规则选取一个</li>
+</ul></li>
+<li>Phase2b：接受者把表决结果发送到学习者（包括领导者）</li>
+</ul>
+<figure>
+<img src="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos%20Report/SouthEast-16523212768523.png" alt><figcaption>Fast Paxos 交互图</figcaption>
+</figure>
+<h3 id="any-消息">any 消息</h3>
+<p>在正常情况下，Leader 若可以自由决定一个值，应该发生一条 Phase2a 消息，其中包含了选择的值，但此时却发送了一条无值的 Any 消息。接受者在接收到 Any 消息后可做一些开始快速回合的初始化工作，等待提议者提交真正的值。Any 消息的意思是接受者可以做任意的处理。</p>
+<p>因此，一个快速回合包括两个阶段：由 Any 消息开始的阶段和由提议者提交值的结束阶段，而 Leader 只是起到一个初始化过程的作用，如果没有错误发生，Leader 将退出之后的通信中过程。</p>
+<h2 id="冲突">冲突</h2>
+<p>在 Classic Paxos 中，接受者投票的 value 都是 Leader 选择好的，所以不存在同一 Round 中投票多个值的场景，从而保证了一致性。但在快速回合中因为<strong>允许多个提议者同时提交不同的值到接受者</strong>，这将导致在快速回合中没有任何 value 被作为最终决议，这也称为“冲突”（Collision） 。</p>
+<p>提议者提交的回合编号是全序的，不同的提议者提交的回合编号肯定不一样，同一提议者不可能在同一回合中提交不同的值，那为什么还会有同一快速回合中有多个值的情况？原因在于快速回合与经典回合区别，当快速回合开始后，会被分配一个唯一的 Round Number，之后无论多少个提议者提交值都是基于这个 Round Number，而不管提议者提交的 Round 是否全序。比如，快速回合编号为 10，提议者 1 提交了（11，1），提议者 2 提交了（12，2），但对快速回合来说存在（10，1，2）两个值。</p>
+<p>因为冲突的存在，会导致 Phase2a.2 的选择非常困难，原因是：</p>
+<blockquote>
+<p>在 Classic Paxos 中，如果接受者返回多个值，只要排序，选择最高的编号对应的值即可，因为 Classic Paxos 中的值都是由 Leader 选择后在 Phase2a 中发送的，因此最高编号的值肯定只有一个。但在 Fast Paxos 中，最高编号的值会发现多个，比如（10，1，2）。假如当前 Leader 正在执行第 i 个 Classic Round(i-Quorum 为 Q) ，得到接受者反馈的最高编号为 k，有两个 value：v、w，说明快速回合 k 存在两个 k-Quorum，Rv,Rw。</p>
+</blockquote>
+<p>这里有一个 O4(v)算法。</p>
+<h2 id="o4v法">O4(v)法</h2>
+<p>下面定义在 Round k 中 v 或 w 被选择的条件：</p>
+<blockquote>
+<p>如果 v 在 Round k 中被选择，那么存在一个 k-Quorum R，使得对任意的 Acceptor a∈Q∩R，都对 v 作出投票。</p>
+</blockquote>
+<p>这个问题也可表述为：<strong>R 中的所有 Acceptor 都对 v 作出投票，并且 <span class="math inline">\(Q \cup R \ne \phi\)</span>，因为如果 Q∩R=φ，则 Round i 将无法得知投票结果。</strong></p>
+<p>因此如果保证下面两个条件：</p>
+<ol type="1">
+<li>每个 Acceptor 在同一 Fast Round 中仅投票一个 Value</li>
+<li><span class="math inline">\(Q \cap R_v \cap R_w \ne \emptyset\)</span></li>
+</ol>
+<p>则 v、w 不可能同时被选择。</p>
+<p>换言之：</p>
+<ol type="1">
+<li>Quorum 的概念相当于多数派的抽象化，也就是达成一致的 Acceptor 的集合。</li>
+<li>进入 Fast Round 之后相当于确定了一个 Round Number，接下来发送到 Acceptor 的 Proposal 都被归纳到这个 Round-Number 之下。</li>
+<li>第 2 句话的含义是，Round-Number 的产生是一次 Accept 的结果，也就有一个对应的 Quorum（假设为 Quorum-Q)。</li>
+<li>进而从这个 Quorum-Q 中去分析，得到一个 Quorum-R,它的条件是 R 中的所有 Acceptor 都对同一个 value 作出投票。</li>
+</ol>
+<h2 id="确定-quorum">确定 Quorum</h2>
+<p>根据上面描述，为了防止一次 Fast Round 选择多个 Value，Quorum 需要满足下面两个条件：</p>
+<ul>
+<li>任意两个 Classic Quorum 有交集</li>
+<li>任意一个 Classic Quorum 与任意两个 Fast Quorum 有交集</li>
+</ul>
+<p>不妨设总 Acceptor 数为 N，Classic Round 运行的最大失败 Acceptor 数为 F，Fast Round 允许的失败数为 E，即 N-F 构成 Classic Round 的一个 Quorum，N-E 构成 Fast Round 的一个 Quorum。</p>
+<p>上面两个条件等价于：</p>
+<ul>
+<li>N&gt;2F</li>
+<li>N&gt;2E+F</li>
+</ul>
+<p>设 Qc，Qf 分别为 Classic Round 和 Fast Round 的 Quorum 大小，经过整理可得两个下限结果：</p>
+<ul>
+<li>|Qc| = |Qf| ≥ N - ⌈N/3⌉ + 1 ≥ ⌊2N/3⌋ + 1</li>
+<li>|Qc| ≥N-⌈N/2⌉+1 = ⌈N/2⌉+1</li>
+<li>|Qf|≥N-⌈N/4⌉≥⌈3N/4⌉</li>
+</ul>
+<p>证明请参考：一致性算法中的节点下限。</p>
+<h2 id="冲突恢复">冲突恢复</h2>
+<p>作为优化，Acceptor 在投票 Value 时也应该发送到 Leader，这样 Leader 就很容易能发现冲突。Leader 如果在 Round i 发现冲突，可以很容易地开始 Round i+1，从 Phase1a 开始重新执行 Classic Paxos 过程。</p>
+<p>但这个其实可以进一步优化，我们首先考虑下面这个事实：如果 Leader 重启了 Round i+1，并且收到了 i-Quorum 个 Acceptor 发送的 Phase1b 消息，则该消息明确了两件事情：</p>
+<ol type="1">
+<li>报告 Acceptor a 参与投票的最大 Round 和对应的 Value</li>
+<li>承诺不会对小于 i+1 的 Round 作出投票</li>
+</ol>
+<p>假如 Acceptor a 也参与了 Round i 的投票，则 a 的 Phase1b 消息同样明确了上述两件事情，并且会把对应的 Round，Value 在 Phase2b 中发送给 Leader（当然还有 Learner），一旦 Acceptor a 执行了 Phase2b，则也同时表明 a 将不会再对小于 i+1 的 Round 进行投票。</p>
+<p>也就是说，<strong>Round i 的 Phase2b 与 Round i+1 的 Phase1b 有同样的含义</strong>，也暗含着如果 Leader 收到了 Round i 的 Phase2b，则可直接开始 Round i+1 的 Phase2a。</p>
+<p>经过整理，产生了一种解决冲突（Recovery）方法：</p>
+<p>如果 Leader 在 Round i 中收到了（i+1)-Quorum 个 Acceptor 的 Phase2b 消息，并且发现冲突，则根据 O4(v)取一个 value，直接执行 Round i+1 的 Phase2a；否则，从 Phase1a 开始重新执行 Round i+1.</p>
+<p>Fast Paxos 基本是本着乐观锁的思路：如果存在冲突，则进行补偿。其中 Leader 起到一个初始化 Progress 和解决冲突的作用，如果 Progress 一直执行良好，则 Leader 将始终不参与一致性过程。</p>
+<p>因此 Fast Paxos 理论上只需要 2 个通信步骤，而 Classic Paxos 需要 3 个，但 Fast Paxos 在解决冲突时有至少需要 1 个通信步骤，在高并发的场景下，冲突的概率会非常高，冲突解决的成本也会很大。</p>
+<p>另外，Fast Paxos 把 Client 深度引入算法中，致使其架构远没 Classic Paxos 那么清晰，也没 Classic Paxos 容易扩展。</p>
+<blockquote>
+<p>Multi Paxos 里提议都由 leader 提出，因而不存在一次决议出现多个 value，Fast Paxos 里由 proposer 直接提议，一次决议里可能有多个 proposer 提议、出现多个 value，即出现提议冲突（collision)。leader 起到初始化决议进程（progress）解决冲突的作用，当冲突发生时 leader 重新参与决议过程。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93/Fast%20Paxos/" rel="prev" title="Fast Paxos">
+      <i class="fa fa-chevron-left"></i> Fast Paxos
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6/%E8%92%8B%E5%AD%A6%E6%A8%A1%E3%80%8A%E6%94%BF%E6%B2%BB%E7%BB%8F%E6%B5%8E%E5%AD%A6%E3%80%8B%E7%AC%AC%E4%BA%94%E7%AB%A0-%E8%B5%84%E6%9C%AC%E7%9A%84%E6%B5%81%E9%80%9A%E8%BF%87%E7%A8%8B/" rel="next" title="蒋学模《政治经济学》第五章-资本的流通过程">
+      蒋学模《政治经济学》第五章-资本的流通过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E4%B8%8E%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">概念与定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#classic-paxos"><span class="nav-number">2.</span> <span class="nav-text">Classic Paxos</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E4%B8%8E%E8%A7%92%E8%89%B2"><span class="nav-number">2.1.</span> <span class="nav-text">参与角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">算法流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fast-paxos"><span class="nav-number">3.</span> <span class="nav-text">Fast Paxos</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#any-%E6%B6%88%E6%81%AF"><span class="nav-number">3.1.</span> <span class="nav-text">any 消息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%B2%E7%AA%81"><span class="nav-number">4.</span> <span class="nav-text">冲突</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#o4v%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">O4(v)法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A-quorum"><span class="nav-number">6.</span> <span class="nav-text">确定 Quorum</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%B2%E7%AA%81%E6%81%A2%E5%A4%8D"><span class="nav-number">7.</span> <span class="nav-text">冲突恢复</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">364</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear@smail.nju.edu.cn" title="E-Mail → mailto:eaglebear@smail.nju.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">同是 DC 坑里人：Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会人：Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家：崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君：YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人：wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民：IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者：ChestnutSilver</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.2m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">33:01</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
