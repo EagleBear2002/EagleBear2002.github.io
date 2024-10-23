@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 正如在实践中使用的那样，传统的共识算法需要三个消息延迟，然后任何进程才能学习选择的值。 Fast Paxos 是经典 Paxos 算法的扩展，它允许在两个消息延迟中学习值。非正式地解释了该算法的工作方式和原因，该算法的 TLA+ 规范作为附录出现。 简介 共识问题需要一组过程来选择单个值。本文考虑了非拜占庭错误的异步消息传递系统中的共识问题。这个问题的解决方案绝不能允许选择两个不同的值，尽管">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fast Paxos">
+<meta property="og:url" content="https://eaglebear2002.github.io/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/Fast%20Paxos/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 正如在实践中使用的那样，传统的共识算法需要三个消息延迟，然后任何进程才能学习选择的值。 Fast Paxos 是经典 Paxos 算法的扩展，它允许在两个消息延迟中学习值。非正式地解释了该算法的工作方式和原因，该算法的 TLA+ 规范作为附录出现。 简介 共识问题需要一组过程来选择单个值。本文考虑了非拜占庭错误的异步消息传递系统中的共识问题。这个问题的解决方案绝不能允许选择两个不同的值，尽管">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-05-11T01:56:08.000Z">
+<meta property="article:modified_time" content="2024-10-23T08:32:06.668Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/Fast%20Paxos/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Fast Paxos | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">46</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">396</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/Fast%20Paxos/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fast Paxos
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-11 09:56:08" itemprop="dateCreated datePublished" datetime="2022-05-11T09:56:08+08:00">2022-05-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-10-23 16:32:06" itemprop="dateModified" datetime="2024-10-23T16:32:06+08:00">2024-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/" itemprop="url" rel="index"><span itemprop="name">分布式系统共识</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>摘要</strong></p>
+<p>正如在实践中使用的那样，传统的共识算法需要三个消息延迟，然后任何进程才能学习选择的值。 Fast Paxos 是经典 Paxos 算法的扩展，它允许在两个消息延迟中学习值。非正式地解释了该算法的工作方式和原因，该算法的 TLA+ 规范作为附录出现。</p>
+<h2 id="简介">简介</h2>
+<p>共识问题需要一组过程来选择单个值。本文考虑了非拜占庭错误的异步消息传递系统中的共识问题。这个问题的解决方案绝不能允许选择两个不同的值，尽管有任意数量的故障，并且如果足够多的进程没有故障并且可以相互通信，它最终必须选择一个值。</p>
+<p>在共识问题的传统陈述中，每个过程都提出一个值，并且选择的值必须是那些提出的值之一。不难看出，任何解决方案都需要至少两次消息延迟，然后任何进程才能了解已选择的值。许多算法在最好的情况下实现了这种延迟。经典的 Paxos 算法很受欢迎，因为它在实际系统中使用时在正常情况下实现了最佳延迟。</p>
+<p>传统共识算法所需的明显最优消息延迟数量是虚幻的——传统问题陈述的产物，其中值由提出它们的相同进程选择。在许多应用程序中，值不是由选择值的相同进程提出的。例如，在客户端/服务器系统中，客户端提出要执行的下一个命令，服务器选择一个提议的命令。当在这样的系统中使用传统的共识算法时，在客户端提出命令和某个进程得知选择了哪个命令之间需要三个消息延迟。</p>
+<p>快速共识算法是这样一种算法，其中一个进程可以在它被提出时的两个消息延迟内学习选择的值，即使值是由不同的进程集提出和选择的。已经表明，如果竞争提案发生冲突，即如果同时提出两个不同的值 ，没有通用共识算法可以保证在两个消息延迟内学习。因此，快速共识算法在发生冲突时并不总是很快。</p>
+<p>Fast Paxos 是一种快速共识算法，是经典 Paxos 的变体。在正常情况下，在没有冲突的情况下，学习发生在两个消息延迟中，并且即使发生冲突，也可以保证在三个消息延迟中发生。此外，它可以使用尽可能少的进程数量来实现任何所需程度的容错。</p>
+<p>Fast Paxos 背后的基本思想也是 Brasileiro 等人早期算法的基础。然而，他们只考虑了传统的共识问题，因此他们没有意识到他们的算法可以很容易地修改以获得快速的共识。 Pedone 和 Schiper 的 R-共识算法也可以被修改以产生一个快速的共识算法。然而，最终算法在存在冲突的情况下至少需要四个消息延迟。（他们还使用类似的算法解决了一个更普遍的问题，在共识的特殊情况下，当发生冲突时也需要至少四个消息延迟。）Zielinski 最近提出了一个快速的共识算法，可以看作是 Fast Paxos 的一种变体。</p>
+<p>Fast Paxos 本质上是经典 Paxos 的简单扩展。如果理解了经典 Paxos 的工作原理，就很容易理解 Fast Paxos 的工作原理。因此，我从第 2 节开始解释经典的 Paxos。第 3 节然后解释如何修改经典 Paxos 以获得 Fast Paxos。这些部分的说明有些非正式。他们的目标是解释算法为何起作用；它们没有以伪代码或任何其他语言提供算法的惯常简明描述。经典 Paxos 算法的精确陈述可以在其他地方找到，附录中给出了 Fast Paxos 的正式 TLA+ 规范。 TLA+ 规范足够通用，可以涵盖此处讨论的所有变体。然而，没有一个 Fast Paxos 的单一声明充分描述了实现所有这些变体所涉及的细节。对 Fast Paxos 底层原理的透彻理解比任何算法描述（无论是伪代码还是正式语言）都为实现它做好了准备。</p>
+<p>最后一节讨论了 Fast Paxos 的最优性，解释了 Brasileiro 等人的算法之间的关系。和 Fast Paxos，并简要提到了经典 Paxos 和 Fast Paxos 的泛化处理拜占庭式故障。</p>
+<h2 id="经典的-paxos-算法">经典的 Paxos 算法</h2>
+<h3 id="问题">问题</h3>
+<p>共识问题最有用地用三组代理表示：可以提出值的<em>提议者</em>，选择单个值的<em>接受者</em>，以及学习选择了什么值的<em>学习者</em>。代理代表某个进程所扮演的角色； 一个进程可以扮演多个角色。例如，在客户端/服务器系统中，客户端可能扮演提议者和学习者的角色，而服务器可能扮演接受者和学习者的角色。</p>
+<p>我假设惯用的异步、分布式、非拜占庭计算模型，其中：</p>
+<ul>
+<li>代理以任意速度运行，可能因停止而失败，也可能重新启动。但是，代理可能不会执行不正确的操作。</li>
+<li>代理通过发送消息进行通信，这些消息可能需要任意长的时间才能传递，可以无序传递，可以复制，也可以丢失。 但是，消息永远不会（无法检测到）损坏。</li>
+</ul>
+<p>共识的安全要求如下，其中一个值只能由提议者提出。</p>
+<ul>
+<li>非平凡性：只能学习提议的值。</li>
+<li>一致性：最多可以学习一个值。</li>
+</ul>
+<p>大多数共识算法，包括 Fast Paxos，都可以轻松满足非平凡的要求。因此，我将在很大程度上忽略不平凡。通过确保接受者只选择一个值并且只能学习他们选择的值来满足一致性。确保只能选择一个值是困难的部分； 很明显应该如何学习选择的值。因此，我将专注于接受者如何选择一个值。</p>
+<p>面对任意数量的（非拜占庭式）故障，必须保持安全要求。共识算法还应满足进度要求，即如果足够多的代理无故障，则最终选择一个值。我们不想依赖提议者或学习者来取得进展，因为他们可能不可靠。例如，我们不希望客户端/服务器系统仅仅因为客户端没有响应而停止；<strong>客户可能扮演提议者和/或学习者的角色</strong>。进程应该只要求足够多的接受者是无故障的，只要有一个无故障的提议者来提出一个值，并且有一个无故障的学习者来学习一个值。然而，这样的要求是有问题的，因为经典的 Fischer、Lynch、Paterson 结果指出任何满足共识安全属性的容错异步算法都无法满足它。因此，需要一些额外的假设。不同的共识算法使用不同的假设。我将推迟对 Paxos 算法的进程属性的精确陈述，其中涉及定义“无故障”的含义，直到我描述了它如何满足安全属性。这是可能的，因为安全要求必须在没有任何无故障假设的情况下保持不变。</p>
+<p>如果所有代理都没有故障，即使它们都失败并重新启动，也必须有可能取得进展。 由于可以在代理失败之前学习到一个值，因此代理必须有一些稳定的存储，可以在失败和重新启动后幸存下来。 我假设代理在重新启动时会从稳定的存储中恢复其状态，因此代理的故障与它的简单暂停没有区别。 因此没有必要明确地对故障进行建模。</p>
+<h3 id="安全">安全</h3>
+<h4 id="基本算法">基本算法</h4>
+<p>我首先描述一个简单版本的 Paxos 共识算法，它满足共识的安全要求。 它在第 2.3 节中扩展到也满足进度属性的完整算法。</p>
+<p>实现一致性要求不选择两个不同的值。 由于一个接受者在任何一回合中最多投票接受一个值，并且任何两个多数都包含一个共同的接受者，因此不可能在同一回合中选择两个不同的值。 但是，接受者可以在不同的回合次中投票接受不同的值。 实现一致性的难点在于确保在不同的回合次中不会选择不同的值。</p>
+<p>实现一致性要求不选择两个不同的值。 由于一个接受者在任何一回合中最多投票接受一个值，并且任何两个多数都包含一个共同的接受者，因此不可能在同一回合中选择两个不同的值。 但是，接受者可以在不同的回合次中投票接受不同的值。 实现一致性的难点在于确保在不同的回合次中不会选择不同的值。</p>
+<p>尽管我们根据接受者曾经投过的所有票来推断算法，但接受者不必记住这些票。 一个接受者 <span class="math inline">\(a\)</span> 只维护以下数据：</p>
+<ul>
+<li><span class="math inline">\(rnd[a]\)</span>：<span class="math inline">\(a\)</span> 参加过的编号最高的回合次，初始为 0。（由于 0 不是回合次，所以 <span class="math inline">\(rnd[a] = 0\)</span> 表示没有参加任何回合次。）</li>
+<li><span class="math inline">\(vrnd[a]\)</span>：<span class="math inline">\(a\)</span> 投票的编号最高的回合次，初始为 0。（因此，<span class="math inline">\(rnd[a] \le rnd[a]\)</span> 始终为真。）</li>
+<li><span class="math inline">\(vval[a]\)</span>：<span class="math inline">\(a\)</span> 在回合 <span class="math inline">\(vrnd[a]\)</span> 中投票接受的值； 它的初始值（当 <span class="math inline">\(vrnd[a] = 0\)</span> 时）无关紧要。</li>
+</ul>
+<p>Paxos 假设有一组<em>协调者</em>代理。 协调者和接受者的角色通常由同一个进程扮演。 对于每一回合 <span class="math inline">\(i\)</span>，一些协调者被预先分配为第 <span class="math inline">\(i\)</span> 回合的协调者。此外，每个协调者都被指定为无限多回合的协调者。 提案人将他们的提案发送给协调者。 如下所述，第 <span class="math inline">\(i\)</span> 回合的协调者选择一个它试图在该回合中选择的值。 每个协调者 <span class="math inline">\(c\)</span> 维护以下数据：</p>
+<ul>
+<li><span class="math inline">\(crnd[c]\)</span>：<span class="math inline">\(c\)</span> 开始的编号最高的一回合，最初为 0。</li>
+<li><span class="math inline">\(cval[c]\)</span>：<span class="math inline">\(c\)</span> 为回合 <span class="math inline">\(crnd[c]\)</span> 选择的值，或者如果 <span class="math inline">\(c\)</span> 尚未为该回合选择一个值，则为特殊值 <span class="math inline">\(none\)</span>。 它的初始值无关紧要。</li>
+</ul>
+<p>如果在第 <span class="math inline">\(i\)</span> 回合中，学习者从大多数接受者那里收到阶段 2b 的消息，宣布他们在第 <span class="math inline">\(i\)</span> 回合中都投票给了 <span class="math inline">\(v\)</span>，那么它就会学习到一个值 <span class="math inline">\(v\)</span>。</p>
+<p>第 <span class="math inline">\(i\)</span> 回合在以下阶段进行，其中 <span class="math inline">\(c\)</span> 是该回合的协调者。</p>
+<ol type="1">
+<li><ol type="a">
+<li>如果 <span class="math inline">\(crnd[c] &lt; i\)</span>，则 <span class="math inline">\(c\)</span> 通过将 <span class="math inline">\(crnd[c]\)</span> 设置为 <span class="math inline">\(i\)</span>，将 <span class="math inline">\(cval[c]\)</span> 设置为 <span class="math inline">\(none\)</span> 来开始第 <span class="math inline">\(i\)</span> 回合，并向每个接受者 <span class="math inline">\(a\)</span> 发送消息，请求 <span class="math inline">\(a\)</span> 参与第 <span class="math inline">\(i\)</span> 回合。</li>
+<li>如果接受者 <span class="math inline">\(a\)</span> 收到参与第 <span class="math inline">\(i\)</span> 回合的请求并且 <span class="math inline">\(i &gt; rnd[a]\)</span>，则 <span class="math inline">\(a\)</span> 将 <span class="math inline">\(rnd[a]\)</span> 设置为 <span class="math inline">\(i\)</span>，并向协调者 <span class="math inline">\(c\)</span> 发送包含回合数 <span class="math inline">\(i\)</span> 和 <span class="math inline">\(vrnd[a]\)</span> 和 <span class="math inline">\(vval[a]\)</span> 的当前值的消息。如果 <span class="math inline">\(i \le rnd[a]\)</span>（因此 <span class="math inline">\(a\)</span> 已经开始第 <span class="math inline">\(i\)</span> 回合或更高编号的回合），则 <span class="math inline">\(a\)</span> 忽略该请求。</li>
+</ol></li>
+<li><ol type="a">
+<li>如果 <span class="math inline">\(crnd[c] = i\)</span>（所以 <span class="math inline">\(c\)</span> 还没有开始更高编号的一回合），<span class="math inline">\(cval[c] = none\)</span>（所以 <span class="math inline">\(c\)</span> 还没有执行这一回合的阶段 2a），并且 <span class="math inline">\(c\)</span> 已经收到阶段来自大多数接受者的第 <span class="math inline">\(i\)</span> 回合的 1b 消息；然后根据下面描述的规则，<span class="math inline">\(c\)</span> 使用这些消息的内容来选择一个值 <span class="math inline">\(v\)</span>，将 <span class="math inline">\(cval[c]\)</span> 设置为 <span class="math inline">\(v\)</span>，并向接受者发送一条消息，要求他们在第 <span class="math inline">\(i\)</span> 回合投票接受 <span class="math inline">\(v\)</span>。</li>
+<li>如果一个接受者 <span class="math inline">\(a\)</span> 在第 <span class="math inline">\(i\)</span> 回合收到一个投票接受一个值 <span class="math inline">\(v\)</span> 的请求，并且 <span class="math inline">\(i \ge rnd[a]\)</span>并且 <span class="math inline">\(vrnd[a] \ne i\)</span>；然后 <span class="math inline">\(a\)</span> 在第 <span class="math inline">\(i\)</span> 回合投票接受 <span class="math inline">\(v\)</span>，将 <span class="math inline">\(vrnd[a]\)</span> 和 <span class="math inline">\(rnd[a]\)</span> 设置为 <span class="math inline">\(i\)</span>，将 <span class="math inline">\(cval[a]\)</span> 设置为 <span class="math inline">\(v\)</span>，并向所有学习者发送消息，宣布其第 <span class="math inline">\(i\)</span> 回合投票。 如果 <span class="math inline">\(i &lt; rnd[a]\)</span> 或 <span class="math inline">\(vrnd[a] = i\)</span>（因此 <span class="math inline">\(a\)</span> 已开始更高编号的一回合或已在此回合中投票），则 <span class="math inline">\(a\)</span> 忽略该请求。</li>
+</ol></li>
+</ol>
+<p>协调者可以随时为新的回合数执行阶段 1a 动作。 但是，该操作的启用条件会阻止协调者开始一个比它已经开始的数字低的一回合。 不同的回合次可以同时执行，但是如果接受者收到（并采取行动）更高编号回合次的消息，它将停止参与回合次。 请求接受不同值的阶段 2a 消息可以在不同的回合次中发送。 但是，阶段 2a 动作的启用条件和回合次对协调者的唯一分配确保了在同一回合次中不能发送具有不同值的阶段 2a 消息。</p>
+<h4 id="在阶段-2a-中选择一个值">在阶段 2a 中选择一个值</h4>
+<h3 id="进展">进展</h3>
+<h4 id="progress-属性">Progress 属性</h4>
+<h4 id="完整算法">完整算法</h4>
+<p>我现在扩展上述算法，使其满足进度属性。首先，协调者和接受者的动作修改如下：</p>
+<ul>
+<li>CA1. 如果接受者 <span class="math inline">\(a\)</span> 收到第 <span class="math inline">\(i\)</span> 回合的阶段 1a 或 2a 消息，且 <span class="math inline">\(i &lt; rnd[a]\)</span> 并且第 <span class="math inline">\(rnd[a]\)</span> 回合的协调者不是第 <span class="math inline">\(i\)</span> 回合的协调者，则 <span class="math inline">\(a\)</span> 向第 <span class="math inline">\(i\)</span> 回合的协调者发送一条特殊消息，指示那一回合 <span class="math inline">\(rnd[a]\)</span> 开始了。(如果 <span class="math inline">\(i &lt; rnd[a]\)</span> 并且回合 <span class="math inline">\(i\)</span> 和 <span class="math inline">\(rnd[a]\)</span> 具有相同的协调者，则回合 <span class="math inline">\(i\)</span> 消息已过时并被忽略。)</li>
+<li>CA2. 只有当协调者 <span class="math inline">\(c\)</span> 认为自己是当前的领导者时，它才会执行一个动作。只有当 <span class="math inline">\(crnd[c] = 0\)</span> 或者它已经知道已经开始了一回合 <span class="math inline">\(j\)</span> 时，它才开始新一回合 <span class="math inline">\(i\)</span>，对于 <span class="math inline">\(crnd[c] &lt; j &lt; i\)</span> 的某些 <span class="math inline">\(j\)</span>。</li>
+</ul>
+<p>由于任何消息都可能丢失，因此代理可能必须重新传输消息以确保它们最终被传递。我修改算法：</p>
+<ul>
+<li>CA3. 每个接受者不断地重新发送它发送的最后一个阶段 1b 或 2b 消息；任何认为自己是领导者的协调者不断向每个接受者重新发送它发送的最后一个阶段 1a 或 2a 消息；并且每个提出了值的提议者不断地将该提议重新发送给每个协调者。</li>
+</ul>
+<p>CA3 要求代理发送无限的消息序列。第 2.4 节解释了如何停止这种无休止的消息重传。到目前为止描述的动作说明了代理应该尝试执行的动作。我们不能指望一个失败的代理成功地做任何事情。我们所能期待的是：</p>
+<ul>
+<li>CA4. 一个无故障的代理最终会执行它应该执行的任何操作。</li>
+</ul>
+<p>例如，CA3 和 CA4 意味着当接受者 a 没有故障时，它最终必须重新发送它发送的最后一个阶段 1b 或 2b 消息。 CA4 不禁止有缺陷的代理执行操作。</p>
+<h4 id="过程证明">过程证明</h4>
+<h3 id="实施注意事项">实施注意事项</h3>
+<h4 id="减少消息数量">减少消息数量</h4>
+<h4 id="经典-paxos-的成本">经典 Paxos 的成本</h4>
+<h2 id="paxos-加速">Paxos 加速</h2>
+<p>如上文第 2.4.2 节所述，Paxos 共识算法中正常情况下的通信模式为：</p>
+<p><span class="math display">\[
+提议者 \to 领导者 \to 接受者 \to 学习者
+\]</span></p>
+<p>在 Fast Paxos 中，提议者绕过领导者直接将其提议发送给接受者。这可以节省一条消息延迟（和一条消息）。我现在解释它是如何工作的。但首先，我需要以一种小而重要的方式概括 Paxos 算法。</p>
+<p>Paxos 算法在上面根据多数集进行了说明，其中多数集包含大多数接受者。如果在第 <span class="math inline">\(i\)</span> 回合中有多数接受者投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 回合中选择值 <span class="math inline">\(v\)</span>。多数集所需的唯一属性是任何两个多数集都具有非空交集。该算法通过假设任意两个称为法定人数的集合的集合来简单概括，这样任何两个法定人数都具有非空交集，并在第 2 节中简单地将“majority set”替换为“法定人数”。</p>
+<p>我们可以通过允许法定人数集取决于回合数来进一步推广该算法。也就是说，我们假设对于每个回合数 <span class="math inline">\(i\)</span>，有一组称为 i-quorum 的接受者集合。如果某个 i-quorum 中的所有接受者在第 <span class="math inline">\(i\)</span> 回合中投票接受 <span class="math inline">\(v\)</span>，则在第 <span class="math inline">\(i\)</span> 回合中选择值 <span class="math inline">\(v\)</span>。同样，保持一致性所需的唯一要求是任何两个仲裁都具有非空交集。这意味着对于任何整数 <span class="math inline">\(i\)</span> 和 j，任何 i-quorum 和任何 j-quorum 都有非空交集。对算法的必要更改是显而易见的。例如，在图 1 中，Q 应该是 i-quorum，而不是多数集。我不会费心明确地重写算法。</p>
+<p>在第 2.3 节的进度属性中，“多数集”应该替换为什么并不明显。这将在下面的第 3.3 节中讨论。</p>
+<h3 id="基本算法-1">基本算法</h3>
+<p>我现在描述第 2.2 节的基本 Paxos 算法对 Fast Paxos 的推广。它只保证安全。稍后会考虑进度和成本。在 Fast Paxos 中，回合编号分为快速回合编号和经典回合编号。一回合被称为快速或经典，取决于它的编号。与以前一样，回合分两个阶段进行，但有两个不同之处：</p>
+<ul>
+<li>协调者在阶段 2a 中选择值的规则被修改如下所述。</li>
+<li>在一个快速的第 <span class="math inline">\(i\)</span> 回合中，如果协调者可以在阶段 2a 中选择任何提议的值，那么它可以代替选择单个值，而是向接受者发送一个称为 <span class="math inline">\(any\)</span> 消息的特殊阶段 2a 消息。当接受者收到阶段 2a 任何消息时，它可以将任何提议者的提议值的消息视为具有该值的普通第 <span class="math inline">\(i\)</span> 阶段 2a 消息。（但是，对于单个值，它可能只执行一次第 <span class="math inline">\(i\)</span> 阶段 2b 动作。）</li>
+</ul>
+<p>回想一下，在正常情况下，协调者 <span class="math inline">\(c\)</span> 收到的所有阶段 1b 消息都表明在该回合中没有接受者投票，因此 <span class="math inline">\(c\)</span> 可以选择阶段 2a 中的任何提议值。因此，快速回合的正常情况是 <span class="math inline">\(c\)</span> 发送阶段 2a <span class="math inline">\(any\)</span> 消息。这通常在为该算法实例提出任何值之前，选择 <span class="math inline">\(c\)</span> 作为领导者时完成。然后，接受者等待来自提议者的提议消息，并将其接收到的第一个消息视为来自 <span class="math inline">\(c\)</span> 的普通阶段 2a 消息。</p>
+<p>经典回合的工作方式与经典 Paxos 中的相同。协调者选择接受者可以投票的值，因此不同的接受者不能在同一回合中投票接受不同的值。在快速回合中情况并非如此。如果协调者在快速回合中发送阶段 2a <span class="math inline">\(any\)</span> 消息，则每个接受者独立决定将哪个提议消息作为阶段 2a 消息。因此，不同的接受者可以在快速回合次中投票接受不同的值。</p>
+<p>协调者在阶段 2a 中选择值的规则不再保证一致性，即使对于经典回合也是如此。事实上，这条规则根本不再适用。图 1 中的规则声明断言，如果 <span class="math inline">\(k \ne 0\)</span>，则 <span class="math inline">\(V\)</span> 包含单个元素。如果 <span class="math inline">\(k\)</span> 是一个快速整数，这就不再适用了。必须修改在阶段 2a 中选择值 <span class="math inline">\(v\)</span> 的规则。</p>
+<h3 id="冲突恢复">冲突恢复</h3>
+<p>在经典 Paxos 中，如果 i-quorum 的接受者在接收到更高编号轮的消息之前收到该轮的第 2a 阶段消息，则第 i 轮成功选择一个值。 如果 i 是协调器发送阶段 2a 任何消息的快速轮次，则这不适用于 Fast Paxos。 在这种情况下，不同的接受者可以在该轮中投票接受不同的值，从而导致没有值被选择。 在正常情况下，接受者首先收到阶段 2a 的任何消息，然后投票接受它收到的第一个提议值。 如果两个或多个不同的提议者几乎同时发送提议，并且这些提议被接受者以不同的顺序接收，则该轮可能会失败。 我现在考虑该算法如何从竞争提案的这种冲突中恢复。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/Fast%20Paxos%20Made%20Easy/" rel="prev" title="Fast Paxos Made Easy">
+      <i class="fa fa-chevron-left"></i> Fast Paxos Made Easy
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/Fast%20Paxos%20Report/" rel="next" title="Fast Paxos Report">
+      Fast Paxos Report <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E7%9A%84-paxos-%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">经典的 Paxos 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8"><span class="nav-number">2.2.</span> <span class="nav-text">安全</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.1.</span> <span class="nav-text">基本算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E9%98%B6%E6%AE%B5-2a-%E4%B8%AD%E9%80%89%E6%8B%A9%E4%B8%80%E4%B8%AA%E5%80%BC"><span class="nav-number">2.2.2.</span> <span class="nav-text">在阶段 2a 中选择一个值</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E5%B1%95"><span class="nav-number">2.3.</span> <span class="nav-text">进展</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#progress-%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">Progress 属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E7%AE%97%E6%B3%95"><span class="nav-number">2.3.2.</span> <span class="nav-text">完整算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E8%AF%81%E6%98%8E"><span class="nav-number">2.3.3.</span> <span class="nav-text">过程证明</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%96%BD%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">2.4.</span> <span class="nav-text">实施注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E6%B6%88%E6%81%AF%E6%95%B0%E9%87%8F"><span class="nav-number">2.4.1.</span> <span class="nav-text">减少消息数量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8-paxos-%E7%9A%84%E6%88%90%E6%9C%AC"><span class="nav-number">2.4.2.</span> <span class="nav-text">经典 Paxos 的成本</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#paxos-%E5%8A%A0%E9%80%9F"><span class="nav-number">3.</span> <span class="nav-text">Paxos 加速</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%AE%97%E6%B3%95-1"><span class="nav-number">3.1.</span> <span class="nav-text">基本算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%B2%E7%AA%81%E6%81%A2%E5%A4%8D"><span class="nav-number">3.2.</span> <span class="nav-text">冲突恢复</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">396</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.4m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">35:50</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
