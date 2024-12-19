@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\put{\mathrm{put}} \def\get{\mathrm{get}} \def\rem{\mathrm{rem}} \def\inv \def\ret \def\hb \def\lin \] 摘要 多线程程序通常依赖高效且线程安全的并发对象，如集合、键值映射和队列。虽然一些并发对象的操作被设计为原子性行为，见证其在线性化顺序中的前驱操作的原子效果，但其他操作为了避开复杂">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ESOP&#39;21-Verifying Visibility-Based Weak Consistency">
+<meta property="og:url" content="https://eaglebear2002.github.io/699/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\put{\mathrm{put}} \def\get{\mathrm{get}} \def\rem{\mathrm{rem}} \def\inv \def\ret \def\hb \def\lin \] 摘要 多线程程序通常依赖高效且线程安全的并发对象，如集合、键值映射和队列。虽然一些并发对象的操作被设计为原子性行为，见证其在线性化顺序中的前驱操作的原子效果，但其他操作为了避开复杂">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-12-07T04:35:40.000Z">
+<meta property="article:modified_time" content="2024-12-19T14:54:24.394Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/699/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ESOP'21-Verifying Visibility-Based Weak Consistency | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">50</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">422</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/699/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ESOP'21-Verifying Visibility-Based Weak Consistency
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-07 12:35:40" itemprop="dateCreated datePublished" datetime="2024-12-07T12:35:40+08:00">2024-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-19 22:54:24" itemprop="dateModified" datetime="2024-12-19T22:54:24+08:00">2024-12-19</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%A4%9A%E7%BA%A7%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" itemprop="url" rel="index"><span itemprop="name">多级隔离级别</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\put{\mathrm{put}}
+\def\get{\mathrm{get}}
+\def\rem{\mathrm{rem}}
+\def\inv
+\def\ret
+\def\hb
+\def\lin
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>多线程程序通常依赖高效且线程安全的并发对象，如集合、键值映射和队列。虽然一些并发对象的操作被设计为原子性行为，见证其在线性化顺序中的前驱操作的原子效果，但其他操作为了避开复杂的控制和同步瓶颈而放弃了这种强一致性。例如，键值映射的 <code>contains(value)</code> 方法可能在不阻塞并发更新的情况下遍历键值条目，以避免不必要的性能瓶颈，因此可能会忽略某些在线性化顺序上的前驱操作的效果。尽管这些弱一致性的操作可能不具备原子性，但它们仍然提供了一些保证，比如只观察到已经存在的值。</p>
+<p>在这项工作中，我们开发了一种方法来证明并发对象实现遵循弱一致性规范。特别是，我们考虑了对放宽可见性规范的（前向）模拟证明，允许指定的操作忽略它们的一些线性化顺序上的前驱操作，即表现得好像这些操作从未发生过一样。除了标注实现代码以识别逻辑效应发生的点（即操作的线性化点），我们还标注代码以识别可见操作，即那些效果被观察到的操作；实际上，这种标注可以通过跟踪每个访问内存位置的写入者自动完成。我们在一个通用的状态转换系统概念上形式化了我们的方法论，该概念独立于任何特定的编程语言或内存模型，并展示了其应用。</p>
+<h2 id="introduction">Introduction</h2>
+<p>编写高效的多线程程序通常涉及仔细组织共享内存访问，以促进线程间通信并避免同步瓶颈。现代软件平台如 Java 包含可重用的抽象（abstractions），这些抽象将低级别的共享内存访问和同步封装为熟悉的高级抽象数据类型（ADTs）。这些所谓的并发对象通常包括互斥原语如锁、原子整数等数值数据类型，以及 collections 如集合、键值映射和队列；Java 的标准版平台包含每种类型的许多实现。此类对象通常提供强一致性保证，如线性化能力 [18]，确保每个操作看起来像是原子地发生，根据某些线性化顺序观察到并发执行操作的原子效果。</p>
+<p>虽然这些强一致性保证对于使用并发对象的程序进行逻辑推理非常理想，但这些保证对于许多操作来说过于严格，因为它们排除了简单和/或高效的实现——Java 的并发集合方法中超过一半的方法放弃了原子性以实现弱一致性 [13]。一方面，基本操作如键值映射的 <code>get</code> 和 <code>put</code> 方法通常允许相对简单的原子实现，因为它们的行为基本上取决于存储相关键值映射的单个内存单元。另一方面，使聚合操作如 <code>size</code> 和 <code>contains(value)</code> 原子化会引入同步瓶颈，或引入复杂的控制结构，因为它们的原子行为取决于同时存储在许多内存单元上的值。有趣的是，即使底层内存操作顺序一致，此类实现也不是线性化的，例如 Java 8 的并发集合，其内存访问是数据竞争自由的 [8]。</p>
+<p><span class="math display">\[
+o_1: contains(v) \\
+o_2: insert(k_1, v) \\
+o_3: remove(k_2)
+\]</span></p>
+<p>例如，Java 的并发哈希映射的 <code>contains(value)</code> 方法在不阻塞并发更新的情况下迭代键值条目，以避免不合理的性能瓶颈。因此，在给定的执行中，contains-value-v 操作 <span class="math inline">\(o_1\)</span> 将忽略操作 <span class="math inline">\(o_2\)</span> 的并发插入 <span class="math inline">\(k_1 \mapsto v\)</span>，因为它已经遍历了键 <span class="math inline">\(k_1\)</span>。这种忽视使 <span class="math inline">\(o_1\)</span> 可能得出值 <span class="math inline">\(v\)</span> 不存在的结论，而只能通过 <span class="math inline">\(o_1\)</span> 在 <span class="math inline">\(o_2\)</span> 之前线性化来解释。在操作 <span class="math inline">\(o_3\)</span> 在 <span class="math inline">\(o_1\)</span> 到达键 <span class="math inline">\(k_2\)</span> 之前并发地移除 <span class="math inline">\(k_2 \mapsto v\)</span> 的情况下，只有在 <span class="math inline">\(o_2\)</span> 完成后，原子性才被违反，因为在线性化的每种可能情况下，映射 <span class="math inline">\(k_2 \mapsto v\)</span> 和 <span class="math inline">\(k_1 \mapsto v\)</span> 二者之一总是存在。尽管如此，此类弱一致性操作仍然提供保证，例如，从未观察到的值永远不会被观察到，且初始存在的值不会被移除。</p>
+<p>在本工作中，我们开发了一种方法论，用于证明并发对象实现遵守其弱一致性规范所规定的保证。我们方法的关键方面是通过可见性放松（visibility relaxation）[13] 提升现有的顺序 ADT 规范，以及利用基于放松可见性 ADTs 的简单且可机械化的基于前向模拟 [25] 的推理。实际上，我们的方法论扩展了基于线性化证明的前向模拟方法，适用于具有弱一致性操作的并发对象，并使弱一致性保证的证明自动化。</p>
+<p>为了利用现有的顺序 ADT 规范，我们采用了最近的可见性放松方法 [13]。与线性化 [18] 类似，每个操作的返回值由其前驱的原子效果决定，这些前驱在某些（即，存在量化）线性化顺序中。为了允许一致性减弱，允许操作在一定程度上忽略其线性化顺序前驱，表现得好像它们没有发生。直观上，这种（也存在量化）可见性捕捉了跨多个内存单元存储的值的无法或不愿意原子观察。为了提供保证，可见性放松的范围在不同程度上受到限制。值得注意的是，绝对操作的可见性必须包括其所有线性化顺序的前驱，而单调操作的可见性必须包括所有发生在前驱之前的操作，以及对它们可见的所有操作。Java 的并发集合方法大多数是绝对或单调的 [13]。例如，在上述包含值示例中，通过考虑操作 <span class="math inline">\(o_2\)</span> 对 <span class="math inline">\(o_1\)</span> 不可见，可以得出 <span class="math inline">\(v\)</span> 不存在的结论。这可以通过线性化顺序 <span class="math inline">\(o_2; o_3; o_1\)</span> 来证明，其中 <span class="math inline">\(o_1\)</span> 看到了 <span class="math inline">\(o_3\)</span> 删除 <span class="math inline">\(k_2 \mapsto v\)</span> 但没有看到 <span class="math inline">\(o_2\)</span> 插入 <span class="math inline">\(k_1 \mapsto v\)</span>。将单调可见性归因于包含值方法相当于保证除非被移除（即并发地），否则初始存在的值将被观察到。</p>
+<p>虽然放松可见性规范提供了一种描述弱一致性并发对象操作提供的保证的手段，但系统地建立实现的遵从性需要一种策略来证明模拟 [25]，即实现的每一步都被（操作表示的）规范的某一步所模拟。我们贡献的核心因此是三重的：首先，识别与实现级别转换相关的相关规范级别动作；其次，识别实现级别注释，这些注释将转换与规范级别动作相关联；第三，开发系统地设计此类注释的策略。例如，基于线性化点的现有方法 [18] 实际上相当于注释实现级别转换，这些转换在其规范级别动作（即其原子效应）发生时发生。放松可见性规范不仅需要一个存在量化线性化顺序的见证，还需要一个存在量化可见性关系，因此需要第二种注释来解决操作的可见性。我们提出了一种可见性动作的概念，使操作能够声明其对其他操作的可见性，例如，指定它读取的内存单元的写入者。</p>
+<p>我们方法的其余部分在于设计一种系统的方法来构建模拟证明，以实现自动验证。本质上，我们识别了一种系统地注释实现的策略，给定线性化点注释和可见性边界（即，绝对或单调），然后使用现成的验证工具对相应的模拟检查进行编码。对于后者，我们利用 civl [16]，这是一种用于 Owicki-Gries 风格模块化证明的并发程序语言和验证器，支持任意数量的线程。原则上，由于我们的方法将模拟简化为安全性验证，任何安全性验证器都可以使用，尽管 civl 通过在任意程序点捕获干扰来促进多线程程序的推理。使用 civl，我们验证了 Java 的并发哈希映射和并发链式队列的包含值方法和大小方法的单调性，以及 add 和 remove 操作的绝对一致性。尽管我们的模型是用 civl 编写的，并假设顺序一致的内存访问，但它们捕捉了 Java 中弱一致性的困难方面，包括基于堆的内存访问；此外，我们的模型在 Java 8 的内存模型下也是合理的，因为它们的 Java 8 实现保证了数据竞争自由。</p>
+<p>总之，我们提出了第一个使用顺序规范和前向模拟来验证弱一致性操作的方法。贡献包括：</p>
+<ul>
+<li>我们的方法论在一般意义上的转换系统上的形式化，不依赖于任何特定的编程语言或内存模型（<span class="math inline">\(\S 3\)</span>）；</li>
+<li>将我们的方法论应用于验证一个弱一致性键值映射的包含值方法（<span class="math inline">\(\S 4\)</span>）；以及</li>
+<li>使用自动化定理证明器验证弱一致性 Java 方法模型的机械化（<span class="math inline">\(\S 5\)</span>）。</li>
+</ul>
+<p>除了上述大纲外，本文还通过可见性放松总结了现有的弱一致性规范方法论（<span class="math inline">\(\S 2\)</span>），总结了相关工作（<span class="math inline">\(\S 6\)</span>），并得出结论（<span class="math inline">\(\S 7\)</span>）。所有定理和引理的证明都列在附录 A 中。</p>
+<h2 id="weak-consistency">Weak Consistency</h2>
+<p>我们验证弱一致性并发对象的方法论依赖于弱一致性规范的精确描述，以及用于建立规范遵从性的证明技术。在本节中，我们回顾并概述了一种称为可见性放松 [13] 的描述，它是顺序抽象数据类型 (ADT) 规范的扩展，在这种规范中，某些操作的返回值可能不反映先前执行的操作的效果。</p>
+<p>在本文的其余部分，记号上，<span class="math inline">\(\varepsilon\)</span> 表示空序列，<span class="math inline">\(\emptyset\)</span> 表示空集，<span class="math inline">\(\_\)</span> 表示未使用的绑定，<span class="math inline">\(\top\)</span> 和 <span class="math inline">\(\bot\)</span> 分别表示布尔值 true 和 false。我们用 <span class="math inline">\(R(x)\)</span> 表示关系 <span class="math inline">\(R\)</span> 中包含元组 <span class="math inline">\(x\)</span>；用 <span class="math inline">\(R[x \mapsto y]\)</span> 表示关系 <span class="math inline">\(R\)</span> 的扩展 <span class="math inline">\(R \cup \{xy\}\)</span>，其中包含 <span class="math inline">\(xy\)</span>；用 <span class="math inline">\(R \mid X\)</span> 表示关系 <span class="math inline">\(R\)</span> 在集合 <span class="math inline">\(X\)</span> 上的投影 <span class="math inline">\(R \cap X^*\)</span>；用 <span class="math inline">\(\overline{R}\)</span> 表示关系 <span class="math inline">\(R\)</span> 的补集 <span class="math inline">\(\{x : x \notin R\}\)</span>；用 <span class="math inline">\(R(x)\)</span> 表示关系 <span class="math inline">\(R\)</span> 在 <span class="math inline">\(x\)</span> 上的像 <span class="math inline">\(\{y : xy \in R\}\)</span>；用 <span class="math inline">\(R^{-1}(y)\)</span> 表示关系 <span class="math inline">\(R\)</span> 在 <span class="math inline">\(y\)</span> 上的前像 <span class="math inline">\(\{x : xy \in R\}\)</span>；<span class="math inline">\(R(x)\)</span> 是指包含还是镜像（inclusion or an image）将根据上下文清楚。最后，我们用 <span class="math inline">\(x_i\)</span> 表示元组 <span class="math inline">\(x = x_0 x_1 \ldots\)</span> 的第 <span class="math inline">\(i\)</span> 个元素。</p>
+<h3 id="weak-visibility-specications">Weak-Visibility Specications</h3>
+<p>对于 ADT 规范的一般概念，我们考虑固定的方法名称集合 <span class="math inline">\(\mathbb{M}\)</span> 和参数或返回值集合 <span class="math inline">\(\mathbb{X}\)</span>。一个操作标签 <span class="math inline">\(\lambda = \langle m, x, y \rangle\)</span> 是一个方法名称 <span class="math inline">\(m \in \mathbb{M}\)</span> 以及参数和返回值 <span class="math inline">\(x, y \in \mathbb{X}\)</span>。只读谓词是一个操作标签上的单目关系 <span class="math inline">\(R(\lambda)\)</span>，操作序列 <span class="math inline">\(s = \lambda_0 \lambda_1 \ldots\)</span> 是操作标签的序列，而顺序规范 <span class="math inline">\(S = \{s_0, s_1, \ldots\}\)</span> 是操作序列的集合。我们说 <span class="math inline">\(R\)</span> 与 <span class="math inline">\(S\)</span> 兼容，当 <span class="math inline">\(S\)</span> 在删除只读操作后是封闭的，即，<span class="math inline">\(\lambda_0 \ldots \lambda_{j-1} \lambda_{j+1} \ldots \lambda_i \in S\)</span> 当 <span class="math inline">\(\lambda_0 \ldots \lambda_i \in S\)</span> 且 <span class="math inline">\(R(\lambda_j)\)</span>。</p>
+<blockquote>
+<p><strong>示例 1</strong></p>
+<p>键值映射 ADT 顺序规范 <span class="math inline">\(S_m\)</span> 是包含所有序列 <span class="math inline">\(\lambda_0 \ldots \lambda_i\)</span> 的前缀封闭集合，其中 <span class="math inline">\(\lambda_i\)</span> 是以下之一：</p>
+<ul>
+<li><span class="math inline">\(\langle \put, k v, b \rangle\)</span>，且 <span class="math inline">\(b = \top\)</span> 当且仅当某个 <span class="math inline">\(\langle \rem, k, \_ \rangle\)</span> 跟随任何先前的 <span class="math inline">\(\langle \put, k v, \_ \rangle\)</span>；</li>
+<li><span class="math inline">\(\langle \rem, k, b \rangle\)</span>，且 <span class="math inline">\(b = \top\)</span> 当且仅当没有其他 <span class="math inline">\(\langle \rem, k, \_ \rangle\)</span> 跟随某个先前的 <span class="math inline">\(\langle \put, k v, \_ \rangle\)</span>；</li>
+<li><span class="math inline">\(\langle \get, k, v \rangle\)</span>，且没有 <span class="math inline">\(\langle \put, k v&#39;, \_ \rangle\)</span> 也没有 <span class="math inline">\(\langle \rem, k, \_ \rangle\)</span> 跟随某个先前的 <span class="math inline">\(\langle \put, k v, \_ \rangle\)</span>，且 <span class="math inline">\(v = \bot\)</span> 如果没有这样的 <span class="math inline">\(\langle \put, k v, \_ \rangle\)</span> 存在；或</li>
+<li><span class="math inline">\(\langle \mathrm{has}, v, b \rangle\)</span>，且 <span class="math inline">\(b = \top\)</span> 当且仅当没有先前的 <span class="math inline">\(\langle \put, k v&#39;, \_ \rangle\)</span> 也没有 <span class="math inline">\(\langle \rem, k, \_ \rangle\)</span> 跟随某个先前的 <span class="math inline">\(\langle \put, k v, \_ \rangle\)</span>。</li>
+</ul>
+<p>只读谓词 <span class="math inline">\(R_m\)</span> 在以下情况下成立：</p>
+<ul>
+<li><span class="math inline">\(R_m(\langle \put, \_, b \rangle)\)</span> 如果 <span class="math inline">\(\neg b\)</span></li>
+<li><span class="math inline">\(R_m(\langle \rem, \_, b \rangle)\)</span> 如果 <span class="math inline">\(\neg b\)</span></li>
+<li><span class="math inline">\(R_m(\langle \get, \_, \_ \rangle)\)</span></li>
+<li><span class="math inline">\(R_m(\langle \mathrm{has}, \_, \_ \rangle)\)</span></li>
+</ul>
+<p>这是 Java 的 Map ADT 的简化版本，即，方法较少。</p>
+</blockquote>
+<p>为了从顺序规范推导弱规范，我们考虑一个集合 <span class="math inline">\(\mathbb{V}\)</span> 中恰好包含两个可见性标签，这些标签来自先前的工作 [13]：绝对和单调。一个可见性注释 <span class="math inline">\(V : \mathbb{M} \to \mathbb{V}\)</span> 将每个方法 <span class="math inline">\(m \in \mathbb{M}\)</span> 映射到一个可见性 <span class="math inline">\(V(m) \in \mathbb{V}\)</span>。</p>
+<p>直观上，绝对可见性要求操作观察其所有线性化顺序前驱的效果。较弱的单调可见性要求操作观察其所有发生在前驱（即，程序和同步顺序）的效果，以及那些前驱已经观察到的效果，即，可见效果的集合在发生在前驱的操作链上单调递增；相反，操作可以忽略那些已经被其发生在前驱忽略的效果，只要那些效果不是通过程序和同步顺序传递相关的。</p>
+<blockquote>
+<p><strong>定义 1</strong></p>
+<p>一个弱可见性规范 <span class="math inline">\(W = \langle S, R, V \rangle\)</span> 是一个顺序规范 <span class="math inline">\(S\)</span>，带有兼容的只读谓词 <span class="math inline">\(R\)</span> 和可见性注释 <span class="math inline">\(V\)</span>。</p>
+</blockquote>
+<blockquote>
+<p><strong>示例 2</strong></p>
+<p>弱一致性包含值映射 <span class="math inline">\(W_m = \langle S_m, R_m, V_m \rangle\)</span> 为示例 1 中的键值映射 ADT 方法 <span class="math inline">\(S_m\)</span> 注释如下：</p>
+</blockquote>
+<p>$ V_m() = V_m() = V_m() = , V_m() = . $</p>
+<p>Java 的并发哈希映射似乎与这一规范一致 [13]。</p>
+<p>我们通过描述并发方法调用返回的值来赋予规范语义，给定调用顺序的约束。实际上，调用之间的发生顺序由程序顺序确定，即，同一线程中的调用，以及同步顺序，即，访问同一原子对象（例如，锁）的不同线程中的调用。一个历史 <span class="math inline">\(h = \langle O, \inv, \ret, \hb \rangle\)</span> 是一个数值操作标识符集合 <span class="math inline">\(O \subseteq \mathbb{N}\)</span>，以及一个调用函数 <span class="math inline">\(\inv : O \to \mathbb{M} \times \mathbb{X}\)</span> 将操作标识符映射到方法名称和参数值，一个部分返回函数 <span class="math inline">\(\ret : O \to \mathbb{X}\)</span> 将操作标识符映射到返回值，以及一个（严格）部分发生顺序关系 <span class="math inline">\(\hb \subseteq O \times O\)</span>；空历史 <span class="math inline">\(h_\emptyset\)</span> 有 <span class="math inline">\(O = \inv = \ret = \hb = \emptyset\)</span>。一个操作 <span class="math inline">\(o \in O\)</span> 是完整的当 <span class="math inline">\(\ret(o)\)</span> 被定义，否则是不完整的；然后 <span class="math inline">\(h\)</span> 是完整的当每个操作都是完整的。一个完整操作 <span class="math inline">\(o\)</span> 的标签 <span class="math inline">\(o\)</span> 有 <span class="math inline">\(\inv(o) = \langle m, x \rangle\)</span> 和 <span class="math inline">\(\ret(o) = y\)</span> 是 <span class="math inline">\(\langle m, x, y \rangle\)</span>。</p>
+<p>为了将给定历史中的操作返回值与顺序规范关联起来，我们考虑这些操作的某些排序。一个历史 <span class="math inline">\(h = \langle O, \_, \_, \hb \rangle\)</span> 的线性化是一个包含 <span class="math inline">\(\hb\)</span> 的全序 <span class="math inline">\(lin \supseteq \hb\)</span>，以及一个可见性投影 <span class="math inline">\(vis\)</span> 将每个操作 <span class="math inline">\(o \in O\)</span> 映射到一个子集 <span class="math inline">\(vis(o) \subseteq lin^{-1}(o)\)</span> 的操作，这些操作在 <span class="math inline">\(lin\)</span> 中位于 <span class="math inline">\(o\)</span> 之前；注意 <span class="math inline">\(\langle o_1, o_2 \rangle \in vis\)</span> 意味着 <span class="math inline">\(o_1\)</span> 观察到 <span class="math inline">\(o_2\)</span>。对于给定的只读谓词 <span class="math inline">\(R\)</span>，我们说 <span class="math inline">\(o\)</span> 的可见性是单调的，当它包括每个发生在前驱的操作，以及对一个发生在前驱的操作可见的操作，该操作不是只读的，即 <span class="math inline">\(vis(o) \supseteq (\hb^{-1}(o) \cup vis(\hb^{-1}(o))) \mid \overline{R}\)</span>。我们说 <span class="math inline">\(o\)</span> 的可见性是绝对的，当 <span class="math inline">\(vis(o) = lin^{-1}(o)\)</span>，并且 <span class="math inline">\(vis\)</span> 本身是绝对的，当每个 <span class="math inline">\(vis(o)\)</span> 是绝对的。一个抽象执行 <span class="math inline">\(e = \langle h, lin, vis \rangle\)</span> 是一个历史 <span class="math inline">\(h\)</span> 以及 <span class="math inline">\(h\)</span> 的线性化和可见性投影 <span class="math inline">\(vis\)</span>。一个抽象执行是顺序的，当 <span class="math inline">\(\hb\)</span> 是全序的，完整的，当 <span class="math inline">\(h\)</span> 是完整的，以及绝对的，当 <span class="math inline">\(vis\)</span> 是绝对的。</p>
+<blockquote>
+<p><strong>示例 3</strong></p>
+<p>一个抽象执行可以使用线性化定义如下：</p>
+<p><span class="math display">\[
+\langle \put, \langle 1, 1 \rangle, \top \rangle \langle \get, 1, 1 \rangle \langle \put, \langle 0, 1 \rangle, \top \rangle \langle \put, \langle 1, 0 \rangle, \bot \rangle \langle \mathrm{has}, 1, \bot \rangle
+\]</span></p>
+</blockquote>
+<p>以及一个发生顺序，与线性化顺序相比，保持 <span class="math inline">\(\langle \mathrm{has}, 1, \bot \rangle\)</span> 与 <span class="math inline">\(\langle \put, \langle 0, 1 \rangle, \top \rangle\)</span> 和 <span class="math inline">\(\langle \put, \langle 1, 0 \rangle, \bot \rangle\)</span> 无序，并且一个可见性投影，其中每个 <span class="math inline">\(\put\)</span> 和 <span class="math inline">\(\get\)</span> 的可见性包括所有线性化前驱，而 <span class="math inline">\(\langle \mathrm{has}, 1, \bot \rangle\)</span> 的可见性包括 <span class="math inline">\(\langle \put, \langle 1, 1 \rangle, \top \rangle\)</span> 和 <span class="math inline">\(\langle \put, \langle 1, 0 \rangle, \bot \rangle\)</span>。回忆在 <span class="math inline">\(\langle k, v \rangle\)</span> 参数中，键 <span class="math inline">\(k\)</span> 优先于值 <span class="math inline">\(v\)</span>。</p>
+<p>为了确定个别历史与弱可见性规范的一致性，我们考虑它们对应的抽象执行的一致性。设 <span class="math inline">\(h = \langle O, \inv, \ret, \hb \rangle\)</span> 是一个历史，<span class="math inline">\(e = \langle h, lin, vis \rangle\)</span> 是一个完整的抽象执行。则 <span class="math inline">\(e\)</span> 与可见性注释 <span class="math inline">\(V\)</span> 和只读谓词 <span class="math inline">\(R\)</span> 一致，如果对于每个操作 <span class="math inline">\(o \in \mathrm{dom}(lin)\)</span> 与 <span class="math inline">\(\inv(o) = \langle m, \_ \rangle\)</span>，<span class="math inline">\(vis(o)\)</span> 是绝对的或单调的，分别根据 <span class="math inline">\(V(m)\)</span> 和 <span class="math inline">\(R\)</span>。标签 <span class="math inline">\(\lambda_0 \lambda_1 \ldots\)</span> 的全序 <span class="math inline">\(o_0 \prec o_1 \prec \ldots\)</span> 的完整操作序列是操作标签的序列，即，<span class="math inline">\(\lambda_i\)</span> 是操作 <span class="math inline">\(o_i\)</span> 的标签。则 <span class="math inline">\(e\)</span> 与顺序规范 <span class="math inline">\(S\)</span> 一致，当标签 <span class="math inline">\(\langle lin \mid (vis(o) \cup \{o\}) \rangle\)</span> 包含在 <span class="math inline">\(S\)</span> 中，对于每个操作 <span class="math inline">\(o \in \mathrm{dom}(lin)\)</span>。最后，我们说 <span class="math inline">\(e\)</span> 与弱可见性规范 <span class="math inline">\(\langle S, R, V \rangle\)</span> 一致，当它与 <span class="math inline">\(S\)</span>、<span class="math inline">\(R\)</span> 和 <span class="math inline">\(V\)</span> 一致。</p>
+<blockquote>
+<p><strong>示例 4</strong></p>
+<p>示例 3 中的执行与弱一致性包含值映射 <span class="math inline">\(W_m\)</span> 一致，该映射在示例 2 中定义。</p>
+</blockquote>
+<blockquote>
+<p><strong>注释 1</strong></p>
+<p>适用于现代软件平台（如 Java）的一致性模型基于发生顺序关系，这些关系抽象了实时执行顺序。由于发生顺序与实时不同，不是必然的区间顺序，因此组合操作的顺序可能不一致。</p>
+</blockquote>
+<h2 id="establishing-consistency-with-forward-simulation">Establishing Consistency with Forward Simulation</h2>
+<h2 id="proof-methodology">Proof Methodology</h2>
+<h2 id="implementation-and-evaluation">Implementation and Evaluation</h2>
+<h2 id="related-work">Related Work</h2>
+<h2 id="conclusion-and-future-work">Conclusion and Future Work</h2>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/18110/" rel="prev" title="数理逻辑-第 10 次作业">
+      <i class="fa fa-chevron-left"></i> 数理逻辑-第 10 次作业
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/58335/" rel="next" title="VLDB'21-Robustness Against Read Committed for Transaction Templates">
+      VLDB'21-Robustness Against Read Committed for Transaction Templates <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak-consistency"><span class="nav-number">2.</span> <span class="nav-text">Weak Consistency</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#weak-visibility-specications"><span class="nav-number">2.1.</span> <span class="nav-text">Weak-Visibility Specications</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#establishing-consistency-with-forward-simulation"><span class="nav-number">3.</span> <span class="nav-text">Establishing Consistency with Forward Simulation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#proof-methodology"><span class="nav-number">4.</span> <span class="nav-text">Proof Methodology</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#implementation-and-evaluation"><span class="nav-number">5.</span> <span class="nav-text">Implementation and Evaluation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#related-work"><span class="nav-number">6.</span> <span class="nav-text">Related Work</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conclusion-and-future-work"><span class="nav-number">7.</span> <span class="nav-text">Conclusion and Future Work</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">422</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.5m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">38:07</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
