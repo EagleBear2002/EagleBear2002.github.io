@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}{so}}} \def\soo{\mathsf{\textcolor{purple}{soo}}} \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PLDI&#39;15-Declarative programming over eventually consistent data stores">
+<meta property="og:url" content="https://eaglebear2002.github.io/48075/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}{so}}} \def\soo{\mathsf{\textcolor{purple}{soo}}} \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241130215002973.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241204151254684.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241205201610601.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241205220346056.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241217093557602.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241217110752112.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241217114103157.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241217112259064.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/48075/image-20241202093016078.png">
+<meta property="article:published_time" content="2024-11-29T09:09:00.000Z">
+<meta property="article:modified_time" content="2024-12-20T06:34:35.512Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/48075/image-20241130215002973.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/48075/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>PLDI'15-Declarative programming over eventually consistent data stores | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">50</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">422</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/48075/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PLDI'15-Declarative programming over eventually consistent data stores
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-11-29 17:09:00" itemprop="dateCreated datePublished" datetime="2024-11-29T17:09:00+08:00">2024-11-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-12-20 14:34:35" itemprop="dateModified" datetime="2024-12-20T14:34:35+08:00">2024-12-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%A4%9A%E7%BA%A7%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" itemprop="url" rel="index"><span itemprop="name">多级隔离级别</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\so{\mathsf{\textcolor{purple}{so}}}
+\def\soo{\mathsf{\textcolor{purple}{soo}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\ww{\mathsf{\textcolor{red}{ww}}}
+\def\rw{\mathsf{\textcolor{blue}{rw}}}
+\def\co{\mathsf{\textcolor{orange}{co}}}
+\def\SO{\mathsf{\textcolor{purple}{SO}}}
+\def\WR{\mathsf{\textcolor{teal}{WR}}}
+\def\CM{\mathsf{\textcolor{orange}{CM}}}
+\def\CO{\mathsf{\textcolor{brown}{CO}}}
+\def\AR{\mathsf{\textcolor{pink}{AR}}}
+\def\vis{\mathsf{\textcolor{orange}{vis}}}
+\def\VIS{\mathsf{\textcolor{orange}{VIS}}}
+\def\hb{\mathsf{\textcolor{pink}{hb}}}
+\def\hbo{\mathsf{\textcolor{pink}{hbo}}}
+\def\A{\mathsf{A}}
+\def\E{\mathsf{E}}
+\def\cc{\mathsf{cc}}
+\def\ec{\mathsf{ec}}
+\def\sc{\mathsf{sc}}
+\def\rc{\mathsf{rc}}
+\def\mav{\mathsf{mav}}
+\def\rr{\mathsf{rr}}
+\def\sameobj{\mathsf{sameobj}}
+\def\oper{\mathsf{oper}}
+\def\txn{\mathsf{txn}}
+\def\sametxn{\mathsf{sametxn}}
+\def\withdraw{\mathtt{withdraw}}
+\def\deposit{\mathtt{deposit}}
+\def\getBalance{\mathtt{getBalance}}
+\def\heta{\hat{\eta}}
+\def\RYW{\mathbf{RYW}}
+\def\MR{\mathbf{MR}}
+\def\MW{\mathbf{MW}}
+\def\WFR{\mathbf{WFR}}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>面向用户的在线服务采用地理分布的数据存储来减少延迟并容忍部分故障，以提供快速且始终可用的体验。然而，地理分布并非没有代价；应用程序开发者需要处理弱一致性行为，并且缺乏构建高级复制数据类型的抽象机制，这导致了复杂的应用程序逻辑，并不可避免地将不一致性暴露给用户。一些商业分布式数据存储和多个学术提案提供了一致性级别的层次结构，更强的一致性保证会带来更高的延迟和吞吐量成本。然而，正确为操作分配合适的一致性级别需要细致的推理，并且通常是一个容易出错的任务。</p>
+<p>在本文中，我们提出了 QUELEA，一种针对最终一致性的数据存储（ECDS）的声明式编程模型，它配备了一种契约语言，能够指定细粒度的应用层一致性属性。一个契约执行系统分析这些契约，并自动生成受保护方法所需的一致性协议。我们在一个现成的支持无协调事务的 ECDS 之上实现了 QUELEA。通过包括两个大型网络应用在内的几个基准测试，展示了我们的方法的有效性。</p>
+<p><strong>关键词：</strong>最终一致性、可用性、CRDT、公理合约、合约分类、分布式事务、SMT 求解器、可判定逻辑、Quelea、Cassandra、Haskell</p>
+<p>作者：</p>
+<ul>
+<li>KC Sivaramakrishnan*, University of Cambridge, UK, sk826@cl.cam.ac.uk</li>
+<li>Gowtham Kaki, Purdue University, USA, gkaki@cs.purdue.edu</li>
+<li>Suresh Jagannathan, Purdue University, USA, suresh@cs.purdue.edu</li>
+</ul>
+<h2 id="introduction">Introduction</h2>
+<p>许多现实世界的网络服务（例如由 Amazon、Facebook、Google、Twitter 等公司构建和维护的网络服务）在数据中心内和数据中心之间跨多个副本复制应用程序状态和逻辑。复制不仅旨在提高应用程序吞吐量并减少用户感知的延迟，而且还旨在容忍部分故障而不损害整体服务可用性。</p>
+<p>传统上，程序员依靠强一致性保证（例如线性化 [15] 或可序列化 [22]）来构建正确的应用程序。虽然强一致性是一种容易表述的属性，但它掩盖了大规模分布式系统在非均匀延迟、可用性和网络分区方面的现实 [8, 14]。事实上，旨在提供“始终在线”体验的现代网络服务绝大多数都倾向于可用性和分区容忍度而不是强一致性。为此，已经提出了几种弱一致性模型，例如最终一致性、因果一致性、会话保证和时间线一致性。</p>
+<p>在弱一致性下，开发人员需要注意并发的冲突更新，并且必须小心谨慎以避免不必要的不一致（例如，银行账户余额为负数，或购物车中出现已移除的商品 [13]）。通常，这些不一致会从应用程序中泄露出来并被用户看到。最终，开发人员必须决定适合特定操作的一致性级别；可以理解，这是一个容易出错的过程，需要对应用程序以及底层数据存储的语义和实现有复杂的了解，而这些通常只有非正式的描述。尽管如此，选择正确的一致性级别不仅对正确性至关重要，而且对应用程序的可扩展性也至关重要。虽然选择比要求的更弱的一致性级别可能会引入程序错误和异常，但选择比必要更强的一致性级别可能会对程序的可扩展性和性能产生负面影响。</p>
+<p>弱一致性还会阻碍程序的组合推理。尽管应用程序可能自然地以易于理解和富有表现力的数据类型（如 map、树、queue 或 graph）来表达，但地理分布式存储通常仅提供一组最小的数据类型，并带有内置冲突解决策略，如最后写入者获胜（LWW）寄存器、计数器和集合 [17, 26]。此外，虽然传统数据库系统通过事务实现可组合性，但地理分布式存储通常缺乏对数据的无限制可序列化事务访问。因此，在这种环境中工作需要适当地强制应用程序状态仅使用存储的功能来运行。</p>
+<p>为了解决这些问题，我们描述了 QUELEA，一种用于 ECDS 的声明式编程模型和实现。QUELEA 的主要创新之处在于它是一种表达性合约语言，用于声明和验证细粒度的应用程序级一致性属性。程序员使用契约语言公理化地指定允许在复制数据类型上执行的合法执行集。</p>
+<p>契约是使用原始一致性关系（例如可见性和会话顺序）以及标准逻辑和关系运算符构建的。契约执行系统将数据类型上的操作静态映射到存储上可用的特定一致性级别，并可证明地验证映射的正确性。本文做出了以下贡献：</p>
+<ul>
+<li>我们引入了 QUELEA，这是 Haskell 的浅层扩展，支持对 ECDS 中发现的复制数据类型的描述和验证。契约用于指定细粒度的应用程序级一致性属性，并进行静态分析以将最有效和最合理的存储一致性级别分配给相应的操作。</li>
+<li>QUELEA 支持任意数据类型上的无协调事务。我们扩展了我们的契约语言以表达细粒度事务隔离保证，并利用契约执行系统自动为事务分配正确的隔离级别。</li>
+<li>我们提供元理论来证明我们的合同执行系统的健全性，并确保只有在满足一致性的必要条件时才执行操作。</li>
+<li>我们描述了 QUELEA 的实现，它是 Cassandra [17]（一种著名的通用数据存储）上的透明垫片层。对一组真实世界的应用程序（包括类似 Twitter 的微博网站和类似 eBay 的拍卖网站）进行的实验评估说明了我们的方法的实用性。</li>
+</ul>
+<p>本文的其余部分安排如下。下一节介绍系统模型。我们描述了最终一致性下编程的挑战，并在 <span class="math inline">\(\S 3\)</span> 中介绍了 QUELEA 合约作为克服这些问题的建议解决方案。<span class="math inline">\(\S 4\)</span> 提供了有关合约语言及其到存储一致性级别的映射的更多细节，以及用于证明映射正确性的元理论。<span class="math inline">\(\S 5\)</span> 介绍了交易合约及其分类。<span class="math inline">\(\S 6\)</span> 描述了在 Cassandra 之上 QUELEA 的实现。<span class="math inline">\(\S 7\)</span> 讨论了实验评估。<span class="math inline">\(\S 8\)</span> 和 <span class="math inline">\(\S 9\)</span> 介绍了相关工作和结论。</p>
+<h2 id="system-model">System Model</h2>
+<p><img src="/48075/image-20241130215002973.png"></p>
+<p>在本节中，我们将描述系统模型，并介绍我们的契约语言所基于的基本关系。图 1 展示了我们系统模型的示意图。分布式存储由一组副本组成，每个副本存储一组对象（<span class="math inline">\(x\)</span>、<span class="math inline">\(y\)</span> 等）。我们假设每个对象在存储中的所有副本上都有复制。一个对象在任何副本上的状态是由对该对象执行的所有更新（效果）组成的集合。例如，在副本 1 上 <span class="math inline">\(x\)</span> 的状态是由对 <span class="math inline">\(x\)</span> 执行的效果 <span class="math inline">\(w_1^x\)</span> 和 <span class="math inline">\(w_2^x\)</span> 组成的集合。</p>
+<p>每个对象都关联着一组操作。客户端通过调用对象上的操作与存储进行交互。特定客户端在存储上的一系列操作称为会话。通常，大量的客户端（因此也有许多会话）并发地访问数据存储。重要的是，客户端不知道某个操作被应用到了哪个副本；为了最小化延迟、负载均衡等原因，数据存储可以选择将操作路由到任意副本。例如，同一会话在同一对象上调用的 foo 和 bar 操作，可能会最终被应用到不同的副本上，因为当客户端调用 <span class="math inline">\(bar\)</span> 时，<span class="math inline">\(foo\)</span> 被应用到的副本 1 可能无法访问。</p>
+<p>当在副本 1 上对对象 <span class="math inline">\(x\)</span> 调用 <span class="math inline">\(foo\)</span> 操作并带有参数 <span class="math inline">\(arg_1\)</span> 时，它只是对该副本上该对象当前的效果集（<span class="math inline">\(w_1^x\)</span> 和 <span class="math inline">\(w_2^x\)</span>）进行归约，产生结果 <span class="math inline">\(v1\)</span> 发送回客户端，并发出一个新的单一效果 <span class="math inline">\(w_3^x\)</span> ，该效果被附加到副本 1 上 <span class="math inline">\(x\)</span> 的状态中。因此，每个操作都是在其被调用的对象状态的一个快照上进行评估的。在这种情况下，效果 <span class="math inline">\(w_1^x\)</span> 和 <span class="math inline">\(w_2^x\)</span> 对 <span class="math inline">\(w_3^x\)</span> 是可见的，逻辑上表示为 <span class="math inline">\(\vis(w_1^x, w_3^x) \land \vis(w_2^x, w_3^x)\)</span> ，其中 <span class="math inline">\(\vis\)</span> 是效果之间的可见性关系。可见性是一种非自反且不对称的关系，只涉及同一个对象上操作产生的效果。执行只读操作类似，只是<strong>不会产生新的效果</strong>。添加到特定副本的效果会被异步发送到其他副本，并最终合并到所有其他副本中。请注意，此模型不假定针对并发冲突更新的特定解决策略，而是保留了每一个更新。当操作在一个特定副本上对一个对象的效果集进行归约时，更新冲突就会得到解决。</p>
+<p>两个来自同一会话的效果 <span class="math inline">\(w_4^x\)</span> 和 <span class="math inline">\(w_5^x\)</span> 被认为是在会话顺序中（逻辑上表示为 <span class="math inline">\(\so(w_4^x, w_5^x)\)</span> ）。会话顺序是一种非自反、传递的关系。来自对相同对象 <span class="math inline">\(x\)</span> 的操作的效果 <span class="math inline">\(w_4^x\)</span> 和 <span class="math inline">\(w_5^x\)</span> 被认为是处于相同对象关系下，写作 <span class="math inline">\(\sameobj(w_4^x, w_5^x)\)</span> 。最后，我们可以使用关系 <span class="math inline">\(\oper\)</span> 将每个效果与其生成操作相关联。在当前例子中，<span class="math inline">\(\oper(w_4^x, foo)\)</span> 和 <span class="math inline">\(\oper(w_5^x, bar)\)</span> 成立。为了简化起见，我们假设所有对象上的所有操作名称都是唯一的。</p>
+<p>这个模型包含了与最终一致性相关的所有不一致性。这项工作的目标是为<strong>每个操作确定精确的一致性级别</strong>，以确保应用程序级约束不被违反（与鲁棒性相一致）。在下一节中，我们将具体描述在 ECDS 之上构建一致银行账户的相关挑战。随后，我们将说明我们的契约和规范语言如何利用基本关系 <span class="math inline">\(\vis\)</span>、<span class="math inline">\(\so\)</span>、<span class="math inline">\(\sameobj\)</span> 和 <span class="math inline">\(\oper\)</span> 来缓解这些挑战。</p>
+<h2 id="motivation">Motivation</h2>
+<p>考虑一下我们如何在 ECDS 上实现高可用性银行账户，并具有完整性约束，即余额必须为非负数。我们首先在 QUELEA 中实现银行账户复制数据类型（RDT），然后描述获得所需正确性保证的机制。</p>
+<h3 id="rdt-specification">RDT Specification</h3>
+<p>QUELEA 的一个关键创新之处在于它允许向存储添加新的 RDT，这样就无需强制应用程序逻辑来利用存储提供的数据类型。此外，QUELEA 将数据类型的收敛语义（即如何解决冲突更新）与其一致性属性（即更新何时可见）分开处理。这种关注点分离允许对冲突解决进行操作推理，对一致性进行声明性推理。这些技术的结合增强了存储的可编程性。</p>
+<p>我们假设银行账户对象提供三种操作：存款 <code>deposit</code>、取款 <code>withdraw</code> 和获取余额 <code>getbalance</code>，并假设如果账户余额不足，取款将失败。QUELEA 中的每个操作都属于以下类型，以 Haskell 语法编写：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-type">Operation</span> e a r = [e] ! a ! (<span class="hljs-title">r</span>, <span class="hljs-type">Maybe</span> <span class="hljs-title">e</span>)</span><br></code></pre></td></tr></table></figure>
+<p><img src="/48075/image-20241204151254684.png"></p>
+<p>操作采用效果列表（该对象的更新历史记录）和输入参数，并返回结果以及可选效果（只读操作不返回任何内容）。新效果（如果发出）将添加到当前副本的对象状态中，并异步发送到其他副本。QUELEA 中的银行帐户操作的实现如图 2 所示。</p>
+<p>数据类型 <code>Acc</code> 表示银行帐户的效果类型。函数 <code>sum</code> 返回列表中元素的总和，<code>sel1</code> 返回元组的第一个元素。对于每个操作，<code>hist</code> 是某个副本中对象状态的快照。从这个意义上讲，RDT 上的每个操作都是原子的，因此适合顺序推理。在这里，<code>getBalance</code> 是一个只读操作，<code>deposit</code> 总是发出效果，而 <code>withdraw</code> 仅在帐户中有足够的余额时才会发出效果。我们以这种风格用几十行代码实现了大量用于现实基准的 RDT，包括购物车、拍卖和微博网站等。</p>
+<h4 id="summarization">Summarization</h4>
+<p>请注意，<code>getBalance</code> 的定义减少了对帐户的整个更新历史记录。如果我们要实现此银行帐户 RDT 的有效实施，我们需要帐户历史记录的摘要。直观地说，当前帐户余额总结了帐户的状态。具有历史记录 <code>[Deposit 10, Withdraw 5]</code> 的银行帐户明显等同于具有单个存款操作 <code>[Deposit 5]</code> 的银行帐户；我们可以用后者替换较早的历史记录，而商店的客户将无法分辨两者之间的区别。</p>
+<p>这种可观察等价性的概念也可以推广到其他 RDT。例如，具有多次更新的最后写入者获胜寄存器等效于仅具有最后一次写入的寄存器。类似地，具有添加和删除操作集合的集合等效于具有从原始集合中添加一系列活动元素的集合。由于可观察等价性的概念特定于每个 RDT，因此程序员可以提供一个汇总函数 - 类型为 <code>[e] -&gt; [e]</code> - 作为 RDT 规范的一部分。银行账户的汇总函数为：</p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">summarize</span> hist = [<span class="hljs-type">Deposit</span> $ sel1 $ getBalance hist ()]<br></code></pre></td></tr></table></figure>
+<p>给定一个银行账户历史记录，汇总函数将返回一个新的历史记录，其中包含当前账户余额的单笔存款。我们的实现调用与 RDT 关联的汇总函数来减少副本维护的效果集的大小。</p>
+<h3 id="anomalies-under-eventual-consistency">Anomalies under Eventual Consistency</h3>
+<p>我们的目标是为每个银行账户操作选择正确的一致性级别，以便 (1) 余额保持非负数，以及 (2) <code>getBalance</code> 操作永远不会错误地返回负余额。</p>
+<p><img src="/48075/image-20241205201610601.png"></p>
+<p>考虑图 3(a) 中所示的执行。假设图中的所有操作都在同一个银行账户对象上进行，初始余额为零。会话 1 执行了一笔 100 的存款，随后在同一会话中执行了一笔 80 的取款。取款操作见证了存款并成功完成。随后，会话 2 执行了一笔取款操作，但重要的是，由于最终一致性，它只见证了会话 1 的存款，而没有见证随后的取款。因此，这笔取款也错误地成功了，违反了完整性约束。随后的 <code>getBalance</code> 操作，如果见证了所有之前的操作，将报告一个负余额。</p>
+<p>很容易看出，防止并发取款操作可以消除这种异常。这可以通过坚持取款操作作为强一致性操作来实现。尽管进行了这种强化，<code>getBalance</code> 操作仍然可能错误地向用户报告一个负余额。考虑图 3(b) 中所示的执行，它由三个并发会话组成，分别执行存款、取款和 <code>getBalance</code> 操作，都在同一个银行账户对象上。如 <code>vis</code> 边所示，会话 2 中的取款操作 <code>withdraw(50)</code> 见证了会话 1 中存款 <code>deposit(100)</code> 的效果，得出余额充足，并成功完成。然而，<code>getBalance</code> 操作可能只见证了这次成功的取款，而没有见证因果前的存款，并向用户报告负 50 的余额。</p>
+<p>在最终一致性下，用户还可能暴露于其他形式的不一致性。图 3(c) 显示了一个执行，其中会话中的 <code>getBalance</code> 操作没有见证同一会话中较早执行的取款操作的效果，可能是因为它是由一个尚未合并 <code>withdraw</code> 效果的副本提供的。此异常会导致用户错误地认为 <code>withdraw</code> 操作失败。</p>
+<p>虽然很容易理解上述异常发生的原因，但找到适当的修复方法却并不容易。使 <code>getBalance</code> 成为强一致性操作肯定足以避免异常，但这真的有必要吗？考虑到强制执行强一致性的成本 [25, 28]，除非没有可行的替代方案，否则最好避免施加如此严格的条件。探索这些替代方案的空间需要了解各种弱一致性替代方案在语义上的细微差别。</p>
+<h3 id="contracts">Contracts</h3>
+<p><img src="/48075/image-20241205220346056.png"></p>
+<p>QUELEA 通过让程序员声明应用程序级别的一致性约束作为合约（图 4）来帮助将操作映射到适当的一致性级别，这些合约公理化地指定了涉及该操作的允许执行集。在银行账户的情况下，任何不表现出前一节描述的异常的执行都是银行账户对象上的良好执行。通过指定每种数据类型的操作调用跟踪的合法执行集，QUELEA 确保该类型的所有执行都是良好范式的。</p>
+<p>在我们的运行示例中，很明显，为了保持关键的完整性约束，<code>withdraw</code> 操作必须是强一致性的。也就是说，给定两个 <code>withdraw</code> 操作 <span class="math inline">\(a\)</span> 和 <span class="math inline">\(b\)</span>，要么 <span class="math inline">\(a\)</span> 对 <span class="math inline">\(b\)</span> 可见，要么反之亦然。我们表达这一应用程序级别的强一致性要求为 <code>withdraw</code> 的合约 <span class="math inline">\((\psi_w)\)</span>：</p>
+<p><span class="math display">\[
+\psi_{w} = \forall (a : \withdraw). \sameobj(a, \heta) \Rightarrow a = \heta \lor \vis(a, \heta) \lor \vis(\heta, a)
+\]</span></p>
+<p>这里，<span class="math inline">\(\heta\)</span> 代表 <code>withdraw</code> 操作发出的效果。语法 <span class="math inline">\(a : \withdraw\)</span> 表示 <span class="math inline">\(a\)</span> 是由 <code>withdraw</code> 操作发出的效果，即 <span class="math inline">\(\text{oper}(a, \withdraw)\)</span> 成立。合约规定，如果当前操作发出效果 <span class="math inline">\(\heta\)</span>，那么对于任何由 <code>withdraw</code> 操作发出的操作 <span class="math inline">\(a\)</span>，要么 <span class="math inline">\(a = \heta\)</span>，要么 <span class="math inline">\(a\)</span> 对 <span class="math inline">\(\heta\)</span> 可见，或者反之亦然。任何在银行账户对象上执行的操作，如果保持上述 <code>withdraw</code> 操作的合约，则认为是从 <code>withdraw</code> 的正确实现派生的。</p>
+<p>为了防止 <code>getBalance</code> 操作永远显示负余额，有必要防止图 3(b) 中描绘的情景。设 <span class="math inline">\(\heta\)</span> 代表 <code>getBalance</code> 操作发出的效果。如果 <code>withdraw</code> 操作的效果 <span class="math inline">\((b)\)</span> 对 <span class="math inline">\(\heta\)</span> 可见，且 <code>deposit</code> 操作的效果 <span class="math inline">\((a)\)</span> 对 <code>withdraw</code> 操作的效果 <span class="math inline">\((b)\)</span> 可见，那么必须是 <span class="math inline">\(a\)</span> 也对 <span class="math inline">\(\heta\)</span> 可见。一个精确捕捉这一应用程序级别一致性要求的 <code>getBalance</code> 合约 <span class="math inline">\((\psi_{gb}^1)\)</span> 可以这样写：</p>
+<p><span class="math display">\[
+\psi_{gb}^1 =\forall (a : \deposit), (b : \withdraw). (\vis(a, b) \land \vis(b, \heta) \Rightarrow \vis(a, \heta))
+\]</span></p>
+<p>为了防止图 3(c) 中描述的缺失更新异常，银行账户上的 <code>getBalance</code> 操作必须见证同一会话中在同一银行账户上执行的所有先前 <code>deposit</code> 和 <code>withdraw</code> 操作的效果。我们可以表达一个额外的 <code>getBalance</code> 合约 <span class="math inline">\((\psi_{gb}^2)\)</span>，以捕捉这一一致性要求：</p>
+<p><span class="math display">\[
+\psi_{gb}^2 = \forall (c : \deposit \lor \withdraw). (\so \cap \sameobj)(c, \heta) \Rightarrow \vis(c, \heta))
+\]</span></p>
+<p>我们的合约语言提供了用于组合关系的运算符。语法 <span class="math inline">\((R_1 \cap R_2)(a, b)\)</span> 等价于 <span class="math inline">\(R_1(a, b) \land R_2(a, b)\)</span>。</p>
+<p>上述合约 <span class="math inline">\((\psi_{gb}^2)\)</span> 表示，如果在会话顺序中，存款或取款操作在 <code>getBalance</code> 操作之前执行，并且在与 <code>getBalance</code> 操作相同的对象上应用，则 <code>getBalance</code> 操作必须见证这些前置操作的效果。</p>
+<p><code>getBalance</code> 操作的最终合约 <span class="math inline">\((\psi_{gb})\)</span> 仅仅是前两个版本 <span class="math inline">\((\psi_{gb}^1\)</span> 和 <span class="math inline">\(\psi_{gb}^2)\)</span> 的合取：</p>
+<p><span class="math display">\[
+\psi_{gb} = \forall (a : \deposit), (b : \withdraw), (c : \deposit \lor \withdraw). \\
+(\vis(a, b) \land \vis(b, \heta) \Rightarrow \vis(a, \heta)) \\
+\land ((\so \cap \sameobj)(c, \heta) \Rightarrow \vis(c, \heta))
+\]</span></p>
+<p>直观上，这一规范禁止了图 3(b) 和 3(c) 中描述的 <code>getBalance</code> 异常的发生。</p>
+<p>最后，由于对存款操作何时或如何执行没有限制，其合约简单为真。</p>
+<h3 id="from-contracts-to-implementation">From Contracts to Implementation</h3>
+<p>请注意，<code>withdraw</code> 和 <code>getBalance</code> 的合约仅表达应用程序级别的一致性要求，并不涉及底层存储的语义。编写合约时，程序员只需考虑在 QUELEA 系统模型下的应用程序语义。应用程序级别一致性要求到适当的存储级别保证的映射是自动在后台完成的。如何确保执行符合合约？挑战在于合约提供了一个声明性的（公理化的）执行规范，而需要的是一个操作过程来强制执行其隐含的约束。</p>
+<p>一种策略是投机性地（speculatively）执行操作。在这里，操作在接收到客户端或其他副本时暂时应用。我们可以维护执行的运行时表现，并在运行时检查良好形成条件，如果执行不良好则回滚。然而，状态维护的开销和用户定义合约的复杂性可能会使这种技术在实践中不可行。</p>
+<p>我们设计了一种静态方法。合约在定理证明器的帮助下进行分析，并静态地映射到特定的存储级别一致性属性，该证明器保证保留合约语义。我们称此过程为合约分类。鉴于存储级别一致性属性的多样性和复杂性，系统实现者通过在相同的合约语言中描述存储语义来参数化分类过程，该语言与用于表达操作合约的语言相同。在下一节中，我们将详细介绍合约语言，并描述针对特定存储语义的分类过程。</p>
+<h2 id="contract-language">Contract Language</h2>
+<h3 id="syntax">Syntax</h3>
+<p>我们的核心合约语言的语法如图 4 所示。该语言基于一阶逻辑 (FOL)，并允许对类型化和非类型化效应变量进行前缀全称量化。我们使用特殊效应变量（<span class="math inline">\(\heta\)</span>）来表示当前操作——正在编写合约的操作。</p>
+<p>请注意，在契约中 <span class="math inline">\(\heta\)</span> 是自由变量。我们在分类契约时（<span class="math inline">\(\S 4.4\)</span>）确定其作用域。一个效果的类型仅仅是引发该效果的操作的名称（例如：<code>withdraw</code>）。我们允许在类型中使用析取，以让效果变量覆盖多个操作名称。契约 <span class="math inline">\(\forall (a : \tau_1 \lor \tau_2).\ \psi\)</span> 仅仅是语法糖，表示 <span class="math inline">\(\forall a. (\oper(a, \tau_1) \lor \oper(a, \tau_2)) \Rightarrow \psi\)</span>。一个未类型化的效果变量覆盖所有操作名称。</p>
+<p>在我们的契约语言中，量化自由命题是谓词表达的效果变量对之间的关系的合取、析取和蕴含。谓词关系的语法类以原始的 <span class="math inline">\(\vis\)</span>，<span class="math inline">\(\so\)</span>，和 <span class="math inline">\(\sameobj\)</span> 关系为基础，并且也接受可以表示为原始关系的并、交或传递闭包的派生关系。常用的派生关系是同一对象会话顺序（<span class="math inline">\(\soo = \so \cap \sameobj\)</span>），发生在之前的顺序（<span class="math inline">\(\hb = (\so \cup \vis)^+\)</span>）和同一对象发生在之前的顺序（<span class="math inline">\(\hbo = (\soo \cup \vis)^+\)</span>）。</p>
+<h3 id="semantics">Semantics</h3>
+<p>QUEUELA 契约是程序执行的公理定义上的约束。图 5 总结了定义公理执行的相关工件。我们将公理执行形式化为一个元组 <span class="math inline">\((\A, \vis, \so, \sameobj)\)</span>，其中 <span class="math inline">\(\A\)</span>，称为效果汤（effect soup），是在程序执行期间生成的所有效果（版本）的集合，而 <span class="math inline">\(\vis, \so, \sameobj \subseteq \A \times \A\)</span> 分别是可见性、会话顺序和同一对象关系，这些关系在运行时被观察到。</p>
+<p>请注意，公理执行（<span class="math inline">\(\E\)</span>）的定义为契约公式中自由出现的原始关系（例如：<span class="math inline">\(\vis\)</span>）提供了解释，并且将量化域固定为程序执行期间观察到的所有效果（<span class="math inline">\(\A\)</span>）的集合。因此，<span class="math inline">\(\E\)</span> 是任何可以用我们的契约语言表达的一阶公式（<span class="math inline">\(\psi\)</span>）的潜在模型。如果 <span class="math inline">\(\E\)</span> 确实是 <span class="math inline">\(\psi\)</span> 的有效模型（表示为 <span class="math inline">\(\E \models \psi\)</span>），我们说执行 <span class="math inline">\(\E\)</span> 满足契约 <span class="math inline">\(\psi\)</span>：</p>
+<blockquote>
+<p>定义 1</p>
+<p>一个公理执行 <span class="math inline">\(\E\)</span> 满足契约 <span class="math inline">\(\psi\)</span> 当且仅当 <span class="math inline">\(\E \models \psi\)</span>。</p>
+</blockquote>
+<h3 id="capturing-store-semantics">Capturing Store Semantics</h3>
+<p>我们的契约语言的一个重要方面是它能够捕获存储级一致性保证以及应用程序级一致性要求。与 [10] 类似，我们可以严格定义各种存储语义，包括结合任何会话子集和因果关系保证以及多个一致性级别的语义。但是，为了我们的目的，我们确定了三个特定的一致性级别——最终一致性、因果一致性和强一致性，许多分布式存储通常提供这三个级别，具有可调（tunable）一致性，但延迟和可用性方面的开销会增加。</p>
+<h4 id="eventual-consistency">Eventual consistency</h4>
+<p>只要客户端可以访问至少一个副本，就可以满足最终一致性操作。在银行账户示例中，存款是最终一致性操作。虽然 ECDS 通常提供具有所有可能异常的基本最终一致性，但我们假设我们的存储提供了更强大的语义，可以保持高可用性 [2, 19]；存储始终公开更新的因果关系。可以根据以下合约定义正式捕获此语义：</p>
+<p><span class="math display">\[
+\psi_\ec = \forall a, b. \; \hbo(a, b) \land \vis(b, \heta) \Rightarrow \vis(a, \heta)
+\]</span></p>
+<p>上述契约规定，如果因果关系上继 a 之后的某个效应 b 对 <span class="math inline">\(\heta\)</span> 也可见，则效应 a 必须对当前效应 <span class="math inline">\(\heta\)</span> 可见。因此，如果每个存储副本始终维护并向客户端公开更新的因果关系，那么这样的存储将满足此契约。在这样的系统中，只要某个副本可访问，就可以满足最终一致性操作（例如存款）的保证，这需要比存储提供的保证更弱的保证。</p>
+<h4 id="causal-consistency">Causal consistency</h4>
+<p>因果一致的操作需要看到对象状态的一个因果一致的快照，包括在同一会话中执行的动作。后一个要求意味着，如果来自同一会话的两个操作 <span class="math inline">\(o_1\)</span> 和 <span class="math inline">\(o_2\)</span> 被应用到不同的副本 <span class="math inline">\(r_1\)</span> 和 <span class="math inline">\(r_2\)</span> 上，第二个操作不能被执行，直到 <span class="math inline">\(o_1\)</span> 的效果被包含在 <span class="math inline">\(r_2\)</span> 中。<code>getBalance</code> 操作需要因果一致性，因为它要求来自同一会话的操作必须是可见的，这在最终一致性下无法保证。相应的存储语义由以下定义的契约 <span class="math inline">\(\psi_\cc\)</span> 捕捉：</p>
+<p><span class="math display">\[
+\psi_\cc = \forall a. \; \hbo(a, \heta) \Rightarrow \vis(a, \heta)
+\]</span></p>
+<h4 id="strong-consistency">Strong consistency</h4>
+<p>强一致的操作在网络分区下可能会无限期地阻塞。一个例子是对 <code>withdraw</code> 操作的全序契约。相应的存储语义由以下定义的契约 <span class="math inline">\(\psi_\sc\)</span> 捕捉：</p>
+<p><span class="math display">\[
+\psi_\sc = \forall a. \; \sameobj(a, \heta) \Rightarrow \vis(a, \heta) \lor \vis(\heta, a) \lor a = \heta
+\]</span></p>
+<h3 id="contract-classification">Contract Classification</h3>
+<p>我们的目标是将应用级别的操作一致性约束映射到适当的存储级别一致性保证，这些保证能够满足这些约束。在我们的契约语言中，能够表达这两种约束作为契约，使我们能够比较并确定一个操作（<span class="math inline">\(op\)</span>）的契约（<span class="math inline">\(\psi_{op}\)</span>）是否足够弱，以至于在由契约 <span class="math inline">\(\psi_{st}\)</span> 标识的存储一致性级别下能够被满足。为此，我们定义了一个二元的“弱于”关系，用于我们的契约语言，如下所示：</p>
+<blockquote>
+<p>定义 2</p>
+<p>一个契约 <span class="math inline">\(\psi_{op}\)</span> 被称为弱于 <span class="math inline">\(\psi_{st}\)</span>（表示为 <span class="math inline">\(\psi_{op} \leq \psi_{st}\)</span>），当且仅当 <span class="math inline">\(\Delta \vdash \forall \hat{\eta}. \psi_{st} \Rightarrow \psi_{op}\)</span>。</p>
+</blockquote>
+<p>在该蕴含式中的量化符绑定在 <span class="math inline">\(\psi_{st}\)</span> 和 <span class="math inline">\(\psi_{op}\)</span> 中自由出现的 <span class="math inline">\(\hat{\eta}\)</span>。蕴含式的上下文（<span class="math inline">\(\Delta\)</span>）是一组关于原始关系性质的假设的合取。一个形式良好的公理执行（<span class="math inline">\(\E\)</span>）应该满足这些假设（即，<span class="math inline">\(\E \models \Delta\)</span>）。</p>
+<blockquote>
+<p>定义 3</p>
+<p>一个公理执行 <span class="math inline">\(\E = (\A, \vis, \so, \sameobj)\)</span> 是形式良好的，如果以下公理（<span class="math inline">\(\Delta\)</span>）成立：</p>
+<ul>
+<li><span class="math inline">\(\hbo\)</span> 顺序关系是无环的：<span class="math inline">\(\forall a. \neg \hbo(a, a)\)</span>；</li>
+<li><span class="math inline">\(\vis\)</span> 仅关联同一对象上的操作：<span class="math inline">\(\forall a, b. \vis(a, b) \Rightarrow \sameobj(a, b)\)</span>；</li>
+<li><span class="math inline">\(\so\)</span> 是一个传递关系：<span class="math inline">\(\forall a, b, c. \so(a, b) \land \so(b, c) \Rightarrow \so(a, c)\)</span>；</li>
+<li><span class="math inline">\(\sameobj\)</span> 是一个等价关系：
+<ul>
+<li><span class="math inline">\(\forall a. \sameobj(a, a)\)</span>；</li>
+<li><span class="math inline">\(\forall a, b. \sameobj(a, b) \Rightarrow \sameobj(b, a)\)</span>；</li>
+<li><span class="math inline">\(\forall a, b, c. \sameobj(a, b) \land \sameobj(b, c) \Rightarrow \sameobj(a, c)\)</span>。</li>
+</ul></li>
+</ul>
+</blockquote>
+<p>如果操作的契约 <span class="math inline">\(\psi_{op}\)</span> 弱于存储契约 <span class="math inline">\(\psi_{st}\)</span>，则前者表达的约束被后者提供的保证所隐含。一阶逻辑的完备性使我们能够断言，任何满足 <span class="math inline">\(\psi_{st}\)</span> 的形式良好的执行（<span class="math inline">\(\E\)</span>）也满足 <span class="math inline">\(\psi_{op}\)</span>（即，<span class="math inline">\(\E \models \psi_{op}\)</span>）。因此，在由 <span class="math inline">\(\psi_{st}\)</span> 捕获的存储一致性级别下执行操作 <span class="math inline">\(op\)</span> 是安全的。</p>
+<p>观察到契约 <span class="math inline">\(\psi_{\sc}\)</span>，<span class="math inline">\(\psi_{\cc}\)</span> 和 <span class="math inline">\(\psi_{\ec}\)</span> 本身在 <span class="math inline">\(\leq\)</span> 关系下是全序的：<span class="math inline">\(\psi_{\ec} \leq \psi_{\cc} \leq \psi_{\sc}\)</span>。这符合直觉，即任何在 <span class="math inline">\(\psi_{\ec}\)</span> 或 <span class="math inline">\(\psi_{\cc}\)</span> 下可满足的契约在 <span class="math inline">\(\psi_{\sc}\)</span> 下也是可满足的，任何在 <span class="math inline">\(\psi_{\ec}\)</span> 下可满足的契约在 <span class="math inline">\(\psi_{\cc}\)</span> 下也是可满足的。我们感兴趣的是最弱的保证（在 <span class="math inline">\(\psi_{\ec}\)</span>，<span class="math inline">\(\psi_{\cc}\)</span>，和 <span class="math inline">\(\psi_{\sc}\)</span> 中）以满足契约。我们定义相应的一致性级别为契约的一致性级别。</p>
+<p><img src="/48075/image-20241217093557602.png"></p>
+<p>分类方案在图 6 中正式给出，定义了判断契约一致性级别的规则。例如，方案将 <code>getBalance</code> 契约（<span class="math inline">\(\psi_{gb}\)</span>）从 <span class="math inline">\(\S 3\)</span> 分类为因果一致契约，因为蕴含式 <span class="math inline">\(\Delta \vdash \forall \heta. \psi_{\cc} \Rightarrow \psi_{gb}\)</span> 在一阶逻辑中是有效的（因此，<span class="math inline">\(\psi_{gb} \leq \psi_{\cc}\)</span>），而蕴含式 <span class="math inline">\(\Delta \vdash \forall \heta. \psi_{\ec} \Rightarrow \psi_{gb}\)</span> 是无效的（因此，<span class="math inline">\(\psi_{gb} \nleq \psi_{\ec}\)</span>）。由于我们将契约语言限制为逻辑的可判定子集，因此这些蕴含式的有效性可以机械地决定，使我们能够在 QUELEA 中自动化分类方案。</p>
+<p>除了将契约分类为一致性级别的三个简单规则外，分类方案还提供了一个判断契约是否形式良好的规则。契约是形式良好的当且仅当它在 <span class="math inline">\(\psi_{\sc}\)</span> 下是可满足的——存储可以提供的最强一致性保证。否则，它被认为是不形式良好的，并被静态地拒绝。</p>
+<h3 id="generality-of-contracts">Generality of Contracts</h3>
+<p>值得注意的是，我们的契约语言提供了一种通用方法来捕获应用程序级一致性属性，并且不依赖于特定的存储语义。特别是，相同的应用程序级契约可以轻松映射到具有不同一致性格的不同存储。为了说明这一点，让我们考虑 Terry 等人 [27] 提出的基于会话保证的一致刻画。Terry 等人提出了以下四个无法比较的会话保证，其语义在以下契约中捕获：</p>
+<p><span class="math display">\[
+\text{Read Your Writes (RYW)} \coloneqq \forall a. \soo(a, \heta) \Rightarrow \vis(a, \heta) \\
+\text{Monotonic Reads (MR)} \coloneqq \forall a, b. \vis(a, b) \land \soo(b, \heta) \Rightarrow \vis(a, \heta) \\
+\text{Monotonic Writes (MW)} \coloneqq \forall a, b. \soo(a, b) \land \vis(b, \heta) \Rightarrow \vis(a, \heta) \\
+\text{Writes Follow Reads (WFR)} \coloneqq \forall a, b, c. \vis(a, b) \land \vis(c, \heta) \land (\soo \cup =)(b, c) \Rightarrow \vis(a, \heta)
+\]</span></p>
+<p><img src="/48075/image-20241217110752112.png"></p>
+<p>在该方案中，操作的一致性级别是上述保证的任意组合，它们形成图 7 所示的部分有序一致性格。该格中的每个元素对应于一个存储一致性级别，并由其契约表示。从上级元素到下级元素的边对应于相应契约之间的弱于关系。根据该方案对契约进行分类是在格中进行定向搜索，从底部开始，确定可以满足契约的最弱一致性级别。确定在最弱的一致性级别下契约可以被满足。根据这个方案，<code>deposit</code> 操作不需要任何保证，<code>getBalance</code> 需要 <span class="math inline">\(\RYW\)</span> 和 <span class="math inline">\(\WFR\)</span>（<span class="math inline">\(\psi_{gb} \leq \RYW \land \WFR\)</span>），而 <code>withdraw</code> 不能被满足（<span class="math inline">\(\psi_{w} \nleq \RYW \land \MW \land \MR \land \WFR\)</span>）。</p>
+<h3 id="soundness-of-contract-classification">Soundness of Contract Classification</h3>
+<h2 id="operational-semantics">Operational Semantics</h2>
+<h3 id="soundness-of-operational-semantics">Soundness of Operational Semantics</h3>
+<h2 id="transaction-contracts">Transaction Contracts</h2>
+<p>虽然针对单个操作的合约提供了程序员对象级别的声明式推理，但现实场景中经常涉及跨越多个对象的操作。为了解决这个问题，最近的几个系统 [2, 9, 26] 提出了最终一致的事务，以便组合多个对象上的操作。然而，考虑到经典的事务模型（如可串行性和快照隔离）需要跨副本协调，这些系统提倡在网络分区下仍可用的无协调事务（coordination-free transactions），但仅提供较弱的隔离保证。无协调事务具有复杂的一致性语义和广泛变化的运行时开销。与操作级别的一致性类似，选择正确的事务类型的责任在于程序员。这一选择进一步被单个操作的一致性语义所复杂化。</p>
+<h3 id="syntax-and-semantics-extensions">Syntax and Semantics Extensions</h3>
+<p>QUELEA 自动化了选择正确和最有效的事务隔离级别的过程。类似于针对单个操作的合约，程序员将合约与事务关联，声明式地表达一致性规范。我们扩展了合约语言，在无量词命题下引入了一个新的术语 <span class="math inline">\(\txn \ S_1 \ S_2\)</span>，其中 <span class="math inline">\(S_1, S_2\)</span> 是效果集合，并引入了一个新的原始等价关系 <code>sametxn</code>，该关系对来自同一事务的效果有效。<span class="math inline">\(\txn\set{a, b}\set{c, d}\)</span> 只是 <span class="math inline">\(\sametxn(a, b) \land \sametxn(c, d) \land \lnot \sametxn(a, c)\)</span> 的语法糖，其中 <span class="math inline">\(a\)</span> 和 <span class="math inline">\(b\)</span> 被认为属于当前事务。</p>
+<p>我们假设不属于任何事务的操作属于它们自己的唯一事务。虽然事务可能具有不同的隔离保证，但我们假设所有事务都提供<strong>原子性</strong>。因此，我们在 <span class="math inline">\(\Delta\)</span> 中包含以下公理：</p>
+<p><span class="math display">\[
+\forall a, b, c. \, \txn\set{a}\set{b, c} \land \sameobj(b, c) \land \vis(b, a) \Rightarrow \vis(c, a)
+\]</span></p>
+<p>该原子性实际上保证了 <span class="math inline">\((\VIS, \AR)\)</span> 框架的 Read Atomic。</p>
+<p>该合约的语义如图 9(a) 所示。</p>
+<h3 id="transactional-bank-account">Transactional Bank Account</h3>
+<p>为了说明声明式推理对于事务的实用性，考虑我们运行示例的扩展，使用两个账户（对象）——当前账户 (<span class="math inline">\(c\)</span>) 和储蓄账户 (<span class="math inline">\(s\)</span>)。每个账户提供 <code>withdraw</code>、<code>deposit</code> 和 <code>getBalance</code> 操作，具有之前定义的相同合约。我们考虑两个事务——<code>save(amt)</code>，将 <code>amt</code> 从当前账户转移到储蓄账户，以及 <code>totalBalance</code>，返回各个账户余额的总和。我们的目标是确保 <code>totalBalance</code> 返回的对象状态一致快照的结果。QUELEA 代码如下：</p>
+<p><img src="/48075/image-20241217114103157.png"></p>
+<p><span class="math inline">\(\psi_{sv}\)</span> 和 <span class="math inline">\(\psi_{tb}\)</span> 是对应事务的契约。函数 <code>classify</code> 静态地将这些契约分配到存储提供的事务隔离级别之一；<code>$()</code> 是元编程语法，用于将结果拼接到程序中。<code>atomically</code> 构造在给定的隔离级别 <span class="math inline">\(x\)</span> 上调用封闭的操作，确保操作的效果以原子方式可见。</p>
+<p>虽然使两个事务可序列化可以确保正确性，但分布式存储很少提供可序列化的事务，因为它们的可用性要求和可扩展性的含义 [2]。幸运的是，这些事务可以通过更弱的隔离保证来满足。然而，尽管事务提供了原子性，异常仍然可能发生。例如，在 <code>totalBalance</code> 事务中，两个 <code>getBalance</code> 操作可能由不同的副本提供服务，每个副本有一组不同的已提交的 <code>save</code> 事务。如果第一个（第二个） <code>getBalance</code> 操作见证了第二个（第一个） <code>getBalance</code> 操作未见证的 <code>save</code> 事务，那么返回的余额将小于（大于）实际余额。如何选择最弱的隔离保证以防止这种异常并不立即明显。</p>
+<p>相反，QUELEA 要求程序员简单地将一致性要求作为契约声明。由于我们希望两个 <code>getBalance</code> 操作见证同一组 <code>save</code> 事务，我们定义 <code>totalBalance</code> 事务的约束 <span class="math inline">\(\psi_{tb}\)</span> 如下：</p>
+<p><span class="math display">\[
+\psi_{tb} = \forall a : \getBalance, b : \getBalance, \\
+(c : \withdraw \lor \deposit), (d : \withdraw \lor \deposit). \\
+\txn\{a, b\}\{c, d\} \land \vis(c, a) \land \sameobj(d, b) \Rightarrow \vis(d, b)
+\]</span></p>
+<p>上述定义中的关键思想是 <code>txn</code> 原语允许我们将不同对象上的操作关联起来。</p>
+<p><code>save</code> 事务只需要确保它执行的两个写操作以原子方式可见。由于这通过将它们组合在一个事务中来保证，<code>save</code> 不需要任何额外的约束，因此 <span class="math inline">\(\psi_{sv}\)</span> 简单地为真。</p>
+<h3 id="coordination-free-transactions">Coordination-free Transactions</h3>
+<p><img src="/48075/image-20241217112259064.png"></p>
+<p>为了说明事务契约分类的实用性，我们识别了三种广为人知的无协调事务语义——已提交读取（RC）[7]、单调原子视图（MAV）[2] 和可重复读取（RR）[7]，并说明了分类策略。我们的技术确实可以应用于不同的隔离级别格。</p>
+<p>具有 ANSI RC 语义的事务仅见证已提交的操作。假设一个副本将缓冲事务更新，直到同一事务的所有更新都可用。一旦事务的所有更新都可用，缓冲的更新将对后续的客户端请求可见。这确保了事务的原子性。重要的是，RC 不包含任何其他保证。因此，实现 RC 的存储不需要副本间的协调。我们可以将 RC 表达如下：</p>
+<p><span class="math display">\[
+\psi_\rc = \forall a, b, c. \txn\{a\}\{b, c\} \land \sameobj(b, c) \\
+\land \vis(b, a) \Rightarrow \vis(c, a)
+\]</span></p>
+<p>请注意，上述定义与 <span class="math inline">\(\S 6.1\)</span> 中描述的事务原子性保证相同。<code>save</code> 操作是一个 RC 事务的例子。</p>
+<p>MAV 语义确保如果事务 $ T_1 $ 中的某个操作见证了另一个事务 $ T_2 $ 的效果，那么 $ T_1 $ 中的后续操作也将见证 $ T_2 $ 的效果。MAV 语义对于维护外键约束、物化视图和二级更新的完整性非常有用 [2]。为了实现 MAV，存储只需跟踪运行事务见证的事务集 $ S_t $，并在某个副本上执行操作之前，确保该副本包含了 $ S_t $ 中的所有事务。因此，MAV 是无协调的。MAV 语义通过以下契约捕获：</p>
+<p><span class="math display">\[
+\psi_\mav = \forall a, b, c, d. \txn\set{a, b}\set{c, d} \land \so(a, b) \land \vis(c, a) \\
+\land \sameobj(d, b) \Rightarrow \vis(d, b)
+\]</span></p>
+<p>其语义如图 9(b) 所示。</p>
+<p>ANSI RR 语义要求事务见证数据存储状态的快照。重要的是，这个快照可以从任何副本中获得，因此 RR 也是无协调的。一个这样的事务的例子是 <code>totalBalance</code> 事务。RR 语义通过以下契约捕获：</p>
+<p><span class="math display">\[
+\psi_\rr = \forall a, b, c, d. \txn\{a, b\}\{c, d\} \land \vis(c, a) \\
+\land \sameobj(d, b) \Rightarrow \vis(d, b)
+\]</span></p>
+<p>其语义如图 9(c) 所示。</p>
+<h3 id="classification">Classification</h3>
+<p>类似于操作级别的契约，在 <span class="math inline">\(\leq\)</span> 关系下，这里描述的无协调事务语义形成了一个全序：<span class="math inline">\(\psi_\rc \leq \psi_\mav \leq \psi_\rr\)</span>。事务分类也类似于图 6 中展示的操作级别契约分类；给定一个事务上的契约 <span class="math inline">\(\psi\)</span>，我们从最弱的事务契约 <span class="math inline">\(\psi_\rc\)</span> 开始，并逐步将其强度与已知的事务契约进行比较，直到找到一个可以安全解除 <span class="math inline">\(\psi\)</span> 的隔离级别。否则，我们报告一个类型错误。</p>
+<h2 id="implementation">Implementation</h2>
+<p><img src="/48075/image-20241202093016078.png"></p>
+<p>QUELEA 实现为 GHC Haskell 的浅层扩展，并在 Cassandra 上运行，Cassandra 是一个现成的最终一致性分布式数据（或备份）存储，负责所有数据管理问题（即，复制、容错、可用性和收敛性）。使用 Template Haskell 实现静态合约分类，借助 Z3 [31] SMT 解决器来完成证明义务。图 9 展示了整体系统架构。</p>
+<p>复制的数据类型和各种一致性语义在 shim 层实现和强制执行。我们的实现支持数据类型操作的最终一致性、因果一致性和强一致性，以及事务的 RC、MAV 和 RR 语义。此功能完全基于 Cassandra 暴露的标准接口实现。从工程角度来看，利用现成的数据存储使实现仅包含大约 2500 行 Haskell 代码，这些代码被封装为一个库。</p>
+<h3 id="operation-consistency">Operation Consistency</h3>
+<p>垫片层通过显式跟踪由于可见性、会话和相同事务关系而引入的影响之间的依赖关系，维护后备存储中对象子集的因果一致的内存快照。依赖关系跟踪类似于 [3] 和 [21] 中介绍的技术。由于 Cassandra 提供持久性、收敛性和容错性，因此每个垫片层节点仅充当软状态缓存，没有节点间通信，并且可以随时安全终止。同样，可以根据需求生成新的垫片层节点。</p>
+<h3 id="transactions">Transactions</h3>
+<h3 id="summarization-1">Summarization</h3>
+<h2 id="evaluation">Evaluation</h2>
+<h2 id="related-work">Related Work</h2>
+<h2 id="conclusions">Conclusions</h2>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/8465/" rel="prev" title="POPL'19-Weak-Consistency Specification via Visibility Relaxation">
+      <i class="fa fa-chevron-left"></i> POPL'19-Weak-Consistency Specification via Visibility Relaxation
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/18110/" rel="next" title="数理逻辑-第 10 次作业">
+      数理逻辑-第 10 次作业 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#system-model"><span class="nav-number">2.</span> <span class="nav-text">System Model</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#motivation"><span class="nav-number">3.</span> <span class="nav-text">Motivation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#rdt-specification"><span class="nav-number">3.1.</span> <span class="nav-text">RDT Specification</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#summarization"><span class="nav-number">3.1.1.</span> <span class="nav-text">Summarization</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#anomalies-under-eventual-consistency"><span class="nav-number">3.2.</span> <span class="nav-text">Anomalies under Eventual Consistency</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contracts"><span class="nav-number">3.3.</span> <span class="nav-text">Contracts</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#from-contracts-to-implementation"><span class="nav-number">3.4.</span> <span class="nav-text">From Contracts to Implementation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#contract-language"><span class="nav-number">4.</span> <span class="nav-text">Contract Language</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#syntax"><span class="nav-number">4.1.</span> <span class="nav-text">Syntax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#semantics"><span class="nav-number">4.2.</span> <span class="nav-text">Semantics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#capturing-store-semantics"><span class="nav-number">4.3.</span> <span class="nav-text">Capturing Store Semantics</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#eventual-consistency"><span class="nav-number">4.3.1.</span> <span class="nav-text">Eventual consistency</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#causal-consistency"><span class="nav-number">4.3.2.</span> <span class="nav-text">Causal consistency</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#strong-consistency"><span class="nav-number">4.3.3.</span> <span class="nav-text">Strong consistency</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contract-classification"><span class="nav-number">4.4.</span> <span class="nav-text">Contract Classification</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#generality-of-contracts"><span class="nav-number">4.5.</span> <span class="nav-text">Generality of Contracts</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#soundness-of-contract-classification"><span class="nav-number">4.6.</span> <span class="nav-text">Soundness of Contract Classification</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#operational-semantics"><span class="nav-number">5.</span> <span class="nav-text">Operational Semantics</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#soundness-of-operational-semantics"><span class="nav-number">5.1.</span> <span class="nav-text">Soundness of Operational Semantics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#transaction-contracts"><span class="nav-number">6.</span> <span class="nav-text">Transaction Contracts</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#syntax-and-semantics-extensions"><span class="nav-number">6.1.</span> <span class="nav-text">Syntax and Semantics Extensions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transactional-bank-account"><span class="nav-number">6.2.</span> <span class="nav-text">Transactional Bank Account</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#coordination-free-transactions"><span class="nav-number">6.3.</span> <span class="nav-text">Coordination-free Transactions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#classification"><span class="nav-number">6.4.</span> <span class="nav-text">Classification</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#implementation"><span class="nav-number">7.</span> <span class="nav-text">Implementation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#operation-consistency"><span class="nav-number">7.1.</span> <span class="nav-text">Operation Consistency</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#transactions"><span class="nav-number">7.2.</span> <span class="nav-text">Transactions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#summarization-1"><span class="nav-number">7.3.</span> <span class="nav-text">Summarization</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evaluation"><span class="nav-number">8.</span> <span class="nav-text">Evaluation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#related-work"><span class="nav-number">9.</span> <span class="nav-text">Related Work</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conclusions"><span class="nav-number">10.</span> <span class="nav-text">Conclusions</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">422</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.5m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">38:09</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
