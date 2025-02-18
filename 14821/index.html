@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}{so}}} \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}} \def\rw{\mathsf{\textcolor{blue}{rw}}} \d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VMCAI&#39;20-Formalizing and Checking Multilevel Consistency">
+<meta property="og:url" content="https://eaglebear2002.github.io/14821/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}{so}}} \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}} \def\rw{\mathsf{\textcolor{blue}{rw}}} \d">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/14821/image-20241216111456351.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14821/image-20241216111700741.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14821/image-20241219225127883.png">
+<meta property="article:published_time" content="2024-12-13T06:55:11.000Z">
+<meta property="article:modified_time" content="2025-02-18T09:30:16.175Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/14821/image-20241216111456351.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/14821/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>VMCAI'20-Formalizing and Checking Multilevel Consistency | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">53</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">425</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/14821/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VMCAI'20-Formalizing and Checking Multilevel Consistency
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-12-13 14:55:11" itemprop="dateCreated datePublished" datetime="2024-12-13T14:55:11+08:00">2024-12-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-02-18 17:30:16" itemprop="dateModified" datetime="2025-02-18T17:30:16+08:00">2025-02-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%A4%9A%E7%BA%A7%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" itemprop="url" rel="index"><span itemprop="name">多级隔离级别</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\so{\mathsf{\textcolor{purple}{so}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\ww{\mathsf{\textcolor{red}{ww}}}
+\def\rw{\mathsf{\textcolor{blue}{rw}}}
+\def\vis{\mathsf{\textcolor{orange}{vis}}}
+\def\arb{\mathsf{\textcolor{pink}{arb}}}
+\def\Write{\mathsf{Write}}
+\def\Read{\mathsf{Read}}
+\def\View{\mathsf{View}}
+\def\RelWrites{RelWrites}
+\def\MaxRelWrites{MaxRelWrites}
+\def\EffWrite{EffWrite}
+\def\wk{\mathsf{wk}}
+\def\st{\mathsf{st}}
+\def\total{\mathsf{total}}
+\def\read{read}
+\def\write{write}
+\def\thru{thru}
+\def\back{back}
+\def\ANY{\mathtt{ANY}}
+\def\ONE{\mathtt{ONE}}
+\def\QUORUM{\mathtt{QUORUM}}
+\def\ALL{\mathtt{ALL}}
+\def\O{\mathcal{O}}
+\def\RelTerms{RelTerms}
+\def\VisBasic{VisBasic}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>分布式数据存储的开发人员必须牺牲一致性来换取性能和可用性。此类系统实际上可能实现弱一致性模型，例如因果一致性或最终一致性，这对应于不同的成本和对客户端的保证。我们考虑分布式系统的情况，它不仅为客户端提供单一级别的一致性，而且提供多种级别的一致性。这对应于许多实际情况。例如，流行的数据存储（如
+Amazon DynamoDB 和 Apache 的
+Cassandra）允许应用程序在同一会话中使用单独的一致性级别标记每个查询。在本文中，我们为多级一致性规范提供了一个正式框架，并解决了检查计算是否符合此类规范的问题。我们为这个问题提供了一种原则性的算法方法，并将其应用于具有多级一致性的模型的几个实例。</p>
+<p>作者：</p>
+<p>Ahmed Bouajjani<sup>1</sup>, Constantin Enea<sup>1</sup>, Madhavan
+Mukund<sup>2,3</sup>, Gautham Shenoy R.<sup>2</sup>, and S. P. Suresh
+<sup>2,3</sup></p>
+<p><sup>1</sup>Universit´e Paris Diderot, Paris, France
+{abou,cenea}<span class="citation" data-cites="irif.fr">@irif.fr</span></p>
+<p><sup>2</sup>Chennai Mathematical Institute, Chennai, India
+{madhavan,gautshen,spsuresh}<span class="citation" data-cites="cmi.ac.in">@cmi.ac.in</span></p>
+<p><sup>3</sup>CNRS UMI 2000 ReLaX, Chennai, India</p>
+<h2 id="introduction">Introduction</h2>
+<p>为了实现可用性和可扩展性，现代数据存储（键值存储）依赖于乐观复制，允许多个客户端对多个副本上的共享数据发出操作，这些副本使用消息传递相互传达更改。这种架构的一个好处是，即使网络连接失败，副本仍可在本地供客户端使用。不幸的是，著名的
+CAP 定理 [15]
+表明，这种高可用性和对网络分区的容忍度与强一致性不相容，即单个集中式副本处理所有操作的假象。因此，现代复制数据存储通常提供较弱的一致性形式，例如最终一致性
+[23] 或因果一致性 [19]，这些一致性最近才被形式化 [6,7,10,22]。</p>
+<p>在弱一致性数据存储上编写应用程序非常困难。为了保持正确性，某种形式的同步通常是不可避免的。因此，流行的数据存储（如
+Amazon DynamoDB 和 Apache 的
+Cassandra）提供了不同级别的一致性，从较弱的形式到强一致性。应用程序可以根据其需求为数据存储中的<strong>查询</strong>添加合适的一致性级别标签。</p>
+<p>大规模数据存储的实现很难构建和测试。例如，它们必须考虑部分故障，即某些组件或网络可能出现故障并产生不完整的结果。确保容错依赖于难以设计和推理的复杂协议。黑盒测试框架
+Jepsen1 在许多生产分布式数据存储中发现了大量微妙的问题。</p>
+<p>测试数据存储会引发两个问题：(1)
+得出一组合适的测试场景，例如要注入系统的故障和要执行的操作集；(2)
+有效的算法来检查给定的执行是否满足所考虑的一致性模型。Jepsen
+框架表明，第一个问题可以通过随机化来解决，例如随机引入故障并随机选择操作。该解决方案的有效性已在最近的工作中得到正式证明
+[21]。第二个问题依赖于一致性模型的适当形式化。</p>
+<p>在这项工作中，我们考虑指定提供多级一致性的数据存储的问题，并推导出算法来检查给定的执行是否遵守这种多级一致性规范。</p>
+<p>我们以 [10]
+中的规范框架为基础，该框架使用两个辅助关系形式化一致性模型：(i)
+可见性关系，指定每个操作观察到的操作集；(ii)
+仲裁顺序，指定所有副本查看并发操作的顺序。如果存在遵循相关约束集的可见性关系和仲裁顺序，则称执行满足一致性标准。对于提供多级一致性的数据存储的情况，我们考虑多个可见性关系和仲裁顺序，每个一致性级别一个。然后，我们考虑一组公式，这些公式单独指定每个一致性级别，以及不同一致性级别的可见性关系和仲裁顺序如何关联。</p>
+<p>基于这种形式化，我们研究了检查给定执行是否满足某个多级一致性规范的问题。一般来说，这个问题是
+NP-COMPLETE
+[6]。但是，我们表明，对于每个值最多写入一次键的执行，对于许多实际有趣的多级一致性规范，这个问题是多项式时间。由于实际的数据存储实现与数据无关
+[24]，即它们的行为不依赖于事务中读取或写入的具体值，因此只需考虑每个值最多写入一次的执行即可。这个复杂性结果使用了
+[6]
+中针对因果一致性情况引入的不良模式的概念。直观地说，<strong>不良模式</strong>是一组以特定顺序发生的与一致性违规相对应的操作。在本文中，我们提供了一种系统的方法来推导不良模式，这些模式表征了广泛的一致性模型及其组合。</p>
+<p>我们的贡献形成了一个有效的算法框架，用于验证提供多级一致性的现代数据存储。据我们所知，我们是第一个研究如此广泛的一致性模型及其组合的渐近复杂性的人，尽管它们在实践中很普遍。</p>
+<p>本文的结构如下。我们从一些多级一致性的实际例子开始。在第 3
+节中，我们提出了一个用于指定和推理多级一致性的形式化模型。第 4
+节描述了用于验证多级一致性的算法。最后我们讨论了相关工作。详细证明可以在技术报告
+[8] 中找到。</p>
+<h2 id="multilevel-consistency-in-the-wild">Multilevel Consistency in
+the Wild</h2>
+<p>在本节中，我们将介绍一些现实世界中的多级一致性实例。我们将注意力集中在分布式读写键值数据存储（以下称为读写存储），它由通过键或变量寻址的唯一内存位置组成。在这项工作中，我们交替使用键和变量。这些内存位置的内容来自一个称为值的域。</p>
+<p>读写数据存储提供了两个 API
+来访问和修改特定内存位置的内容。读取特定内存位置内容的 API 通常名为 Read
+或 Get，将值存储到特定内存位置的 API 通常名为 Write 或
+Put。在本文中，我们分别将这两种方法称为 Read 和 Write。Read
+方法不会更新数据存储的状态，只会向调用该方法的应用程序会话显示部分状态。另一方面，Write
+方法会修改数据存储的状态。</p>
+<p>通常，应用程序读取数据存储的位置，执行一些本地计算，然后将值写回数据存储。应用程序执行的一系列相关读写操作称为会话。</p>
+<p>应用程序期望数据存储能够提供某种一致性保证，即它们从数据存储中读取的数据值是新鲜还是陈旧。它们还寻求与呈现给它们的结果的单调性有关的一些保证。数据存储向应用程序提供的这些保证称为一致性标准。一些流行的一致性标准包括：</p>
+<ul>
+<li>Read-Your-Writes：会话中先前操作的效果将对同一会话中的后续操作可见。</li>
+<li>Monotonic
+Reads：一旦操作的效果在会话中可见，它将对该会话中的所有后续操作保持可见。</li>
+<li>Monotonic
+Writes：如果远程操作的效果在会话中可见，则远程操作会话中所有先前操作的效果也可见。</li>
+<li>Causal
+Consistency：会话中先前操作的效果始终对后续操作可见。此外，如果操作的效果对另一个操作可见，则每个看到后者效果的操作都会看到前者的效果。</li>
+<li>Sequential
+Consistency：操作的效果可以通过通过在各个会话中交错执行的读取和写入获得的单个顺序执行来解释。</li>
+</ul>
+<p>目前，大多数关于测试读写存储行为的文献都侧重于测试特定一致性标准的正确性
+[6,7,14]。然而，有些情况下，DynamoDB 和 Cassandra
+等数据存储系统为应用程序提供了指定每个读取操作的一致性级别的选择
+[11]。有些分布式数据存储库允许一致性配给
+[18]，还允许对读取操作提供增量一致性保证
+[17]。在每种情况下，我们都需要根据多个一致性标准推断数据存储行为的正确性。</p>
+<p>现在我们来看看现实世界中多级一致性的一些例子。在这项工作中，我们假设读取和写入
+API 如下。</p>
+<blockquote>
+<p>定义 1（读取和写入 API）</p>
+<p>令 <span class="math inline">\(x\)</span> 为键/变量，<span class="math inline">\(val\)</span> 表示从数据存储读取/写入的数据，<span class="math inline">\(level\)</span> 表示一致性级别。</p>
+<ul>
+<li><span class="math inline">\(\Write(x, val)\)</span> ：使用值 <span class="math inline">\(val\)</span> 更新键/变量 <span class="math inline">\(x\)</span> 所寻址的内存位置的内容。</li>
+<li><span class="math inline">\(\Read(x, val, level)\)</span> ：键为
+<span class="math inline">\(x\)</span> 的内存位置的内容相对于一致性级别
+<span class="math inline">\(level\)</span> 为 <span class="math inline">\(val\)</span>，，其中 <span class="math inline">\(level \in \set{\ANY, \ONE, \QUORUM,
+\ALL}\)</span>。</li>
+</ul>
+</blockquote>
+<h3 id="read-write-stores-with-strong-and-weak-reads">Read-Write Stores
+with Strong and Weak Reads</h3>
+<p>以数据存储 Cassandra
+为例，它允许应用程序更细粒度地选择一致性级别，例如 <span class="math inline">\(\set{\ANY, \ONE, \QUORUM,
+\ALL}\)</span>。它通过确保当使用 <code>ANY</code>
+执行读取时，通过查询数据存储的任何可用副本来提供返回值来实现这一点。同样，如果使用
+<code>ONE</code>
+提交读取操作，则通过查询已知包含该键的至少一个值的副本来提供返回值。另一方面，如果使用
+<code>QUORUM</code>
+执行读取，数据存储会在查询大多数副本后返回该值。最后，如果使用
+<code>ALL</code>
+执行读取，则在返回响应之前会查询所有副本。显然，<code>ANY</code>
+是最弱的一致性标准，而 <code>ALL</code>
+是最强的一致性标准。通常，数据存储通过查询所需的副本子集来回答查询，从而提供与不同一致性标准相关的响应。</p>
+<p>通常，在更强的一致性标准下执行的读取操作将花费更多时间，因为它可能必须等待所有待处理操作变为可见，或者在返回结果之前运行共识协议。在某些情况下，应用程序可能会对返回值符合某些较弱一致性标准的读取操作感到满意。考虑一个显示电影院可用座位的
+Web
+应用程序。应用程序可以选择根据较弱的一致性标准读取可用座位，因为：</p>
+<ul>
+<li>尝试预订座位的用户数量通常多于可用座位数。等待达成共识或法定人数会减慢每个人的读取速度。因此，更快的响应是可取的。</li>
+<li>用户看到可用座位的时间与用户决定预订特定座位的时间之间存在滞后。由于同时进行的预订，因此在用户预订座位时，显示的数据可能会过时。</li>
+<li>用户可能会在最终确定一组座位并为其付款之前改变主意。</li>
+</ul>
+<p>因此，Web
+应用程序可以选择满足较弱一致性标准的读取，同时允许用户选择座位，然后仅当用户付费时才执行满足更强一致性标准的读取。</p>
+<p>考虑图 1
+中的示例，其中所有写入请求都在同一副本上处理。对于每个会话，都有一个（可能不同的）指定副本，从该副本返回对弱读取的响应。</p>
+<p><img src="/14821/image-20241216111456351.png"></p>
+<p>在此场景中，强读（对应于一致性级别
+ALL）满足顺序一致性，而弱读遵循单调读一致性。因此，由所有写入和弱读组成的片段应该在单调读方面是正确的。同样，由所有写入和强读组成的片段应该在顺序一致性方面是正确的。</p>
+<p>图 2(a) 中可以看到与图 1
+中的示例相对应的弱片段。此片段对于单调读取是正确的；一旦写入 G 在会话 1
+中对读取 C 可见，它就会在整个会话中保持可见。写入 I
+对任何其他会话尚不可见。</p>
+<p>强片段如图 2(b)
+所示。这在顺序一致性方面是正确的，其中通过共识获得的操作顺序为 <span class="math inline">\(A \to B \to G \to H \to I \to D \to
+E\)</span>。</p>
+<p><img src="/14821/image-20241216111700741.png"></p>
+<p>但是，由于强读对应于级别
+ALL，其中所有副本都已看到先前的写入并已就并发写入的顺序达成一致，因此在强读之后的弱读必须考虑先前强读所看到的影响。因此，数据存储施加了额外的约束。一旦写入对会话中的强读可见，则该写入对该会话中所有后续弱读也可见。这可确保较弱的读取确实会合并会话所看到的先前结果。类似地，对弱读可见的写入是从参与级别
+ALL
+对应的后续强读的副本进行的。因此，会话中先前弱读可见的影响对后续强读也可见。</p>
+<p>有了这些额外的限制，我们就无法再解释读取操作 F，因为写入 G 和 I
+的影响在读取 F 时都是可见的。强一致性标准已经保证写入 I 发生在写入 G
+之后，从而有效地用值 6 覆盖了值
+4。因此，这种行为在多级设置中是不正确的。</p>
+<p>现在考虑 Cassandra 的行为，其中写入在其中一个副本（对应于级别
+ONE）上执行，弱读取在其中一个副本（对应于级别
+ONE）上执行，强读取在副本仲裁（对应于级别
+QUORUM）上执行。在这种情况下，先前较弱读取可见的写入效果不一定在后续较强读取中可见，因为执行较弱读取的副本可能不在执行较强读取的副本仲裁中。类似地，会话中先前较强读取可见的写入效果不一定对会话中后续较弱读取可见，因为仲裁中的写入可能尚未到达执行较弱读取的副本。因此，较强和较弱读取可以彼此独立。</p>
+<p>最后考虑一下 Amazon DynamoDB Accelerator (DAX) [1]
+的情况，它包含一个位于应用程序和 DynamoDB
+后端之间的直写缓存。应用程序执行的每个写入操作都首先提交到 DynamoDB
+后端，并在缓存中更新。默认情况下，读取是最终一致的，即从缓存中执行读取。如果缓存中不存在该项目，则从后端数据存储中获取该项目，并在将值返回给应用程序之前用该项目更新缓存。但是，应用程序也可以通过调用
+ConsistentRead
+来请求强一致性读取。在这种情况下，从后端读取值并返回给应用程序，而不缓存结果。应用程序进行的任何后续最终一致性读取都可能无法反映先前强一致性读取返回的值。在
+DAX
+的情况下，可以观察到，对弱最终一致性读取可见的写入效果对后续的强一致性读取也可见，因为这些写入也存在于
+DynamoDB
+后端。但是，对强一致性读取可见的写入效果不一定对后续的弱最终一致性读取可见。</p>
+<p>从这些多级一致性的例子中，我们可以看到，另一个一致性标准的存在可以对用于解释历史正确性的可见性和仲裁关系的选择施加额外的约束。在下一节中，我们将提供一个正式框架，用于对具有多个一致性级别的读写数据存储的行为进行建模。</p>
+<h2 id="formalizing-multilevel-consistency">Formalizing Multilevel
+Consistency</h2>
+<p>我们扩展了 [9]
+中提供的用于建模读写存储行为的正式框架。应用程序提交给数据存储的每个操作都是
+Read 或 Write 操作，其签名在定义 1 中给出。</p>
+<p>我们用 Vars
+表示读写存储中的所有变量集，并假设写入读写存储的每个值都是自然数 <span class="math inline">\(val \in
+\mathbb{N}\)</span>。我们假设所有变量最初都是未定义的，其值 <span class="math inline">\(\bot\)</span>。</p>
+<p>为简单起见，我们仅假设两个一致性级别，即弱和强，分别用 <span class="math inline">\(\wk\)</span> 和 <span class="math inline">\(\st\)</span> 表示，其中与 <span class="math inline">\(\wk\)</span> 级别相对应的一致性标准严格弱于与
+<span class="math inline">\(\st\)</span>
+级别相对应的一致性标准。一致性标准之间的比较在定义 7 中正式定义。</p>
+<p>应用程序观察到的读写数据存储的行为是它在存储上执行的读写序列。相关读写操作的序列称为会话。因此，每个会话看到的读写存储的行为是该会话中执行的读/写操作的全序。</p>
+<p>读写存储的行为是所有会话看到的行为的集合。在图 1
+中，我们看到了访问数据存储的三个会话观察到的数据存储行为。我们将这种行为称为混合历史，正式定义如下：</p>
+<blockquote>
+<p>定义 2（混合历史）</p>
+<p>一个读写存储的混合历史是一个对 <span class="math inline">\(H = (\O,
+\so)\)</span>，其中 <span class="math inline">\(\O\)</span>
+是读写操作的集合，而 <span class="math inline">\(\so\)</span>
+是被称为会话顺序的全序集合。</p>
+<p>对于历史 <span class="math inline">\(H\)</span>，我们定义以下 <span class="math inline">\(\O\)</span> 的子集。</p>
+<ul>
+<li><span class="math inline">\(\O_{\Read}\)</span> 是在 <span class="math inline">\(H\)</span> 中发生的读操作的集合；</li>
+<li><span class="math inline">\(\O_{\Write}\)</span> 是在 <span class="math inline">\(H\)</span> 中发生的写操作的集合；</li>
+<li><span class="math inline">\(\O_{\wk} = \O_{\Write} \cup \{\Read(x,
+val, level) \in \O_{\Read} \mid level = \wk\}\)</span>（在 <span class="math inline">\(H\)</span> 中发生的弱操作的集合）；</li>
+<li><span class="math inline">\(\O_{\st} = \O_{\Write} \cup \{\Read(x,
+val, level) \in \O_{\Read} \mid level = \st\}\)</span>（在 <span class="math inline">\(H\)</span> 中发生的强操作的集合）。</li>
+</ul>
+<p><span class="math inline">\(H\)</span> 的弱片段表示为 <span class="math inline">\(H_{\wk} = (\O_{\wk}, \so \cap (\O_{\wk} \times
+\O_{\wk}))\)</span>。类似地，<span class="math inline">\(H\)</span>
+的强片段表示为 <span class="math inline">\(H_{\st} = (\O_{\st}, \so \cap
+(\O_{\st} \times
+\O_{\st}))\)</span>。请注意，我们将写操作视为强和弱片段的一部分。</p>
+</blockquote>
+<ul>
+<li>对于 <span class="math inline">\(X \subseteq \O \times \O\)</span>
+和 <span class="math inline">\(\ell \in \{\Read, \Write, \wk,
+\st\}\)</span>，<span class="math inline">\(X \upharpoonright_{\ell} = X
+\cap (\O_{\ell} \times \O_{\ell})\)</span>；</li>
+<li>对于 <span class="math inline">\(X, Y \subseteq \O \times
+\O\)</span>，<span class="math inline">\(X;Y = \{(x, y) \mid \exists z :
+(x, z) \in X \land (z, y) \in Y\}\)</span> 是 <span class="math inline">\(X\)</span> 和 <span class="math inline">\(Y\)</span> 的组合；</li>
+<li>对于 <span class="math inline">\(X \subseteq \O \times
+\O\)</span>，<span class="math inline">\(\total(X)\)</span> 表示 <span class="math inline">\(X\)</span> 是一个全序。</li>
+</ul>
+<p>当读写存储的副本从应用程序接收一个操作时，它决定已知于该副本的旧操作（要么是从应用程序接收的，要么是从数据存储的其他副本接收的）的效果应如何对新操作可见。在历史上的可见性关系指定了对操作可见的操作集。</p>
+<blockquote>
+<p>定义 3（可见性关系）</p>
+<p>在历史 <span class="math inline">\(H = (\mathcal{O}, \so)\)</span>
+上的可见性关系 <span class="math inline">\(\vis\)</span> 是 <span class="math inline">\(\mathcal{O}\)</span> 上的无环关系。对于 <span class="math inline">\(o, o&#39; \in \mathcal{O}\)</span>，我们用 <span class="math inline">\(o \xrightarrow{\vis} o&#39;\)</span> 表示操作
+<span class="math inline">\(o\)</span> 的效果对操作 <span class="math inline">\(o&#39;\)</span> 可见。</p>
+<p>如果一对操作 <span class="math inline">\(o, o&#39;\)</span> 没有
+<span class="math inline">\(\vis\)</span>
+关系，我们称它们为并发操作，表示为 <span class="math inline">\(o
+\parallel_{\vis} o&#39;\)</span>。</p>
+<p>我们定义操作 <span class="math inline">\(o\)</span> 关于可见性关系
+<span class="math inline">\(\vis\)</span> 的视图，记作 <span class="math inline">\(\View_{\vis}(o)\)</span>，是所有对 <span class="math inline">\(o\)</span> 可见的写操作的集合。</p>
+</blockquote>
+<p>对于图 1 中的历史，我们可以定义一个可见性关系为</p>
+<p><span class="math display">\[
+\set{A \xrightarrow{\vis} B, G \xrightarrow{\vis} C, G
+\xrightarrow{\vis} D, H \xrightarrow{\vis} D, G \xrightarrow{\vis} E, H
+\xrightarrow{\vis} E, I \xrightarrow{\vis} E, G \xrightarrow{\vis} F}
+\]</span></p>
+<p>当副本相互通信时，它们需要协调并发写操作的效果，以便最终收敛到同一状态。在会聚数据存储的情况下，这是通过使用诸如“最后写入者获胜”这样的规则来完成的，该规则完全排序所有写操作。这被抽象为仲裁关系，它是历史中所有写操作的全序。我们将仲裁关系表示为
+<span class="math inline">\(\arb\)</span>。我们假设仲裁关系与可见性关系一致，这意味着对于一对写操作
+<span class="math inline">\(o\)</span> 和 <span class="math inline">\(o&#39;\)</span>，如果 <span class="math inline">\(o\)</span> 对 <span class="math inline">\(o&#39;\)</span> 可见，则 <span class="math inline">\(o\)</span> 在 <span class="math inline">\(\arb\)</span> 中位于 <span class="math inline">\(o&#39;\)</span> 之前。</p>
+<blockquote>
+<p>定义 4（仲裁关系）</p>
+<p>在混合历史 <span class="math inline">\(H = (\mathcal{O},
+\so)\)</span> 上的仲裁关系 <span class="math inline">\(\arb\)</span> 是
+<span class="math inline">\(\mathcal{O}_{\Write}\)</span> 上的全序。对于
+<span class="math inline">\(o_i, o_j \in \mathcal{O}\)</span>，我们说
+<span class="math inline">\(o_i \xrightarrow{\arb} o_j\)</span> 表示操作
+<span class="math inline">\(o_i\)</span> 在操作 <span class="math inline">\(o_j\)</span> 之前被排序。</p>
+</blockquote>
+<p>对于图 1 中的历史，仲裁关系可以是全序</p>
+<p><span class="math display">\[
+A \xrightarrow{\arb} G \xrightarrow{\arb} H \xrightarrow{\arb} I
+\]</span></p>
+<p>我们用读写存储的功能规范来定义混合历史的正确性。</p>
+<p>设 <span class="math inline">\(H\)</span> 是一个混合历史。设 <span class="math inline">\(\vis\)</span> 和 <span class="math inline">\(\arb\)</span> 是在 <span class="math inline">\(H\)</span> 上的可见性和仲裁关系。</p>
+<p>我们说写操作 <span class="math inline">\(o&#39;\)</span> 是读操作
+<span class="math inline">\(o\)</span> 的相关写操作，当且仅当 <span class="math inline">\(o&#39;\)</span> 在 <span class="math inline">\(o\)</span> 的视图中，并且 <span class="math inline">\(o\)</span> 和 <span class="math inline">\(o&#39;\)</span> 操作于同一个变量。所有与 <span class="math inline">\(o\)</span> 相关的写操作的集合，记作 <span class="math inline">\(\RelWrites_{\vis}(o)\)</span>，被定义为集合 <span class="math inline">\(\set{o&#39; \in \View_{\vis}(o) \mid o 和 o&#39;
+操作同一个变量}\)</span>。</p>
+<p><span class="math inline">\(\MaxRelWrites_{\vis}(o)\)</span>
+是写操作关于 <span class="math inline">\(\vis\)</span>
+的最大元素的集合，被定义为</p>
+<p><span class="math display">\[
+\MaxRelWrites_{\vis}(o) = \set{o&#39; \in \RelWrites_{\vis}(o) \mid
+\forall o&#39;&#39; \in \RelWrites_{\vis}(o) : o&#39;&#39;
+\xrightarrow{\vis} o&#39; \vee o&#39;&#39; \parallel_{\vis} o&#39;}
+\]</span></p>
+<p>读操作 <span class="math inline">\(o\)</span> 的有效写操作，记作
+<span class="math inline">\(\EffWrite^{\arb}_{\vis}(o)\)</span>，被定义为根据仲裁关系从
+<span class="math inline">\(o\)</span>
+的最大相关写操作集中选择的最大写操作。</p>
+<p><span class="math display">\[
+\EffWrite^{\arb}_{\vis}(o) = \begin{cases}
+\max(\arb \upharpoonright_{\MaxRelWrites_{\vis}(o)}) &amp; \text{if }
+\MaxRelWrites_{\vis}(o) \neq \emptyset \\
+\bot &amp; \text{otherwise}
+\end{cases}
+\]</span></p>
+<blockquote>
+<p>定义 5（读写存储的功能正确性）</p>
+<p>设 <span class="math inline">\(H = (\O, \so)\)</span>
+是一个具有可见性关系 <span class="math inline">\(\vis\)</span>
+和仲裁关系 <span class="math inline">\(\arb\)</span>
+的读写数据存储的混合历史。我们说 <span class="math inline">\((H, \vis,
+\arb)\)</span> 功能上正确，当且仅当对于每个读操作 <span class="math inline">\(o = \Read(x, val,
+level)\)</span>，以下条件成立。</p>
+<ul>
+<li>如果 <span class="math inline">\(\EffWrite^{\arb}_{\vis}(o) =
+\bot\)</span>，则 <span class="math inline">\(val =
+\bot\)</span>（即，在 <span class="math inline">\(o\)</span>
+发生时没有对 <span class="math inline">\(x\)</span> 的写操作）。</li>
+<li>如果 <span class="math inline">\(o&#39; =
+\EffWrite^{\arb}_{\vis}(o)\)</span>，则 <span class="math inline">\(o&#39;\)</span> 写入了值 <span class="math inline">\(val\)</span>，即 <span class="math inline">\(o\)</span> 读到了“最近的”写操作。</li>
+</ul>
+</blockquote>
+<p>接下来，我们正式地通过一组公式定义一致性标准。我们的定义改编自 [13]
+中约束的定义。</p>
+<blockquote>
+<p>定义 6（一致性标准）</p>
+<p>关系项 <span class="math inline">\(\tau\)</span> 是由形式 <span class="math inline">\(r_1; \cdots ; r_k\)</span> （<span class="math inline">\(k \geq 1\)</span>）组成的组合，其中每个 <span class="math inline">\(r_i \in \set{so, vis}\)</span>。一致性标准是集合
+<span class="math inline">\(\set{\tau \subseteq vis \mid \tau 是关系项}
+\cup \set{\total(vis)}\)</span> 的子集。</p>
+<p>因此，一致性标准是一个<strong>可能为空的可见性约束集合</strong>和一个可选的全序约束。为了简化表示，我们通常将约束写成合取式。</p>
+<p>请注意，<span class="math inline">\(so\)</span> 和 <span class="math inline">\(vis\)</span> 是变量，通常解释为历史中的 <span class="math inline">\(\so\)</span> 和 <span class="math inline">\(\vis\)</span>
+关系的限制。如下面所示，我们总是需要一个额外的约束，即 <span class="math inline">\(\vis \upharpoonright_{\Write} \subseteq
+\arb\)</span>（因此它没有明确包含在一致性标准中）。</p>
+<p>TODO：定义中的 <span class="math inline">\(so, vis\)</span> 和 <span class="math inline">\(\so, \vis\)</span> 到底是什么关系？</p>
+</blockquote>
+<p>对于一致性标准 <span class="math inline">\(\alpha\)</span>，<span class="math inline">\(\RelTerms(\alpha)\)</span> 是在 <span class="math inline">\(\alpha\)</span> 中出现的所有关系项的集合，而 <span class="math inline">\(\VisBasic(\alpha)\)</span> 是 <span class="math inline">\(\alpha\)</span>
+中所有可见性约束的集合，不包括全序约束 <span class="math inline">\(\total(\vis)\)</span>。</p>
+<blockquote>
+<p>定义 7（历史中的一致性标准）</p>
+<p>设 <span class="math inline">\(H = (\O, \so)\)</span>
+是一个混合历史，设 <span class="math inline">\(\vis\)</span> 和 <span class="math inline">\(\arb\)</span> 是在 <span class="math inline">\(H\)</span> 上的可见性和仲裁关系，设 <span class="math inline">\(\alpha\)</span> 是一个一致性标准。我们说 <span class="math inline">\(H, \vis \models \alpha\)</span> 当且仅当：</p>
+<ol type="1">
+<li>对于 <span class="math inline">\(\alpha\)</span> 中的每个 <span class="math inline">\(\tau \subseteq vis\)</span>，<span class="math inline">\(\tau[so := \so, vis := \vis] \subseteq
+\vis\)</span>，并且</li>
+<li>如果 <span class="math inline">\(\total(vis) \in \alpha\)</span>，则
+<span class="math inline">\(\total(\vis)\)</span> 成立。</li>
+</ol>
+<p>进一步地说，我们说 <span class="math inline">\(H, \vis, \arb \models
+\alpha\)</span> 当且仅当 <span class="math inline">\(H, \vis \models
+\alpha\)</span> 并且 <span class="math inline">\(\vis
+\upharpoonright_{\Write} \subseteq \arb\)</span>。</p>
+</blockquote>
+<p>一些众所周知的一致性标准如表 1 所示。</p>
+<p><img src="/14821/image-20241219225127883.png"></p>
+<p>我们说一致性标准 <span class="math inline">\(\alpha\)</span>
+至少和另一个一致性标准 <span class="math inline">\(\alpha&#39;\)</span>
+一样强，如果对于每个历史 <span class="math inline">\(H\)</span>、可见性关系 <span class="math inline">\(\vis\)</span> 和仲裁关系 <span class="math inline">\(\arb\)</span>，如果 <span class="math inline">\(H,
+\vis, \arb \models \alpha\)</span>，那么 <span class="math inline">\(H,
+\vis, \arb \models \alpha&#39;\)</span>。</p>
+<p>假设 <span class="math inline">\(H = (O, \so)\)</span>
+是一个混合历史。设 <span class="math inline">\(\alpha_w\)</span> 和
+<span class="math inline">\(\alpha_s\)</span>
+分别是弱一致性（wk）和强一致性（st）的标准。我们希望选择弱可见性关系
+<span class="math inline">\(\vis_{\wk}\)</span> 和强可见性关系 <span class="math inline">\(\vis_{\st}\)</span>，以及仲裁关系 <span class="math inline">\(\arb\)</span>，使得 <span class="math inline">\(H_{\wk}, \vis_{\wk}, \arb \models
+\alpha_w\)</span> 并且 <span class="math inline">\(H_{\st}, \vis_{\st},
+\arb \models \alpha_s\)</span>。</p>
+<p>正如我们在前一节中提到的，在多级设置中，单独满足对应于弱一致性和强一致性标准的约束是不够的。我们现在继续建模多级一致性约束。</p>
+<h3 id="modelling-multilevel-consistency">Modelling Multilevel
+Consistency</h3>
+<p>受 DAX [1]
+和现代处理器中的缓存层次结构的启发，我们可以将多级一致性建模为一系列按其保证的一致性递增顺序排列的数据存储，这样提供最弱一致性级别的数据存储最接近应用程序，而提供最强一致性级别的数据存储距离应用程序最远。我们进一步假设这些数据存储使用相同的仲裁策略来排序并发写入操作，并且每个较弱的数据存储都有能力更新其状态以匹配更强的数据存储的状态。</p>
+<p>就本文而言，由于我们仅将自己限制在两个级别，即 <span class="math inline">\(\wk\)</span> 和 <span class="math inline">\(\st\)</span>，因此这将减少到只有两个数据存储，其中对应于较弱一致性标准的数据存储作为应用程序和对应于更强一致性标准的数据存储之间的缓存。</p>
+<p>所有弱读操作都是从弱数据存储中执行的。</p>
+<p>写操作有两种可能的执行方式：</p>
+<ol type="1">
+<li>Write-Through：写操作首先在强数据存储中执行，最终将被传播到弱数据存储。</li>
+<li>Write-Back：写操作首先在弱数据存储中执行，最终将被传播到强数据存储。</li>
+</ol>
+<p>强读操作有两种可能的执行方式：</p>
+<ol type="1">
+<li>Read-Through:
+在强数据存储中执行的强读操作的结果直接发送给应用程序，绕过弱数据存储。</li>
+<li>Read-Back:
+强读操作的结果在传播到应用程序之前先在弱数据存储中更新。</li>
+</ol>
+<p>因此，系统选择两种方式之一来执行写操作，并选择两种方式之一来执行强读操作。</p>
+<p>请注意，选择 Write-Through
+策略来执行写操作的系统将确保任何在弱数据存储中可见的写操作也将在强数据存储中可见，因为所有的写操作首先在强数据存储中执行，然后再传播到弱数据存储。因此，在弱读操作中可见的写操作的效果也将对后续的强操作可见。</p>
+<p>同样，选择 Read-Back
+策略来执行强读操作的系统将确保任何对强读可见的写操作也将在后续的弱读操作中可见。在返回强读结果给应用程序之前，该结果会合并到弱数据存储中。</p>
+<p>然而，Write-Back 和 Read-Through
+策略并不能提供任何关于在弱（或强）读操作中可见的写操作效果与同一会话中的后续强（或弱）读操作之间的保证。</p>
+<p>我们现在以约束的形式定义这四种策略各自提供的保证。</p>
+<blockquote>
+<p>定义 8（多级约束）</p>
+<p>我们定义以下公式：</p>
+<p><span class="math display">\[
+\psi_{\thru}^{\write} \coloneqq (vis^{wk}; so) \upharpoonright_{\st}
+\subseteq vis^{st}\\
+\psi_{\back}^{\write} \coloneqq \top\\
+\psi_{\thru}^{\read} \coloneqq \top\\
+\psi_{\back}^{\read} \coloneqq (vis^{st}; so) \upharpoonright_{\wk}
+\subseteq vis^{wk}
+\]</span></p>
+<p>一个多级约束 <span class="math inline">\(\varphi\)</span> 是形式为
+<span class="math inline">\(\psi^{\read} \land \psi^{\write}\)</span>
+的合取式，其中 <span class="math inline">\(\psi^{\read} \in
+\{\psi_{\thru}^{\read}, \psi_{\back}^{\read}\}\)</span> 和 <span class="math inline">\(\psi^{\write} \in \{\psi_{\thru}^{\write},
+\psi_{\back}^{\write}\}\)</span>。</p>
+</blockquote>
+<h2 id="testing-multilevel-correctness-of-a-hybrid-history">Testing
+Multilevel Correctness of a Hybrid History</h2>
+<h3 id="bad-pattern-characterization-for-multilevel-correctness">Bad
+Pattern Characterization for Multilevel Correctness</h3>
+<h3 id="constructing-minimal-visibility-relations">Constructing Minimal
+Visibility Relations</h3>
+<h3 id="complexity">Complexity</h3>
+<h2 id="related-work">Related Work</h2>
+<p>先前的研究表明，分布式数据存储需要提供多级一致性，以便在一致性和可用性/延迟之间取得平衡
+[2,17,18,20]。Kraska 等人 [18]
+的研究提供了一种事务范例，允许应用程序定义数据而非事务的一致性级别，还允许应用程序在运行时切换一致性保证。在
+Guerraoui 等人 [17]
+的研究中，作者提供了一个通用库，允许应用程序请求对同一查询的多个响应，其中较晚出现的响应比先前的响应更正确。因此，与较早的响应相比，较晚的响应应该对系统状态有更多的了解。在我们的工作中，我们定义了多级约束，它可以通过要求后续强响应看到先前弱响应观察到的效果来模拟增量一致性保证的要求。</p>
+<p>Burckhardt [9]
+提供了一种通用方法，用于在历史、可见性和仲裁顺序方面形式化分布式数据存储的规范，并为一致性标准提供了公理表征。在我们的工作中，我们基于这种形式主义推导出了读写存储的规范。我们调整了这种表征，将一致性标准定义为各个公式的结合。我们的工作在混合历史的定义方面扩展了
+[9]，并为读写存储提供了多级正确性的定义。</p>
+<p>之前已有关于验证行为相对于单个一致性标准的正确性的研究。示例包括
+[7]，它涉及验证相对于最终一致性的正确性；[5]，它研究检查具有顺序规范的一致性标准的并发实现的可行性，包括顺序一致性、线性化和冲突可串行化；[6]，它侧重于因果一致性的正确性。我们的工作提供了一个通用程序，用于检查所有这些单个一致性标准的读写历史的正确性。此外，[6]
+表明，验证历史相对于因果一致性的正确性是
+NP-COMPLETE。但是，对于有区别的历史，该问题可以在多项式时间内解决。在我们的工作中，我们概括了计算最小可见性关系和检查使用我们的语法定义的所有一致性标准是否存在不良模式的技术。在
+[12] 中，作者使用 Mazurkiewicz
+踪迹理论对静态一致性进行建模。他们表明，历史记录的测试问题（他们称之为成员资格问题）是
+NP-COMPLETE。我们无法在我们的框架中建模静态一致性，因为我们无法建模静态点。在
+[14]
+中，作者对根据各种一致性标准测试历史记录正确性的问题进行了详细的复杂性分析。我们的发现与
+[14]
+中关于测试一致性标准的难度的结果一致，该标准要求可见性关系为全序。在最近的一项研究
+[13]
+中，作者提供了一种根据弱一致性标准测试数据存储历史记录正确性的技术。该研究还根据扩展会话顺序（在那里称为程序顺序）和先发生关系（在
+[9]
+中称为先返回关系）的最小可见性关系来描述正确性。我们的工作将这一概念应用于读写存储，我们观察到，通过构建最小可见性关系可以满足可见性约束的正确性，而读写规范和仲裁约束的正确性可以简化为检查是否存在某些不良模式。特别是，我们根据冲突关系对仲裁关系的描述省去了
+[13] 中使用的搜索所有可能的仲裁关系的步骤。</p>
+<p>[16]
+处理红蓝一致性的验证，其中在历史记录中，一部分操作被标记为红色，而其余操作被标记为蓝色。蓝色操作预计会满足较弱的一致性标准，而红色操作则应该满足更强的一致性标准。强操作和弱操作的效果是相互可见的。我们可以通过设置
+<span class="math inline">\(\varphi = \psi^{\write}_{\thru} \land
+\psi^{\read}_{\back}\)</span> 来对此进行建模。</p>
+<p>我们的工作也应该与 [3] 形成对比，[3] 解决了根据 CRDT
+规范检查其一致性的问题，并涵盖了广泛的
+CRDT，包括复制集、标志、计数器、寄存器等。在我们的案例中，相关的数据结构是寄存器，结果是可比的（相对于较弱的一致性标准进行检查是可处理的）。然而，我们在本文中还考虑了具有多个一致性标准的寄存器，而那里没有考虑到这一点</p>
+<p>另一项相关工作是
+[4]，它使用读取关系（在那里称为写入读取关系）来显示测试执行（包含事务）的正确性，这些执行符合各种一致性标准，例如读取已提交
+(RC)、读取原子 (RA)、因果一致性
+(CC)、前缀一致性和快照隔离。当前工作的关键区别在于，我们同时考虑具有多个一致性级别的历史记录，而
+[4] 在单个一致性标准下考虑由事务组成的执行。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/60076/" rel="prev" title="软件安全课程实验-第一题-实验报告">
+      <i class="fa fa-chevron-left"></i> 软件安全课程实验-第一题-实验报告
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/47295/" rel="next" title="并发程序一致性综述">
+      并发程序一致性综述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multilevel-consistency-in-the-wild"><span class="nav-number">2.</span> <span class="nav-text">Multilevel Consistency in
+the Wild</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#read-write-stores-with-strong-and-weak-reads"><span class="nav-number">2.1.</span> <span class="nav-text">Read-Write Stores
+with Strong and Weak Reads</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#formalizing-multilevel-consistency"><span class="nav-number">3.</span> <span class="nav-text">Formalizing Multilevel
+Consistency</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#modelling-multilevel-consistency"><span class="nav-number">3.1.</span> <span class="nav-text">Modelling Multilevel
+Consistency</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#testing-multilevel-correctness-of-a-hybrid-history"><span class="nav-number">4.</span> <span class="nav-text">Testing
+Multilevel Correctness of a Hybrid History</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bad-pattern-characterization-for-multilevel-correctness"><span class="nav-number">4.1.</span> <span class="nav-text">Bad
+Pattern Characterization for Multilevel Correctness</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#constructing-minimal-visibility-relations"><span class="nav-number">4.2.</span> <span class="nav-text">Constructing Minimal
+Visibility Relations</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#complexity"><span class="nav-number">4.3.</span> <span class="nav-text">Complexity</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#related-work"><span class="nav-number">5.</span> <span class="nav-text">Related Work</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">425</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.6m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">39:50</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
