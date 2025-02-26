@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\SER{\mathsf{SER}} \def\PSI{\mathsf{PSI}} \def\SI{\mathsf{SI}} \def\PC{\mathsf{PC}} \def\CC{\mathsf{CC}} \def\RA{\mathsf{RA}} \def\read{\mathtt{read}} \def\write{\mathtt{write}} \def\Event{\mat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="arXiv&#39;25-TxnSails-Achieving Serializable Transaction Scheduling with Self-Adaptive Isolation Level Selection">
+<meta property="og:url" content="https://eaglebear2002.github.io/24617/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\SER{\mathsf{SER}} \def\PSI{\mathsf{PSI}} \def\SI{\mathsf{SI}} \def\PC{\mathsf{PC}} \def\CC{\mathsf{CC}} \def\RA{\mathsf{RA}} \def\read{\mathtt{read}} \def\write{\mathtt{write}} \def\Event{\mat">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/24617/image-20250226095318372.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24617/image-20250226101601365.png">
+<meta property="article:published_time" content="2025-02-23T05:41:00.000Z">
+<meta property="article:modified_time" content="2025-02-26T09:11:08.625Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/24617/image-20250226095318372.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/24617/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>arXiv'25-TxnSails-Achieving Serializable Transaction Scheduling with Self-Adaptive Isolation Level Selection | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">53</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">427</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/24617/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          arXiv'25-TxnSails-Achieving Serializable Transaction Scheduling with Self-Adaptive Isolation Level Selection
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-23 13:41:00" itemprop="dateCreated datePublished" datetime="2025-02-23T13:41:00+08:00">2025-02-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-02-26 17:11:08" itemprop="dateModified" datetime="2025-02-26T17:11:08+08:00">2025-02-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\SER{\mathsf{SER}}
+\def\PSI{\mathsf{PSI}}
+\def\SI{\mathsf{SI}}
+\def\PC{\mathsf{PC}}
+\def\CC{\mathsf{CC}}
+\def\RA{\mathsf{RA}}
+\def\read{\mathtt{read}}
+\def\write{\mathtt{write}}
+\def\Event{\mathsf{Event}}
+\def\Obj{\mathsf{Obj}}
+\def\hist{\mathsf{hist}}
+\def\level{\mathsf{level}}
+\def\before{\mathsf{before}}
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\ww{\mathsf{\textcolor{red}{ww}}}
+\def\rw{\mathsf{\textcolor{blue}{rw}}}
+\def\co{\mathsf{\textcolor{orange}{co}}}
+\def\CO{\mathsf{\textcolor{brown}{CO}}}
+\def\Int{\mathtt{Int}}
+\def\Ext{\mathtt{Ext}}
+\def\Prefix{\mathtt{Prefix}}
+\def\Conflict{\mathtt{Conflict}}
+\def\SerTotal{\mathtt{SerTotal}}
+\def\lthb{\lt_\mathsf{hb}}
+\def\ltar{\lt_\mathsf{ar}}
+\def\ltpo{\lt_\mathsf{po}}
+\def\DDG{\mathsf{DDG}}
+\def\SDG{\mathsf{SDG}}
+\def\I{\mathcal{I}}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>实现可串行化隔离级别，被视为事务处理的黄金标准，但其成本高昂。近期研究表明，通过调整工作负载中的特定查询模式，即使在较低的隔离级别下也能实现可串行化。然而，这些研究通常忽略了较低隔离级别带来的性能优势与维持可串行化所需开销之间的权衡，可能导致隔离级别选择不当，无法最大化性能。本文提出了一种中间层解决方案——TxNSAILS，旨在实现可串行化调度并具备自适应隔离级别选择能力。首先，TxNSAILS
+集成了一种统一的并发控制算法，能够在较低隔离级别下以最小额外开销实现可串行化。其次，TxNSAILS
+采用深度学习方法，刻画较低隔离级别带来的性能收益与开销之间的权衡关系，从而预测最优隔离级别。最后，TxNSAILS
+实现了跨隔离级别的验证机制，确保在实时隔离级别切换过程中维持可串行化。大量实验表明，TxNSAILS
+在性能上优于现有最优解决方案高达 26.7 倍，相较于 PostgreSQL
+的可串行化隔离级别提升高达 4.8 倍。</p>
+<ul>
+<li>Qiyu Zhuang - Renmin University of China, qyzhuang@ruc.edu.cn</li>
+<li>Wei Lu - Renmin University of China, luwei@ruc.edu.cn</li>
+<li>Shuang Liu - Renmin University of China, shuangliu@ruc.edu.cn</li>
+<li>Yuxing Chen - Tencent Inc., yuxingchen@tencent.com</li>
+<li>Xinyue Shi - Renmin University of China, xinyueshi@ruc.edu.cn</li>
+<li>Zhanhao Zhao - Renmin University of China,
+zhanhaozhao@ruc.edu.cn</li>
+<li>Yipeng Sun - Renmin University of China, yipengsun@ruc.edu.cn</li>
+<li>Anqun Pan - Tencent Inc., anqunpan@tencent.com</li>
+<li>Xiaoyong Du - Tencent Inc., xiaoyongdu@tencent.com</li>
+</ul>
+<h2 id="introduction">INTRODUCTION</h2>
+<p>可串行化隔离级别（SER）被认为是事务处理的黄金标准，因为它能够防止所有形式的异常。SER
+在金融领域的银行系统和交通运输领域的空中交通控制系统等关键任务应用中至关重要，这些系统要求其数据
+100% 正确[18]。然而，配置 RDBMS 为 SER
+会带来昂贵的协调开销[45]。尽管有大量研究致力于减轻这一开销[37, 44,
+53]，但保持事务调度的串行顺序仍然是一个基本的性能瓶颈。</p>
+<p>近年来，许多研究通过修改应用程序并将 RDBMS
+配置为较低的隔离级别，探索实现 SER
+的方法[32]。这种方法背后的两个关键原因如下：首先，某些 RDBMS（如 Oracle
+21c）无法严格保证 SER，并且不支持在 RDBMS
+内部修改并发控制，这需要通过修改应用程序逻辑来强制实现
+SER[10]。其次，RDBMS
+在较低隔离级别（如已提交读取（RC）和快照隔离（SI））下通常提供更好的性能，这是由于它们较为宽松的排序要求。在较低隔离级别下修改应用程序以实现
+SER，有时比直接将 RDBMS 设置为 SER 更能提高性能[8, 9, 45]。</p>
+<p>现有能够在低隔离级别下实现 SER 的工作大致遵循以下三步：❶
+通过分析事务模板构建静态依赖图，事务模板是现实应用中事务逻辑的抽象[45,
+46]。在该图中，每个模板由一个顶点表示，模板之间的依赖关系（如写写（WW）、写读（WR）或读写（RW））由边表示。❷
+将 RDBMS
+配置为较低的隔离级别，并根据静态依赖图识别低隔离级别下允许的、但 SER
+却禁止的危险结构。例如，在 SI 下，两个连续的 RW
+依赖关系被认为是危险结构[24, 27]，而在 RC 下，单个 RW
+依赖关系就构成了危险结构[9, 45]。❸
+通过修改应用程序逻辑消除危险结构，例如通过将某些 SQL
+语句的读取操作提升为写入操作，从而消除 RW 依赖关系，进而保证 SER。</p>
+<p>然而，现有研究存在两个主要缺点。首先，静态修改查询模式效率低下。这些研究在应用程序级别修改静态
+SQL
+语句，将某些读取操作转换为写操作，这可能会导致不必要的事务冲突。例如，将读取操作改为写入操作可能会将并发的读写操作转换为写写冲突，在
+MVCC
+系统中显著降低事务性能。其次，这些研究未能解决低隔离级别的性能提升与维持
+SER 所需开销之间的关键权衡，导致难以选择最佳的隔离级别。如第 7 节的图 8
+所示，简单地将 RDBMS 配置为 SER
+有时比其他方法表现更好。此外，随着工作负载的发展，理想的隔离级别也可能发生变化，但现有研究缺乏动态适应的能力。</p>
+<p>本文提出了
+TxnSails，旨在通过自适应隔离级别选择实现可串行化调度，解决上述缺点。TxnSails
+的三个关键目标如下：❶ 在各种低隔离级别下高效实现 SER；❷
+动态调整最佳隔离级别，以最大化工作负载变化下的性能；❸
+设计通用且可适应的方案，适用于各种
+RDBMS，无需修改数据库内核。为了实现这一目标，TxnSails
+作为一个中间层解决方案，提高了通用性。然而，实施 TxnSails
+面临三个主要挑战。首先，设计一种方法，使得在不引入额外写操作的情况下提升各种隔离级别为
+SER
+是一项复杂任务。其次，确定最佳隔离级别需要准确建模低隔离级别带来的性能收益和
+SER
+开销之间的权衡，这在动态工作负载下尤为具有挑战性。第三，随着工作负载的发展，最佳隔离级别可能需要随着时间的推移进行调整，这就要求设计一个高效可靠的机制，在隔离级别之间进行过渡。</p>
+<p>为了解决这些挑战，本文提出了以下关键技术：</p>
+<ol type="1">
+<li><p>高效的中间层并发控制算法，确保每个低隔离级别下的 SER
+(§4.1)。我们提出了一种运行时、细粒度的方法，针对单个事务而非事务模板进行操作，确保事务的执行满足
+SER 的要求。这一方法的灵感来自于一个定理：如果调度中不存在两个事务 Ti 和
+Tj，其中 Tj 在 Ti 之前提交，但存在从 Ti 到 Tj
+的依赖关系，则该调度是可串行化的
+[9]。基于这一定理，我们提出了一种统一的并发控制算法来确保
+SER。该算法跟踪事务及其在静态依赖图中涉及的特定 RW 依赖的模板。</p></li>
+<li><p>自适应隔离级别选择机制
+(§4.2)。我们并非直接通过量化成本模型来平衡低隔离级别带来的性能收益与维持可串行化所需的开销，而是采用了一种利用图神经网络
+[15] 和消息传递技术 [30]
+的学习模型，以预测给定工作负载的最佳隔离级别。我们的观察表明，各种隔离级别的性能与实现
+SER
+的开销密切受两个关键因素的影响：事务之间的数据访问依赖关系和事务内的数据访问分布。为了捕捉这些关系，我们将工作负载特征建模为图，其中顶点表示单个事务特征，边表示事务之间的数据访问依赖关系。基于这一见解，我们提出了一种基于图的动态工作负载模型，利用实时工作负载特征预测最佳隔离级别。据我们所知，TxnSails
+是首个实现动态工作负载自适应隔离级别选择的系统。</p></li>
+<li><p>跨隔离级别验证机制，支持高效过渡和可串行化调度
+(§4.3)。最佳隔离级别应随着工作负载的变化而调整。当 RDBMS
+决定更改隔离级别时，新事务必须在更新后的隔离级别下执行。尽管现有方法在所有事务使用统一的低隔离级别时能够实现
+SER，但当事务在不同隔离级别下运行时，它们无法确保
+SER。这是因为不同的隔离级别可能会引入新的危险结构，这些结构可能违反 SER
+的要求。为了解决这个问题，我们识别了不同隔离级别之间的危险结构，并提出了一种跨隔离级别验证机制，可以在隔离级别过渡过程中防止这些结构的发生，而无需造成显著的系统停机时间。我们在
+§5.2 中证明了跨隔离级别验证机制的正确性。</p></li>
+</ol>
+<p>我们在 SmallBank [8]、TPC-C [4] 和 YCSB+T [21]
+基准上进行了广泛的评估。结果表明，TxnSails
+可以根据动态工作负载自适应地选择最佳隔离级别，取得了比其他最先进的方法高出
+26.7 倍的性能提升，并且比 PostgreSQL 提供的 SER 高出 4.8
+倍的性能提升。</p>
+<h2 id="preliminaries">PRELIMINARIES</h2>
+<h2 id="overview-of-txnsails">OVERVIEW OF TxnSails</h2>
+<p><img src="/24617/image-20250226095318372.png"></p>
+<h2 id="design-of-txnsails">DESIGN OF TxnSails</h2>
+<p>在本节中，我们提供 TXNSails
+的详细设计。我们首先介绍中间阶层并发控制机制，该机制在将 RDBMS
+配置为低隔离水平时，可以实现可序列化的调度（第 4.1
+节）。然后，我们提出一种自适应隔离水平选择方法，该方法可以预测最佳的未来隔离水平（第
+4.2
+节）。最后，我们介绍了交叉隔离验证机制，该机制可确保在隔离水平过渡期间（第
+4.3 节）中可序列化的调度。</p>
+<h3 id="middle-tier-concurrency-control">Middle-tier Concurrency
+Control</h3>
+<p>现有方法通过静态引入其他写作操作来确保低隔离水平的序列化。但是，这些方法降低了并发性并增加开销。为了克服这些局限性，TXNSAILS
+引入了中间阶段并发控制算法，该算法动态验证运行时依赖关系并计划其提交顺序。特别是，TXNSAILS
+仅专注于 Analyzer
+确定的脆弱依赖项，并采用轻巧的验证机制来进一步减轻开销。</p>
+<h4 id="transaction-lifecycle">Transaction lifecycle</h4>
+<p>中层交易的生命周期分为三个阶段：执行，验证和提交阶段。</p>
+<p>（1）在执行阶段，TXNSails
+建立了具有特定隔离级别的数据库连接，直到交易进行或中止交易才能调整。遵循
+RDBMS 事务执行后，TXNSails 将读/写入数据项存储在可能引起脆弱依赖性的线程
+- 本地缓冲区中；</p>
+<p>（2）在验证阶段，TXNSails
+获取了存储在缓冲区中的数据项的验证锁。然后，它检测到它们之间的依赖项，并旨在安排与已确定的依赖顺序一致的提交命令。对验证阶段的更详细说明将在§4.1.2
+中给出；</p>
+<p>（3）在提交阶段，TXNSAILS 将修改应用于数据库，然后释放验证锁。</p>
+<h4 id="validation-phase">Validation phase</h4>
+<p>TXNSAILS 在验证阶段执行两个关键任务：（1）检测脆弱的依赖关系；
+（2）安排与依赖订单一致的提交订单。为了实现这一目标，我们明确地将一个版本列添加到架构中，该模式在每个更新后都会增加。我们通过比较数据项的版本来追踪依赖订单。算法
+1 显示了详细的算法。</p>
+<p><img src="/24617/image-20250226101601365.png"></p>
+<p>对于 RC 和 SI 级别，我们根据定义 6
+中定义的依赖性检测脆弱的依赖项。在验证期间，交易首先请求共享读取集中的项目的锁，并在写入集中的项目中为项目提供了独家锁（第
+2-7 行）。具体而言，在交易 𝑇𝑖
+提交之前，验证阶段是分两个关键步骤进行的：（1）𝑇𝑖
+检查其写入集合中的每个数据项，以确定是否并发交易 𝑇𝑗
+是否正在读取相同的数据项并进行验证。我们通过验证锁来实现这一目标。如果任何锁定请求失败了，则指示存在，将检测到
+RW
+依赖关系。在这种情况下，应将失败的锁定请求附加在相应的锁的候补名单中，使
+𝑇𝑖 等到 𝑇𝑗
+提交，以确保依赖关系和提交订单之间的一致性。如果在验证阶段没有并发交易正在读取同一项目，则
+𝑇𝑖 继续提交并创建一个新的数据版本。</p>
+<p>（2）𝑇𝑖 在其读取集中检查每个数据项，并将线程 -
+本地缓冲区中每个读取项的版本与维护的最新版本（第 10-15
+行）进行比较。如果发现了一个较新的版本，则指示从当前事务到承诺事务的 RW
+依赖性，例如 𝑇𝑗，然后中止 𝑇𝑖 以确保提交和依赖性顺序的一致性（第 16-17
+行）。此外，将本地缓冲区中的数据项版本与 RDBMS
+中的最新版本进行比较，可以在数据库中间件和基础数据库之间引入其他交互，从而在系统和网络资源上施加开销。为了减轻这种负担，TXNSails
+在中层内存中采用了一种缓存机制来存储最新版本的数据项。通过快速检索最新版本，这种方法可大大降低验证开销并提高整体效率。</p>
+<blockquote>
+<p>对于每个 <span class="math inline">\(T_i\)</span>：</p>
+<ol type="1">
+<li>若存在 <span class="math inline">\(T_j \xrightarrow{\rw}
+T_i\)</span>，且 <span class="math inline">\(T_j\)</span> 还未提交，则
+<span class="math inline">\(T_i\)</span> 要等到 <span class="math inline">\(T_j\)</span> 提交后再提交；</li>
+<li>若存在 <span class="math inline">\(T_i \xrightarrow{\rw}
+T_j\)</span>，且 <span class="math inline">\(T_j\)</span> 已经提交，则
+<span class="math inline">\(T_i\)</span> 放弃；</li>
+</ol>
+</blockquote>
+<p>在上述步骤中，我们确保中层中的提交顺序与依赖顺序一致。随后，我们安排与中间层中提交订单一致的
+RDBM
+中的实际提交订单。在检测脆弱的依赖性时，通过中断或阻止交易来实现中层一致性。我们确保仅在数据库中成功提交事务后仅发布验证锁（第
+20-25 行）才能实现 RDBMS
+层的一致性。基于此，如果两个并发交易访问相同的数据项（一个写作和另一个读取或写作），则它们都不能同时输入验证阶段。一项交易必须完成验证并提交另一个交易，并确保
+RDBMS 中正确且一致的提交订单。</p>
+<h4 id="discussion">Discussion</h4>
+<p>为了优化 VLT 中的内存使用量，TXNSails
+结合了一种有效的垃圾收集算法以驱逐冷条目。在 VLT 中访问条目 𝑒
+时，TXNSAILS 更新了
+𝑒。此外，为了防止很少访问的存储桶中的条目无限期地持续存在，背景线程会定期扫描这些长期使用的存储桶并驱逐过时的条目，从而确保整个系统上有效的内存管理。</p>
+<p>我们注意到，带有谓词的范围查询可能可能引入幻影读取异常。对于幻影读取，易受攻击依赖的定义仍然适用，这使
+TXNSAIL
+能够检测并防止这种异常。唯一的区别是，我们需要实现较大的颗粒验证锁，例如间隔或表锁，以启用检测谓词之间的依赖项。由于已经存在的各种粗粒锁定技术，例如
+PostgreSQL 和 GAP 锁[36]中的 Siread
+Locks，我们选择使用这些方法实现粗粒验证锁，并将锁定优化排除在我们的纸上以专注于有效的隔离水平适应。</p>
+<p>在保持可串行化执行顺序（SER）的同时，为工作负载中的所有事务选择最佳的隔离级别是具有挑战性的，因为我们需要在不同隔离级别之间平衡开销和性能收益。受到现有基于神经网络的工作负载预测方法的启发作负载的特征预测未来的最佳隔离级别。主要的挑战在于有效的工作负载特征选择和表示。为此，TxnSails
+采用事务依赖图来捕捉工作负载特征，并采用图分类模型进行自适应隔离级别预测。</p>
+<h3 id="self-adaptive-isolation-level-selection">Self-adaptive Isolation
+Level Selection</h3>
+<h4 id="graph-construction">Graph construction</h4>
+<p>为了提取并发事务的复杂特征，TxnSails
+提出了一种图结构的工作负载模型，包含三个矩阵：顶点矩阵<span class="math inline">\(V\)</span>，边索引矩阵<span class="math inline">\(E\)</span>和边属性矩阵<span class="math inline">\(A\)</span>。正式地，工作负载图定义为<span class="math inline">\(G = (V, E, A)\)</span>，其中<span class="math inline">\(A\)</span>中的每一行表示一个操作符的特征向量，<span class="math inline">\(E\)</span>中的每个元素<span class="math inline">\(e_{ij}\)</span>表示顶点<span class="math inline">\(v_i\)</span>和<span class="math inline">\(v_j\)</span>之间的关系，<span class="math inline">\(A\)</span>中的每一行表示边的特征向量。</p>
+<p>TxnSails
+通过使用蒙特卡罗采样法动态构建运行时工作负载图。每个批次中的事务映射到顶点<span class="math inline">\(v_i\)</span>，并通过提取其读集和写集中的数据项数量来生成其特征向量<span class="math inline">\(V_i\)</span>。对于每一对顶点<span class="math inline">\((v_i,
+v_j)\)</span>，如果它们之间存在数据依赖关系，即它们的读集和写集有交集，TxnSails
+会在边索引矩阵<span class="math inline">\(E\)</span>中加入边项<span class="math inline">\(e_{ij}\)</span>。对于每一条边<span class="math inline">\(e_{ij}\)</span>，TxnSails
+会提取数据依赖关系的类型以及相关的关系来生成其属性<span class="math inline">\(A_{e_{ij}}\)</span>。依赖关系的类型可以是
+RR、RW/WR 或 WW。例如，如果两个事务的写集有交集，那么它们之间就是 WW
+依赖。由于关系和依赖类型的数量是固定的，TxnSails 使用独热编码（One-Hot
+Encoding）来表示这两个特征，并将其存储在属性矩阵<span class="math inline">\(A\)</span>中。</p>
+<h4 id="graph-embedding-and-isolation-prediction">Graph embedding and
+isolation prediction</h4>
+<p>使用构建的图形结构模型
+𝐺=（𝑉，𝐸，𝐴）预测未来工作量的最佳隔离策略，这是由于其复杂的结构以及动态和高维特征而挑战，需要捕获本地和全局依赖性。启发式方法依赖于缺乏普遍性的手动制作的规则，而传统的机器学习模型在利用顶点和边缘编码的关系信息方面缺乏，而失去了关键的结构环境。为了应对这些挑战，我们使用图形分类模型，该模型通过通过基于神经网络的多层卷积汇总节点特征来学习图形表示。</p>
+<h4 id="data-collection-and-labeling">Data collection and labeling</h4>
+<h4 id="data-collection-and-labeling-1">Data collection and
+labeling</h4>
+<h3 id="cross-isolation-validation">Cross-isolation Validation</h3>
+<h3 id="跨隔离级别验证">4.3 跨隔离级别验证</h3>
+<p>如果预测的最佳隔离级别发生变化，TxnSails 将从原有的隔离级别 <span class="math inline">\(I_{old}\)</span> 过渡到最佳隔离级别 <span class="math inline">\(I_{new}\)</span>。我们设计了一种跨隔离级别验证机制，以确保在隔离级别过渡期间依然保持可串行化的调度。</p>
+<blockquote>
+<p>示例 3。图 6 展示了从 SER 过渡到 RC 时的非可串行化调度。在事务 <span class="math inline">\(T_2\)</span> 提交之后，<span class="math inline">\(T_1\)</span> 和 <span class="math inline">\(T_2\)</span> 在 SER 下运行，而 <span class="math inline">\(T_3\)</span> 在 RC 下运行。在这种情况下，预计
+<span class="math inline">\(T_1\)</span> 应该被中止以确保
+SER。然而，现有的 RDBMS 并不处理不同隔离级别下事务之间的依赖关系，允许
+<span class="math inline">\(T_1\)</span>
+成功提交，导致非可串行化的调度。注意，当事务 <span class="math inline">\(T_1\)</span>、<span class="math inline">\(T_2\)</span> 和 <span class="math inline">\(T_3\)</span> 都在 SER 下执行时，RDBMS
+中的并发控制可以防止这种非可串行化调度的发生。</p>
+</blockquote>
+<p>我们需要明确考虑跨隔离级别过渡的情况，以确保在过渡过程中事务执行的正确性。一个简单的解决方法是等待所有事务在原有隔离级别下完成后再进行过渡。在上述示例中，这意味着需要阻塞
+<span class="math inline">\(T_3\)</span> 直到 <span class="math inline">\(T_1\)</span>
+提交。然而，这可能会导致系统停机时间过长，尤其是当存在长时间运行的未提交事务时。另一种方法是中止这些未提交的事务并在过渡后重新执行，这将导致较高的中止率。为减轻这些负面影响，TxnSails
+采用了一种跨隔离级别验证（CIV）机制，确保 SER
+并允许非阻塞的事务执行，同时不会显著增加中止率。具体来说，我们将定义中的单一隔离级别下的脆弱依赖关系扩展为跨隔离级别脆弱依赖关系，定义如下：</p>
+<blockquote>
+<p>定义 7（跨隔离级别脆弱依赖关系）</p>
+<p>跨隔离级别脆弱依赖关系定义为：在链 <span class="math inline">\(T_i
+\xrightarrow{\rw} T_j \xrightarrow{\rw} T_k\)</span>
+中，三个事务可以在两个不同的隔离级别下执行。</p>
+<p>我们扩展定理 2.2 以得到推论 1，并在 §5.2 中证明它。</p>
+</blockquote>
+<blockquote>
+<p>推论 1</p>
+<p>对于任何跨隔离级别脆弱依赖关系 <span class="math inline">\(T_i
+\xrightarrow{\rw} T_j\)</span>，如果 <span class="math inline">\(T_i\)</span> 在 <span class="math inline">\(T_j\)</span>
+之前提交，则在隔离级别过渡期间的事务调度是可串行化的。</p>
+</blockquote>
+<p>基于推论 1，我们通过检测所有跨隔离级别脆弱依赖关系来实现我们的 CIV
+机制，并确保在过渡过程中提交和依赖顺序的一致性。CIV
+机制包括三个步骤：</p>
+<ol type="1">
+<li>当系统从当前隔离级别 <span class="math inline">\(I_{old}\)</span>
+过渡到最佳隔离级别 <span class="math inline">\(I_{new}\)</span>
+时，首先阻止新的事务进入验证阶段，直到所有在过渡前已经进入验证阶段的事务提交或中止。重要的是，我们仅阻止事务进入验证阶段，事务可以正常执行而不受阻塞。</li>
+<li>完成执行阶段的事务进入跨隔离级别验证阶段。在跨隔离级别验证阶段，事务根据
+<span class="math inline">\(I_{old}\)</span> 或 <span class="math inline">\(I_{new}\)</span>
+的验证锁定方法请求验证锁，以确保可以检测到所有跨隔离级别脆弱依赖关系。例如，当从
+SI 过渡到 RC 时，处于跨隔离级别验证阶段的事务将按 RC
+的验证锁定方法请求验证锁，无论其原先执行的隔离级别是 SI 还是 RC。</li>
+<li>在获取验证锁之后，事务 <span class="math inline">\(T_i\)</span>
+首先检测其原隔离级别的脆弱依赖关系。然后，它通过检查是否有已提交事务修改了其读集（使用
+§4.1.2
+中的相同检测方法）来检测跨隔离级别脆弱依赖关系。如果检测到这样的修改，<span class="math inline">\(T_i\)</span>
+将被中止，以确保提交和依赖顺序的一致性。</li>
+</ol>
+<p>一旦所有在 <span class="math inline">\(I_{old}\)</span>
+下执行的事务都提交或中止，过渡过程就结束。之后，事务不再需要经过跨隔离级别验证。</p>
+<p>具体来说，我们可以证明，在 RC 和 SI
+之间的过渡是可串行化的，只要它们按照 §4.1
+中描述的并发控制方式执行（详细证明见 §5.2）。</p>
+<h2 id="serializability-and-recovery">SERIALIZABILITY AND RECOVERY</h2>
+<p>在本节中，我们首先证明了TXNSAILS在单个隔离级别和跨隔离级别类别中分别在第5.1和§5.2节中的序列化。最后，我们介绍了第5.3节中的失败恢复策略。</p>
+<h3 id="serializability-under-low-isolation-levels">Serializability
+under Low Isolation Levels</h3>
+<h3 id="serializability-under-cross-isolation-levels">Serializability
+under Cross-isolation Levels</h3>
+<h3 id="failure-recovery">Failure Recovery</h3>
+<h2 id="implementation">IMPLEMENTATION</h2>
+<h2 id="evaluations">EVALUATIONS</h2>
+<h2 id="related-work">RELATED WORK</h2>
+<h2 id="conclusion">CONCLUSION</h2>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/22286/" rel="prev" title="arXiv'25-Using Read Promotion and Mixed Isolation Levels for Performant">
+      <i class="fa fa-chevron-left"></i> arXiv'25-Using Read Promotion and Mixed Isolation Levels for Performant
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/22651/" rel="next" title="AI 职业替代风险评估矩阵">
+      AI 职业替代风险评估矩阵 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#preliminaries"><span class="nav-number">2.</span> <span class="nav-text">PRELIMINARIES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#overview-of-txnsails"><span class="nav-number">3.</span> <span class="nav-text">OVERVIEW OF TxnSails</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#design-of-txnsails"><span class="nav-number">4.</span> <span class="nav-text">DESIGN OF TxnSails</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#middle-tier-concurrency-control"><span class="nav-number">4.1.</span> <span class="nav-text">Middle-tier Concurrency
+Control</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#transaction-lifecycle"><span class="nav-number">4.1.1.</span> <span class="nav-text">Transaction lifecycle</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#validation-phase"><span class="nav-number">4.1.2.</span> <span class="nav-text">Validation phase</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#discussion"><span class="nav-number">4.1.3.</span> <span class="nav-text">Discussion</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#self-adaptive-isolation-level-selection"><span class="nav-number">4.2.</span> <span class="nav-text">Self-adaptive Isolation
+Level Selection</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#graph-construction"><span class="nav-number">4.2.1.</span> <span class="nav-text">Graph construction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#graph-embedding-and-isolation-prediction"><span class="nav-number">4.2.2.</span> <span class="nav-text">Graph embedding and
+isolation prediction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#data-collection-and-labeling"><span class="nav-number">4.2.3.</span> <span class="nav-text">Data collection and labeling</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#data-collection-and-labeling-1"><span class="nav-number">4.2.4.</span> <span class="nav-text">Data collection and
+labeling</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cross-isolation-validation"><span class="nav-number">4.3.</span> <span class="nav-text">Cross-isolation Validation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E9%AA%8C%E8%AF%81"><span class="nav-number">4.4.</span> <span class="nav-text">4.3 跨隔离级别验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#serializability-and-recovery"><span class="nav-number">5.</span> <span class="nav-text">SERIALIZABILITY AND RECOVERY</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#serializability-under-low-isolation-levels"><span class="nav-number">5.1.</span> <span class="nav-text">Serializability
+under Low Isolation Levels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#serializability-under-cross-isolation-levels"><span class="nav-number">5.2.</span> <span class="nav-text">Serializability
+under Cross-isolation Levels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#failure-recovery"><span class="nav-number">5.3.</span> <span class="nav-text">Failure Recovery</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#implementation"><span class="nav-number">6.</span> <span class="nav-text">IMPLEMENTATION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#evaluations"><span class="nav-number">7.</span> <span class="nav-text">EVALUATIONS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#related-work"><span class="nav-number">8.</span> <span class="nav-text">RELATED WORK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conclusion"><span class="nav-number">9.</span> <span class="nav-text">CONCLUSION</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">427</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.6m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:03</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
