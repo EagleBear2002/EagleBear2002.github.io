@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\assert{\mathsf{assert}} \def\assume{\mathsf{assume}} \def\cmted{\mathsf{cmted}} \def\do{\mathsf{do}} \def\done{\mathsf{done}} \def\false{\mathsf{false}} \def\for{\mathsf{for}} \def\foreach{\ma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="POPL&#39;19-Pretend Synchrony-Synchronous Verification of Asynchronous Distributed Programs">
+<meta property="og:url" content="https://eaglebear2002.github.io/18209/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\assert{\mathsf{assert}} \def\assume{\mathsf{assume}} \def\cmted{\mathsf{cmted}} \def\do{\mathsf{do}} \def\done{\mathsf{done}} \def\false{\mathsf{false}} \def\for{\mathsf{for}} \def\foreach{\ma">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220801223608351.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220801223626368.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220802091335620.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803100234539.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803113521453.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803113825735.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803160714439.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803160807098.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803160945731.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18209/image-20220803230648158.png">
+<meta property="article:published_time" content="2022-07-10T13:49:55.000Z">
+<meta property="article:modified_time" content="2025-03-07T08:09:42.612Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18209/image-20220801223608351.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18209/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>POPL'19-Pretend Synchrony-Synchronous Verification of Asynchronous Distributed Programs | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">54</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">430</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18209/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          POPL'19-Pretend Synchrony-Synchronous Verification of Asynchronous Distributed Programs
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-07-10 21:49:55" itemprop="dateCreated datePublished" datetime="2022-07-10T21:49:55+08:00">2022-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-03-07 16:09:42" itemprop="dateModified" datetime="2025-03-07T16:09:42+08:00">2025-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/" itemprop="url" rel="index"><span itemprop="name">分布式系统共识</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\assert{\mathsf{assert}}
+\def\assume{\mathsf{assume}}
+\def\cmted{\mathsf{cmted}}
+\def\do{\mathsf{do}}
+\def\done{\mathsf{done}}
+\def\false{\mathsf{false}}
+\def\for{\mathsf{for}}
+\def\foreach{\mathsf{foreach}}
+\def\Just{\mathsf{Just}}
+\def\MsgType{\mathsf{MsgType}}
+\def\recv{\mathsf{recv}}
+\def\recvTO{\mathsf{recvTO}}
+\def\repeat{\mathsf{repeat}}
+\def\rounds{\mathsf{rounds}}
+\def\send{\mathsf{send}}
+\def\skip{\mathsf{skip}}
+\def\true{\mathsf{true}}
+\def\val{\mathsf{val}}
+\def\Values{\mathsf{Values}}
+\def\value{\mathsf{value}}
+\def\pick{\mathsf{pick}}
+\def\prop{\mathsf{prop}}
+\def\Goolong{\mathsf{Goolong}}
+\def\IceT{\mathsf{IceT}}
+\def\Int{\mathsf{Int}}
+\def\Round{\mathsf{Round}}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>我们提出了假装同步（pretend
+synchrony），这是一种验证分布式系统的新方法，基于这样的观察：虽然分布式程序必须异步执行，但在验证它们的正确性时，我们通常可以将它们视为同步的。为此，我们计算了一个同步（synchronization），一个在语义上等效的程序，其中所有发送、接收和消息缓冲区都被简单的赋值取代，产生了一个可以使用
+Floyd-Hoare 风格的验证条件和 SMT
+进行验证的程序。我们实现了我们的方法作为在 Go
+中编写经过验证的分布式程序的框架，并通过四个具有挑战性的案例研究对其进行评估——经典的两阶段提交、Raft
+领导者选举协议、单法令 Paxos 协议和基于 Multi-Paxos
+的分布式键值存储。我们发现假装同步允许我们开发高性能系统，同时通过将手动指定的不变量减少
+6
+倍来使功能正确性的验证更简单，并通过将检查时间减少三个数量级使之更快。</p>
+<h2 id="导论">导论</h2>
+<p>异步分布式系统很难做到正确。网络延迟、执行时间的变化和消息丢失可能会触发程序员既不打算也不预期的行为。为了消除这种微妙的错误来源，程序员煞费苦心地构建工作负载和压力测试来调整相关的时间表。这些努力注定会失败。由于无界数据域和程序经常参数化的事实，即参与节点的数量在编译时是未知的，可能的调度数量是无限的，确保测试充其量只是触及所有可能行为的表面。确保正确性的更原则性方法是通过数学证明正式验证它们的预期属性。然而，验证说起来容易做起来难。由于通信的异步（asynchronous）特性，程序员必须向证明者提供不变量，这些不变量通过在所有参与者的联合状态上拆分案例来明确枚举可能的调度。这样的不变量很复杂，很难预测。更糟糕的是，异步不变量必须对（无界）消息缓冲区的内容进行推理，这使得甚至无法确定候选不变量的正确性。</p>
+<p><strong><em>Lipton 简化</em></strong>（Lipton's
+reduction）为驯服异步提供了一条诱人的途径。
+直观地说，它为将每个接收移动（moving）到其匹配的发送操作提供了基础，从而将这对异步操作融合到一个同步分配中（assignment）。
+几位作者已经探索了如何使用这个想法来简化推理，例如关于原子性以允许共享内存程序的正确性证明，并推理消息传递系统中的死锁。
+不幸的是，一些具有挑战性的问题共同阻碍了简化的应用，特别是在分布式环境中融合发送和接收。</p>
+<ol type="1">
+<li><strong>广播</strong>（Broadcasts）：我们必须考虑广播到其他进程集并因此从其他进程集接收的进程集。例如，像
+Paxos 或 Raft
+这样的系统有一组提议者广播到一组接受者。这些广播打败了简化：当实际顺序取决于运行时的不同交错时，我们如何将发送集融合到接收集？</li>
+<li><strong>丢弃</strong>（Drop）：我们必须考虑到消息在网络上被丢弃，或者等效地，延迟任意长时间。这些丢弃阻止了简化：我们如何将接收与发送融合，其有效负载甚至可能无法通过网络？</li>
+<li><strong>轮次</strong>（Rounds）：最后，分布式执行通常在概念上构造为多轮执行的迭代。例如，我们可能在领导者选举协议中有多个轮次（或投票），或者由分布式存储中的后续密钥查找触发的不同轮次通信。这些轮次阻碍了简化：即使实际上可能会收到延迟消息并干扰未来的轮次，我们如何才能仅在一轮内融合发送和接收？</li>
+</ol>
+<p>我们的关键见解是，通过仔细的语言设计，我们可以确保惯用且高效的分布式程序具有足够的语义结构以实现简化，从而简化形式验证。
+尤其是，</p>
+<ol type="1">
+<li>对称进程标识符足以命名组成参与广播的集合的各个进程。我们可以通过使用标量集数据类型来明确对称性，它只允许进程标识符之间的相等比较。至关重要的是，即使广播可能以不同的顺序接收，对称性确保了这些顺序是等效的，以进程标识符的排列为模，从而允许我们通过标准的聚焦和模糊（或实例化和概括）操作来减少多进程广播抽象解释理论。</li>
+<li>Scala Actors 或 Go
+中的类型化通道有助于确保在任何时候，一个进程都在期待单一类型的消息，并且在一对进程之间最多有一个给定类型的消息。我们观察到这个属性让我们可以将消息丢弃简单地视为返回
+None 消息的超时接收操作。这直接让我们合理地减少了对 Maybe
+消息分配的发送和接收。</li>
+<li>轮标识符允许我们在程序语法中明确轮的概念，特别是将重复计算构造为对无限轮集的迭代。</li>
+</ol>
+<p>然后，我们可以使用这种结构来定义称为轮非干扰的独立概念，该概念受循环并行化的经典工作的启发，直观地确保不同的轮是通信封闭的。
+这允许我们利用轮次的对称性来简化在所有轮次上证明一个断言的问题，从而在一个任意选择的轮次上证明该断言，这可以使用
+Lipton 的简化来完成。</p>
+<ul>
+<li>库：我们的第一个贡献是程序员可以用来实现异步分布式系统的类型和通信原语库。我们库的设计确保将通信结构化为类型化的通道，即使在存在消息丢失、广播和多轮交互的情况下也能减少通信—现实世界分布式系统的基本特征（第
+3 节）。</li>
+<li>编译器：我们的第二个贡献是将程序编译成它们的同步的算法。我们将该编译器构建为一组本地重写规则，每个规则都将输入程序转换为一个新程序，包括一个同步的前缀和一个仍需要重写的后缀。至关重要的是，我们引入了新颖的重写规则，该规则利用我们的库所解释的通信结构，在存在消息丢失、广播和多轮通信的情况下实现语法指导的减少。我们确定了一类称为分层成对通信协议
+(SPCP)
+的程序，编译器对其是完整的，即编译器保证计算同步，如果存在同步（第 4
+节）。</li>
+<li>验证器：我们的第三个贡献是展示如何使用同步作为验证的基础。我们证明了每次重写都保留了程序的停止状态的稳健性结果（定理
+4.4）。然后，我们实现了一个验证器，它以语法指导的方式遍历同步程序，以组合代码和断言以发出
+Owickie-Gries 样式验证条件，其有效性—通过
+SMT—与健全性结果一起确定，意味着原始来源的正确性（第 6 节）。</li>
+<li>评估：我们的最后贡献是假装同步作为 <span class="math inline">\(\Goolong\)</span> 的实现：一个用 Go
+编写经过验证的分布式程序的框架。我们使用 <span class="math inline">\(\Goolong\)</span>
+开发了四个案例研究：经典的两阶段提交协议、Raft 领导者选举协议、单法令
+Paxos 协议和基于 Multi-Paxos
+的分布式键值存储。为了证明我们的库允许惯用的实现，我们在 Multi-Paxos
+上构建了一个键值对存储，并展示了它的性能以与其他实现竞争。为了证明我们的同步编译器有助于正确性验证，我们展示了所有这些协议都具有简单直观的同步不变量，<span class="math inline">\(\Goolong\)</span>
+会自动检查。为了证明假装同步简化了验证，我们还在 Dafny
+中实现了除键值存储之外的所有案例研究，并使用最先进的 IronFleet
+使用的经典方法来验证它们系统。我们发现假装同步将手动指定的不变量注释的数量减少了
+6 倍。根据我们的经验，事实证明，由 <span class="math inline">\(\Goolong\)</span> 验证的同步断言对于确定 Dafny
+验证所需的许多异步不变量至关重要。此外，通过避免复杂的量化不变量（在消息缓冲区的内容上），假装同步将检查程序所需的时间缩短了三个数量级，从使用
+Dafny 的 20 多分钟到不到 2 秒（第 7 节）。</li>
+</ul>
+<h2 id="概述">概述</h2>
+<p>我们首先在高层次上激发假装同步，然后展示一系列小例子来说明其基本成分。</p>
+<p><strong><em>网络和故障模型</em></strong>：我们的正式开发和基准测试假设网络中的消息可能会被任意丢弃或重新排序。
+我们通过非阻塞接收对此类消息进行建模，这些接收可以不确定地超时并返回
+None 值。
+此外，我们假设一个标准的崩溃恢复失败模型，其中一个进程可能会崩溃，但该进程必须将其状态保存在持久存储中，并从该持久状态恢复执行，或者保持沉默。静默相当于所有进程消息被网络丢弃。但是，为了简化本概述中的演示，我们将假设所有接收都是阻塞的，并且消息不能被丢弃，但可以任意重新排序。</p>
+<h3 id="动机假装同步">动机：假装同步</h3>
+<h4 id="两阶段提交">两阶段提交</h4>
+<p>图 1 和图 2 显示了经典的两阶段提交 (2PC) 协议。在该协议中，协调节点 c
+尝试将值提交给多个数据库节点 db。我们使用 <span class="math inline">\([P]_p\)</span> 表示单个进程 <span class="math inline">\(p\)</span> 执行程序 <span class="math inline">\(P\)</span> 和 <span class="math inline">\(\Pi_{(p∈ps)}[P]_p\)</span> 表示 <span class="math inline">\(P\)</span> 由一组进程 <span class="math inline">\(ps\)</span> 执行。我们使用 $$
+表示并行合成，并假设最初 cmted 和 abort 都设置为
+false。该协议由两轮组成。在第一轮中，如图 1
+所示，协调者遍历所有节点，向它们发送提案值。然后每个数据库节点不确定地选择提交或中止事务并将其选择发送给协调者。如果至少有一个节点选择中止，则协调者通过设置适当的标志来中止整个事务。在协议的第二轮中，协调者将其提交或中止的决定广播给数据库节点，数据库节点会回复确认。最后，如果协调者决定提交事务，每个数据库节点将其值设置为先前收到的提案。</p>
+<figure>
+<img src="/18209/image-20220801223608351.png" alt="图 1.两阶段提交：第一轮每个 for 循环都用不变量 I_1 进行注释。我们使用 _ 来表示不相关的变量">
+<figcaption aria-hidden="true">图 1.两阶段提交：第一轮每个 for
+循环都用不变量 I_1 进行注释。我们使用 _ 来表示不相关的变量</figcaption>
+</figure>
+<figure>
+<img src="/18209/image-20220801223626368.png" alt="图 2. 两阶段提交：第二轮">
+<figcaption aria-hidden="true">图 2. 两阶段提交：第二轮</figcaption>
+</figure>
+<h4 id="正确性">正确性</h4>
+<p>为了证明我们实现 2PC
+的正确性，我们想证明，如果协议完成并且协调者决定提交事务，则所有数据库节点确实选择了提议的值，即，在协议之后必须满足以下条件：</p>
+<p><span class="math display">\[
+\forall p \in db : c.cmted = true \Rightarrow p.value = c.prop
+\]</span></p>
+<h4 id="异步不变量很复杂">异步不变量很复杂</h4>
+<p>让我们首先考虑如何在异步设置中证明此属性。考虑图 1
+中协调者的第一个循环，让 done 表示到目前为止已在位置 (1a)
+执行发送的所有数据库节点的集合。为了排除消息出现在“稀薄的空气”中，我们需要断言只要
+<span class="math inline">\(p \notin \done\)</span>，那么就没有从 c 到 p
+的消息，并且 p 还没有在位置 (1b) 执行相应的接收。如果，<span class="math inline">\(p \in
+\done\)</span>，由于通信的异步性质，我们需要对 p
+的位置进行分类讨论（case split）。要么，</p>
+<ol type="1">
+<li>有一条从 c 到 p 的正在进行的消息，其中包含 c 的进程 id
+和提案值，并且 p 正在等待接收消息（已发送，但未接收）</li>
+<li>p 收到 c 的消息，将其 val 变量设置为 prop
+并决定要么提交或中止事务，但尚未响应（已接收并决策，但未响应）</li>
+<li>p 响应，将其决定转发给 c（已响应）</li>
+</ol>
+<p>对于图 1 中 c 的第二个循环，我们需要一个类似的分情况讨论：如果 <span class="math inline">\(p \notin \done\)</span> 那么要么</p>
+<ol type="1">
+<li>有一条从 c 到 p 的未决消息包含 c 的进程 id 和提议（已发送）</li>
+<li>p 已选择提交或中止但没有尚未发送响应（已接收并决策，但未响应）</li>
+<li>p 已发送包含提交或中止消息的响应</li>
+</ol>
+<p>最后，如果 <span class="math inline">\(p \in \done\)</span>，则 p
+必须完成协议的第一部分，并且 val 必须设置为 c
+的提议。协议第二部分的不变量由类似的案分类讨论组成。</p>
+<h4 id="异步使验证无法确定">异步使验证无法确定</h4>
+<p>虽然避免这种分类讨论——在协调者、数据库节点和消息缓冲区的联合状态上——本身是可取的，但在异步设置中证明正确性还有一个更基本的问题：直接包含消息通过将其建模为数组来缓冲到系统状态需要嵌套数组读取，这使得即使检查候选不变量也无法确定异步使验证无法确定虽然避免这种情况分裂——在协调者、数据库节点和消息缓冲区的联合状态上——本身是可取的，但在异步设置中证明正确性还有一个更基本的问题：通过将消息缓冲区建模为数组来直接将消息缓冲区包含到系统状态中需要嵌套数组读取，这使得甚至检查候选不变量也无法确定。</p>
+<h4 id="假装同步">假装同步</h4>
+<p>在本文中，我们确定了一种建立在以下观察基础上的新方法：即使程序在执行时表现得异步，我们可以在推理程序时完全假装通信是同步的。例如，考虑图
+1 中标记为 (1a) 的发送，并假设在当前迭代协调者 c 发送到某个进程
+p。由于在我们的执行模型中，消息由通过网络发送的值的类型来索引，因此消息只能在单个接收（single
+receive）时接收，即在图 1 中标记为 (1b) 的位置处的接收（图 2
+中的接收需要一个 Decision 类型的值）。此外，发送不会干扰 c 和 db
+中其他进程之间的所有发送。因此，在不影响我们正确性属性的有效性的情况下，我们可以通过
+Lipton 的推动者理论 [Lipton 1975]，假装提案在发送后直接被接收。对于图 1
+中位置 (2a) 处的 p 发送，可以进行类似的论证。即使 p
+的发送匹配多个接收（即，在 p 的循环中位置 (2b) 处的任何接收），由为 a
+选择特定获胜者所产生的状态给定的迭代是对称的，即，是等效的模数过程标识符的排列。因此，只要我们保留所有可能的迭代顺序，我们就可以在不影响正确性的情况下匹配发送和接收。</p>
+<h4 id="同步不变量很简单">同步不变量很简单</h4>
+<figure>
+<img src="/18209/image-20220802091335620.png" alt="图 3.两阶段提交的同步">
+<figcaption aria-hidden="true">图 3.两阶段提交的同步</figcaption>
+</figure>
+<p>我们的方法通过以下方式利用了这种洞察力：用户不是为异步程序编写不变量，而是像程序是同步的一样编写不变量，有效地将匹配的发送和接收对视为赋值。同步不变量作为
+for 循环的注释给出。再次考虑图 1。对于第一个循环，我们需要以下不变量
+<span class="math inline">\(I_1\)</span> 说明，如果循环是为某个进程 p
+执行的（由 <span class="math inline">\(p \in \done\)</span> 表示，其中
+done 是一个辅助变量，指的是已经执行的 p 的集合循环），那么 p
+一定已经被分配了 c 的提议值。</p>
+<p><span class="math display">\[
+I_1 \triangleq \lambda \; done. \forall p. p \in \done \Rightarrow
+p.\val = c.\prop
+\]</span></p>
+<p>不变量 <span class="math inline">\(I_2\)</span> 和 <span class="math inline">\(I_3\)</span> 是微不足道的（即，与 <span class="math inline">\(I_1\)</span>
+相同），因为各自的循环不修改任何相关值，并且不需要由用户提供。
+最后，不变量 <span class="math inline">\(I_4\)</span> 表明，每当为进程 p
+执行循环时，进程 p 的 value 变量必须设置为它在第一轮收到的提议。</p>
+<p><span class="math display">\[
+I_4 \triangleq \lambda \; done. \forall p.
+\begin{pmatrix}
+p \in done \wedge \\ c.\cmted = \true
+\end{pmatrix}
+\Rightarrow p.\value = p.\val
+\]</span></p>
+<p>总之，这些简单的同步不变量没有考虑到异步所需的分类讨论，足以证明 2PC
+的正确性。</p>
+<h4 id="检查同步不变量">检查同步不变量</h4>
+<p>我们分两步验证同步不变量的正确性。首先，我们计算同步（synchronization）；一个语义等价的同步程序，通过迭代地应用一组重写规则（第
+4 节）。其次，我们使用 synchronization
+来生成和检查验证条件，以确保所提供的不变量是归纳的、无干扰的并且暗示了所需的正确性属性（第
+6
+节）。在第一步中，我们的实现完全自动地计算这种同步，而不依赖于用户提供的不变量。每个重写步骤都会生成一个新程序，其中包含一个同步的前缀和一个仍需要重写的后缀。重复此过程，直到后缀减少为
+skip。图 3 显示了 <span class="math inline">\(\Goolong\)</span> 为 2PC
+计算的 synchronization。直观地说，同步版本匹配图 1 和图 2
+中的连接块。在同步版本中，所有协议步骤一个接一个地执行：首先，协调器将其提案分配给所有数据库节点；然后，每个节点决定提交或中止；然后，协调器将其决定分配给每个数据库节点，最后，每个节点分配建议的值以防协调器决定提交。在第二步中，<span class="math inline">\(\Goolong\)</span>
+使用同步和用户提供的不变量来计算确保程序满足所有断言的验证条件。 <span class="math inline">\(\Goolong\)</span> 通过将验证条件排放到 SMT
+求解器来检查验证条件。重要的是，同步设置中检查不变量的验证条件落入数组中属性片段，因此，检查不变量是可确定的。</p>
+<h3 id="主要观点">主要观点</h3>
+<p>我们现在讨论假装同步背后的主要成分，并说明它们如何实现异步分布式程序的同步验证。</p>
+<h4 id="ex-1简化">Ex 1：简化</h4>
+<figure>
+<img src="/18209/image-20220803100234539.png" alt="图 4.Ex1 ping 广播：简化">
+<figcaption aria-hidden="true">图 4.Ex1 ping 广播：简化</figcaption>
+</figure>
+<p>将程序视为同步进行推理大大简化了验证，但是我们什么时候可以在不影响我们要验证的正确性属性的有效性的情况下同步程序呢？如果我们限制自己证明有关停止状态的属性，那么对于给定的跟踪，我们总是可以通过
+Lipton 的减少理论将发送移动到匹配的接收，从而使发送完全同步。考虑图 4a
+中所示的示例 Ex1。进程 p 在一组静态无界进程 qs 上循环。对于 qs
+中的每个进程 q，p 发送一个 ping 消息并等待 q 的确认。 qs
+中的每个进程都等待接收一个值，将该值分配给
+v，最后以一个确认应答。我们想证明，在终止后，qs 中的所有进程都将其变量 v
+设置为 ping，即我们希望 ∀q ∈ qs : q.v = ping
+在终止时保持不变。为此，我们首先注意到，对于每个 q ∈ qs，q
+的接收只能与单个发送（p
+中的那个）匹配。此外，我们要证明的属性并不涉及中间程序状态，例如消息缓冲区的内容。因此，我们可以通过将发送和接收对转换为赋值，将程序完全重写为更简单的同步版本。对
+q 的发送和 p 的接收执行类似的步骤会产生图 4
+所示的同步程序。然后，以下不变量证明了预期的属性。这个不变量表明，每当循环遍历一个进程时，它的
+v 变量就会被设置为 ping。</p>
+<p><span class="math display">\[
+I_5 \triangleq \lambda \; done. \forall q. q \in \done \Rightarrow q.v =
+ping
+\]</span></p>
+<p>请注意，如果我们要验证原始异步程序，这个简单的不变量是不够的；
+相反，我们必须对是否已收到消息进行区分大小写，并维护消息缓冲区的不变量（即，从
+p 到 qs 中的进程的所有消息都包含值 ping）。</p>
+<h4 id="ex-2对称">Ex 2：对称</h4>
+<figure>
+<img src="/18209/image-20220803113521453.png" alt="图 5.Ex2 拆分 ping 广播：对称">
+<figcaption aria-hidden="true">图 5.Ex2 拆分 ping
+广播：对称</figcaption>
+</figure>
+<p>我们可以将发送向上移动到它的匹配接收，不仅如果在所有程序跟踪中都存在唯一匹配接收，而且如果所有匹配接收都是对称的，即从选择特定接收产生的状态等同于排列进程
+ID [Norris IP 和 Dill 1996]。考虑图 5a 中的 Ex2。进程 p，首先向 q
+中的所有进程发送 ping
+消息，然后在第二个循环中等待它们的确认。和前面的例子一样，我们想证明，在终止时，qs
+中的所有进程都将它们的 v 变量设置为 ping。为此，考虑过程 p
+的第一个循环。与前面的示例一样，p 向位置 (1a) 的某个进程 q
+的发送只能在一次接收时接收，即在位置 (1b) 的进程 q
+的接收。因此，我们可以将原始的异步程序重写为图 5b
+中的中间程序。该中间程序由对应于第一循环的同步的同步前缀和待同步的余数组成。</p>
+<p>接下来，考虑 p 的第二个循环。对于给定的循环迭代，p 在位置 (2b)
+的接收可以从位置 (2a) 的 qs
+中的进程的多个发送接收。但是，所有发送都是对称的。也就是说，进程运行相同的代码，但进程
+ID 不同，因此，为每次迭代选择任意获胜者会导致相同的最终状态。这产生了图
+5c 所示的同步程序。尽管 Ex2 结构的通信方式与 Ex1
+不同，但同步正确性证明不受影响。因此，我们可以重用相同的不变量，即 I5
+来证明所需的正确性。</p>
+<h4 id="ex-3组播">Ex 3：组播</h4>
+<figure>
+<img src="/18209/image-20220803113825735.png" alt="图 6.Ex3 ping 组播">
+<figcaption aria-hidden="true">图 6.Ex3 ping 组播</figcaption>
+</figure>
+<p>不幸的是，简化和对称本身不足以验证真实的分布式系统。考虑图 6a 中的
+Ex3，它是 Paxos 协议 [Lamport 2001] 的“提议”阶段的简化。这里，一组进程
+ps 正在与一组进程 qs 进行通信。 ps 中的每个进程 p 循环 qs
+中的所有进程。对于 qs 中的每个进程 q，p 发送一个由它自己的进程标识符和值
+ping 组成的对。类似地，qs 中的每个进程 q 循环遍历 ps
+中的所有进程。在每次迭代中，q 从 ps 中的某个进程接收一个 id 和一个值
+v，然后向该 id
+发送一个确认。和前面的例子一样，我们想证明，在程序执行后，qs
+中的每个进程都将其局部变量 v 设置为值
+ping。不幸的是，我们不能直接应用上一个例子的推理，因为 Ex3
+中的比赛不是对称的！例如，考虑在位置 (b) 接收 qs 中的某个进程
+q。对于给定的循环迭代，进程 q 可以从位置 (a) 处的 ps
+中的所有进程接收，但是，这些进程可能处于不同的循环迭代中，因此，一般来说，选择另一个可能会导致不同的结果。为了克服这一困境，我们将注意力集中在
+ps 中的单个过程与 qs
+中的过程的任意迭代之间的交互。即使整个系统存在非对称竞争，p
+中的单个进程和 qs 中的所有进程之间的每次交互都是对称的。因此，我们说 Ex3
+的竞争几乎是对称的，并通过以下方式利用这一洞察力：为了计算整个系统的同步，同步
+ps 中的单个进程与所有进程 qs
+之间的交互就足够了，然后并行重复单个交互，对 ps
+中的每个进程执行一次。重要的是，与前面的示例相比，同步不再是顺序程序，而是进程
+ps 上的并行组合。图 6b 显示了单个进程 u ∈ ps 与 qs
+中每个进程的任意迭代之间的交互。由于这种交互与 Ex2
+中的相同，我们获得了图 6c 中所示的整体同步，其中我们使用⟨P⟩ 表示 P
+是原子执行的。最后，我们注意到，尽管通信模式要复杂得多，但仍可以通过简单的同步不变
+I5 证明预期的属性。</p>
+<h4 id="ex-4消息丢失">Ex 4：消息丢失</h4>
+<figure>
+<img src="/18209/image-20220803160714439.png" alt="图 7. Ex4 ping 超时">
+<figcaption aria-hidden="true">图 7. Ex4 ping 超时</figcaption>
+</figure>
+<p>验证分布式系统的一个关键困难是消息可以被网络丢弃。在这样的设置中，接收必须能够超时以避免无限期地等待丢失的消息。但是，由于无法判断消息是否实际上已被丢弃，或者只是延迟，这会产生接收陈旧消息的可能性（即那些用于较早接收但过早超时的消息）。因此，异步设置中的正确性证明必须表明陈旧的消息不会影响所需的属性。假装同步的语言限制了以下通信不变量，这使得对消息丢失的推理变得容易：在任何给定时刻，一个进程需要单一类型的消息，并且在给定进程对之间最多有一个给定类型的消息，即，每个可能的发件人只有一个匹配的消息。鉴于此限制，我们可以将接收与超时同步，该接收期望来自某个固定的其他进程的消息，而不必担心在同一通道上接收到陈旧的消息，但是，我们不是立即分配接收到的值，而是区分是否消息已被删除。我们可以通过调用对称推理将这种推理推广到我们期望来自一组进程的消息的情况，就像以前一样。考虑图
+7 中的示例 Ex4，其中进程 p 向集合 qs 中的每个进程发送 ping 消息。 qs
+中的每个进程都使用非阻塞接收来等待消息。这个接收或者将接收到的值分配给一个可能类型的
+Just 给变量 v，或者不确定地超时，在这种情况下它分配 None。图 7b 显示了
+Ex4 的同步：同步循环 qs 中的所有进程，并将 ping 分配给 q 的局部变量
+v，或者 p 不确定地将 Just Ack 或 None 分配给 w。</p>
+<h4 id="ex-5多轮">Ex 5：多轮</h4>
+<figure>
+<img src="/18209/image-20220803160807098.png" alt="图 8.Ex5：Ex1 的多轮版本">
+<figcaption aria-hidden="true">图 8.Ex5：Ex1 的多轮版本</figcaption>
+</figure>
+<p>接下来，我们讨论如何使用轮次重复协议。考虑图 8 中的
+Ex5，它使用轮次重复图 4a 中的 Ex1 的协议。为此，进程 p 使用循环 rounds r
+∈ R do P end 为集合 R 中的每个轮标识符 r 迭代 P 一次。 q
+中的每个进程使用重复语句重复其协议，该语句永远循环。在每一轮中，进程 p
+遍历 qs 中的进程，并向每个 q 发送一个由轮数 r 和一个 ping
+组成的对。然后它等待来自同一进程的回复，它只接受当前轮 r 中的值。 qs
+中的每个进程都等待一个值和一个整数。当它接收到消息时，它将轮数绑定到
+r，将接收到的值分配给由当前轮索引的映射 v，最后以对轮 r
+的确认进行响应。在 2.2 中，我们想证明变量 v 在协议终止时被设置为
+ping，然而，现在我们想证明这个属性在所有轮次中都成立。更正式地说，我们想证明
+∀r ∈ R : ∀q ∈ qs : v[r] = ping
+在协议完成后成立。为了证明这个性质，我们首先观察 Ex5
+表现出我们所说的圆形不干涉。轮不干扰要求 1)
+不同轮对应的迭代不通过共享状态相互干扰，即写入或读取同一个变量；2)
+不同轮对应的迭代不通过发送消息进行干扰。示例 Ex5
+满足这两个条件：对应于不同轮的迭代不共享状态，因为每个进程只访问由其当前轮数
+r 索引的 v。类似地，在 Ex5
+中，对应于不同轮次的迭代不会相互发送消息，因为 p 和所有 qs
+只发送和接收当前绑定轮数 r 的消息。由于 Ex5
+表现出圆形不干涉，我们可以证明 ∀r ∈ R : ∀q ∈ qs : v[r] = ping
+对所有迭代都成立，通过证明该属性适用于单个任意迭代。（第 5 节中的定理
+5.4）。图 8b 显示了 Ex5 对任意轮 r* 的实例化，这让我们可以重用不变量 I5
+来证明所需的属性。</p>
+<h4 id="表达能力">表达能力</h4>
+<p>为了计算同步，<span class="math inline">\(\Goolong\)</span>
+要求输入程序只有几乎对称的种族。 <span class="math inline">\(\Goolong\)</span> 通过语法检查 (ğ 3)
+自动验证此条件。当此检查失败时，<span class="math inline">\(\Goolong\)</span>
+会生成一个错误见证，其中包含参与比赛的发送和接收。我们发现许多协议要么自然地只包含几乎对称的竞争，要么可以很容易地重构以确保它们这样做（这种重构通常包括确保彼此独立的消息具有不同的类型）。当无法计算同步时，<span class="math inline">\(\Goolong\)</span>
+以同步反例的形式提供反馈，由同步前缀和无法同步的余数程序组成。我们发现反例通常有助于识别和消除同步的障碍。为了让
+<span class="math inline">\(\Goolong\)</span>
+计算同步，程序必须是可同步的，也就是说，它既不能包含死锁，也不能包含虚假发送。我们确定了一类称为分层成对通信协议（SPCP）的程序，我们的方法是完整的，即，当且仅当程序可同步时，它才会计算同步（ğ
+4.5）。直观地说，这个片段由程序组成，其中进程通过迭代进程集一个接一个地进行成对通信。该片段包含到目前为止介绍的所有程序，即示例
+Ex1 到 Ex4 和两阶段提交，以及我们四个案例研究中的三个。</p>
+<h2 id="分布式消息传递程序">分布式消息传递程序</h2>
+<p>图 9 显示了 IceT 的语法，这是一种用于分布式消息传递程序的命令式语言。
+IceT 作为一种中间语言，<span class="math inline">\(\Goolong\)</span>
+自动从使用我们的库编写的 Go 程序中提取。</p>
+<figure>
+<img src="/18209/image-20220803160945731.png" alt="图 9.IceT 语言的语法">
+<figcaption aria-hidden="true">图 9.IceT 语言的语法</figcaption>
+</figure>
+<h3 id="语法">语法</h3>
+<h4 id="分布式进程">分布式进程</h4>
+<p>每个分布式进程都与一个唯一标识符 (ID)
+相关联，该标识符用作发送消息的地址。
+标识符属于标量集数据类型，即只能比较是否相等。我们用 skip 表示空进程，用
+<span class="math inline">\([s]p\)</span> 表示 ID 为 p
+的单个进程执行语句 s。我们写 p.x 是指进程 p 的变量
+x；当明确时，我们将省略 p 而只写 x。</p>
+<h4 id="程序">程序</h4>
+<p>我们从单个进程语句的顺序和并行组合中获得程序。
+我们允许对同一进程的连续语句进行分组，即对于语句 s1 和 s2，我们将 <span class="math inline">\([s1]p; [s2]p\)</span> 缩写为 <span class="math inline">\([s1; s2]p\)</span>。 令 X 为有限集。
+然后，我们使用 <span class="math inline">\(\Pi (x \in X).P\)</span> 和
+<span class="math inline">\(\for \; x \in X \; \do \; P\)</span>
+分别表示 P 的所有实例化到 X
+中的值的<strong>并行</strong>和<strong>顺序</strong>组合。更正式地说，让
+<span class="math inline">\(X = {x0, x1, . . . , xk }\)</span> 并让
+<span class="math inline">\(t[u/x]\)</span> 表示项 u 对项 t 中的变量 x
+的替换（不捕获）。然后，我们定义</p>
+<p><span class="math display">\[
+\Pi (x \in X).P \triangleq P[x_0/x] \parallel P[x_1/x] \parallel . . .
+\parallel P[x_k/x]
+\\\for \; x \in X \; \do \; P \; \mathsf{end} \triangleq P[x_0/x] ;
+P[x_1/x] ; . . . ; P[x_k/x]
+\]</span></p>
+<p>我们使用 <span class="math inline">\(\foreach \; X \; \do \;
+P\)</span> 表示对有限集合 X 的顺序迭代，而不绑定 X 中的元素，即对于具有
+k 个元素的集合 X，<span class="math inline">\(\foreach \; X \; \do \;
+P\)</span> 重复程序 P k 次。 请注意，foreach
+循环是进程创建新进程标识符的唯一方式。 我们使用 <span class="math inline">\(\rounds \; r \in R \; \do \; P \;
+\mathsf{end}\)</span> 表示程序 P 在一组协议轮 R 上的迭代，<span class="math inline">\(\repeat \; \do \; P \; \mathsf{end}\)</span>
+表示无限重复 P 的程序。</p>
+<h4 id="范式">范式</h4>
+<p>如果一个程序由来自不共享变量的不同进程的语句序列的并行组合组成，则该程序属于范式（Normal
+Form），即，在范式程序中，进程不能与其自身并行组合。对于两个这样的程序 P
+和 Q，我们让 <span class="math inline">\(P \circ Q\)</span> 表示在 P
+之后按过程对 Q
+排序的结果。我们假设输入程序是正常形式的，然而，我们的重写规则产生的程序可能不是。</p>
+<h3 id="语义">语义</h3>
+<p>接下来，我们描述 IceT 程序的行为。</p>
+<h4 id="发送和接收">发送和接收</h4>
+<p>进程通过发送和接收消息进行通信。语句 <span class="math inline">\(\send(t,p,e,r)\)</span> 在第 r 轮中异步将表达式
+e（类型 t）的值发送到进程 p。对偶，<span class="math inline">\(x
+\leftarrow \recv(p, t, r)\)</span> 阻塞，直到它在第 r 轮中从进程 p
+接收到类型 t 的值，然后将接收到的值分配给变量 x。非阻塞接收 <span class="math inline">\(x ← \recvTO(p, t, r)\)</span> 在第 r
+轮中等待来自进程 p 的类型 t 的消息。如果及时收到具有值 v
+的消息，则接收将 <span class="math inline">\(\Just \; v\)</span> 赋值给
+x，但是，它可能会不确定地超时，在这种情况下，它会赋值
+None。阻塞和非阻塞接收在不同的设置中使用：阻塞接收需要一个可靠的网络，其中消息不会被丢弃，而只能任意重新排序（例如在第
+2.1
+节中）；非阻塞接收与不可靠的网络一起使用，其中消息可以任意重新排序和丢弃。我们的基准测试使用不可靠的网络设置。我们让来自集合
+X 的接收表示来自任何 <span class="math inline">\(x \in X\)</span>
+的接收；来自 <span class="math inline">\(*\)</span>
+的接收表示从任何进程接收。在消息类型和轮次固定的情况下，我们从语句中省略它们，即，我们使用
+<span class="math inline">\(send(p, e)\)</span> 表示将 e 的值发送到 p
+并使用 <span class="math inline">\(x \leftarrow \recv(p)\)</span> 表示从
+p 接收。最后，我们使用 <span class="math inline">\(x \leftarrow
+\recv\)</span> 作为 <span class="math inline">\(x \leftarrow
+\recv(∗)\)</span> 的缩写。</p>
+<h4 id="不变量">不变量</h4>
+<p>在 IceT 中，每个 for 循环都用循环不变量 <span class="math inline">\(I_S\)</span> 进行注释。 <span class="math inline">\(I_S\)</span> 是同步数据不变量（synchronous data
+invariant），即同步上的循环不变量。
+同步数据不变量由用户提供并由我们的验证条件生成过程（第 6
+节）使用，该过程检查不变量确实保持同步。
+除了数据不变性之外，我们的重写还需要一个通信不变量 <span class="math inline">\(I_C\)</span>，该 <span class="math inline">\(I_C\)</span> 在重写为同步程序（第 4 节）
+期间进行检查。
+通信不变量包含有关向谁发送或从谁接收的信息。我们将这些注释包含在我们的完整性结果中，但我们发现，在实践中，这些不变量非常简单，即，要么为
+<span class="math inline">\(\true\)</span>，要么声明某个变量包含某个进程
+ID。 对于我们所有的示例，<span class="math inline">\(\Goolong\)</span>
+完全自动计算通信不变量。</p>
+<h4 id="原子动作和选择">原子动作和选择</h4>
+<p>该语言包括原子动作 <span class="math inline">\(⟨e \triangleright
+P⟩\)</span>，它们不是由用户编写的，而是由我们的重写规则（第 4 节）
+计算的。 一个动作 <span class="math inline">\(⟨P \triangleright
+e⟩\)</span> 包括一个原子执行的程序 P
+和一个从提供的同步数据不变量派生的注释 e，用于生成验证条件（第 6 节）。
+如果 e 等于 <span class="math inline">\(\true\)</span>，我们有时会省略它。我们的重写规则还生成
+<span class="math inline">\(x \leftarrow \pick(X)\)</span>
+形式的语句，其中变量 x 被赋值为 X
+的任意元素，但是，该语句并未在表面语言中公开。</p>
+<h4 id="语义-1">语义</h4>
+<p><span class="math inline">\(\IceT\)</span>
+的语义是标准的，但是，我们提供了补充材料的完整形式化。 程序配置 C 是
+<span class="math inline">\(C \triangleq (\sigma, msgs, P)\)</span>
+形式的三元组，由存储 <span class="math inline">\(\sigma\)</span>、多组运行中消息 msgs 和程序 P
+组成，或者是用于表示断言失败的显着配置崩溃。
+重要的是，所有进程都在崩溃配置中停止，这允许我们将本地断言违规编码为停止属性。
+存储将变量和 ID 映射到值。 消息多集是类型 <span class="math inline">\((ID \times ID \times \MsgType \times \Round \times
+\Values) \rightarrow \Int\)</span>
+的映射。发送添加消息到集合，而接收和消息删除删除它们。我们写 <span class="math inline">\(C \rightarrow C&#39;\)</span> 表示配置 C'
+可以通过执行一些单例进程语句序列从 C 到达。</p>
+<h4 id="属性">属性</h4>
+<p>属性 <span class="math inline">\(\varphi\)</span>
+是一阶公式（在某些背景理论中）：当且仅当当从 <span class="math inline">\(\sigma\)</span> 给定其自由变量的估值时，<span class="math inline">\(\varphi\)</span> 为真时，商店（stores） <span class="math inline">\(\sigma\)</span> 满足 <span class="math inline">\(\varphi\)</span>（我们写为 <span class="math inline">\(\sigma \models \varphi\)</span>）。
+满意度以明显的方式提升到配置。 假设语句 <span class="math inline">\(\assume(\varphi)\)</span> <span class="math inline">\(\varphi\)</span> 为真时简化为 <span class="math inline">\(\skip\)</span>，否则发散（永远循环）。 当 <span class="math inline">\(\varphi\)</span> 为真时，断言语句 <span class="math inline">\(\assert(\varphi)\)</span> 简化为 <span class="math inline">\(\skip\)</span>，否则转换到崩溃配置，其中每个进程都停止。</p>
+<h4 id="停止属性和不变性">停止属性和不变性</h4>
+<p>在本文中，我们关注验证程序的停止属性，即停止状态的属性，即没有进程可以采取任何进一步步骤的状态。
+暂停属性的示例范围从局部断言安全到全局属性，例如死锁自由度或两阶段提交中的协议（参见公式
+2.1）。</p>
+<p>我们写 <span class="math inline">\(P \models _H \varphi\)</span>
+来表示 <span class="math inline">\(\varphi\)</span>
+在所有从初始配置可达的<strong>暂停配置</strong>中成立。对于我们的重写，我们有时需要确保在共享变量的并行进程的干扰下保留属性。</p>
+<p>我们写 <span class="math inline">\(P \models _I \varphi\)</span>
+来表示 <span class="math inline">\(\varphi\)</span> 在 P
+下是<strong>始终成立</strong>的，即如果 <span class="math inline">\(\varphi\)</span> 最初成立，那么 <span class="math inline">\(\varphi\)</span>
+在任意数量的执行步骤之后成立。</p>
+<h3 id="几乎对称的竞争">几乎对称的竞争</h3>
+<p>我们的方法要求程序只包含几乎对称的竞争（almost symmetric
+races）。为了检查给定程序的这个属性，我们首先用一个唯一的标签（tag）来注释每个语法发送语句。对于每个语法接收，我们然后计算它可以接收的标签集（set
+of
+tags）。为了确定一个程序是否只包含几乎对称的竞争，我们要求，<strong>对于每个语法接收，它可以接收的标记集必须最多包含一个语法发送语句</strong>。虽然通常很难计算给定语法接收可以从中接收消息的发送标签集，但我们使用发送和接收消息的类型通过将所有发送与正确类型相加来计算合理的过度近似、round
+和发送者规范到集合（例如，在第 2.1
+节提案中，决策和确认具有不同的类型，从而确保它们只能在正确的位置接收）。这提供了一个简单的语法检查。</p>
+<h4 id="消除通配符接收">消除通配符接收</h4>
+<figure>
+<img src="/18209/image-20220803230648158.png" alt="图 10.示例：对称竞争">
+<figcaption aria-hidden="true">图 10.示例：对称竞争</figcaption>
+</figure>
+<p>如果一个程序只包含几乎对称的竞争，我们可以很容易地消除通配符接收，方法是用来自唯一相应进程的接收或对称的
+ID 集替换它们。</p>
+<p>示例 3.1：考虑图 10 中所示的程序 P 和
+Q。发送用红色标记注释，接收用蓝色标记集注释。P
+中的接收违反了几乎对称竞争的属性，因为它可以返回由 a 或 b 发送的消息。在
+Q 中，c 中的接收可以从 as 中的任何进程接收消息，但每条消息都源自标记为
+<span class="math inline">\(l_0\)</span> 的单个发送语句。因此，接收语句
+<span class="math inline">\(\recv(∗, t)\)</span> 可以替换为 <span class="math inline">\(\recv(as, t)\)</span>。</p>
+<p>确保一个程序只包含几乎对称的竞争，再加上我们的语言限制，为我们提供了以下关键保证：每当一个进程期望来自一个固定的其他进程的固定类型和轮次的消息时，最多可以有一个这样的消息。这个属性来自对称种族的定义和我们的语言限制的事实
+确保相同（<span class="math inline">\(\foreach\)</span> 或 <span class="math inline">\(\for\)</span>）循环的任何两次迭代发送到不同的进程。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/54572/" rel="prev" title="10-禁止吸毒既是限制自由又是保障自由">
+      <i class="fa fa-chevron-left"></i> 10-禁止吸毒既是限制自由又是保障自由
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/60610/" rel="next" title="辩证看待 01-有“问题意识”，也要有“过程意识”">
+      辩证看待 01-有“问题意识”，也要有“过程意识” <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">导论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA%E5%81%87%E8%A3%85%E5%90%8C%E6%AD%A5"><span class="nav-number">2.1.</span> <span class="nav-text">动机：假装同步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4"><span class="nav-number">2.1.1.</span> <span class="nav-text">两阶段提交</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">2.1.2.</span> <span class="nav-text">正确性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E4%B8%8D%E5%8F%98%E9%87%8F%E5%BE%88%E5%A4%8D%E6%9D%82"><span class="nav-number">2.1.3.</span> <span class="nav-text">异步不变量很复杂</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E4%BD%BF%E9%AA%8C%E8%AF%81%E6%97%A0%E6%B3%95%E7%A1%AE%E5%AE%9A"><span class="nav-number">2.1.4.</span> <span class="nav-text">异步使验证无法确定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%87%E8%A3%85%E5%90%8C%E6%AD%A5"><span class="nav-number">2.1.5.</span> <span class="nav-text">假装同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E4%B8%8D%E5%8F%98%E9%87%8F%E5%BE%88%E7%AE%80%E5%8D%95"><span class="nav-number">2.1.6.</span> <span class="nav-text">同步不变量很简单</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E5%90%8C%E6%AD%A5%E4%B8%8D%E5%8F%98%E9%87%8F"><span class="nav-number">2.1.7.</span> <span class="nav-text">检查同步不变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E8%A7%82%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">主要观点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ex-1%E7%AE%80%E5%8C%96"><span class="nav-number">2.2.1.</span> <span class="nav-text">Ex 1：简化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ex-2%E5%AF%B9%E7%A7%B0"><span class="nav-number">2.2.2.</span> <span class="nav-text">Ex 2：对称</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ex-3%E7%BB%84%E6%92%AD"><span class="nav-number">2.2.3.</span> <span class="nav-text">Ex 3：组播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ex-4%E6%B6%88%E6%81%AF%E4%B8%A2%E5%A4%B1"><span class="nav-number">2.2.4.</span> <span class="nav-text">Ex 4：消息丢失</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ex-5%E5%A4%9A%E8%BD%AE"><span class="nav-number">2.2.5.</span> <span class="nav-text">Ex 5：多轮</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E8%83%BD%E5%8A%9B"><span class="nav-number">2.2.6.</span> <span class="nav-text">表达能力</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">分布式消息传递程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">语法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%9B%E7%A8%8B"><span class="nav-number">3.1.1.</span> <span class="nav-text">分布式进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.1.2.</span> <span class="nav-text">程序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8C%83%E5%BC%8F"><span class="nav-number">3.1.3.</span> <span class="nav-text">范式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E4%B9%89"><span class="nav-number">3.2.</span> <span class="nav-text">语义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E5%92%8C%E6%8E%A5%E6%94%B6"><span class="nav-number">3.2.1.</span> <span class="nav-text">发送和接收</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%8F%98%E9%87%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">不变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E5%8A%A8%E4%BD%9C%E5%92%8C%E9%80%89%E6%8B%A9"><span class="nav-number">3.2.3.</span> <span class="nav-text">原子动作和选择</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E4%B9%89-1"><span class="nav-number">3.2.4.</span> <span class="nav-text">语义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7"><span class="nav-number">3.2.5.</span> <span class="nav-text">属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%9C%E6%AD%A2%E5%B1%9E%E6%80%A7%E5%92%8C%E4%B8%8D%E5%8F%98%E6%80%A7"><span class="nav-number">3.2.6.</span> <span class="nav-text">停止属性和不变性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%B9%8E%E5%AF%B9%E7%A7%B0%E7%9A%84%E7%AB%9E%E4%BA%89"><span class="nav-number">3.3.</span> <span class="nav-text">几乎对称的竞争</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E9%80%9A%E9%85%8D%E7%AC%A6%E6%8E%A5%E6%94%B6"><span class="nav-number">3.3.1.</span> <span class="nav-text">消除通配符接收</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">430</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:30</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
