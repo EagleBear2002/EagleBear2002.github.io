@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="\[ \def\Var{\mathsf} \def\Val{\mathsf{Val}} \def\OpId{\mathsf{OpId}} \def\Op{\mathsf{Op}} \def\read{\mathsf{read}} \def\write{\mathsf{write}} \def\reads{\mathsf{reads}} \def\writes{\mathsf{writes}} \d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OOPSLA&#39;19-On the Complexity of Checking Transactional Consistency">
+<meta property="og:url" content="https://eaglebear2002.github.io/63716/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="\[ \def\Var{\mathsf} \def\Val{\mathsf{Val}} \def\OpId{\mathsf{OpId}} \def\Op{\mathsf{Op}} \def\read{\mathsf{read}} \def\write{\mathsf{write}} \def\reads{\mathsf{reads}} \def\writes{\mathsf{writes}} \d">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307101350560.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20241023162817954.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307140512292.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307140444637.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307125352901.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307132016846.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307140411747.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307141502138.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307171044691.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240708201942894.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240708202053555.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307222200206.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307171133144.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240307172716147.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/63716/image-20240306124612869.png">
+<meta property="article:published_time" content="2024-03-04T02:25:00.000Z">
+<meta property="article:modified_time" content="2025-03-22T06:58:55.541Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/63716/image-20240307101350560.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/63716/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OOPSLA'19-On the Complexity of Checking Transactional Consistency | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">54</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">433</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/63716/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OOPSLA'19-On the Complexity of Checking Transactional Consistency
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-04 10:25:00" itemprop="dateCreated datePublished" datetime="2024-03-04T10:25:00+08:00">2024-03-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-03-22 14:58:55" itemprop="dateModified" datetime="2025-03-22T14:58:55+08:00">2025-03-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E6%89%A7%E8%A1%8C%E5%8E%86%E5%8F%B2%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">执行历史验证</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>18k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">\[
+\def\Var{\mathsf}
+\def\Val{\mathsf{Val}}
+\def\OpId{\mathsf{OpId}}
+\def\Op{\mathsf{Op}}
+\def\read{\mathsf{read}}
+\def\write{\mathsf{write}}
+\def\reads{\mathsf{reads}}
+\def\writes{\mathsf{writes}}
+\def\checkSER{\mathsf{checkSER}}
+\def\size{\mathsf{size}}
+\def\width{\mathsf{width}}
+\def\Comm{\mathsf{Comm}}
+\def\SER{\mathsf{SER}}
+\def\SI{\mathsf{SI}}
+\def\PC{\mathsf{PC}}
+\def\CC{\mathsf{CC}}
+\def\RC{\mathsf{RC}}
+\def\RA{\mathsf{RA}}
+\def\Serialization{\mathsf{Serialization}}
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\so{\mathsf{\textcolor{purple}{so}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\co{\mathsf{\textcolor{orange}{co}}}
+\]</span></p>
+<p><strong>摘要</strong></p>
+<p>事务通过启用对共享数据的计算来简化并发编程，这些共享数据与其他并发计算隔离并且对故障具有弹性。现代数据库为事务提供了不同的一致性模型，对应于一致性和可用性之间的不同权衡。在这项工作中，我们研究了检查事务数据库的给定执行是否遵循某种一致性模型的问题。我们证明了诸如读提交、读原子和因果一致性之类的一致性模型是多项式时间可检查的，而前缀一致性和快照隔离通常是
+NP 完全的。这些结果补充了先前有关可串行性的 NP 完整性结果。此外，在 NP
+完全一致性模型的背景下，我们设计了多项式时间的算法，假设输入执行中的某些参数（例如会话数）是固定的。我们在几个生产数据库的背景下评估这些算法的可扩展性。</p>
+<p>笔者修改了 DBCop 的部分代码：<a target="_blank" rel="noopener" href="https://git.nju.edu.cn/EagleBear/dbcop-verifier" class="uri">https://git.nju.edu.cn/EagleBear/dbcop-verifier</a></p>
+<p>作者：</p>
+<ul>
+<li>RANADEEP BISWAS, Universite de Paris, IRIF, CNRS, France</li>
+<li>CONSTANTIN ENEA, Universite de Paris, IRIF, CNRS, France</li>
+</ul>
+<h2 id="introduction">INTRODUCTION</h2>
+<p>事务通过启用对共享数据的计算来简化并发编程，这些共享数据与其他并发计算隔离并且能够适应故障。现代数据库提供各种形式的事务，对应于一致性和可用性之间的不同权衡。最强级别的一致性是通过可序列化事务实现的[Papadimitriou
+1979]，其并发执行的结果与按某种顺序原子执行事务相同。不幸的是，串行化对系统的可用性带来了严重的损失，例如，假设数据库是通过可能遭受分区或故障的网络访问的。因此，现代数据库通常对事务提供较弱的保证，通过弱一致性模型形式化，例如因果一致性[Lamport
+1978]和快照隔离[Berenson et al 1995]。</p>
+<p>提供事务的大型数据库的实现很难构建和测试。例如，分布式（复制）数据库必须考虑部分故障，其中某些组件或网络可能会发生故障并产生不完整的结果。确保容错依赖于难以设计和推理的复杂协议。黑盒测试框架
+Jepsen [Kingsbury 2019]
+在许多生产分布式数据库中发现了大量微妙的问题。</p>
+<p>测试事务数据库提出了两个问题：（1）导出一组合适的测试场景，例如注入系统的故障和要执行的事务集，以及（2）导出有效的算法来检查给定的执行是否满足所考虑的一致性模型。
+Jepsen
+框架旨在通过使用随机化来解决第一个问题，例如随机引入故障并随机选择事务中的操作。这种方法的有效性已在最近的工作中得到正式证明
+[Ozkan et al 2018]。然而，第二个问题基本上尚未得到探讨。 Jepsen
+以一种相当特别的方式检查一致性，重点关注给定一致性模型的特定类别的违规，例如脏读（从中止的事务中读取值）。这个问题具有挑战性，因为一致性规范非常重要，并且无法使用例如添加到客户端代码中的标准本地断言来检查它们。</p>
+<p>除了可串行化之外，检查执行正确性的复杂性也很复杂。某些一致性模型是未知的。检查可串行性已被证明是
+NP 完全的 [Papadimitriou
+1979]，并且在非事务上下文中检查因果一致性已知需要多项式时间 [Bouajjani
+et al
+2017]。在这项工作中，我们试图通过调查这个问题的复杂性来填补这一空白。几个一致性模型，并且在
+NP
+完整性的情况下，设计多项式时间的算法，假设输入执行的某些参数（例如会话数）有固定界限。</p>
+<p>我们考虑了实践中最流行的几种一致性模型。其中最弱的是提交读（RC）[Berenson
+et al
+1995]，要求事务中读取的每个值都由提交的事务写入。读取原子（RA）[Cerone
+et al 2015] 要求在事务中连续读取同一变量返回相同的值（也称为可重复读取
+[Berenson et al
+1995]），并且事务“看到”前一个写入的值同一会话中的事务。一般来说，我们假设事务是在会话中组织的[Terry
+et al
+1994]，会话是应用程序执行期间执行的事务序列的抽象。因果一致性（CC）[Lamport
+1978] 要求如果事务 <span class="math inline">\(t_1\)</span>
+影响另一个事务 <span class="math inline">\(t_2\)</span>，例如，在同一会话中 <span class="math inline">\(t_1\)</span> 在 <span class="math inline">\(t_2\)</span> 之前排序，或者 <span class="math inline">\(t_2\)</span> 读取 <span class="math inline">\(t_1\)</span>
+写入的值，则这两个事务可以被任何其他事务观察到按这个顺序。前缀一致性（PC）[Burckhardt
+et al 2015]
+要求所有事务之间存在总提交顺序，以便每个事务都遵守该序列的前缀。快照隔离（SI）[Berenson
+et al 1995]
+进一步要求两个不同的事务在都写入公共变量时观察不同的前缀。最后，我们还提供了有关检查可串行性（SER）问题的新结果，以补充有关其
+NP 完整性的已知结果。</p>
+<p>我们在本文中探讨的算法问题为这些一致性模型带来了一个新的规范框架，该框架依赖于执行中的写入-读取关系（也称为读取）这一事实，将读取与写入其数据的事务相关联。值，可以有效地定义。可以从每个值最多写入一次（变量可以写入任意次数）的执行中轻松提取写-读关系。这可以通过使用唯一标识符标记值来轻松实现（例如，随着每次新写入而递增的本地计数器与客户端/会话标识符相结合）1。由于实际的数据库实现是数据无关的[Wolper
+1986]，即它们的行为不依赖于事务中读取或写入的具体值，因此任何潜在的错误行为都可能在每个值最多写入一次的执行中暴露出来。因此，这个假设不失一般性。</p>
+<p>之前的工作 [Bouajjani et al 2017; Burckhardt et al 2014; Cerone et al
+2015]
+使用两种辅助关系形式化了这种一致性模型：为每个事务定义其观察到的事务集的可见性关系，以及定义事务提交到“全局”内存的顺序的提交顺序。满足某些一致性模型的执行被定义为存在可见性关系和遵守某些公理的提交顺序。在我们的例子中，从执行中导出的写-读关系扮演了可见性关系的角色。这种简化使我们能够陈述一系列定义这些一致性模型的公理，这些模型具有共同的形状。直观上，它们定义了事务
+<span class="math inline">\(t_1\)</span> 集合的下限，该组事务 <span class="math inline">\(t_1\)</span> 必须按提交顺序位于执行中读取的事务
+<span class="math inline">\(t_2\)</span>
+之前。除了揭示这些一致性模型之间的差异之外，这些公理对于我们随后研究的算法问题也至关重要。</p>
+<p>我们确定检查执行是否满足 RC、RA 或 CC 是多项式时间，而同样的问题对于
+PC 和 SI 来说是 NP 完全的。此外，在 NP
+完全一致性模型（PC、SI、SER）的情况下，我们表明，只要输入执行中的会话数被认为是固定的（即，
+不计入输入大小）。更详细地说，我们确定，当会话数量固定时，检查 SER
+可以简化为具有多项式大小的空间中的搜索问题。
+（该算法适用于任意执行，但其复杂性一般来说会以会话数量呈指数级增长）然后，我们表明，使用执行转换，可以在多项式时间内将检查
+PC 或 SI 减少为检查 SER，粗略地说，
+，将每个事务分为两部分：一部分包含所有读取，一部分包含所有写入（SI
+还需要添加一些额外的变量，以便处理在公共变量上写入的事务）。我们通过依赖称为通信图的执行抽象来进一步扩展这些结果
+[Chalupa et al
+2018]。粗略地说，通信图的顶点对应于会话，边表示两个会话访问（读或写）同一个变量。我们证明，只要通信图的双连通分量具有固定大小，所有这些标准都是多项式时间可检查的。</p>
+<p>我们对我们的算法在 CockroachDB [Cockroach 2019a]
+的执行上进行了实验评估，该数据库声称实现了可串行性 [Cockroach
+2019b]，但承认存在异常的可能性；Galera [Galera 2019a]
+的文档包含关于是否实现快照隔离的相互矛盾的声明[Galera 2019b,c] 和
+AntidoteDB [Antidote 2019a]，声称实现因果一致性 [Antidote
+2019b]。我们的实施报告在所有情况下都违反了这些标准。我们发现 AntidoteDB
+的一致性违规是新颖的，并且已得到其开发人员的证实。我们证明了我们的算法是高效且可扩展的。特别是，我们表明，尽管我们算法的渐近复杂度一般是指数级的（相对于会话数），但在实践中并没有执行最坏情况的行为。</p>
+<p>总而言之，这项工作的贡献有四个方面：</p>
+<ul>
+<li>我们开发了一个新的规范框架来描述常见的事务一致性标准（§2）；</li>
+<li>我们证明检查 RC、RA 和 CC 是多项式时间，而检查 PC 和 SI 是 NP
+完全的（§3）；</li>
+<li>我们证明 PC、SI 和 SER
+是多项式时间可检验的，假设输入执行的通信图具有固定大小的双连通分量（§4
+和§5）；</li>
+<li>我们对生产数据库生成的执行算法进行实证评估（§6）；</li>
+</ul>
+<p>这些贡献结合起来形成了一个用于验证事务一致性模型的有效算法框架。据我们所知，我们是第一个研究大多数一致性模型的渐近复杂性的人，尽管它们在实践中很普遍。</p>
+<p>其他材料可在 [Biswas 和 Enea 2019] 中找到。</p>
+<h2 id="consistency-criteria">CONSISTENCY CRITERIA</h2>
+<h3 id="histories">Histories</h3>
+<p>我们考虑一个存储一组变量 <span class="math inline">\(\Var = \set{x,y,
+\dots}\)</span>。客户端通过发出由读和写操作形成的事务来与数据库交互。假设一组未指定的值
+<span class="math inline">\(\Val\)</span> 和一组操作标识符 <span class="math inline">\(\OpId\)</span>，我们让</p>
+<p><span class="math display">\[
+\Op = \set{\read_i(x,v), \write_i(x,v) : i \in \OpId, x \in \Var,v \in
+\Val}
+\]</span></p>
+<p>是读取值 <span class="math inline">\(v\)</span> 或将值 <span class="math inline">\(v\)</span> 写入变量 <span class="math inline">\(x\)</span>
+的操作集。当操作标识符不重要时，我们会忽略它们。</p>
+<blockquote>
+<p>定义 2.1。事务 <span class="math inline">\(\left \langle O, \po
+\right \rangle\)</span> 是一组有限的操作 <span class="math inline">\(O\)</span> 以及 <span class="math inline">\(O\)</span> 上的严格全序 <span class="math inline">\(\po\)</span>，称为程序顺序，program order。</p>
+</blockquote>
+<p>我们使用 $t, t_1, t_2 $ 来排列事务。事务 <span class="math inline">\(t\)</span> 中的读、写<strong>操作集</strong>分别由
+<span class="math inline">\(\reads(t)\)</span>，和 <span class="math inline">\(\writes(t)\)</span>
+表示。事务集的扩展照常定义。另外，我们说事务 <span class="math inline">\(t\)</span> 写入变量 <span class="math inline">\(x\)</span>，表示为 <span class="math inline">\(t\)</span> 写入 <span class="math inline">\(x\)</span>，当 <span class="math inline">\(\write_i(x,v) \in \writes(t)\)</span> 对于某些
+<span class="math inline">\(i\)</span> 和 <span class="math inline">\(v\)</span> 时。类似地，事务 <span class="math inline">\(t\)</span> 读取变量 <span class="math inline">\(x\)</span>，当 <span class="math inline">\(\read_i(x ,v) \in \reads(t)\)</span> 对于某些
+<span class="math inline">\(i\)</span> 和 <span class="math inline">\(v\)</span> 来说。</p>
+<p><img src="/63716/image-20240307101350560.png"></p>
+<p>为了简化说明，我们假设每个事务 <span class="math inline">\(t\)</span>
+至多包含对每个变量 <span class="math inline">\(x\)</span>
+的一次写入操作，并且在同一事务中读取变量 <span class="math inline">\(x\)</span> 之前不能先写入 <span class="math inline">\(x\)</span>（也即，不存在对于同一个变量“先写后读”）。如果一个事务包含对同一变量的多次写入，则只有最后一个对其他事务可见（相对于实践中考虑的任何一致性标准）。例如，图
+1a 中的 <span class="math inline">\(\read(x)\)</span> 不应返回
+1，因为这不是其他事务写入 <span class="math inline">\(x\)</span>
+的最后一个值。它可以返回初始值或
+2。此外，如果在同一事务中在读取之前先写入同一变量，那么它应该返回在同一事务中写入的值（即最新写入的值）事务中的
+<span class="math inline">\(x\)</span>。例如，图 1b 中的 <span class="math inline">\(\read(x)\)</span> 只能返回
+2（假设同一事务中没有其他对 x
+的写入）。这两个属性可以在给定的执行中轻松验证（以语法方式）。除了这两个属性之外，实践中使用的各种一致性标准仅约束每个事务中对每个变量的最后写入以及同一事务中不先于对同一变量的写入的读取。</p>
+<p>一致性标准在称为历史（history）的执行的抽象视图上形式化。历史记录仅包含成功或已提交的事务。在数据库上下文中，始终假设中止事务的影响对其他事务不可见，因此可以忽略它们。例如，图
+1c 中的 <span class="math inline">\(\read(x)\)</span>
+不应返回由中止事务写入的值 1。事务根据（部分偏序）会话顺序（session
+order） <span class="math inline">\(\so\)</span>
+进行排序，因此这表示使用数据库的应用程序施加的排序约束。最常见的是序列的并集，每个序列称为一个会话。我们假设历史记录包含
+W-R
+关系，该关系标识写入执行中每次读取返回的值的事务。如前所述，可以从每个值最多写入一次的执行中轻松提取这样的关系。由于在实践中，数据库是数据独立的
+[Wolper
+1986]，即它们的行为不依赖于事务中读取或写入的具体值，因此在此类执行中可能会暴露任何潜在的错误行为。</p>
+<blockquote>
+<p>定义 2.2。历史 <span class="math inline">\(\left \langle T, \so, \wr
+\right \rangle\)</span> 是一组事务 <span class="math inline">\(T\)</span>
+以及严格的偏序（称为会话顺序），以及关系 <span class="math inline">\(\wr
+\subseteq T \times \reads(T)\)</span> 称为写-读关系，当且仅当</p>
+<ul>
+<li><span class="math inline">\(\wr\)</span> 的反函数是一个全函数（total
+function），如果 <span class="math inline">\((t, \read(x,v)) \in
+\wr\)</span>，则 <span class="math inline">\(\write(x,v) \in
+t\)</span>，并且</li>
+<li>$ $ 是无环的。</li>
+</ul>
+<p>全函数意味着每一个读操作读到的值都对应着对该变量的更早的一个写操作。</p>
+</blockquote>
+<p>为了简化技术说明，我们假设每个历史记录都包含写入所有变量初始值的不同事务。此事务先于
+<span class="math inline">\(\so\)</span> 中的所有其他事务。我们使用
+<span class="math inline">\(h, h_1, h_2, \dots\)</span> 涵盖历史。</p>
+<p>当 <span class="math inline">\((t, \read(x, v)) \in \wr\)</span>
+时，我们说读操作 <span class="math inline">\(\read(x,v)\)</span> 从
+<span class="math inline">\(t\)</span> 写入的变量 <span class="math inline">\(x\)</span> 中读取值 <span class="math inline">\(v\)</span>。对于给定的变量 <span class="math inline">\(x\)</span>，<span class="math inline">\(\wr_x\)</span> 表示 <span class="math inline">\(\wr\)</span> 对变量 <span class="math inline">\(x\)</span> 的读取的限制，即，<span class="math inline">\(\wr_x = \wr \cap (T \times \set{\read(x,v)|v \in
+\Val})\)</span>（即，涉及到变量 <span class="math inline">\(x\)</span>
+的 W-R 关系）。此外，我们将关系 <span class="math inline">\(\wr\)</span>
+和 <span class="math inline">\(\wr_x\)</span>
+扩展为事务对，如下所示：<span class="math inline">\(\left \langle
+t_1,t_2 \right \rangle \in \wr\)</span> 时，<span class="math inline">\(\left \langle t_1,t_2 \right \rangle \in
+\wr_x\)</span>，当且仅当存在读操作 <span class="math inline">\(\read(x,v) \in \reads(t_2)\)</span> 使得 <span class="math inline">\(\left \langle t_1, \read(x,v) \right \rangle \in
+\wr, \left \langle t_1, \read(x,v) \right \rangle \in \wr_x\)</span>。当
+<span class="math inline">\(\left \langle t_1, t_2 \right \rangle \in
+\wr\)</span> 时，我们说事务 <span class="math inline">\(t_1\)</span>
+被事务 <span class="math inline">\(t_2\)</span> 读取，当它被某个事务
+<span class="math inline">\(t_2\)</span> 读取时，我们说它被读取。</p>
+<h3 id="axiomatic-framework">Axiomatic Framework</h3>
+<p>我们描述了一个公理框架来描述满足特定一致性标准的历史集。总体原则是，如果历史记录的事务存在严格的总顺序（称为提交顺序，用
+<span class="math inline">\(\co\)</span>
+表示），则该历史记录满足特定标准，该顺序扩展了写读关系和会话顺序，并且满足某些属性。这些属性由一组公理表示，这些公理将提交顺序与历史记录中的会话顺序和写读关系联系起来。</p>
+<p><img src="/63716/image-20241023162817954.png"></p>
+<p>我们使用的公理具有统一的形式：它们定义了在历史记录中读取的事务 <span class="math inline">\(t_1\)</span> 的强制共同前驱 <span class="math inline">\(t_2\)</span> 。例如，称为读提交（RC）[Berenson et
+al 1995]
+的标准要求历史中读取的每个值都是由提交的事务写入的，而且同一事务中的读取是单调的，因为它们确实不返回较旧的值，w.r.t.提交顺序，而不是过去读取的其他值
+4。虽然第一个条件适用于任何历史记录（由于 <span class="math inline">\(\wr\)</span> 的满射性），但第二个条件由图 2a
+中的已提交读公理表示。该公理指出，对于写入在事务 <span class="math inline">\(t\)</span> 中读取的变量 <span class="math inline">\(x\)</span> 的任何事务 <span class="math inline">\(t_1\)</span> ，在同一事务中写入 <span class="math inline">\(x\)</span> 并先前读取的事务集 <span class="math inline">\(t_2\)</span> 的提交顺序必须先于 <span class="math inline">\(t_1\)</span> 。例如，图 3a
+显示了不满足此公理的历史记录和（部分）提交顺序，因为 <span class="math inline">\(\read(x)\)</span> 返回的事务中写入的值比前一个
+<span class="math inline">\(\read(y)\)</span> 中读取的事务更旧。图 3b
+给出了满足该公理的历史记录和提交顺序的示例。</p>
+<p><img src="/63716/image-20240307140512292.png"></p>
+<p>更准确地说，这些公理是以下形式的一阶公式（像往常一样，这些公式在历史记录
+<span class="math inline">\(h\)</span> 的元组 <span class="math inline">\(\left \langle h, \co \right \rangle\)</span> 和
+<span class="math inline">\(h\)</span> 中事务的提交顺序 <span class="math inline">\(\co\)</span> 上进行解释）：</p>
+<p><span class="math display">\[
+\forall x, \forall t_1, t_2, \forall \alpha. t_1 \neq t_2 \land \left
+\langle t_1, \alpha \right \rangle \in \wr_x \land t_2 \text{ writes } x
+\land \phi(t_2, \alpha)  \Rightarrow \left \langle t_2, t_1 \right
+\rangle \in \co
+\]</span></p>
+<p>其中 <span class="math inline">\(\phi(t_2, \alpha)\)</span> 是与
+<span class="math inline">\(t_2\)</span> 和 <span class="math inline">\(\alpha\)</span>（即从 <span class="math inline">\(t_1\)</span>
+读取的数据或事务读取）相关的属性，该属性随一个公理的不同而变化。直观上，这个公理模式陈述如下：为了让
+<span class="math inline">\(\alpha\)</span> 能够专门读取 <span class="math inline">\(t_1\)</span> 对 <span class="math inline">\(x\)</span> 的写入，必须是每个也写入 <span class="math inline">\(x\)</span> 并满足 <span class="math inline">\(\phi(t_2, \alpha)\)</span> 的 <span class="math inline">\(t_2\)</span> 在 <span class="math inline">\(t_1\)</span>
+之前提交。请注意，在我们考虑的所有情况下， <span class="math inline">\(\phi(t_2, \alpha)\)</span> 已经确保 <span class="math inline">\(t_2\)</span> 在读取 <span class="math inline">\(\alpha\)</span> 之前提交，因此该公理模式确保 <span class="math inline">\(t_2\)</span> 在 <span class="math inline">\(t_1\)</span> 写入之前进一步提交。</p>
+<p>图 2 给出了整篇论文中使用的公理。属性 <span class="math inline">\(\phi\)</span>
+使用写-读关系、历史记录中的会话顺序以及提交顺序将 <span class="math inline">\(t_2\)</span> 和 <span class="math inline">\(\alpha\)</span> 联系起来。</p>
+<p>下面，我们解释我们考虑的其余一致性标准以及定义它们的公理。读原子（RA）[Cerone
+等人 2015] 是由读原子公理定义的读提交的强化，它规定对于任何事务 <span class="math inline">\(t_1\)</span> 写入在事务 <span class="math inline">\(t_3\)</span> 中读取的变量 <span class="math inline">\(x\)</span>，<span class="math inline">\(\wr\)</span> 或 <span class="math inline">\(\so\)</span> 前驱的集合 <span class="math inline">\(t_3\)</span> 中写入 <span class="math inline">\(x\)</span> 的提交顺序必须先于 <span class="math inline">\(t_1\)</span>。 <span class="math inline">\(\wr\)</span> 前驱的情况对应于 [Berenson et al
+1995]
+中的可重复读取标准，该标准要求同一事务中对同一变量的连续读取返回相同的值，图
+3b 显示了违规，并且每次读取 <span class="math inline">\(a\)</span> 事务
+<span class="math inline">\(t\)</span> 中的变量 <span class="math inline">\(x\)</span> 返回由 <span class="math inline">\(t\)</span> 读取的最大事务 <span class="math inline">\(t&#39;\)</span>（w.r.t. 提交顺序）写入的值，图 3d
+显示了违规（对于左侧事务之间的任何提交顺序， <span class="math inline">\(\read(x)\)</span> 或 <span class="math inline">\(\read(y)\)</span>
+将返回一个未由最大事务写入的值）。前驱的情况对应于有关会话的“read-my-writes”保证
+[Terry et al 1994]，该保证规定事务 <span class="math inline">\(t\)</span> 必须观察同一会话中先前的写入。例如，图
+3c 中的 <span class="math inline">\(\read(y)\)</span> 返回 1
+表明右侧的最后一个事务不满足此保证：将 1 写入 <span class="math inline">\(y\)</span> 的事务在将 2 写入 <span class="math inline">\(y\)</span> 之前对该会话已经可见，因此值 2
+应该已经读过。Read Atomic 要求读取 <span class="math inline">\(y\)</span> 的事务的 <span class="math inline">\(\so\)</span> 前驱在向 <span class="math inline">\(y\)</span> 写入 1 的事务之前在 <span class="math inline">\(\co\)</span> 中排序，这使得并集 <span class="math inline">\(\co \cup \wr\)</span> 循环。</p>
+<p>下面的引理表明，对于满足 Read Atomic 的历史，<span class="math inline">\(\wr_x\)</span>
+的逆扩展到交易是一个总函数（证明见附录 A）。</p>
+<blockquote>
+<p>引理 2.3</p>
+<p>设 <span class="math inline">\(h = \langle T, \so , \wr
+\rangle\)</span> 是历史。如果 <span class="math inline">\(\langle h, \co
+\rangle\)</span> 满足 Read Atomic，则对于每个事务 <span class="math inline">\(t\)</span> 和两次读取 <span class="math inline">\(\read_{i_1} (x, v_1), \read_{i_2} (x,v_2) \in
+\reads(t), \wr^{-1} (\read_{i_1} (x,v_1)) = \wr^{-1} (\read_{i_2}
+(x,v_2))\)</span> 且 <span class="math inline">\(v_1 =
+v_2\)</span>。</p>
+</blockquote>
+<p>因果一致性（CC）[Lamport 1978]
+由因果公理定义，该公理指出，对于任何事务 <span class="math inline">\(t_1\)</span> 写入在事务 <span class="math inline">\(t_3\)</span> 中读取的变量 <span class="math inline">\(x\)</span>，<span class="math inline">\((\wr \cup
+\so)^+ t_3\)</span> 写入 <span class="math inline">\(x\)</span>
+的前驱集合必须按提交顺序位于 <span class="math inline">\(t_1\)</span>
+之前（<span class="math inline">\((\wr \cup \so)^+\)</span>
+通常称为因果顺序）。图 3e 中可以发现违反该公理的情况：事务 <span class="math inline">\(t_2\)</span> 将 2 写入 <span class="math inline">\(x\)</span> 是 <span class="math inline">\((\wr
+\cup \so)^+\)</span> 事务 <span class="math inline">\(t_3\)</span> 从
+<span class="math inline">\(x\)</span> 读取 <span class="math inline">\(1\)</span> 的前置事务，因为事务 <span class="math inline">\(t_4\)</span> 将 <span class="math inline">\(1\)</span> 写入 <span class="math inline">\(y\)</span>，从 <span class="math inline">\(t_2\)</span> 读取 <span class="math inline">\(x\)</span>，<span class="math inline">\(t_3\)</span> 从 <span class="math inline">\(t_4\)</span> 读取 <span class="math inline">\(y\)</span>。这意味着 <span class="math inline">\(t_2\)</span> 在提交顺序上应该先于事务 <span class="math inline">\(t_1\)</span> 将 <span class="math inline">\(1\)</span> 写入 <span class="math inline">\(x\)</span>，这又与写-读关系（<span class="math inline">\(t_2\)</span> 从 <span class="math inline">\(t_1\)</span> 读取）不一致。</p>
+<p>前缀一致性（PC）[Burckhardt et al. 2015]是 CC
+的加强，它要求每个事务遵守所有事务之间提交顺序的前缀。直觉上观察到的事务是
+<span class="math inline">\(\wr \cup \so\)</span> 前驱，定义 PC
+的公理前缀指出，对于写入在事务 <span class="math inline">\(t_3\)</span>
+中读取的变量 <span class="math inline">\(x\)</span> 的任何事务 <span class="math inline">\(t_1\)</span>，由 <span class="math inline">\(t_3\)</span> 写入 <span class="math inline">\(x\)</span> 观察到的事务的 <span class="math inline">\(\co^*\)</span> 前驱集合按提交顺序必须先于 <span class="math inline">\(t_1\)</span>（我们使用 <span class="math inline">\(\co^*\)</span> 来表示即使 <span class="math inline">\(t_3\)</span> 观察到的事务也必须先于 <span class="math inline">\(t_1\)</span>）。这确保了上述前缀属性。PC
+违规的示例可以在图 3f
+中找到：底部的两个事务从顶部的三个事务读取，但这三个事务的任何序列化都将意味着
+<span class="math inline">\(x=1\)</span>、<span class="math inline">\(y=2\)</span> 或在此序列化中，无法在前缀末尾生成
+<span class="math inline">\(x=2\)</span>，<span class="math inline">\(y=1\)</span>。</p>
+<p>快照隔离（SI）[Berenson et al. 1995] 是对 PC
+的强化，如果两个事务发生冲突，即不允许两个事务观察到相同的提交顺序前缀，即写入公共变量。它是由前缀公理和另一个称为冲突公理的规则结合定义的。冲突公理要求对于任何事务
+<span class="math inline">\(t_1\)</span> 写入在事务 <span class="math inline">\(t_3\)</span> 中读取的变量 <span class="math inline">\(x\)</span>，在 <span class="math inline">\(t_3\)</span> 之前写入与 <span class="math inline">\(t_3\)</span> 冲突的事务 <span class="math inline">\(x\)</span> 的 <span class="math inline">\(\co^*\)</span> 前驱集合按提交顺序，必须在 <span class="math inline">\(t_1\)</span> 之前。图 <span class="math inline">\(3g\)</span> 显示了冲突违规的情况。</p>
+<p>最后，可串行性（SER）[Papadimitriou 1979]
+由同名公理定义，它要求对于任何写入事务 <span class="math inline">\(t_3\)</span> 中读取的变量 <span class="math inline">\(x\)</span> 的事务 <span class="math inline">\(t_1\)</span>，<span class="math inline">\(t_3\)</span> 写入 <span class="math inline">\(x\)</span> 的共同前驱集合必须按提交顺序位于 <span class="math inline">\(t_1\)</span>
+之前。这确保了每笔交易都能观察到所有共同前任交易的影响。图 3h
+显示了可串行性违规的情况。</p>
+<p>下一个引理说明了这些公理之间的关系（参见附录 A 的证明）。</p>
+<blockquote>
+<p>引理 2.4 以下蕴涵成立：</p>
+<p><span class="math display">\[
+\text{Causal} \Rightarrow \text{Read Atomic} \Rightarrow \text{Read
+Committed} \\
+\text{Prefix} \Rightarrow \text{Causal} \\
+\text{Serializability} \Rightarrow \text{Prefix} \land \text{Conflict}
+\]</span></p>
+</blockquote>
+<h2 id="checking-consistency-criteria">CHECKING CONSISTENCY
+CRITERIA</h2>
+<p><img src="/63716/image-20240307140444637.png"></p>
+<p>本节确定了针对给定历史记录检查表 1
+中不同一致性标准的复杂性。更准确地说，我们表明可以在多项式时间内检查已提交读、原子读和因果一致性，而检查其余标准的问题是
+NP 完全的。</p>
+<p><img src="/63716/image-20240307125352901.png"></p>
+<p>直观上，多项式时间结果基于以下事实：定义这些一致性标准的公理不包含蕴涵左侧的提交顺序
+(<span class="math inline">\(\co\)</span>)。因此，证明满足这些公理的提交顺序的存在可以使用饱和过程来完成，该饱和过程基于实例化给定历史中的写-读关系和会话顺序的公理来构建“部分”提交顺序。由于提交顺序必须是写读关系和会话顺序的扩展，因此它从一开始就包含这两个关系。当以这种方式导出的阶次约束变成循环时，该饱和过程停止。例如，让我们考虑对图
+4a 和图 4b 中的历史应用与 RA 相对应的程序。将图 2b
+中的公理应用于第一个历史记录，由于右侧的事务从 y 读取 2，我们得到它的
+<span class="math inline">\(\wr_x\)</span>
+前驱（即左侧的第一个事务）必须先于按提交顺序将 2 写入 y
+的事务（红边）。这是成立的，因为 <span class="math inline">\(\wr_x\)</span> 前驱写在 y
+上。类似地，由于同一个事务从 x 读取
+1，我们知道它的前驱事务必须先于按提交顺序向 x 写入 1
+的事务（蓝色边缘）。这已经暗示了循环提交顺序，因此，该历史记录不满足
+RA。另一方面，对于图 4b
+中的历史，所有公理实例化都是空的，即蕴涵的左边部分是假的，因此，它满足
+RA。检查图 4c 中历史记录的 CC 需要一个饱和步骤：由于右下角的事务从 x
+读取 1，这是 <span class="math inline">\(\wr_x\)</span> ；在 x 上写入的
+<span class="math inline">\(\wr_y\)</span>
+前驱（左下角的事务）在提交顺序中必须先于向 x 写入 1 的事务（图中 <span class="math inline">\(\wr_x ; \wr_y\)</span> 表示 <span class="math inline">\(\wr_x \circ
+\wr_y\)</span>，对应的箭头应该是虚线）。由于这已经与会话顺序不一致，我们得知该历史记录违反了
+CC。</p>
+<p><img src="/63716/image-20240307132016846.png"></p>
+<p>算法 1 列出了我们检查 CC 的过程。如上所述，<span class="math inline">\(\co\)</span> 最初设置为 <span class="math inline">\(\so \cup \wr\)</span>，然后，它被公理 Causal
+的非空实例化所隐含的其他排序约束所饱和（其中蕴涵的左侧计算结果为
+true）。有关 RC 和 RA 的算法以类似的方式定义，通过本质上更改第 6
+行的测试，使其对应于相应公理中蕴涵的左侧。算法 1 可以重写为 Datalog
+程序，其中包含用于计算传递闭包和关系组合的简单 Datalog
+规则，以及形式化的规则：</p>
+<p>TODO</p>
+<p>来表示因果公理。以下是这些算法在多项式时间内运行的结果（或者等效地，可以在包含给定历史中的
+<span class="math inline">\(\wr\)</span> 和 <span class="math inline">\(\so\)</span> 关系的数据库上以多项式时间评估相应的
+Datalog 程序）。</p>
+<blockquote>
+<p>定理 3.1. 对于任何标准 <span class="math inline">\(C \in \set{\RC,
+\RA, \CC}\)</span>，检查给定历史是否满足 C 的问题是多项式时间。</p>
+</blockquote>
+<p>另一方面，检查 PC、SI 和 SER 通常是 NP
+完全的。我们使用布尔可满足性（SAT）的减少来展示这一点，该减少统一覆盖了所有三种情况。就
+SER 而言，Papadimitriou [1979] 提供了 的 NP
+完整性结果的新证明，该证明使用了所谓的非循环 SAT 的约简，并且不能扩展到
+PC 和 SI。</p>
+<blockquote>
+<p>定理 3.2. 对于任何准则 <span class="math inline">\(C \in \set{\PC,
+\SI, \SER}\)</span>，检查给定历史是否满足 C 的问题是 NP 完全的。</p>
+</blockquote>
+<p>证明：TODO</p>
+<h2 id="checking-consistency-of-bounded-width-histories">CHECKING
+CONSISTENCY OF BOUNDED-WIDTH HISTORIES</h2>
+<p>在本节中，我们将展示在<strong>给定历史记录的宽度</strong>（即相互无序事务的最大数量）的假设下，检查前缀一致性、快照隔离和可串行性变成了多项式时间。会话顺序受固定常数限制。如果我们考虑会话顺序是事务序列的并集（以写入初始值的虚构事务为模）的标准情况，即一组会话，那么历史的宽度就是会话的数量。我们首先提出一种用于检查可串行性的算法，该算法是当宽度受固定常数限制时的多项式时间。一般来说，该算法的渐近复杂度在历史宽度上是指数级的，但这种最坏情况的行为在实践中并没有被执行，如第
+6
+节所示。然后，我们证明可以减少检查前缀一致性和快照隔离检查可串行性问题的多项式时间。</p>
+<h3 id="checking-serializability">Checking Serializability</h3>
+<p>我们提出了一种用于检查给定历史记录的可序列化性的算法，该算法通过按照与会话顺序一致的顺序<strong>逐一“线性化”事务</strong>来构造有效的提交顺序（满足序列化）（如果有）。在任何时候，已经线性化的事务集都由会话顺序的反链唯一确定（即，一组相互无序的事务
+w.r.t. <span class="math inline">\(\so\)</span>），并且下一个要线性化的事务是在事务的直接后继者中选择的在这个反链中。该算法的关键在于，可以选择下一个要线性化的事务，以便它不会以不依赖于已线性化事务之间的顺序的方式产生串行化违规。因此，该算法可以看作是在
+<span class="math inline">\(\so\)</span>
+反链空间中的搜索。如果历史的宽度有界（由固定常数），则可能的反链数量是历史大小的多项式，这意味着搜索可以在多项式时间内完成。</p>
+<p><img src="/63716/image-20240307140411747.png"></p>
+<p>历史 <span class="math inline">\(h = \left\langle T, \so, \wr
+\right\rangle\)</span> 的前缀是一组事务 <span class="math inline">\(T&#39; \subseteq T\)</span>，使得 <span class="math inline">\(T&#39;\)</span> 中的所有 <span class="math inline">\(\so\)</span> 前驱事务也在 <span class="math inline">\(T&#39;\)</span> 中，即 <span class="math inline">\(\forall t \in T, \so^{-1}(t) \in
+T&#39;\)</span>。前缀 <span class="math inline">\(T&#39;\)</span> 由
+<span class="math inline">\(T&#39;\)</span> 中关于 <span class="math inline">\(\so\)</span>
+最大的事务集唯一确定。这组事务形成了一个反链，即该组中的任何两个元素对于
+<span class="math inline">\(\so\)</span> 都是不可比较的。给定一个反链
+<span class="math inline">\(\set{t_1, \ldots, t_n}\)</span>，我们可以说
+<span class="math inline">\(\set{t_1, \ldots, t_n}\)</span> 是前缀 <span class="math inline">\(T&#39; = \set{t : \exists i , \left\langle t,t_i
+\right\rangle \in \so \lor t = t_i}\)</span> 的边界。例如，给定图 6a
+中的历史记录，事务集 <span class="math inline">\(\set{t_0,t_1,t_2}\)</span> 是具有边界 <span class="math inline">\(\set{t_1,t_2}\)</span>
+的前缀（后者是会话顺序的反链）。</p>
+<p>历史 <span class="math inline">\(h\)</span> 的前缀 <span class="math inline">\(T&#39;\)</span> 被称为可序列化，当且仅当 <span class="math inline">\(h\)</span> 中的事务存在部分提交顺序 <span class="math inline">\(\co\)</span> 使得以下内容成立：</p>
+<ul>
+<li><span class="math inline">\(\co\)</span> 与 <span class="math inline">\(h\)</span> 中的会话顺序和写-读关系不矛盾，即 <span class="math inline">\(\wr \cup \so \cup \co\)</span> 是无环的；</li>
+<li><span class="math inline">\(\co\)</span> 是 <span class="math inline">\(T&#39;\)</span> 中事务的全序；</li>
+<li><span class="math inline">\(\co\)</span> 将 <span class="math inline">\(T&#39;\)</span> 中的事务排序在 <span class="math inline">\(T \setminus T&#39;\)</span>
+中的事务之前，即对于每个 <span class="math inline">\(t_1 \in T&#39;, t_2
+\in T \setminus T&#39;\)</span>，<span class="math inline">\(\left\langle t_1, t_2 \right\rangle \in
+\co\)</span>；</li>
+<li><span class="math inline">\(\co\)</span> 不会对任何两个事务 <span class="math inline">\(t_1, t_2 \notin T&#39;\)</span> 进行排序；</li>
+<li>历史记录 <span class="math inline">\(h\)</span> 以及提交顺序 <span class="math inline">\(\co\)</span> 满足定义可串行性的公理，即 <span class="math inline">\(\left\langle h, \co \right\rangle \models
+\Serialization\)</span>。</li>
+</ul>
+<p>对于图 6a 中的历史记录，前缀 <span class="math inline">\(\set{t_0,t_1,t_2}\)</span>
+是可序列化的，因为存在一个部分提交顺序 <span class="math inline">\(\co\)</span>，它按照此顺序排列 <span class="math inline">\(t_0, t_1, t_2\)</span>，并且 <span class="math inline">\(t_1\)</span> 和 <span class="math inline">\(t_2\)</span> 都在 <span class="math inline">\(t_3\)</span> 和 <span class="math inline">\(t_4\)</span>
+之前。公理序列化很容易满足，因为前缀包含写入 <span class="math inline">\(x\)</span>
+的单个事务，并且前缀之外的所有事务都不读取 <span class="math inline">\(x\)</span>。</p>
+<p><span class="math inline">\(h\)</span> 的前缀 <span class="math inline">\(T&#39; \uplus {t}\)</span> 被称为 <span class="math inline">\(h\)</span> 的可序列化前缀 <span class="math inline">\(T&#39;\)</span> 的有效扩展，表示为 <span class="math inline">\(T&#39; \triangleright T&#39; \uplus
+{t}\)</span>，如果满足以下条件：</p>
+<ul>
+<li><span class="math inline">\(t\)</span> 不从 <span class="math inline">\(T&#39;\)</span> 之外的事务读取，即对于每个 <span class="math inline">\(t&#39; \in T \setminus T&#39;\)</span>，<span class="math inline">\(\left\langle t&#39;,t \right\rangle \notin
+\wr\)</span>。</li>
+<li>对于 <span class="math inline">\(t\)</span> 写入的每个变量 <span class="math inline">\(x\)</span>，在 <span class="math inline">\(T&#39;\)</span> 之外不存在事务 <span class="math inline">\(t_2 \neq t\)</span> 读取由 <span class="math inline">\(t_1 \in T&#39;\)</span> 写入的 <span class="math inline">\(x\)</span> 值，即对于每个 <span class="math inline">\(x\)</span> 和每个 <span class="math inline">\(t_1
+\in T&#39;\)</span>，<span class="math inline">\(t_2 \in T \setminus
+(T&#39; \uplus {t})\)</span>，<span class="math inline">\(\left\langle
+t_1,t_2 \right\rangle \notin
+\wr\)</span>。（原文如此，笔者认为此处应该改为 <span class="math inline">\(\left\langle t_1,t_2 \right\rangle \notin
+\wr_x\)</span>）</li>
+</ul>
+<p>对于图 6a 中的历史记录，我们有 <span class="math inline">\(\set{t_0,t_1} \triangleright \set{t_0,t_1} \uplus
+\set{t_2}\)</span>，因为 <span class="math inline">\(t_2\)</span> 从
+<span class="math inline">\(t_0\)</span>
+读取并且不写入任何变量。另一方面，<span class="math inline">\(\set{t_0,t_1} \not\triangleright \set{t_0,t_1}
+\uplus \set{t_3}\)</span>，因为 <span class="math inline">\(t_3\)</span>
+写入 <span class="math inline">\(x\)</span>，而在此前缀之外的事务 <span class="math inline">\(t_2\)</span> 从前缀中包含的事务 <span class="math inline">\(t_0\)</span> 读取。</p>
+<p>令 <span class="math inline">\(\triangleright^*\)</span> 表示 <span class="math inline">\(\triangleright\)</span> 的自反和传递闭包。</p>
+<p>以下引理对于证明初始空前缀的迭代有效扩展可用于表明给定历史是可序列化的至关重要。</p>
+<blockquote>
+<p>引理 4.1 对于历史 <span class="math inline">\(h\)</span>
+的可序列化前缀 <span class="math inline">\(T&#39;\)</span>，如果前缀
+<span class="math inline">\(T&#39; \uplus {t}\)</span> 是 <span class="math inline">\(T&#39;\)</span>
+的有效扩展，则扩展后的前缀是可序列化的。</p>
+</blockquote>
+<p>证明 令 <span class="math inline">\(\co&#39;\)</span>
+为满足可序列化前缀条件的 <span class="math inline">\(T&#39;\)</span>
+的部分提交顺序。我们将 <span class="math inline">\(\co&#39;\)</span>
+扩展到偏序 <span class="math inline">\(\co = \co&#39; \cup \set{\langle
+t, t&#39; \rangle | t&#39; \notin T&#39; \uplus
+\set{t&#39;}}\)</span>。我们证明 <span class="math inline">\(\langle h,
+\co \rangle \models \Serialization\)</span>。<span class="math inline">\(T&#39; \uplus \set{t}\)</span>
+是可序列化前缀的其他条件可以通过 <span class="math inline">\(\co\)</span> 轻松满足。</p>
+<p>TODO</p>
+<p><img src="/63716/image-20240307141502138.png"></p>
+<p>算法 2
+列出了我们用于检查可串行性的算法。它被定义为一个递归过程，搜索给定前缀的有效扩展序列（最初，该前缀为空），直到覆盖整个历史记录。图
+6b 描绘了图 6a
+中历史记录的搜索情况。右侧分支（包含蓝色边缘）仅包含有效扩展，并且它到达包含历史记录中所有事务的前缀。</p>
+<blockquote>
+<p>定理 4.2 历史 <span class="math inline">\(h\)</span>
+是可序列化的当且仅当 <span class="math inline">\(\mathsf{checkSER}(h,
+\emptyset)\)</span> 返回 true。</p>
+</blockquote>
+<p>证明 TODO</p>
+<p>算法 2 枚举给定历史 <span class="math inline">\(h\)</span>
+的前缀，每个前缀由包含该前缀中最大事务的 <span class="math inline">\(h\)</span> 的反链唯一确定。根据定义，历史 <span class="math inline">\(h\)</span> 的每个反链的大小小于 <span class="math inline">\(h\)</span> 的宽度。因此，历史 <span class="math inline">\(h\)</span> 的可能反链（前缀）的数量为 <span class="math inline">\(O(\size(h) ^{\width(h)})\)</span>，其中 <span class="math inline">\(\size(h)\)</span>、<span class="math inline">\(\width(h)\)</span> 分别是事务数量、宽度，<span class="math inline">\(h\)</span>。由于可以在二次时间内检查有效扩展属性，因此由
+<span class="math inline">\(\checkSER\)</span>
+定义的算法的渐近时间复杂度上限为 <span class="math inline">\(O(\size(h)
+^ {\width(h)} \cdot
+\size(h)^3)\)</span>。以下推论是这些观察的直接结果。</p>
+<blockquote>
+<p>推论 4.3 对于任意但固定的常数 <span class="math inline">\(k \in
+\mathbb{N}\)</span>，检查宽度至多为 k
+的历史的可串行性的问题是多项式时间。</p>
+</blockquote>
+<h3 id="reducing-prefix-consistency-to-serializability">Reducing Prefix
+Consistency to Serializability</h3>
+<p><img src="/63716/image-20240307171044691.png"></p>
+<blockquote>
+<p>定理 4.8 历史 <span class="math inline">\(h\)</span>
+满足前缀一致性当且仅当 <span class="math inline">\(h_{R|W}\)</span>
+是可序列化的</p>
+</blockquote>
+<blockquote>
+<p>推论 4.9 对于任意但固定的常数 <span class="math inline">\(k \in
+\mathbb{N}\)</span>，检查宽度至多为 k
+的历史的前缀一致性的问题是多项式时间。</p>
+</blockquote>
+<h3 id="reducing-snapshot-isolation-to-serializability">Reducing
+Snapshot Isolation to Serializability</h3>
+<p><img src="/63716/image-20240708201942894.png"></p>
+<blockquote>
+<p>定理 4.10 历史 <span class="math inline">\(h\)</span> 满足 SI
+当且仅当 <span class="math inline">\(h_{R|W}^{c}\)</span>
+是可序列化的</p>
+</blockquote>
+<p><img src="/63716/image-20240708202053555.png"></p>
+<h2 id="communication-graphs">COMMUNICATION GRAPHS</h2>
+<p><img src="/63716/image-20240307222200206.png"></p>
+<p>在本节中，我们提出了 PC、SI 和 SER
+多项式时间结果的扩展，它允许处理不同会话之间共享变量稀疏的历史。对于本节的结果，我们采取简化的假设，即会话顺序是事务序列的并集（以写入初始值的虚构事务为模），即每个事务序列对应于会话的标准概念。我们使用称为通信图的无向图来表示不同会话之间的变量共享。例如，图
+12a 中的历史通信图在图 12b
+中给出。为了便于阅读，在边上标记了两个会话访问的变量。</p>
+<p>我们证明，当通信图的每个双连通分量的大小受固定常数限制时，检查 PC、SI
+或 SER 的问题是多项式时间。这比第 4
+节中的结果更强，因为双连通分量的数量可以任意大，这意味着会话总数是无限的。一般来说，我们证明这些一致性标准的时间复杂度仅在此类双连通分量的最大大小中呈指数增长，而不是在会话总数中呈指数增长。</p>
+<p>一个无向图是双连通的，意味着它是连通的，并且如果要删除任何一个顶点，该图将保持连通状态，并且图
+<span class="math inline">\(G\)</span> 的双连通分量是 <span class="math inline">\(G\)</span> 的最大双连通子图。图 12b
+显示了通信图双连通分量的分解。该图包含 5
+个会话，而每个双连通分量的大小最多为 3。直观上，如果历史 <span class="math inline">\(h\)</span> 违反了某些一致性标准 <span class="math inline">\(C \in \set{\PC, \SI,
+\SER}\)</span>，则存在来自同一双连通分量的会话上的 <span class="math inline">\(h\)</span> 投影，这也违反了 <span class="math inline">\(C\)</span>（反之亦然）
+。因此，可以针对每个双连通分量（更准确地说，在仅包含同一双连通分量中的会话的子历史记录上）单独检查这些标准中的任何一个。实际上，这个分解论证甚至适用于
+RC、RA 和 CC。例如，在图 12a
+中的历史情况中，可以单独查看三个子历史来检查任何一致性标准：具有 <span class="math inline">\(S1\)</span> 和 <span class="math inline">\(S2\)</span> 的子历史，具有 <span class="math inline">\(S2\)</span>、<span class="math inline">\(S3\)</span> 和 <span class="math inline">\(S4\)</span> 的子历史，以及 <span class="math inline">\(S4\)</span> 和 <span class="math inline">\(S5\)</span> 的子历史记录。</p>
+<p>形式上，历史 <span class="math inline">\(h\)</span>
+的通信图是一个无向图 <span class="math inline">\(\Comm(h) = (V,
+E)\)</span>，其中顶点集 <span class="math inline">\(V\)</span> 是 <span class="math inline">\(h\)</span> 中<strong>会话</strong>的集合，并且
+<span class="math inline">\((v,v&#39;) \in E\)</span> 当且仅当会话 <span class="math inline">\(v\)</span> 和 <span class="math inline">\(v&#39;\)</span> 分别包含两个事务 <span class="math inline">\(t_1\)</span> 和 <span class="math inline">\(t_2\)</span>，使得 <span class="math inline">\(t_1\)</span> 和 <span class="math inline">\(t_2\)</span> 读取或写入公共变量 <span class="math inline">\(x\)</span>。</p>
+<p>我们从一个技术引理开始，表明图中表示历史 <span class="math inline">\(h\)</span> 和关系 <span class="math inline">\(\co\)</span>（在 <span class="math inline">\(h\)</span>
+的交易上）的某种形式的最小路径位于底层通信图的单个双连通分量内。这用于表明<strong>任何一致性违规都可以通过一次查看单个双连通分量</strong>来暴露。表示历史
+<span class="math inline">\(h\)</span> 和关于 <span class="math inline">\(h\)</span> 的交易的关系 <span class="math inline">\(\co\)</span> 的图由 <span class="math inline">\(G(h,\co)\)</span> 表示。</p>
+<p>给定图 <span class="math inline">\(G(h,\co)\)</span> 和其顶点上的关系
+<span class="math inline">\(r\)</span>，关系 <span class="math inline">\(\so, \wr\)</span> 和 <span class="math inline">\(\po\)</span> 上的项，例如 <span class="math inline">\((\wr \cup \so)^+\)</span>，形式为 <span class="math inline">\(r\)</span> 的路径（或 <span class="math inline">\(r\)</span> 路径）是表示由项 <span class="math inline">\(r\)</span> 指定的 <span class="math inline">\(\so,
+\wr\)</span> 或 <span class="math inline">\(\co\)</span>
+依赖关系的边序列，例如 <span class="math inline">\(\wr\)</span> 或 <span class="math inline">\(\so\)</span> 依赖关系的序列。</p>
+<p>TODO</p>
+<h2 id="experimental-evaluation">EXPERIMENTAL EVALUATION</h2>
+<p><img src="/63716/image-20240307171133144.png"></p>
+<p><img src="/63716/image-20240307172716147.png"></p>
+<p><img src="/63716/image-20240306124612869.png"></p>
+<h2 id="related-work">RELATED WORK</h2>
+<p>Cerone 等人 [2015] 使用 Burckhardt 等人 [2014]
+的规范方法，对我们在本文中考虑的标准进行了首次形式化。这种形式化使用两个辅助关系，一个是可见性关系，它表示一个事务“观察”另一个事务的影响，另一个是提交顺序，也称为仲裁顺序，就像我们的例子一样。使用仅包括会话顺序的历史概念来抽象执行，并且对某些一致性标准的遵守被定义为存在可见性关系和满足某些公理的提交顺序。在实际目标的推动下，我们的历史包括写入-读取关系，这使得能够更统一且在我们看来更直观的公理来描述一致性标准。然而，我们的形式化与
+Cerone 等人 [2015]
+的形式化是等效的（本文的扩展版本中提出了这种等效性的形式证明 [Biswas 和
+Enea 2019]）。此外，Cerone 等人 [2015]
+并没有像我们的论文那样研究算法问题。</p>
+<p>Papadimitriou [1979] 表明检查执行的可串行性是 NP
+完全的。此外，它还确定了一个更强的标准，称为冲突可串行性，它是多项式时间可检查的。冲突可串行性假设历史作为操作序列给出，并要求提交顺序与基于该序列定义的事务之间的冲突顺序一致（粗略地说，如果事务
+<span class="math inline">\(t_1\)</span> 在 <span class="math inline">\(t_2\)</span> 之前访问某个变量 <span class="math inline">\(x\)</span>，则事务 <span class="math inline">\(t_1\)</span> 按冲突顺序位于事务 <span class="math inline">\(t_2\)</span>
+之前）。此结果不适用于分布式数据库，在分布式数据库中，不可能在提交到网络中不同节点的操作之间得出这样的序列。</p>
+<p>Bouajjani 等人[2017]
+表明，检查非事务性分布式数据库执行中因果一致性的几种变化需要多项式时间（他们还假设每个值最多写入一次）。假设单例事务，我们的
+CC 概念对应于 Bouajjani 等人 [2017] 中的因果收敛标准。因此，我们关于 CC
+的结果可以看作是关于因果收敛到事务的结果的延伸。</p>
+<p>有一些工作研究了检查共享内存系统中的一致性标准（例如顺序一致性和线性化）的问题。
+Gibbons 和 Korach [1997] 表明，检查单值寄存器类型的线性化能力一般来说是
+NP
+完全的，但执行时需要多项式时间，其中每个值最多写入一次。通过减少可串行性，他们表明即使每个值最多写入一次，检查顺序一致性也是
+NP 完全的。 Emmi 和 Enea [2018]
+将有关线性化的结果扩展到一系列称为集合的抽象数据类型，其中包括堆栈、队列、键值映射等。顺序一致性简化为具有单例事务的历史的可串行性（即，由单个读或写操作）。因此，我们用于检查有界宽度历史的可串行性的多项式时间结果（推论
+4.3）意味着用有界数量的线程检查历史的顺序一致性是多项式时间。后一个结果是由
+Abdulla 等人独立建立的[2019]。</p>
+<p>通信图的概念受到 Chalupa 等人 [2018]
+的工作的启发，该工作研究了多线程程序的偏序约简（POR）技术。一般来说，偏序约简的目标
+[Flanagan and Godefroid 2005]
+是避免探索对于一些合适的等价概念等价的执行，例如 Mazurkiewicz 迹等价
+[Mazurkiewicz 1986]。他们使用通信图的非循环性来定义其 POR
+技术最适合的一类程序。他们探索的算法问题与我们的不同，并且他们不像我们的结果那样研究该图的双连通分量。</p>
+<h2 id="conclusions">CONCLUSIONS</h2>
+<p>我们的结果提供了一种有效的方法，以有效的方式检查事务数据库在广泛的一致性标准方面的正确性。我们为这些标准设计了一个新的规范框架，除了启用有效的验证算法之外，还提供了对它们之间在执行期间读取的事务之前必须提交的事务集方面的差异的新颖理解。这些算法被证明是可扩展的，并且比这些标准的标准
+SAT
+编码（如我们的框架中定义的）效率高几个数量级。虽然这些算法非常容易理解和实现，但其正确性的证明并非易事，并且可以从新的规范框架中受益匪浅。</p>
+<p>未来工作的一个重要场所是确定特定违规行为的根本原因。事实上，我们能够处理广泛的标准，这已经有助于识别给定执行中违反的最弱标准。然后，在
+RC、RA 和 CC
+的情况下，不一致对应于提交顺序中的周期，根本原因可以归因于这种关系中的最小周期。我们在与
+Antidote 开发人员的沟通中这样做是为了简化我们发现的包含 42
+笔事务的违规行为。在 PC、SI 和 SER 的情况下，可以在 SAT
+求解器中实现类似于 CDCL 的搜索过程，以便计算根本原因，因为 SAT
+求解器将计算不可满足性核心。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/393/" rel="prev" title="MySQL 可重复读如何“避免”幻读？">
+      <i class="fa fa-chevron-left"></i> MySQL 可重复读如何“避免”幻读？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/49380/" rel="next" title="离散数学基础知识">
+      离散数学基础知识 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#introduction"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#consistency-criteria"><span class="nav-number">2.</span> <span class="nav-text">CONSISTENCY CRITERIA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#histories"><span class="nav-number">2.1.</span> <span class="nav-text">Histories</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#axiomatic-framework"><span class="nav-number">2.2.</span> <span class="nav-text">Axiomatic Framework</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#checking-consistency-criteria"><span class="nav-number">3.</span> <span class="nav-text">CHECKING CONSISTENCY
+CRITERIA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#checking-consistency-of-bounded-width-histories"><span class="nav-number">4.</span> <span class="nav-text">CHECKING
+CONSISTENCY OF BOUNDED-WIDTH HISTORIES</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#checking-serializability"><span class="nav-number">4.1.</span> <span class="nav-text">Checking Serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reducing-prefix-consistency-to-serializability"><span class="nav-number">4.2.</span> <span class="nav-text">Reducing Prefix
+Consistency to Serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reducing-snapshot-isolation-to-serializability"><span class="nav-number">4.3.</span> <span class="nav-text">Reducing
+Snapshot Isolation to Serializability</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#communication-graphs"><span class="nav-number">5.</span> <span class="nav-text">COMMUNICATION GRAPHS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#experimental-evaluation"><span class="nav-number">6.</span> <span class="nav-text">EXPERIMENTAL EVALUATION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#related-work"><span class="nav-number">7.</span> <span class="nav-text">RELATED WORK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#conclusions"><span class="nav-number">8.</span> <span class="nav-text">CONCLUSIONS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">433</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">VLDB 顶会选手-Czxingchen</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">PLDI 顶会选手-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:33</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
