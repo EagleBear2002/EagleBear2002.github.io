@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\ABORT{\mathsf{ABORT}} \def\ACCEPT{\mathsf{ACCEPT}} \def\ACCEPTACK{\mathsf{ACCEPT\_ACK}} \def\act{\mathsf{act}} \def\ballot{\mathsf{ballot}} \def\certify{\mathtt{certify}} \def\client{\mathsf{c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DC&#39;21-Multi-shot Distributed Transaction Commit">
+<meta property="og:url" content="https://eaglebear2002.github.io/16442/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\ABORT{\mathsf{ABORT}} \def\ACCEPT{\mathsf{ACCEPT}} \def\ACCEPTACK{\mathsf{ACCEPT\_ACK}} \def\act{\mathsf{act}} \def\ballot{\mathsf{ballot}} \def\certify{\mathtt{certify}} \def\client{\mathsf{c">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/16442/Fig1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16442/Fig2.png">
+<meta property="article:published_time" content="2022-04-19T08:05:31.000Z">
+<meta property="article:modified_time" content="2025-05-28T15:02:50.974Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/16442/Fig1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/16442/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DC'21-Multi-shot Distributed Transaction Commit | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">55</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">435</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/16442/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DC'21-Multi-shot Distributed Transaction Commit
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-19 16:05:31" itemprop="dateCreated datePublished" datetime="2022-04-19T16:05:31+08:00">2022-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-28 23:02:50" itemprop="dateModified" datetime="2025-05-28T23:02:50+08:00">2025-05-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%85%B1%E8%AF%86/" itemprop="url" rel="index"><span itemprop="name">分布式系统共识</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>10k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><span class="math display">$$
+\def\ABORT{\mathsf{ABORT}}
+\def\ACCEPT{\mathsf{ACCEPT}}
+\def\ACCEPTACK{\mathsf{ACCEPT\_ACK}}
+\def\act{\mathsf{act}}
+\def\ballot{\mathsf{ballot}}
+\def\certify{\mathtt{certify}}
+\def\client{\mathsf{client}}
+\def\COMMIT{\mathsf{COMMIT}}
+\def\committed{\mathsf{committed}}
+\def\coord{\mathsf{coord}}
+\def\dec{\mathsf{dec}}
+\def\DECIDED{\mathsf{DECIDED}}
+\def\decide{\mathtt{decide}}
+\def\DECISION{\mathsf{DECISION}}
+\def\decision{\mathsf{decision}}
+\def\FOLLOWER{\mathsf{FOLLOWER}}
+\def\follower{\mathsf{follower}}
+\def\l{\mathcal{l}}
+\def\LEADER{\mathsf{LEADER}}
+\def\leader{\mathsf{leader}}
+\def\D{\mathcal{D}}
+\def\next{\mathsf{next}}
+\def\Obj{\mathsf{Obj}}
+\def\P{\mathcal{P}}
+\def\phase{\mathsf{phase}}
+\def\PREPARE{\mathsf{PREPARE}}
+\def\PREPARED{\mathsf{PREPARED}}
+\def\PREPAREACK{\mathsf{PREPARE\_ACK}}
+\def\proc{\mathsf{proc}}
+\def\RECOVERING{\mathsf{RECOVERING}}
+\def\S{\mathcal{S}}
+\def\shards{\mathsf{shards}}
+\def\START{\mathsf{START}}
+\def\status{\mathsf{status}}
+\def\T{\mathcal{T}}
+\def\txn{\mathsf{txn}}
+\def\Val{\mathsf{Val}}
+\def\Ver{\mathsf{Ver}}
+\def\vote{\mathsf{vote}}
+$$</span></p>
+<p><strong>摘要</strong></p>
+<p>原子事务提交（ACP）是一个和一致性相似的单次协议问题，旨在模拟易出错的分布式系统的事务提交协议属性。我们认为，ACP
+限制太多以至于不能捕获现代事务数据存储的复杂性，其中提交协议和并发控制集成，并且他们对不同事务的执行是相互依赖的。作为替代方案，我们引入了传输认证服务（TCS），一个新的正式问题，它通过集成的并发控制来捕获多发事务提交协议的安全保证。TCS
+由可实例化的认证函数参数化，以支持常见的隔离级别，如可串行化和快照隔离。然后，我们推导出一个可证明正确性的弹性崩溃协议，用于通过连续改进来实现
+TCS。我们的协议比主流方法实现了更好的时间复杂度，主流方法在 Paxos
+风格的复制之上分两阶段提交。</p>
+<h2 id="概论">概论</h2>
+<p>现代数据存储通常被需要管理大量数据，同时为用户提供严格的事务保证。它们通过将数据划分为独立管理的<em>分片</em>和容错性来实现可伸缩性，方法是在一组服务器上复制每个分片。实现这样的系统需要复杂的协议来确保分布式事务满足通常称为
+ACID 的所需属性的组合：原子性，一致性，隔离性和持久性。</p>
+<p>传统上，分布式计算文献将实现这些属性的方法抽象为单独的问题：特别是保证原子性的原子提交问题（ACP）和保证隔离性的并发控制（CC）。ACP
+正式化作为一个一次性协议问题，其中涉及事务的多个分片需要就其最终结果作出决策：如果所有分片都投票提交，则决策<em>提交</em>，否则<em>放弃</em>。并发控制负责确保全局历史符合所需的隔离级别。在典型的实现中，每个分片跟踪事务访问的本地对象，并根据本地观察到的与其他活动事务的冲突确定其对事务结果的投票（提交或放弃）。虽然
+ACP 和 CC
+都必须在任何现实的事务处理系统中解决，但它们在现有文献中被视为不相交的。特别是，ACP
+的解决方案将投票视为问题的输入，并把与负责产生投票的 CC
+进行交互这件事遗留在问题范围之外。</p>
+<p>然而，这种分离过于简单，无法捕捉到许多实际实现的复杂性，其中提交协议和并发控制紧密集成，因此可能会以微妙的方式相互影响。例如，考虑经典的<em>两阶段提交</em>（2PC）协议，用于解决可靠进程之间的
+ACP。事务处理系统通常为每个事务执行一个 2PC 实例。当管理分片 <span class="math inline"><em>s</em></span> 的进程 <span class="math inline"><em>p</em><sub><em>i</em></sub></span> 收到一个事务
+<span class="math inline"><em>t</em></span>
+时，它会执行一个本地并发控制检查并相应地投票提交或中止 <span class="math inline"><em>t</em></span>。不同进程的投票 <span class="math inline"><em>t</em></span>
+被聚合，然后最终决定分发给所有进程。如果 <span class="math inline"><em>p</em><sub><em>i</em></sub></span> 投票支持
+<span class="math inline"><em>t</em></span>，只要它不知道对 <span class="math inline"><em>t</em></span> 的最终决定，它就必须保守地假定
+<span class="math inline"><em>t</em></span> 已提交。这可能会导致 <span class="math inline"><em>p</em><sub><em>i</em></sub></span> 在另一个 2PC
+实例中为与 <span class="math inline"><em>t</em></span> 冲突的事务 <span class="math inline"><em>t</em>′</span> 投票中止，即使最终 <span class="math inline"><em>t</em></span> 被中止。在这种情况下，一个 2PC
+实例（对于 <span class="math inline"><em>t</em>′</span>）的结果取决于另一个实例（对于
+<span class="math inline"><em>t</em></span>）执行的内部结构和使用的并发控制策略。</p>
+<p>目前，缺乏一个正式的框架来捕捉实际实现的这些复杂方面使得它们难以理解和证明。在本文中，我们迈出了弥合这一差距的第一步。我们介绍了事务认证服务（TCS，第
+2
+节），这是一个新的正式问题，用于捕获具有集成并发控制的多次事务提交协议的安全保证。TCS
+暴露了一个简单的接口，允许客户端通过一个返回提交或放弃的 <span class="math inline">$\certify$</span> 请求提交事务以进行认证。TCS
+旨在用于具有乐观并发控制的事务处理系统的上下文中，其中首先乐观地执行事务，然后将结果（例如，读取和写入集）提交给
+TCS 以进行认证。与 ACP 相比，TCS 对重复调用 <span class="math inline">$\certify$</span>
+的数量或其并发性没有任何限制。因此，它自然有助于将事务提交和并发控制之间的交互形式化。为此，TCS
+由一个认证函数参数化，该函数封装了所需隔离级别的并发控制策略，例如可串行化和快照隔离。然后通过要求其认证决策与认证功能一致来制定
+TCS 的正确性。</p>
+<p>我们利用 TCS
+开发一个正式的框架，用于构建具有可定制隔离级别的可证明正确的多次事务提交协议。我们框架的核心是一个新的<em>多次两阶段提交协议</em>（第
+3 节）。它形式化了经典 2PC
+如何与许多实际事务处理系统中的并发控制交互，其方式在提供的隔离级别中是参数化的。该协议还用作派生更复杂的
+TCS
+实现的模板。我们证明了多次两阶段提交协议正确地实现了具有给定认证功能的
+TCS，前提是每个分片使用的并发控制策略与此函数匹配。</p>
+<p>接下来，我们提出了一个<em>崩溃容错</em> TCS
+实现，并通过证明它模拟多次 2PC（第 4 节）来确定其正确性。使 2PC
+容错的一种常见方法是让每个分片使用复制协议（例如 Paxos）来模拟可靠的 2PC
+进程。与最近的工作类似，我们的实现通过将 2PC 和 Paxos
+编织在一起来优化该方案的时间复杂度。特别是，我们的协议避免持续复制 2PC
+协调者，以换取协调者单方面中止事务的能力。反过来，这允许消除普通容错 2PC
+中所需的 Paxos
+一致性，以在分片上保留对事务的最终决策：如果发生故障，可以从分片的当前状态重建决策。与以前遵循相同设计的协议相比，我们的协议在隔离级别上是通用的，并且经过严格证明是正确的。因此，它可以作为未来分布式事务提交实现的参考解决方案。此外，我们协议的一个变体具有与一致性和非阻塞原子提交的下限相匹配的时间复杂度。</p>
+<p>我们协议的一个特性使得证明其正确性变得特别微妙，即避免就事务的最终决策达成共识，而是将决策异步传播到相关的分片副本。这意味着不同的分片副本可能在不同的时间收到决策，因此它们的状态可能不一致。为了解决这个问题，在我们的协议中，投票由单个分片<em>领导者</em>根据可用的信息在本地计算；
+其他进程仅存储投票。这种被动复制方法在设计从领导者故障中恢复的方式并证明其正确性时要小心。</p>
+<h2 id="事务确认服务tcs">事务确认服务（TCS）</h2>
+<h3 id="接口">接口</h3>
+<p><em>事务认证服务</em> （TCS）接受来自 <span class="math inline">$\T$</span> 的事务并从 <span class="math inline">$\D
+= \{ \ABORT, \COMMIT\}$</span>
+产生<em>决策</em>。客户端使用两种类型的<em>操作</em>与 TCS 交互：形式为
+<span class="math inline">$\certify(t)$</span> 的认证请求，其中 <span class="math inline">$t \in \T$</span>，以及形式为 <span class="math inline">$\decision(t, d)$</span> 的响应，其中 <span class="math inline">$d \in \D$</span>。</p>
+<p>在本文中，我们关注使用（向后）乐观并发控制的事务处理系统。因此，我们假设提交给
+TCS 的事务包括其乐观执行产生的所有信息。例如，考虑一个事务系统管理集合
+<span class="math inline">$\Obj$</span> 中具有集合 <span class="math inline">$\Val$</span>
+中的值的<em>对象</em>，其中事务可以对对象执行读取和写入。这些对象与一个完全有序的<em>版本</em>集合
+<span class="math inline">$\Ver$</span>
+相关联，该集合具有一个可区分的最低版本 <span class="math inline"><em>v</em><sub>0</sub></span>。那么提交给 TCS
+的每个事务 <span class="math inline"><em>t</em></span>
+可能与以下数据相关联：</p>
+<ul>
+<li>读集 <span class="math inline">$R(t) \subseteq \Obj \times
+\Ver$</span>：<span class="math inline"><em>t</em></span>
+读取的对象及其版本的集合，每个对象包含一个版本。</li>
+<li>写集 <span class="math inline">$W(t) \subseteq \Obj \times
+\Val$</span>：<span class="math inline"><em>t</em></span>
+写入的具有其值的对象集合，其中每个对象包含一个值。我们要求任何写入的对象也已被读取：<span class="math inline">∀(<em>x</em>,_) ∈ <em>W</em>(<em>t</em>).(<em>x</em>,_) ∈ <em>R</em>(<em>t</em>)</span>。</li>
+<li>提交版本 <span class="math inline">$V_c(t) \in \Ver$</span>：分配给
+<span class="math inline"><em>t</em></span>
+写入的版本。我们要求此版本高于读取的任何版本：<span class="math inline">∀(_,<em>v</em>) ∈ <em>R</em>(<em>t</em>).<em>V</em><sub><em>c</em></sub>(<em>t</em>) &gt; <em>v</em></span>。</li>
+</ul>
+<h3 id="认证函数">认证函数</h3>
+<p>TCS 由认证函数 <span class="math inline"><em>f</em> : 2<sup>𝒯</sup> × 𝒯 → 𝒟</span>
+参数化，该函数封装了所需隔离级别的并发控制策略。结果 <span class="math inline"><em>f</em>(<em>T</em>,<em>t</em>)</span>
+是给定先前提交的事务 <span class="math inline"><em>T</em></span>
+的集合对事务 <span class="math inline"><em>t</em></span>
+的决策。我们要求 <span class="math inline"><em>f</em></span>
+在以下意义上是<em>分布式</em>的：</p>
+<p><span class="math display">$$
+\forall T_1, T_2, t. f(T_1 \cup T_2, t) = f(T_1, t) \sqcap f(T_2, t)
+\tag 1
+$$</span></p>
+<p>其中操作符 <span class="math inline">⊓</span> 定义如下：<span class="math inline">$\COMMIT \sqcap \COMMIT= \COMMIT$</span> 并且对任何
+<span class="math inline"><em>d</em></span>，<span class="math inline">$d \sqcap \ABORT = \ABORT$</span>
+这个要求是合理的，因为 <span class="math inline"><em>f</em>(<em>T</em>,<em>t</em>)</span>
+的通用定义分别检查 <span class="math inline"><em>t</em></span> 是否与
+<span class="math inline"><em>T</em></span> 中的每个事务发生冲突。</p>
+<p>例如，给定上述事务域，以下认证函数封装了可串行化的经典并发控制策略：
+<span class="math inline">$f(T, t) = \COMMIT$</span> 当且仅当 <span class="math inline"><em>t</em></span> 读取的版本都没有被 <span class="math inline"><em>T</em></span> 中的事务覆盖，即，</p>
+<p><span class="math display">$$
+\forall x,v.(x,v) \in R(t) \Rightarrow (\forall t'. \in T.(x, \_) \in
+W(t') \Rightarrow V_c(t') \le v). \tag 2
+$$</span></p>
+<p>快照隔离（SI）的认证函数类似，但将认证检查限制在事务 <span class="math inline"><em>t</em></span> 写入的对象：<span class="math inline">$f(T, t) = \COMMIT$</span> 当且仅当</p>
+<p><span class="math display">$$
+\forall x,v.(x,v) \in R(t) \wedge (x, \_) \in W(t) \Rightarrow (\forall
+t' \in T.(x, \_) \in W(t') \Rightarrow V_c(t') \le v). \tag 3
+$$</span></p>
+<p>很容易检查认证函数 (2) 和 (3) 是分布式的。</p>
+<h3 id="历史">历史</h3>
+<p>我们使用<em>历史</em>来表示 TCS
+执行——验证和决定动作的有限序列，使得每个事务最多出现一次作为 <span class="math inline">$\certify$</span>
+的参数，并且每个决定动作都是对前一个验证动作的响应。对于历史 <span class="math inline"><em>h</em></span>，我们让 <span class="math inline">$\act(h)$</span> 是 <span class="math inline"><em>h</em></span> 中的动作集合。对于动作 <span class="math inline"><em>a</em></span>，<span class="math inline">$a' \in
+\act(h)$</span>，当 <span class="math inline"><em>a</em></span> 出现在
+<span class="math inline"><em>h</em></span> 中的 <span class="math inline"><em>a</em>′</span> 之前，我们写 <span class="math inline"><em>a</em>≺<sub><em>h</em></sub><em>a</em>′</span>。如果其中的每个
+<span class="math inline">$\certify$</span> 动作都具有匹配的 <span class="math inline">$\decide$</span> 动作，则历史 <span class="math inline"><em>h</em></span>
+是<em>完整的</em>。如果一个完整的历史由连续的 <span class="math inline">$\certify$</span> 和匹配 <span class="math inline">$\decide$</span>
+动作对组成，则该历史是<em>连续的</em>。如果 <span class="math inline"><em>h</em></span> 包含 <span class="math inline">$\decision(t, \COMMIT)$</span>，则事务 <span class="math inline"><em>t</em></span> 在历史 <span class="math inline"><em>h</em></span> 中<em>提交</em>。我们用 <span class="math inline">$\committed(h)$</span> 表示 <span class="math inline"><em>h</em></span> 到对应在 <span class="math inline"><em>h</em></span>
+中提交的事务的动作的投影。对于完整的历史 <span class="math inline"><em>h</em></span>，<span class="math inline"><em>h</em></span> 的<em>线性化</em> <span class="math inline">𝓁</span> 是一个顺序历史，使得：</p>
+<ol type="1">
+<li><span class="math inline"><em>h</em></span> 和 <span class="math inline"><em>l</em></span> 包含相同的动作</li>
+<li><span class="math inline">$\forall t, t'. \decide(t,\_) \prec_ h
+\certify(t') \Rightarrow \decide(t, \_) \prec_l
+\certify(t').$</span></li>
+</ol>
+<h3 id="tcs-正确性">TCS 正确性</h3>
+<p>一个完整的序列历史 <span class="math inline"><em>h</em></span>
+对于一个认证函数 <span class="math inline"><em>f</em></span>
+是合法的，如果它的证明决定是根据 <span class="math inline"><em>f</em></span> 计算的： <span class="math inline">$\forall a = \decide(t, d) \in \act(h). d = f(\{t'
+\mid \decide(t', \COMMIT) \prec_h a \}, t).$</span></p>
+<p>如果 <span class="math inline">$h \mid \committed(h)$</span>
+具有合法的线性化，则历史 h 关于 f
+是<em>正确的</em>。如果所有历史记录都是正确的，则 TCS 实现对于 <span class="math inline"><em>f</em></span> 是<em>正确的</em>。</p>
+<h3 id="使用-tcs-规范">使用 TCS 规范</h3>
+<p>可以在事务处理系统 (TPS) 中轻松使用正确的
+TCS。例如，考虑前面定义的事务域。基于乐观并发控制的典型 TPS
+将确保提交的认证事务读取数据库中已经存在的版本。形式上，这意味着对于由
+TCS 接口的动作引起的每个历史 <span class="math inline"><em>h</em></span>，该命题成立：如果 <span class="math inline"><em>t</em></span> 是一个事务，使得 <span class="math inline">$\certify(t)$</span> 发生在 <span class="math inline"><em>h</em></span> 中，并且 <span class="math inline">(<em>x</em>,<em>v</em>) ∈ <em>R</em>(<em>t</em>)</span>，那么存在一个事务
+<span class="math inline"><em>t</em>′</span> 使得 <span class="math inline">(<em>x</em>,_) ∈ <em>W</em>(<em>t</em>′) ∧ <em>V</em><sub><em>c</em></sub>(<em>t</em>′) = <em>v</em></span>，并且
+<span class="math inline"><em>h</em></span> 在 <span class="math inline">$\certify(t)$</span> 之前包含了 <span class="math inline">$\decision(t ,
+\COMMIT)$</span>。很容易看出，这意味着如果 <span class="math inline"><em>h</em></span> 对于可序列化性 (2)
+的认证函数是正确的，那么按照 <span class="math inline"><em>h</em></span>
+的合法线性化的规定，对提交的事务进行排序会产生正确的序列历史：由事务
+<span class="math inline"><em>t</em></span>
+读取的每个对象的值是由最近的先前事务写入该对象的值。因此，关于认证功能（2）正确的
+TCS 确实可以用于实现 可序列化的 TPS。</p>
+<h2 id="多次-2pc-和本地分片认证函数">多次 2PC 和本地分片认证函数</h2>
+<p>我们现在展示经典两阶段提交 (2PC)
+协议的多次版本，它是每个分片使用的并发控制策略中的参数。然后，我们证明该协议实现了由给定认证函数参数化的正确事务认证服务，前提是每个分片的并发控制与该函数匹配。与
+2PC 一样，我们的协议假设过程可靠。在下一节中，我们通过证明它模拟多次 2PC
+的行为来确定允许崩溃的协议的正确性。</p>
+<h3 id="系统模型">系统模型</h3>
+<p>我们考虑一个由一组进程 <span class="math inline">$\P$</span>
+组成的异步消息传递系统。在本节中，我们假设进程是可靠的，并且通过可靠的
+FIFO 通道连接。我们假设一个函数 <span class="math inline">$\client: \T
+\to \P$</span> 确定发出给定事务的客户端进程。系统管理的数据从集合 <span class="math inline">$\S$</span> 中被划分为分片。一个函数 <span class="math inline">$\shards: \T→ 2^\S$</span>
+确定需要证明给定事务的分片集合，通常是存储事务访问的数据的分片。每个分片
+<span class="math inline">$s \in \S$</span> 由进程 <span class="math inline">$\proc(s) \in \P$</span>
+管理。为简单起见，我们假设分片和进程之间存在一对一的映射。我们有时将
+<span class="math inline">$\proc$</span>
+应用于一组分片，以获得管理它们的一组进程。</p>
+<h3 id="一般情况协议">一般情况协议</h3>
+<p>我们在图 1 中给出了协议的伪代码，并在图 2a 中说明了它的消息流。图 1
+中的每个处理程序都是原子执行的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp">next=<span class="hljs-number">-1</span><br>txn[] (from N to T)<br>vote[] (from N to &#123;COMMIT, ABORT&#125;)<br>dec[] (from N to &#123;COMMIT, ABORT&#125;)<br></code></pre></td></tr></table></figure>
+<figure>
+<img src="/16442/Fig1.png" alt="Fig1">
+<figcaption aria-hidden="true">Fig1</figcaption>
+</figure>
+<p>为了验证事务 <span class="math inline"><em>t</em></span>，客户端在
+<span class="math inline">$\PREPARE$</span> 消息中将其发送到相关分片（第
+6
+行）。管理分片的进程将收到的所有事务安排到一个总的认证订单中，存储在一个数组
+<span class="math inline">$\txn$</span> 中；<span class="math inline">$\next$</span>
+变量指向数组中最后一个填充的插槽。收到事务 <span class="math inline"><em>t</em></span>（第 8 行）后，进程将 <span class="math inline"><em>t</em></span> 存储在 <span class="math inline">$\txn$</span>
+的下一个空闲槽中。该进程还计算其<em>投票</em>，说明是 <span class="math inline">$\COMMIT$</span> 还是 <span class="math inline">$\ABORT$</span> 事务，并将其存储在数组 <span class="math inline">$\vote$</span>
+中。我们按照以下方式解释投票计算；直观地说，投票是由事务 <span class="math inline"><em>t</em></span>
+是否与之前收到的事务冲突来决定的。在管理分片 <span class="math inline"><em>s</em></span> 的进程收到 <span class="math inline"><em>t</em></span> 后，我们说 <span class="math inline"><em>t</em></span> 在 <span class="math inline"><em>s</em></span> 处<em>准备好</em>。该进程在数组
+<span class="math inline">$\phase$</span> 跟踪事务状态，其条目最初存储
+<span class="math inline">$\START$</span>，一旦事务准备好，就会更改为
+<span class="math inline">$\PREPARED$</span>。准备好事务 <span class="math inline"><em>t</em></span> 后，该过程发送一个 <span class="math inline">$\PREPAREACK$</span>
+消息，其中包含其在认证顺序中的位置和给 <span class="math inline"><em>t</em></span>
+的<em>协调者</em>的投票。该过程由该函数确定： <span class="math inline">$\coord: \T \to \P$</span> 使得 <span class="math inline">$\forall t.\coord(t) \in
+\proc(\shards(t))$</span>。</p>
+<p>事务 <span class="math inline"><em>t</em></span>
+的协调者一旦从其每个分片 <span class="math inline"><em>s</em></span>
+接收到针对 <span class="math inline"><em>t</em></span> 的 <span class="math inline">$\PREPAREACK$</span> 消息就会采取行动，该消息携带
+<span class="math inline"><em>s</em></span> 的投票 <span class="math inline"><em>d</em><sub><em>s</em></sub></span>（第 14
+行）。协调者使用 <span class="math inline">⊓</span> 算子（第 2
+节）计算关于 <span class="math inline"><em>t</em></span>
+的最终决定，并将其以 <span class="math inline">$\DECISION$</span>
+消息的形式发送给客户端和所有相关分片。当进程接收到事务的决定时（第 18
+行），它将决定存储在 <span class="math inline">$\dec$</span>
+数组中，并将事务的阶段推进到 <span class="math inline">$\DECIDED$</span>。请注意，我们不允许协调者单方面中止事务：这可以最大限度地减少我们在第
+4 节中介绍的协议的容错版本中的延迟。</p>
+<h3 id="投票计算">投票计算</h3>
+<p>管理分片 <span class="math inline"><em>s</em></span>
+的进程将投票计算为两个<em>分片本地认证函数</em> <span class="math inline">$f_s:s^{\T} \times \T \to \D$</span> 和 <span class="math inline">$g_s:s^{\T} \times \T \to \D$</span> 的结合。与第 2
+节的认证函数不同，分片本地认证函数仅用于检查由 <span class="math inline"><em>s</em></span>
+管理的对象上的冲突。他们将已经决定在分片上提交的事务集以及仅准备提交的事务集作为第一个参数（第
+11 行）。我们要求上述函数是分布式的，类似于（1）。</p>
+<p>例如，考虑第 2 节中给出的事务模型。并假设对象集 <span class="math inline">$\Obj$</span> 在分片之间进行分区：<span class="math inline">$\Obj = \uplus _{s \in \S}
+\Obj_s$</span>。那么为可串行化定义分片本地认证函数的一种可能方法如下：<span class="math inline">$f_s(T, t) = \COMMIT$</span> 当且仅当：</p>
+<p><span class="math display">$$
+\forall x \in \Obj_s . \forall v.(x, v) \in R(t) \Rightarrow  (\forall
+t' \in T.(x,\_)\in W(t') \Rightarrow V_c(t') \le v), \tag 4
+$$</span></p>
+<p>并且 <span class="math inline">$g_s(T, t) = \COMMIT$</span>
+当且仅当：</p>
+<p><span class="math display">$$
+\forall x \in \Obj_s. \forall v. \\
+((x, \_)\in R(t) \Rightarrow (\forall t' \in T.(x,\_)\notin W(t')))
+\wedge \\
+((x, \_)\in W(t) \Rightarrow (\forall t' \in T.(x,\_)\notin R(t'))) \tag
+5
+$$</span></p>
+<figure>
+<img src="/16442/Fig2.png" alt="Fig2">
+<figcaption aria-hidden="true">Fig2</figcaption>
+</figure>
+<h3 id="遗忘和回忆决策">遗忘和回忆决策</h3>
+<p>图 1 中的协议在 21 行和 24
+行有两个额外的函数，它们并不确定性地执行。在第 4
+部分我们将展示，这些是为了抽象协议能够捕捉乐观容错 TCS
+实现的行为。因为进程被破坏，这些执行可能临时丢失和最终决策有关的信息，并且之后从相关的分片的投票重构它。同时，正如我们之前解释过的，决策的丢失可能影响到一些投票计算。21
+行的函数遗忘某一事务的决策（而不是投票）。24
+行的函数允许进程向协调者重新发送他们知道的投票，这些协调者之后会重新发送最终决策（14
+行）。这让遗忘决策的进程从相关分片存储的投票重构它。</p>
+<h3 id="正确性">正确性</h3>
+<p>如果 <span class="math inline"><em>f</em><sub><em>s</em></sub></span>
+和 <span class="math inline"><em>g</em><sub><em>s</em></sub></span>
+给出的本地分片确认并发控制与（6）-（8）描述的全局认证函数 <span class="math inline"><em>f</em></span>
+给出的分片不可知并发控制相关，下面的定理确定了多次 2PC 的正确性。</p>
+<p>定理略。</p>
+<h2 id="容错提交协议">容错提交协议</h2>
+<h3 id="系统模型-1">系统模型</h3>
+<p>我们现在通过允许进程因崩溃而失败（即永久停止执行）来削弱上一节的假设。
+我们仍然假设进程是通过可靠的 FIFO 通道连接的，在以下意义上：消息按 FIFO
+顺序传递，并且非故障进程之间的消息保证最终传递。 每个分片 <span class="math inline"><em>s</em></span> 现在由一组 <span class="math inline">2<em>k</em> + 1</span> 个进程管理，其中最多 <span class="math inline"><em>k</em></span> 个可能失败。我们称这组中的一组
+<span class="math inline"><em>k</em> + 1</span> 个进程为 <span class="math inline"><em>s</em></span> 的法定人数。对于一个分片 <span class="math inline"><em>s</em></span>，我们将 <span class="math inline">$\proc(s)$</span>
+重新定义为管理此分片的一组进程。为简单起见，我们假设管理不同分片的进程组是不相交的。</p>
+<h3 id="一般协议">一般协议</h3>
+<p>在上述模型中实现 TCS 的一种直接方法是使用状态机复制使分片模拟多次 2PC
+中的可靠过程； 这通常基于共识协议，例如
+Paxos。在这种情况下，永远不会忘记事务的最终决定，因此不会模拟第 21
+行和第 24
+行的处理程序。尽管这种方法被多个系统使用，但多名研究人员观察到，由此产生的协议需要大量不必要的消息延迟。即，图
+2a 中的多次 2PC
+的每个动作都需要额外往返同一分片中的一组进程以保持其效果，从而产生图 2b
+中的消息流图。
+请注意，协调者的操作也必须被复制，因为如果协调者宕机，多次 2PC
+将阻塞。生成的协议需要 7 次消息延迟，客户端才能了解事务决策。</p>
+<h3 id="优化的协议概述">优化的协议概述</h3>
+<p>在图 5 中，我们给出了一个提交协议，该协议通过将跨分片的多次 2PC
+和每个分片内的类 Paxos 协议编织在一起来减少消息延迟的数量。
+我们从代码中省略了与消息重传相关的细节。我们在图 2c
+中说明了协议的消息流，并在图 6
+中总结了其正确性证明中使用的关键不变量。</p>
+<p>一个进程维护与多次 2PC 协议中相同的变量（图 1）和一些额外的变量。
+分片中的每个进程要么是分片的领导者，要么是追随者。
+如果领导者失败，则其中一个追随者接管。<span class="math inline">$\status$</span> 变量记录进程是 <span class="math inline">$\LEADER$</span> 状态、<span class="math inline">$\FOLLOWER$</span>
+状态，还是处于领导者更改期间使用的特殊 <span class="math inline">$\RECOVERING$</span> 状态。 使用整数 <span class="math inline">$\ballot$</span> 表示特定进程充当领导者的一段时间。
+对于 <span class="math inline"><em>b</em> ≥ 1</span> 的选票，进程 <span class="math inline">$\leader(b) = ((b - 1) \mod (2 f + 1))$</span>
+是选票的领导者。我们使用整组整数作为选票，因为给定的进程可能多次扮演领导者的角色。
+在任何给定时间，一个进程都参与一个单一的投票，该投票存储在一个变量 <span class="math inline"><em>c</em><em>b</em><em>a</em><em>l</em><em>l</em><em>o</em><em>t</em></span>
+中并且永远不会减少。在领导者更换期间，我们还使用额外的选票变量 <span class="math inline">$\ballot$</span>。</p>
+<p>与图 2b 中所示的一般协议不同，我们的协议不执行共识以将 <span class="math inline">$\DECISION$</span>
+消息的内容持久保存在分片中。相反，事务的最终决定被异步发送给每个相关分片的成员。这意味着不同的分片成员可能会在不同的时间收到关于事务的决定。由于对事务的最终决定会影响在认证顺序中跟随它的事务的投票计算（第
+3
+节），因此在不同的分片成员上计算对后续事务的投票可能会产生不同的结果。为了解决这个问题，在我们的协议中，只有领导者构建认证顺序并计算投票。追随者是被动的：他们只是复制领导者的决定。一旦分片的领导者收到最终决定，就会在分片的投票计算中考虑它。</p>
+<h3 id="无故障案例">无故障案例</h3>
+<p>为了验证事务 <span class="math inline"><em>t</em></span>，客户端在
+<span class="math inline">$\PREPARE$</span> 消息中将其发送到相关分片（第
+10 行）。 进程 <span class="math inline"><em>p</em><sub><em>i</em></sub></span>
+仅在它是其分片 <span class="math inline"><em>s</em><sub>0</sub></span>
+的领导者时才处理消息（第 12 行）。 我们推迟描述当另一个进程 <span class="math inline"><em>p</em><sub><em>j</em></sub></span> 正在向 <span class="math inline"><em>p</em><sub><em>i</em></sub></span> 重新发送
+<span class="math inline">$\PREPARE$</span> 消息（第 13 行）以及 <span class="math inline"><em>p</em><sub><em>i</em></sub></span> 过去已经收到
+<span class="math inline"><em>t</em></span> 时（第 15 行）的情况。</p>
+<p>在接收到 <span class="math inline">$\PREPARE(t)$</span> 后，领导者
+<span class="math inline"><em>p</em><sub><em>i</em></sub></span>
+首先确定一个进程 <span class="math inline"><em>p</em></span>，它将作为
+<span class="math inline"><em>t</em></span>
+的协调者。如果领导者第一次收到 <span class="math inline"><em>t</em></span>（第 17 行），那么与多镜头 2PC
+类似，它附加 <span class="math inline"><em>t</em></span>到认证订单并根据本地可用信息计算投票。领导者接下来执行
+Paxos 的“阶段 2”的类似操作，试图说服其分片 <span class="math inline"><em>s</em><sub>0</sub></span>
+接受它的提议。为此，它向 <span class="math inline"><em>s</em><sub>0</sub></span> 发送 <span class="math inline">$\ACCEPT$</span>
+消息（包括它自己，为了统一），这类似于 Paxos 的“2a”消息（第 23
+行）。该消息携带领导者的选票、事务 <span class="math inline"><em>t</em></span>、它在认证顺序中的位置、投票和
+<span class="math inline"><em>t</em></span>
+的协调者的身份。领导者代码确保图 6 中的<em>不变量 1</em>：在给定的选票 b
+中，可以将唯一的事务-投票对分配给认证顺序中的插槽 <span class="math inline"><em>k</em></span>。</p>
+<p>只有当一个进程参与相应的投票（第 25 行）时，它才会处理 <span class="math inline">$\ACCEPT$</span> 消息。如果进程之前没有听说过 <span class="math inline"><em>t</em></span>，它会存储事务和投票，并将事务的阶段推进到准备就绪。然后它向
+<span class="math inline"><em>t</em></span> 的协调器发送 <span class="math inline">$\ACCEPTACK$</span> 消息，类似于 Paxos
+的“2b”消息。这确认该过程已接受事务和投票。追随者的认证顺序始终是追随者所在选票的领导者的认证顺序的前缀，如不变量
+2 所示。当追随者接收到 <span class="math inline">$\ACCEPT$</span>
+消息时，由于通道的 FIFO 排序，该不变量被保留。</p>
+<p>事务 <span class="math inline"><em>t</em></span>
+的协调者一旦从它的每个分片 <span class="math inline">$s \in
+\shards(t)$</span> 接收到 <span class="math inline"><em>t</em></span> 的
+<span class="math inline">$\ACCEPTACK$</span>
+消息的法定人数就会采取行动，这些分片携带 <span class="math inline"><em>s</em></span> 的投票 <span class="math inline"><em>d</em><sub><em>s</em></sub></span>（第 31
+行）。协调器计算关于 <span class="math inline"><em>t</em></span>
+的最终决策，并将其在 <span class="math inline">$\DECISION$</span>
+消息中发送给客户端和每个相关分片。当一个进程收到一个事务的决定时（第 35
+行），该进程将它存储起来并将事务的阶段推进到决定。请注意，与第 3
+节中的多镜头 2PC
+协议一样。协调者不能单方面中止事务。一旦事务的最终决定被传递给分片的领导者，它就会在该分片的未来投票计算中被考虑在内。以可序列化（4）和（5）的分片本地函数为例，如果写入对象
+<span class="math inline"><em>x</em></span>
+的事务最终决定中止，那么将此决定传递给领导者可能会允许另一个写入 <span class="math inline"><em>x</em></span> 的事务提交。</p>
+<h3 id="领导者恢复">领导者恢复</h3>
+<h3 id="协调者恢复">协调者恢复</h3>
+<h3 id="优化">优化</h3>
+<h3 id="协议正确性">协议正确性</h3>
+<h2 id="相关工作">相关工作</h2>
+<h2 id="结论">结论</h2>
+<p>在本文中，我们迈出了在现代事务处理系统中构建分布式事务提交理论的第一步，该理论捕获了原子提交和并发控制之间的交互。我们提出了一个事务认证服务的新问题，以及一个在可靠进程之间解决它的抽象协议。由此，我们系统地推导出了一个可证明正确的优化容错协议。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/63328/" rel="prev" title="README">
+      <i class="fa fa-chevron-left"></i> README
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/56159/" rel="next" title="CMU 数据库系统-分布式数据库导论">
+      CMU 数据库系统-分布式数据库导论 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">概论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%A1%AE%E8%AE%A4%E6%9C%8D%E5%8A%A1tcs"><span class="nav-number">2.</span> <span class="nav-text">事务确认服务（TCS）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.1.</span> <span class="nav-text">接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A4%E8%AF%81%E5%87%BD%E6%95%B0"><span class="nav-number">2.2.</span> <span class="nav-text">认证函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2"><span class="nav-number">2.3.</span> <span class="nav-text">历史</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcs-%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">2.4.</span> <span class="nav-text">TCS 正确性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-tcs-%E8%A7%84%E8%8C%83"><span class="nav-number">2.5.</span> <span class="nav-text">使用 TCS 规范</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%AC%A1-2pc-%E5%92%8C%E6%9C%AC%E5%9C%B0%E5%88%86%E7%89%87%E8%AE%A4%E8%AF%81%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">多次 2PC 和本地分片认证函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">系统模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%83%85%E5%86%B5%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.2.</span> <span class="nav-text">一般情况协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%95%E7%A5%A8%E8%AE%A1%E7%AE%97"><span class="nav-number">3.3.</span> <span class="nav-text">投票计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%97%E5%BF%98%E5%92%8C%E5%9B%9E%E5%BF%86%E5%86%B3%E7%AD%96"><span class="nav-number">3.4.</span> <span class="nav-text">遗忘和回忆决策</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">3.5.</span> <span class="nav-text">正确性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E9%94%99%E6%8F%90%E4%BA%A4%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">容错提交协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%A8%A1%E5%9E%8B-1"><span class="nav-number">4.1.</span> <span class="nav-text">系统模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.2.</span> <span class="nav-text">一般协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E7%9A%84%E5%8D%8F%E8%AE%AE%E6%A6%82%E8%BF%B0"><span class="nav-number">4.3.</span> <span class="nav-text">优化的协议概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E6%95%85%E9%9A%9C%E6%A1%88%E4%BE%8B"><span class="nav-number">4.4.</span> <span class="nav-text">无故障案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%86%E5%AF%BC%E8%80%85%E6%81%A2%E5%A4%8D"><span class="nav-number">4.5.</span> <span class="nav-text">领导者恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E8%B0%83%E8%80%85%E6%81%A2%E5%A4%8D"><span class="nav-number">4.6.</span> <span class="nav-text">协调者恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96"><span class="nav-number">4.7.</span> <span class="nav-text">优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E6%AD%A3%E7%A1%AE%E6%80%A7"><span class="nav-number">4.8.</span> <span class="nav-text">协议正确性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-number">5.</span> <span class="nav-text">相关工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">6.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">435</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.labelray.top/" title="https:&#x2F;&#x2F;blog.labelray.top&#x2F;" rel="noopener" target="_blank">北美双学位顶会人-Labelray</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.6m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">39:51</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
