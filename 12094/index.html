@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="适配器模式 模式动机   在软件开发中采用类似于电源适配器的设计和编码技巧被称为适配器模式。 通常情况下，客户端可以通过目标类的接口访问它所提供的服务。有时，现有的类可以满足客户类的功能需要，但是它所提供的接口不一定是客户类所期望的，这可能是因为现有类中方法名与目标类中定义的方法名不一致等原因所导致的。 在这种情况下，现有的接口需要转化为客户类期望的接口，这样保证了对现有类的重用。如果不进行这样的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件详细设计-07-适配器模式和组合模式">
+<meta property="og:url" content="https://eaglebear2002.github.io/12094/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="适配器模式 模式动机   在软件开发中采用类似于电源适配器的设计和编码技巧被称为适配器模式。 通常情况下，客户端可以通过目标类的接口访问它所提供的服务。有时，现有的类可以满足客户类的功能需要，但是它所提供的接口不一定是客户类所期望的，这可能是因为现有类中方法名与目标类中定义的方法名不一致等原因所导致的。 在这种情况下，现有的接口需要转化为客户类期望的接口，这样保证了对现有类的重用。如果不进行这样的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611160409519.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102349666.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102403121.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102417444.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102432733.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102447774.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102501104.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/8-1686484548868-982.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170809493.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170814527.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230609102730137.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/11-1686484548868-983.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170421101.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/12-1686484548868-984.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/13-1686484548868-985.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170837303.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/15-1686484548868-986.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/07%E9%96%AB%E5%82%9E%E5%8E%A4%E9%8D%A3%E3%84%A4%E7%AC%8C%E7%BC%81%E5%8B%AB%E6%82%8E-1686484548868-987.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170645952.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12094/image-20230611170659360.png">
+<meta property="article:published_time" content="2023-06-09T02:22:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.698Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/12094/image-20230611160409519.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/12094/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件详细设计-07-适配器模式和组合模式 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/12094/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件详细设计-07-适配器模式和组合模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-09 10:22:00" itemprop="dateCreated datePublished" datetime="2023-06-09T10:22:00+08:00">2023-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="适配器模式">适配器模式</h2>
+<h3 id="模式动机">模式动机</h3>
+<p><img src="/12094/image-20230611160409519.png" alt></p>
+<ol>
+<li>在软件开发中采用类似于电源适配器的设计和编码技巧被称为适配器模式。</li>
+<li>通常情况下，客户端可以通过目标类的接口访问它所提供的服务。有时，现有的类可以满足客户类的功能需要，但是它所提供的接口不一定是客户类所期望的，这可能是因为现有类中方法名与目标类中定义的方法名不一致等原因所导致的。</li>
+<li>在这种情况下，现有的接口需要转化为客户类期望的接口，这样保证了对现有类的重用。如果不进行这样的转化，客户类就不能利用现有类所提供的功能，适配器模式可以完成这样的转化。</li>
+<li>在适配器模式中可以定义一个包装类，包装不兼容接口的对象，这个包装类指的就是适配器（Adapter），它所包装的对象就是适配者（Adaptee），即被适配的类。</li>
+<li>适配器提供客户类需要的接口，适配器的实现就是把客户类的请求转化为对适配者的相应接口的调用。也就是说：当客户类调用适配器的方法时，在适配器类的内部将调用适配者类的方法，而这个过程对客户类是透明的，客户类并不直接访问适配者类。因此，适配器可以使由于接口不兼容而不能交互的类可以一起工作。这就是适配器模式的模式动机。</li>
+</ol>
+<h3 id="模式定义">模式定义</h3>
+<ol>
+<li>适配器模式（Adapter Pattern）：将一个接口转换成客户希望的另一个接口，适配器模式使接口不兼容的那些类可以一起工作，其别名为包装器（Wrapper）。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。</li>
+<li>Adapter Pattern: Convert the interface of a class into another interface clients expect. Adapter lets classes work together that couldn't otherwise because of incompatible interfaces.</li>
+</ol>
+<h3 id="模式结构">模式结构</h3>
+<ol>
+<li>对象适配器</li>
+</ol>
+<img src="/12094/image-20230609102349666.png" style="zoom: 67%;">
+<ol start="2">
+<li>类适配器</li>
+</ol>
+<img src="/12094/image-20230609102403121.png" style="zoom: 67%;">
+<p>适配器模式包含如下角色：</p>
+<ol>
+<li><code>Target</code>：目标抽象类</li>
+<li><code>Adapter</code>：适配器类</li>
+<li><code>Adaptee</code>：适配者类</li>
+<li><code>Client</code>：客户类</li>
+</ol>
+<h3 id="模式分析">模式分析</h3>
+<ol>
+<li>典型的类适配器代码：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Adapter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Adaptee</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Target</span>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">request</span><span class="hljs-params">()</span>&#123;<br>        specificRequest();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>典型的对象适配器代码：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Adapter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Target</span> &#123;<br>    <span class="hljs-keyword">private</span> Adaptee adaptee;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Adapter</span><span class="hljs-params">(Adaptee adaptee)</span> &#123;<br>        <span class="hljs-built_in">this</span>.adaptee = adaptee;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">request</span><span class="hljs-params">()</span> &#123;<br>        adaptee.specificRequest();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="适配器模式实例与解析">适配器模式实例与解析</h3>
+<h4 id="实例一：仿生机器人">实例一：仿生机器人</h4>
+<p>现需要设计一个可以模拟各种动物行为的机器人，在机器人中定义了一系列方法，如机器人叫喊方法 <code>cry()</code>、机器人移动方法 <code>move()</code> 等。如果希望在不修改已有代码的基础上使得机器人能够像狗一样叫，像狗一样跑，使用适配器模式进行系统设计。</p>
+<p><img src="/12094/image-20230609102417444.png" alt></p>
+<h4 id="实例二：加密适配器">实例二：加密适配器</h4>
+<p>某系统需要提供一个加密模块，将用户信息（如密码等机密信息）加密之后再存储在数据库中，系统已经定义好了数据库操作类。为了提高开发效率，现需要重用已有的加密算法，这些算法封装在一些由第三方提供的类中，有些甚至没有源代码。使用适配器模式设计该加密模块，实现在不修改现有类的基础上重用第三方加密方法。</p>
+<p><img src="/12094/image-20230609102432733.png" alt></p>
+<h3 id="模式优缺点">模式优缺点</h3>
+<h4 id="适配器模式的优点">适配器模式的优点</h4>
+<ol>
+<li>将目标类和适配者类解耦，通过引入一个适配器类来重用现有的适配者类，而无须修改原有代码。</li>
+<li>增加了类的透明性和复用性，将具体的实现封装在适配者类中，对于客户端类来说是透明的，而且提高了适配者的复用性。</li>
+<li>灵活性和扩展性都非常好，通过使用配置文件，可以很方便地更换适配器，也可以在不修改原有代码的基础上增加新的适配器类，完全符合“开闭原则”。</li>
+</ol>
+<h4 id="类适配器模式还具有如下优点">类适配器模式还具有如下优点</h4>
+<ol>
+<li>由于适配器类是适配者类的子类，因此可以在适配器类中置换一些适配者的方法，使得适配器的灵活性更强。</li>
+</ol>
+<h4 id="类适配器模式的缺点如下">类适配器模式的缺点如下</h4>
+<ol>
+<li>对于 Java、C# 等不支持多重继承的语言，一次最多只能适配一个适配者类，而且目标抽象类只能为抽象类，不能为具体类，其使用有一定的局限性，不能将一个适配者类和它的子类都适配到目标接口。</li>
+</ol>
+<h4 id="对象适配器模式还具有如下优点">对象适配器模式还具有如下优点</h4>
+<ol>
+<li>一个对象适配器可以把多个不同的适配者适配到同一个目标，也就是说，同一个适配器可以把适配者类和它的子类都适配到目标接口。</li>
+</ol>
+<h4 id="对象适配器模式的缺点如下">对象适配器模式的缺点如下</h4>
+<ol>
+<li>与类适配器模式相比，要想置换适配者类的方法就不容易。如果一定要置换掉适配者类的一个或多个方法，就只好先做一个适配者类的子类，将适配者类的方法置换掉，然后再把适配者类的子类当做真正的适配者进行适配，实现过程较为复杂。</li>
+</ol>
+<h3 id="模式适用环境">模式适用环境</h3>
+<p>在以下情况下可以使用适配器模式：</p>
+<ol>
+<li>系统需要使用现有的类，而这些类的接口不符合系统的需要。</li>
+<li>想要建立一个可以重复使用的类，用于与一些彼此之间没有太大关联的一些类，包括一些可能在将来引进的类一起工作。</li>
+</ol>
+<h3 id="模式应用">模式应用</h3>
+<p>Sun 公司在 1996 年公开了 Java 语言的数据库连接工具 JDBC，JDBC 使得 Java 语言程序能够与数据库连接，并使用 SQL 语言来查询和操作数据。JDBC 给出一个客户端通用的抽象接口，每一个具体数据库引擎（如 SQL Server、Oracle、MySQL 等）的 JDBC 驱动软件都是一个介于 JDBC 接口和数据库引擎接口之间的适配器软件。抽象的 JDBC 接口和各个数据库引擎 API 之间都需要相应的适配器软件，这就是为各个不同数据库引擎准备的驱动程序。</p>
+<h3 id="模式应用-2">模式应用</h3>
+<p>在 JDK 类库中也定义了一系列适配器类，如在 <code>com.sun.imageio.plugins.common</code> 包中定义的<code>InputStreamAdapter</code>类，用于包装 <code>ImageInputStream</code> 接口及其子类对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">InputStreamAdapter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">InputStream</span> &#123;<br>    ImageInputStream stream;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">InputStreamAdapter</span><span class="hljs-params">(ImageInputStream stream)</span> &#123;<br>        <span class="hljs-built_in">super</span>();<br>        <span class="hljs-built_in">this</span>.stream = stream;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">read</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException &#123;<br>        <span class="hljs-keyword">return</span> stream.read();<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">read</span><span class="hljs-params">(<span class="hljs-type">byte</span> b[], <span class="hljs-type">int</span> off, <span class="hljs-type">int</span> len)</span> <span class="hljs-keyword">throws</span> IOException &#123;<br>        <span class="hljs-keyword">return</span> stream.read(b, off, len);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>默认适配器模式（Default Adapter Pattern）或缺省适配器模式
+<ol>
+<li>当不需要全部实现接口提供的方法时，可先设计一个抽象类实现接口，并为该接口中每个方法提供一个默认实现（空方法），那么该抽象类的子类可有选择地覆盖父类的某些方法来实现需求，它适用于一个接口不想使用其所有的方法的情况。因此也称为单接口适配器模式。</li>
+<li>适配者接口</li>
+<li>默认适配器类</li>
+<li>具体业务类</li>
+</ol>
+</li>
+</ol>
+<p><img src="/12094/image-20230609102447774.png" alt></p>
+<p><img src="/12094/image-20230609102501104.png" alt></p>
+<ol start="3">
+<li>双向适配器：在对象适配器的使用过程中，如果在适配器中同时包含对目标类和适配者类的引用，适配者可以通过它调用目标类中的方法，目标类也可以通过它调用适配者类中的方法，那么该适配器就是一个双向适配器。</li>
+</ol>
+<p><img src="/12094/8-1686484548868-982.png" alt></p>
+<h3 id="适配器小结">适配器小结</h3>
+<ol>
+<li>结构型模式描述如何将类或者对象结合在一起形成更大的结构。</li>
+<li>适配器模式用于将一个接口转换成客户希望的另一个接口，适配器模式使接口不兼容的那些类可以一起工作，其别名为包装器。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。</li>
+<li>适配器模式包含四个角色：
+<ol>
+<li>目标抽象类定义客户要用的特定领域的接口</li>
+<li>适配器类可以调用另一个接口，作为一个转换器，对适配者和抽象目标类进行适配，它是适配器模式的核心</li>
+<li>适配者类是被适配的角色，它定义了一个已经存在的接口，这个接口需要适配</li>
+<li>在客户类中针对目标抽象类进行编程，调用在目标抽象类中定义的业务方法。</li>
+</ol>
+</li>
+<li>在类适配器模式中，适配器类实现了目标抽象类接口并继承了适配者类，并在目标抽象类的实现方法中调用所继承的适配者类的方法；在对象适配器模式中，适配器类继承了目标抽象类并定义了一个适配者类的对象实例，在所继承的目标抽象类方法中调用适配者类的相应业务方法。</li>
+<li>适配器模式
+<ol>
+<li>主要优点是将目标类和适配者类解耦，增加了类的透明性和复用性，同时系统的灵活性和扩展性都非常好，更换适配器或者增加新的适配器都非常方便，符合&quot;开闭原则&quot;</li>
+<li>类适配器模式的缺点是适配器类在很多编程语言中不能同时适配多个适配者类</li>
+<li>对象适配器模式的缺点是很难置换适配者类的方法。</li>
+</ol>
+</li>
+<li>适配器模式适用情况包括：
+<ol>
+<li>系统需要使用现有的类，而这些类的接口不符合系统的需要；</li>
+<li>想要建立一个可以重复使用的类，用于与一些彼此之间没有太大关联的一些类一起工作。</li>
+</ol>
+</li>
+</ol>
+<h2 id="组合模式">组合模式</h2>
+<h3 id="模式动机-2">模式动机</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/12094/image-20230611170809493.png" alt></th>
+<th><img src="/12094/image-20230611170814527.png" alt="image-20230611170814527"></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>对于树形结构，当容器对象（如文件夹）的某一个方法被调用时，将遍历整个树形结构，寻找也包含这个方法的成员对象（可以是容器对象，也可以是叶子对象，如子文件夹和文件）并调用执行。（递归调用）</li>
+<li>由于容器对象和叶子对象在功能上的区别，在使用这些对象的客户端代码中必须有区别地对待容器对象和叶子对象，而实际上大多数情况下客户端希望一致地处理它们，因为对于这些对象的区别对待将会使得程序非常复杂。</li>
+<li>组合模式描述了如何将容器对象和叶子对象进行递归组合，使得用户在使用时无须对它们进行区分，可以一致地对待容器对象和叶子对象，这就是组合模式的模式动机。</li>
+</ol>
+<h3 id="模式定义-2">模式定义</h3>
+<ol>
+<li>组合模式（Composite Pattern）：组合多个对象形成树形结构以表示“整体-部分”的结构层次。组合模式对单个对象（即叶子对象）和组合对象（即容器对象）的使用具有一致性。</li>
+<li>组合模式又可以称为整体-部分（Part-Whole）模式，属于对象的结构模式，它将对象组织到树结构中，可以用来描述整体与部分的关系。</li>
+<li>Composite Pattern: Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.</li>
+</ol>
+<h3 id="模式结构-2">模式结构</h3>
+<img src="/12094/image-20230609102730137.png" style="zoom: 67%;">
+<ol>
+<li>组合模式包含如下角色：
+<ol>
+<li><code>Component</code>：抽象构件</li>
+<li><code>Leaf</code>：叶子构件</li>
+<li><code>Composite</code>：容器构件</li>
+<li><code>Client</code>：客户类</li>
+</ol>
+</li>
+</ol>
+<h3 id="模式分析-2">模式分析</h3>
+<ol>
+<li>组合模式的关键是定义了一个抽象构件类，它既可以代表叶子，又可以代表容器，而客户端针对该抽象构件类进行编程，无须知道它到底表示的是叶子还是容器，可以对其进行统一处理。</li>
+<li>同时容器对象与抽象构件类之间还建立一个聚合关联关系，在容器对象中既可以包含叶子，也可以包含容器，以此实现递归组合，形成一个树形结构。</li>
+<li>文件系统组合模式结构图：</li>
+</ol>
+<img src="/12094/11-1686484548868-983.png" style="zoom:67%;">
+<ol start="4">
+<li>典型的抽象构件角色代码：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Component</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(Component c)</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">remove</span><span class="hljs-params">(Component c)</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> Component <span class="hljs-title function_">getChild</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">operation</span><span class="hljs-params">()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="5">
+<li>典型的叶子构件角色代码：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Leaf</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Component</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(Component c)</span> &#123; <span class="hljs-comment">//异常处理或错误提示</span><br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">remove</span><span class="hljs-params">(Component c)</span> &#123; <span class="hljs-comment">//异常处理或错误提示</span><br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Component <span class="hljs-title function_">getChild</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> &#123; <span class="hljs-comment">//异常处理或错误提示</span><br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">operation</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">//实现代码</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="6">
+<li>典型的容器构件角色代码：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Composite</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Component</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">ArrayList</span> <span class="hljs-variable">list</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>();<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(Component c)</span> &#123;<br>        list.add(c);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">remove</span><span class="hljs-params">(Component c)</span> &#123;<br>        list.remove(c);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Component <span class="hljs-title function_">getChild</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> &#123;<br>        (Component) list.get(i);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">operation</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">for</span> (Object obj : list) &#123;<br>            ((Component) obj).operation();<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="组合模式实例与解析">组合模式实例与解析</h3>
+<h4 id="实例一：水果盘">实例一：水果盘</h4>
+<p><img src="/12094/image-20230611170421101.png" alt></p>
+<p>在水果盘（Plate）中有一些水果，如苹果（Apple）、香蕉（Banana）、梨子（Pear），当然大水果盘中还可以有小水果盘，现需要对盘中的水果进行遍历（吃），当然如果对一个水果盘执行&quot;吃&quot;方法，实际上就是吃其中的水果。使用组合模式模拟该场景。</p>
+<p><img src="/12094/12-1686484548868-984.png" alt></p>
+<h4 id="实例二：文件浏览">实例二：文件浏览</h4>
+<p>文件有不同类型，不同类型的文件其浏览方式有所区别，如文本文件和图片文件的浏览方式就不相同。对文件夹的浏览实际上就是对其中所包含文件的浏览，而客户端可以一致地对文件和文件夹进行操作，无须关心它们的区别。使用组合模式来模拟文件的浏览操作。</p>
+<p><img src="/12094/13-1686484548868-985.png" alt></p>
+<h3 id="模式优缺点-2">模式优缺点</h3>
+<h4 id="组合模式的优点">组合模式的优点</h4>
+<ol>
+<li>可以清楚地定义分层次的复杂对象，表示对象的全部或部分层次，使得增加新构件也更容易。</li>
+<li>客户端调用简单，客户端可以一致的使用组合结构或其中单个对象。</li>
+<li>定义了包含叶子对象和容器对象的类层次结构，叶子对象可以被组合成更复杂的容器对象，而这个容器对象又可以被组合，这样不断递归下去，可以形成复杂的树形结构。</li>
+<li>更容易在组合体内加入对象构件，客户端不必因为加入了新的对象构件而更改原有代码。组合模式</li>
+</ol>
+<h4 id="组合模式的缺点">组合模式的缺点</h4>
+<ol>
+<li>使设计变得更加抽象，对象的业务规则如果很复杂，则实现组合模式具有很大挑战性，而且不是所有的方法都与叶子对象子类都有关联。</li>
+<li>增加新构件时可能会产生一些问题，很难对容器中的构件类型进行限制。</li>
+</ol>
+<h3 id="模式适用环境-2">模式适用环境</h3>
+<p>在以下情况下可以使用组合模式：</p>
+<ol>
+<li>需要表示一个对象整体或部分层次，在具有整体和部分的层次结构中，希望通过一种方式忽略整体与部分的差异，可以一致地对待它们。</li>
+<li>让客户能够忽略不同对象层次的变化，客户端可以针对抽象构件编程，无须关心对象层次结构的细节。</li>
+<li>对象的结构是动态的并且复杂程度不一样，但客户需要一致地处理它们。</li>
+</ol>
+<h3 id="模式应用-3">模式应用</h3>
+<ol>
+<li>XML 文档解析</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">books</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">book</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">author</span>&gt;</span>Carson<span class="hljs-tag">&lt;/<span class="hljs-name">author</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">price</span> <span class="hljs-attr">format</span>=<span class="hljs-string">&quot;dollar&quot;</span>&gt;</span>31.95<span class="hljs-tag">&lt;/<span class="hljs-name">price</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">pubdate</span>&gt;</span>05/01/2001<span class="hljs-tag">&lt;/<span class="hljs-name">pubdate</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">book</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">pubinfo</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">publisher</span>&gt;</span>MSPress<span class="hljs-tag">&lt;/<span class="hljs-name">publisher</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">state</span>&gt;</span>WA<span class="hljs-tag">&lt;/<span class="hljs-name">state</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">pubinfo</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">books</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p><img src="/12094/image-20230611170837303.png" alt></p>
+<ol start="2">
+<li>操作系统中的目录结构是一个树形结构，因此在对文件和文件夹进行操作时可以应用组合模式，例如杀毒软件在查毒或杀毒时，既可以针对一个具体文件，也可以针对一个目录。如果是对目录查毒或杀毒，将递归处理目录中的每一个子目录和文件。</li>
+<li>JDK 的 AWT/Swing 是组合模式在 Java 类库中的一个典型实际应用。</li>
+</ol>
+<p><img src="/12094/15-1686484548868-986.png" alt></p>
+<h3 id="模式扩展">模式扩展</h3>
+<ol>
+<li>更复杂的组合模式</li>
+</ol>
+<p><img src="/12094/07%E9%96%AB%E5%82%9E%E5%8E%A4%E9%8D%A3%E3%84%A4%E7%AC%8C%E7%BC%81%E5%8B%AB%E6%82%8E-1686484548868-987.jpg" alt></p>
+<ol start="2">
+<li>透明组合模式</li>
+</ol>
+<p><img src="/12094/image-20230611170645952.png" alt></p>
+<ol start="3">
+<li>安全组合模式：违反了里氏代换原则</li>
+</ol>
+<p><img src="/12094/image-20230611170659360.png" alt></p>
+<h3 id="组合小结">组合小结</h3>
+<ol>
+<li>组合模式用于组合多个对象形成树形结构以表示&quot;整体-部分&quot;的结构层次。组合模式对单个对象（即叶子对象）和组合对象（即容器对象）的使用具有一致性。组合模式又可以称为&quot;整体-部分&quot;模式，属于对象的结构模式，它将对象组织到树结构中，可以用来描述整体与部分的关系。</li>
+<li>组合模式包含三个角色
+<ol>
+<li>抽象构件为叶子构件和容器构件对象声明接口，在该角色中可以包含所有子类共有行为的声明和实现</li>
+<li>叶子构件在组合结构中表示叶子节点对象，叶子节点没有子节点</li>
+<li>容器构件在组合结构中表示容器节点对象，容器节点包含子节点，其子节点可以是叶子节点，也可以是容器节点，它提供一个集合用于存储子节点，实现了在抽象构件中定义的行为。</li>
+</ol>
+</li>
+<li>组合模式的关键是定义了一个抽象构件类，它既可以代表叶子，又可以代表容器，而客户端针对该抽象构件类进行编程，无须知道它到底表示的是叶子还是容器，可以对其进行统一处理。</li>
+<li>组合模式
+<ol>
+<li>主要优点在于可以方便地对层次结构进行控制，客户端调用简单，客户端可以一致的使用组合结构或其中单个对象，用户就不必关心自己处理的是单个对象还是整个组合结构，简化了客户端代码</li>
+<li>缺点在于使设计变得更加抽象，且增加新构件时可能会产生一些问题，而且很难对容器中的构件类型进行限制。</li>
+</ol>
+</li>
+<li>组合模式适用情况包括
+<ol>
+<li>需要表示一个对象整体或部分层次</li>
+<li>让客户能够忽略不同对象层次的变化，客户端可以针对抽象构件编程，无须关心对象层次结构的细节</li>
+<li>对象的结构是动态的并且复杂程度不一样，但客户需要一致地处理它们。</li>
+</ol>
+</li>
+<li>组合模式根据抽象构件类的定义形式，又可以分为透明组合模式和安全组合模式。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/18482/" rel="prev" title="软件详细设计-09-外观模式、享元模式和代理模式">
+      <i class="fa fa-chevron-left"></i> 软件详细设计-09-外观模式、享元模式和代理模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/29146/" rel="next" title="软件详细设计-08-桥接模式和装饰模式">
+      软件详细设计-08-桥接模式和装饰模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">适配器模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%9C%BA"><span class="nav-number">1.1.</span> <span class="nav-text">模式动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">模式结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90"><span class="nav-number">1.4.</span> <span class="nav-text">模式分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%AE%9E%E4%BE%8B%E4%B8%8E%E8%A7%A3%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">适配器模式实例与解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%B8%80%EF%BC%9A%E4%BB%BF%E7%94%9F%E6%9C%BA%E5%99%A8%E4%BA%BA"><span class="nav-number">1.5.1.</span> <span class="nav-text">实例一：仿生机器人</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BA%8C%EF%BC%9A%E5%8A%A0%E5%AF%86%E9%80%82%E9%85%8D%E5%99%A8"><span class="nav-number">1.5.2.</span> <span class="nav-text">实例二：加密适配器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">1.6.</span> <span class="nav-text">模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">1.6.1.</span> <span class="nav-text">适配器模式的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E8%BF%98%E5%85%B7%E6%9C%89%E5%A6%82%E4%B8%8B%E4%BC%98%E7%82%B9"><span class="nav-number">1.6.2.</span> <span class="nav-text">类适配器模式还具有如下优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9%E5%A6%82%E4%B8%8B"><span class="nav-number">1.6.3.</span> <span class="nav-text">类适配器模式的缺点如下</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E8%BF%98%E5%85%B7%E6%9C%89%E5%A6%82%E4%B8%8B%E4%BC%98%E7%82%B9"><span class="nav-number">1.6.4.</span> <span class="nav-text">对象适配器模式还具有如下优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9%E5%A6%82%E4%B8%8B"><span class="nav-number">1.6.5.</span> <span class="nav-text">对象适配器模式的缺点如下</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E9%80%82%E7%94%A8%E7%8E%AF%E5%A2%83"><span class="nav-number">1.7.</span> <span class="nav-text">模式适用环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8"><span class="nav-number">1.8.</span> <span class="nav-text">模式应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8-2"><span class="nav-number">1.9.</span> <span class="nav-text">模式应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E5%B0%8F%E7%BB%93"><span class="nav-number">1.10.</span> <span class="nav-text">适配器小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">组合模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%9C%BA-2"><span class="nav-number">2.1.</span> <span class="nav-text">模式动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89-2"><span class="nav-number">2.2.</span> <span class="nav-text">模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84-2"><span class="nav-number">2.3.</span> <span class="nav-text">模式结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90-2"><span class="nav-number">2.4.</span> <span class="nav-text">模式分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E5%AE%9E%E4%BE%8B%E4%B8%8E%E8%A7%A3%E6%9E%90"><span class="nav-number">2.5.</span> <span class="nav-text">组合模式实例与解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%B8%80%EF%BC%9A%E6%B0%B4%E6%9E%9C%E7%9B%98"><span class="nav-number">2.5.1.</span> <span class="nav-text">实例一：水果盘</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BA%8C%EF%BC%9A%E6%96%87%E4%BB%B6%E6%B5%8F%E8%A7%88"><span class="nav-number">2.5.2.</span> <span class="nav-text">实例二：文件浏览</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9-2"><span class="nav-number">2.6.</span> <span class="nav-text">模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">2.6.1.</span> <span class="nav-text">组合模式的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">2.6.2.</span> <span class="nav-text">组合模式的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E9%80%82%E7%94%A8%E7%8E%AF%E5%A2%83-2"><span class="nav-number">2.7.</span> <span class="nav-text">模式适用环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8-3"><span class="nav-number">2.8.</span> <span class="nav-text">模式应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E6%89%A9%E5%B1%95"><span class="nav-number">2.9.</span> <span class="nav-text">模式扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E5%B0%8F%E7%BB%93"><span class="nav-number">2.10.</span> <span class="nav-text">组合小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

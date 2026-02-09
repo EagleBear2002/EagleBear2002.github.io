@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\Var{\mathsf{Var}} \def\IG{\mathsf{IG}} \def\T{\mathcal{T}} \def\S{\mathcal{S}} $$ 摘要 在在线事务处理（OLTP）系统中，可序列化是事务执行的一个关键属性；如果没有它，由于并发活动，可能会违反数据的完整性约束。可以通过使用严格的两阶段锁定（S2PL）等可序列化并发控制机制来保证可序列化，而不考虑应用程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PODS&#39;05-Allocating Isolation Levels to Transactions">
+<meta property="og:url" content="https://eaglebear2002.github.io/6591/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\Var{\mathsf{Var}} \def\IG{\mathsf{IG}} \def\T{\mathcal{T}} \def\S{\mathcal{S}} $$ 摘要 在在线事务处理（OLTP）系统中，可序列化是事务执行的一个关键属性；如果没有它，由于并发活动，可能会违反数据的完整性约束。可以通过使用严格的两阶段锁定（S2PL）等可序列化并发控制机制来保证可序列化，而不考虑应用程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/6591/image-20250122202414812.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6591/image-20250122202355450.png">
+<meta property="article:published_time" content="2025-01-22T11:17:48.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.780Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/6591/image-20250122202414812.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/6591/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>PODS'05-Allocating Isolation Levels to Transactions | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/6591/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PODS'05-Allocating Isolation Levels to Transactions
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-22 19:17:48" itemprop="dateCreated datePublished" datetime="2025-01-22T19:17:48+08:00">2025-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" itemprop="url" rel="index"><span itemprop="name">隔离级别</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\Var{\mathsf{Var}}
+\def\IG{\mathsf{IG}}
+\def\T{\mathcal{T}}
+\def\S{\mathcal{S}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>在在线事务处理（OLTP）系统中，可序列化是事务执行的一个关键属性；如果没有它，由于并发活动，可能会违反数据的完整性约束。可以通过使用严格的两阶段锁定（S2PL）等可序列化并发控制机制来保证可序列化，而不考虑应用程序逻辑。然而，这种机制导致的并发性降低通常过于严重，因此数据库管理系统（DBMS）为数据库管理员（DBA）提供了使用不同并发控制机制的机会，前提是这样做是安全的。然而，此前几乎没有理论可以指导 DBA 判断何时是安全的！</p>
+<p>在本文中，我们讨论了如何为一组事务分配适当的隔离级别（从而使用特定的并发控制机制），同时确保每次执行都是冲突可序列化的。当每个事务可以选择使用 S2PL 或快照隔离（SI）时，我们精确地描述了可接受的分配，并提供了一个简单的基于图的算法来确定最弱的可接受分配。</p>
+<p>本文涉及的类别和主题描述包括：数据库管理系统中的事务处理。关键词包括：并发控制、可序列化、异常、一致性、快照隔离、两阶段锁定。</p>
+<p>作者</p>
+<ul>
+<li>Alan Fekete, School of Information Technologies, University of Sydney</li>
+</ul>
+<h2 id="INTRODUCTION">INTRODUCTION</h2>
+<p>数据库管理系统（DBMS）在工业中被广泛应用于在线事务处理（OLTP），在这种场景下，快速响应且独立编码的应用程序被用来执行商业活动（例如，修改库存、财务和客户数据以反映一次销售的发生）。在这种系统中，数据完整性至关重要，它既涉及数据值与现实世界状态的一致性，也涉及表达数据内部一致性的约束的有效性（例如，参照完整性，或者汇总数据与被汇总数据的相等性）。在 OLTP 系统中，数据完整性面临许多威胁，但一个重要的威胁来自独立应用程序的并发活动；如果没有对交织执行进行仔细控制（即并发控制），诸如“丢失更新”或“不一致读取”等异常可能会导致数据被破坏。</p>
+<p>“ACID 事务”的抽象概念，尤其是 DBMS 机制如何防止对数据完整性的并发风险，是 Jim Gray 因其在 1998 年获得图灵奖的伟大贡献之一。这些思想已经发展成为一个强大的理论，包含两个主要方面。一个方面是识别那些被认为是正确的交织（因为它们不会威胁到数据完整性）；另一方面是开发（并证明其正确性）控制这些交织的算法。长期以来，可序列化一直被认为是事务执行的适当正确性标准。可序列化执行是指每个提交的事务看到的值，以及最终状态包含的值，与在完全无并发的串行或批处理执行中运行事务时相同。可序列化执行的优点在于，只要初始状态满足任何完整性约束，并且每个单独运行的事务程序从满足约束的状态出发产生另一个这样的状态，那么我们就可以确信最终状态的数据满足任何完整性约束。也就是说，如果应用程序被逐一检查，DBA 就不必担心它们的交织会引发微妙的问题。</p>
+<p>在文献中，有许多并发控制机制可以确保所有执行都是可序列化的（无论运行什么事务）。然而，在实践中，很明显，严格的两阶段锁定机制（采用某种形式的索引锁定）是保证可序列化的主导方式。许多商业系统，包括 IBM 的 DB2、微软的 SQL Server 和 Sybase 的 ASE，都是基于这种算法构建的。不幸的是，即使系统设计者发明了所有可能的改进，执行两阶段锁定时并发性降低的性能影响仍然被认为是严重的，事实上，这些引擎上的大多数事务都使用较低的隔离级别，其中共享锁被提前释放或根本不被获取。</p>
+<p>另一种多版本并发控制方法出现在包括 Oracle 和 PostgreSQL 在内的系统中。这种方法完全避免使用共享锁，而是通过访问旧版本的数据（这些数据无论如何都可能被保留用于回滚目的）来实现。这种算法称为快照隔离（SI），它避免了所有已知的并发异常，如不一致读取和丢失更新。然而，正如在[2]中证明的那样，这种算法并不能确保所有事务的执行都是可序列化的，并且可能会导致违反完整性约束。简而言之，快照隔离的并发控制机制意味着事务 T 看到的是在 T 开始之前提交的所有事务产生的数据库状态。因此，如果 T1 和 T2 是使用快照隔离机制的并发事务，它们彼此都不会看到对方的修改（而在串行执行中，因此也在可序列化执行中，其中一个事务会看到另一个事务的修改）。</p>
+<p>在本文中，我们考虑了如何利用 DBMS 支持不同事务使用不同隔离级别（从而使用不同的并发控制机制）的能力。虽然实践者经常这样做，但此前几乎没有理论可以指导他们明智地做出这些决策。特别是，我们考虑一个 DBA 可以选择对某些事务使用严格的两阶段锁定机制，而其他事务则使用快照隔离机制。这将在微软 SQL Server 即将发布的 Yukon 版本中变得非常容易，DBA 可以在每个程序中在首次访问数据库之前包含“SET ISOLATION LEVEL”语句，而引擎同时支持“ISOLATION LEVEL SNAPSHOT”和“ISOLATION LEVEL SERIALIZABLE”（后者将使用两阶段锁定）。在 Oracle 中，以“SET ISOLATION SERIALIZABLE”开头的事务将使用快照隔离，但可以通过在默认的“读已提交”隔离级别下使用“LOCK TABLE name IN SHARE MODE”在读取表之前显式设置共享锁来获得两阶段锁定。</p>
+<p>我们提供了一种理论，使 DBA 能够决定，对于每种可能的并发机制分配，分配是否可接受，即所有可能产生的执行是否都是可序列化的（因此是否能够保持数据的完整性）。当然，总是至少有一种可接受的分配：对每个事务都使用两阶段锁定。然而，正如我们将展示的那样，我们的理论可以证明其他分配是否也可接受，而且通常 DBA 能够证明许多事务可以被允许使用快照隔离机制。</p>
+<p>在第 2 节中，我们解释了涉及的并发控制机制的细节，并总结了我们所依据的现有定义和理论。在第 3 节中，我们分析了单次执行中的冲突，并展示了在任何非可序列化执行中都成立的一些属性。第 4 节则研究了一组事务以及分配给这些事务的并发控制机制；我们的主要结果是定理 3，它精确地描述了何时一个分配具有所有可能产生的执行都是冲突可序列化的属性。第 5 节研究了所有可能的可接受分配的空间，并展示了保持可接受性的分配操作。第 6 节总结全文。</p>
+<h3 id="Related-Work">Related Work</h3>
+<p>关于可序列化理论和并发控制的文献浩如烟海。请参阅[4, 8, 6, 12]以获取相关介绍和参考文献。然而，这些先前的工作大多只考虑那些在没有任何应用程序知识或完整性约束的情况下就能保证正确性的情况，这并不适用于 SI。快照隔离机制首次在研究文献[2]中被描述，该文献还证明了这种机制并不能在所有情况下保证正确性。先前的工作[5]展示了当所有程序都使用 SI 进行并发控制时，如何为某些应用程序组合证明可序列化。与本文不同的是，这些工作并未考虑运行不同算法的事务的混合。</p>
+<p>长期以来，研究传统一直致力于处理将不同的并发控制技术应用于数据的不同部分（要么是每个对象，要么是联邦系统中的每个站点）的混合。[11]详细分析了何时可以组合每个对象的并发控制算法，但每个算法都需要在没有具体应用程序知识的情况下保证本地可序列化（与 SI 不同）。这一研究方向在许多涉及联邦或多数据库系统的论文中得以延续；在那里，由于机制可能未知或不兼容，因此需要额外的协调，例如访问票据项。在[10]中，这种方法被应用于包含使用 SI 的站点以及使用确保本地可序列化的算法（如两阶段锁定）的联邦系统。需要注意的是，所有这些工作都与我们的讨论不具可比性，因为在我们的讨论中，不同的并发方法是与每个单独的事务相关联的，而不是与数据的不同部分相关联。</p>
+<p>另一种确保混合隔离级别正确性的方法见于[3]，它使用对所需完整性约束的具体知识，并且证明的条件是给定的约束得以保持，而不是本文中更一般的可序列化。</p>
+<h2 id="BACKGROUND-MATERIAL">BACKGROUND MATERIAL</h2>
+<p>在本节中，我们将总结标准概念和定义，这些是我们后续结果的基础。</p>
+<h3 id="Combinatorics-definitions">Combinatorics definitions</h3>
+<p>我们在此汇总本文使用的离散数学（尤其是组合数学）中的概念定义。这些概念虽然广为人知，但术语存在差异，因此我们给出定义以避免混淆。</p>
+<p>一个有向图由一组节点和一组边组成。每条边被定义为一个有序的节点对，称为边的源节点和目标节点。因此，任何集合上的二元关系都可以用来定义一个有向图，其边即为关系中的对。</p>
+<p>在标记有向图中，每条边与一个非空的标记子集相关联。因此，与给定标记相关联的边集合定义了原图的一个子图。注意，我们允许一条边拥有多个标记。</p>
+<p>有向图 $G$ 中的有向路径是一个交替的节点和边序列 $v_\alpha, e_\alpha, v_\beta, e_\beta, \dots, v_\eta$，其中每条边 $e$ 的源节点是路径中紧邻其前的节点 $v$，目标节点是紧邻其后的节点 $v'$。</p>
+<p>环是一个有向路径，其初始节点和最终节点相同，且序列中没有其他节点重复出现。</p>
+<p>如果一个有向图不包含环，则称为无环图。</p>
+<p>有向图 $G$ 中的环 $v_\alpha, e_\alpha, v_\beta, e_\beta, \dots, v_\alpha$ 被称为无弦环，如果对于环中任意两个节点 $v_\psi$ 和 $v_\phi$（它们不在环中通过边相连），那么在 $G$ 中它们也不相连。注意，我们的定义允许环中连续节点之间在 $G$ 中存在反向边。如果环在 $G$ 中是最小长度的，则它必然是无弦环。</p>
+<p>一个偏序集 $(X, \preceq)$ 是一个集合 $X$，以及定义在 $X$ 上的二元关系 $\preceq$，该关系是自反的、反对称的和传递的。</p>
+<p>部分有序集 $(X, \preceq)$ 被称为格，如果集合 $X$ 中的任意两个元素 $x$ 和 $y$ 都有一个最小上界（也称为并，记为 $x \vee y$）和一个最大下界（也称为交，记为 $x \wedge y$）。</p>
+<p>在格 $(X, \preceq)$ 中，形式为 $\set{x \in X : x \preceq a}$ 的集合称为由 $a$ 生成的主理想（principal ideal）。</p>
+<h3 id="Concurrency-Control-Algorithms">Concurrency Control Algorithms</h3>
+<p>传统的并发控制实践基于锁机制 [6]。大多数产品允许每个事务显式地设置和释放一些锁，并且它们还提供了基于事务声明隔离级别的隐式机制；数据库管理系统（DBMS）引擎随后会对访问的各个项目设置锁，并确保在任何项目上不能持有冲突的锁（请求无法获得的锁将被阻塞，直到锁变为可用）。为了确保可接受的性能，有许多微妙的问题需要处理，包括检测和处理死锁、使用多种粒度的锁（通过适当的意向模式来保持它们的协调），以及在谓词读取中使用索引时适当地设置锁，谓词读取用于计算哪些记录匹配查询中的 where 子句（参见 [6] 的第 7.8 节）。为了实现完全隔离，关键特性是锁必须保持到事务完成（这意味着锁遵循“两阶段”规则，即事务一旦释放任何锁，就不能再获取新的锁）。在本文中，我们将此称为严格两阶段锁（Strict Two-Phase Locking，缩写为 S2PL）并发控制。</p>
+<p>SQL 标准使用术语“SERIALIZABLE”隔离级别，并且它并不假定使用特定的严格两阶段锁定算法。然而，我们的理论依赖于特定的机制，即提交持续时间的锁被持有，因此我们将在整篇论文中引用 S2PL 隔离级别。我们保留术语 Serializable 用于标准理论定义，即多个事务的交错执行，其中一些事务可能声明为不同的隔离级别，但它们的交错执行方式与串行执行模式相同 [12, 12, 8]。我们注意到，当每个事务都使用 S2PL 隔离机制时，整个执行过程是可串行化的。</p>
+<p>开创性论文 [2] 对隔离定义的传统观点提出了挑战，部分原因是指出了一种算法，该算法避免了所有传统的异常执行，但仍然允许非可串行化的交错执行，并导致完整性约束的违反。这种并发控制算法称为快照隔离（Snapshot Isolation，缩写为 SI），它已经在许多常用的 DBMS 引擎中实现，例如 Oracle [7] 和 PostgreSQL（然而，这两个产品在应用程序程序员声明事务应为“Serializable”时不适当地使用了该算法）。即将发布的 Microsoft SQL Server Yukon 版本也将提供该算法，作为 S2PL 的较弱替代隔离级别。</p>
+<p>SI 是一种多版本机制：它同时保留一个项目的多个版本，并允许事务访问其他版本以及项目的最新值。在许多实现中，保留版本是为了支持可能的回滚事件。当使用 SI 机制的事务 T 希望访问一个项目时，它会看到在 T 启动时最近提交的版本。（一个例外是当 T 自己对该项目发出了修改；在这种情况下，T 会看到自己最近的版本。）这种使用 T 启动时的状态（称为 T 的快照）也适用于评估 where 子句时的索引。实际上，T 的更新被保留在一个私有的宇宙中，对其他事务不可见，直到 T 提交时，它创建的版本才会被安装并对所有人可见。为了避免丢失更新，使用 SI 机制运行的事务 T 将不允许提交，如果它将安装某个项目 $x$ 的版本，该版本将覆盖在 T 活动期间安装的版本（因此该版本不是 T 快照的一部分）。这被称为“先提交者获胜”规则。</p>
+<p>尽管 [2] 中没有提到，但像 Oracle 这样的 SI 实现确保由 SI 事务 T 产生的项目 $x$ 的版本必须从它离开 T 的任何私有宇宙时起受到排他锁的保护，直到（包括）该版本因 T 提交而被安装为止。排他锁必须按照此类锁的正常规则获得（例如，必须在封闭的粒度上获得意向锁，如果另一个事务持有冲突的锁，则无法获得该锁等）。我们要求这一点，因为它确保 SI 和 S2PL 事务之间避免丢失更新的交错。同样，检查是否覆盖在 SI 事务 T 活动期间安装的版本，将涵盖由锁定事务产生的版本以及由 SI 事务产生的版本。</p>
+<p>我们已经广泛描述了 SI 机制。我们的结果也适用于各种特殊情况：例如，某些 SI 的实现并不为 SI 事务 T 使用私有宇宙。相反，它们让 T 在原地进行更新，T 在 SI 事务创建版本时获取排他锁，并在此时执行检查以防止覆盖另一个版本；然后 T 保持锁直到提交。这具有上述属性（锁从版本进入公共空间时起保持到 T 提交，并且如果 T 产生的版本覆盖了在 T 活动期间安装的版本，则 T 不会提交），因此我们的理论将适用于这种实现，就像适用于为每个 SI 事务使用私有宇宙的实现一样，并且仅在 T 提交时获取锁、执行检查并将版本从私有空间移动到共享数据库。</p>
+<h3 id="Multiversion-serializability-theory">Multiversion serializability theory</h3>
+<p>在本节中，我们遵循 [9] 的方法来定义多版本执行的冲突可串行化（conflict serializability）。这与 [12, 4] 中定义的串行化略有不同。一个区别是 [9] 在某个数据项的所有写操作之间添加了额外的冲突边，而 [4, 12] 则不包含从未被观察到的版本（这种情况仅在存在&quot;盲目写&quot;时可能发生）。另一个区别是 [9] 处理特定的版本顺序（由提交时间定义），而 [4, 12] 仅要求数据项版本存在某种顺序。为了简化理论，我们仅考虑操作的时间顺序（全序）；我们的模型中不包含时间上无序的事件。</p>
+<p>一个事务 $T_i$ 被表示为一个操作序列。每个操作要么是对某个数据项 $x$ 的读操作 $r_i[x]$，要么是对某个数据项 $y$ 的写操作 $w_i[y]$。$T_i$ 的读操作涉及的数据项集合记为 $rset(T_i)$，写操作涉及的数据项集合记为 $wset(T_i)$。我们通常不显式提及，但为了精确定义，我们假设存在一个初始化事务 $T_{-\infty}$（写入所有数据项的初始版本）和一个终结事务 $T_{\infty}$（读取所有数据项的最终版本）。</p>
+<p>为了符号简洁（但不失一般性），这类模型不允许同一事务中对同一数据项的重复访问（例如序列 $T_i$ 中不能出现 $\ldots w_i[x]\ldots w_i[x]\ldots$）。此外，本文还假设：如果 $T_i$ 同时包含 $r_i[x]$ 和 $w_i[x]$，则 $r_i[x]$ 在序列中必须位于 $w_i[x]$ 之前。这不是表达能力的严重限制，因为 SI 和 S2PL 机制都确保当事务读取其先前写入的数据项时，观察到的是自身创建的版本。因此，这种读操作对可串行化没有影响，可以简单地从形式模型中省略，从而使 SI 事务中的所有剩余读操作都来自其快照。</p>
+<p>为了表示数据库管理系统（DBMS）的执行（即事务的交错执行），我们使用一个操作序列。执行中的操作包括以下类型：</p>
+<ul>
+<li>$r_j[x_k]$：表示事务 $T_j$ 对数据项 $x$ 的读操作，返回由事务 $T_k$ 写入的版本值。</li>
+<li>$w_j[x_j]$：表示事务 $T_j$ 对数据项 $x$ 的写操作，生成新版本。</li>
+<li>$start(T_j)$：表示事务 $T_j$ 开始执行。</li>
+<li>$commit(T_j)$：表示事务 $T_j$ 提交。</li>
+<li>$slock_j[x]$：表示事务 $T_j$ 获取数据项 $x$ 的共享锁。</li>
+<li>$xlock_j[x]$：表示事务 $T_j$ 获取数据项 $x$ 的排他锁。</li>
+</ul>
+<p>一个操作序列 $H$ 能称为事务 $T_1, T_2, \ldots, T_n$ 的执行（execution），当且仅当满足以下条件：</p>
+<h4 id="事务结构">事务结构</h4>
+<p>对每个事务 $T_i$，存在一个转换函数 $h_i$，将 $T_i$ 的每个写操作 $w_i[x]$ 映射为 $H$ 中的操作 $w_i[x_i]$，将每个读操作 $r_i[x]$ 映射为 $H$ 中的操作 $r_i[x_j]$（其中 $w_j[x_j]$ 必须在 $H$ 中存在）。</p>
+<h4 id="事务顺序">事务顺序</h4>
+<p>对任意事务 $T_i$，操作 $start(T_i)$ 必须出现在 $H$ 中所有 $w_i[x_i]$, $r_i[x_k]$, $slock_i[x]$ 或 $xlock_i[x]$ 操作之前；$commit(T_i)$ 必须出现在这些操作之后；且若事务 $T_i$ 中的操作 $o$ 在 $o'$ 之前，则 $h_i(o)$ 在 $H$ 中也必须出现在 $h_i(o')$ 之前。</p>
+<h4 id="锁规则">锁规则</h4>
+<p>锁操作需符合常规锁规则：</p>
+<ul>
+<li>若 $H$ 包含 $slock_j[x]$，则在该操作之前，所有持有 $x$ 排他锁的事务 $T_k$ 必须已提交（即 $commit(T_k)$ 已发生）。</li>
+<li>若 $H$ 包含 $xlock_j[x]$，则在该操作之前，所有持有 $x$ 共享锁或排他锁的事务 $T_k$ 必须已提交。</li>
+</ul>
+<h4 id="并发控制">并发控制</h4>
+<p>每个事务的操作需遵循其分配的并发控制机制：</p>
+<ul>
+<li>若 $T_i$ 使用 SI，则对每个写操作 $w_i[x_i]$，$H$ 必须包含 $xlock_i[x]$；对每个读操作 $r_i[x_k]$，$x_k$ 必须是 $T_i$ 启动前最后提交的版本。</li>
+<li>若 $T_i$ 使用 S2PL，则对每个写操作 $w_i[x_i]$，$H$ 必须在写操作前获取 $xlock_i[x]$；对每个读操作 $r_i[x_k]$，$H$ 必须在读操作前获取 $slock_i[x]$，且 $x_k$ 是该读操作前最后提交的版本。</li>
+</ul>
+<h4 id="冲突序列化图（CSG）的定义">冲突序列化图（CSG）的定义</h4>
+<p>首先定义数据项版本的顺序：若 $H$ 包含 $w_j[x_j]$ 和 $w_k[x_k]$，则称版本 $x_j$ 先于 $x_k$（记为 $x_j \ll x_k$），当且仅当 $commit(T_j)$ 在 $H$ 中早于 $commit(T_k)$。此顺序是反自反、传递且反对称的。</p>
+<p>冲突序列化图 $CSG(H)$ 的定义如下：</p>
+<ul>
+<li>节点：$H$ 中的事务。</li>
+<li>边（带标签的冲突关系）：
+<ul>
+<li>写读边（wr）：$T_j \stackrel{wr}{\rightarrow} T_k$ 当且仅当存在 $x$ 使得 $H$ 包含 $r_k[x_j]$ 或 $r_k[x_m]$（且 $x_j \ll x_m$）。</li>
+<li>写写边（ww）：$T_j \stackrel{ww}{\rightarrow} T_k$ 当且仅当存在 $x$ 使得 $x_j \ll x_k$。</li>
+<li>读写边（rw）：$T_j \stackrel{rw}{\rightarrow} T_k$ 当且仅当存在 $x$ 使得 $H$ 包含 $r_j[x_m]$ 和 $w_k[x_k]$（且 $x_m \ll x_k$）。</li>
+</ul>
+</li>
+</ul>
+<p>定理 1：一个执行 $H$ 是冲突可串行化的，当且仅当其冲突序列化图 $CSG(H)$ 是无环的。</p>
+<h2 id="CONFLICT-THEORY">CONFLICT THEORY</h2>
+<h2 id="GLOBAL-INTERFERENCE-THEORY">GLOBAL INTERFERENCE THEORY</h2>
+<p>暴露边和保护边的定义：</p>
+<p><img src="/6591/image-20250122202414812.png" alt></p>
+<p>关键事务的定义：</p>
+<p><img src="/6591/image-20250122202355450.png" alt></p>
+<blockquote>
+<p>定理 3</p>
+<p>对于事务集合 $\T$，一个分配 $\S$ 是可接受的，当且仅当没有 $\IG(\T)$ 中关键点（pivot）在 $\S$ 中。</p>
+<p>简言之，所有关键事务用 S2PL 机制，其他事务用 SI 机制，则整个 $\T$ 是可序列化的。</p>
+</blockquote>
+<h2 id="THE-LATTICE-OF-ALLOCATIONS">THE LATTICE OF ALLOCATIONS</h2>
+<h2 id="CONCLUSIONS-AND-FURTHER-WORK">CONCLUSIONS AND FURTHER WORK</h2>
+<p>我们已经提出了第一套理论框架，用于判断在一个系统中，当不同事务使用不同的并发控制机制时，所有执行是否都可序列化。此外，我们还能够精确地描述哪些事务需要被分配为使用严格的两阶段锁定（S2PL），哪些事务可以被允许使用快照隔离（SI）或 S2PL。这些结果可以用于在数据库管理系统（DBMS）中运行事务，例如即将发布的微软 SQL Server 的 Yukon 版本，该系统提供了两种并发控制机制；这些结果也可以用于在 Oracle 平台上运行事务，其中 SI 是默认提供的，但应用程序可以通过在读取之前设置（并持有）显式的共享锁来获得 S2PL。</p>
+<p>在未来的工作中，我们打算研究不同可接受分配的性能影响。直觉上认为，最大可接受分配（尽可能少地使用 S2PL，尽可能多地使用 SI）可能会带来最高的吞吐量，但这需要仔细验证。我们还将寻求将我们的结果整合到工具中，这些工具可以检查混合的应用程序（这些应用程序不是显式的读写序列，而是包含 SQL 语句和控制流），以确定每个程序的合适隔离级别。在更理论的方向上，我们希望将我们的工作扩展到描述可接受分配的场景，其中一些事务使用“读已提交”（PC in MySQL）隔离级别（即，它们在读取之前获取短时间的共享锁），而其他事务则使用 SI 和 S2PL。</p>
+<h2 id="ACKNOWLEDGMENTS">ACKNOWLEDGMENTS</h2>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/48979/" rel="prev" title="Adya'99-Weak Consistency: A Generalized Theory and Optimistic Implementations for Distributed">
+      <i class="fa fa-chevron-left"></i> Adya'99-Weak Consistency: A Generalized Theory and Optimistic Implementations for Distributed
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/50940/" rel="next" title="SIGMOD'08-Serializable Isolation for Snapshot Databases">
+      SIGMOD'08-Serializable Isolation for Snapshot Databases <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#INTRODUCTION"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Related-Work"><span class="nav-number">1.1.</span> <span class="nav-text">Related Work</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BACKGROUND-MATERIAL"><span class="nav-number">2.</span> <span class="nav-text">BACKGROUND MATERIAL</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Combinatorics-definitions"><span class="nav-number">2.1.</span> <span class="nav-text">Combinatorics definitions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Concurrency-Control-Algorithms"><span class="nav-number">2.2.</span> <span class="nav-text">Concurrency Control Algorithms</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiversion-serializability-theory"><span class="nav-number">2.3.</span> <span class="nav-text">Multiversion serializability theory</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.1.</span> <span class="nav-text">事务结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E9%A1%BA%E5%BA%8F"><span class="nav-number">2.3.2.</span> <span class="nav-text">事务顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%81%E8%A7%84%E5%88%99"><span class="nav-number">2.3.3.</span> <span class="nav-text">锁规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">2.3.4.</span> <span class="nav-text">并发控制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%B2%E7%AA%81%E5%BA%8F%E5%88%97%E5%8C%96%E5%9B%BE%EF%BC%88CSG%EF%BC%89%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.3.5.</span> <span class="nav-text">冲突序列化图（CSG）的定义</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CONFLICT-THEORY"><span class="nav-number">3.</span> <span class="nav-text">CONFLICT THEORY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GLOBAL-INTERFERENCE-THEORY"><span class="nav-number">4.</span> <span class="nav-text">GLOBAL INTERFERENCE THEORY</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#THE-LATTICE-OF-ALLOCATIONS"><span class="nav-number">5.</span> <span class="nav-text">THE LATTICE OF ALLOCATIONS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CONCLUSIONS-AND-FURTHER-WORK"><span class="nav-number">6.</span> <span class="nav-text">CONCLUSIONS AND FURTHER WORK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ACKNOWLEDGMENTS"><span class="nav-number">7.</span> <span class="nav-text">ACKNOWLEDGMENTS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

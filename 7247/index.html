@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 什么是软件交付  软件交付是软件项目的结束阶段，标志着软件开发任务的完成 软件交付是软件开发与软件维护两个既连续又不同的软件产品生存状态的分水岭。 只有做好软件交付工作，才是真正地完成整个项目。  安装与部署  需求阶段：考虑环境约束等 体系结构设计阶段：进行产品部署的设计决策，包括网络拓扑、库文件、动态">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-20-软件交付">
+<meta property="og:url" content="https://eaglebear2002.github.io/7247/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 什么是软件交付  软件交付是软件项目的结束阶段，标志着软件开发任务的完成 软件交付是软件开发与软件维护两个既连续又不同的软件产品生存状态的分水岭。 只有做好软件交付工作，才是真正地完成整个项目。  安装与部署  需求阶段：考虑环境约束等 体系结构设计阶段：进行产品部署的设计决策，包括网络拓扑、库文件、动态">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-05-31T09:02:38.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.635Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/7247/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-20-软件交付 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/7247/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-20-软件交付
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 17:02:38" itemprop="dateCreated datePublished" datetime="2022-05-31T17:02:38+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="什么是软件交付">什么是软件交付</h2>
+<ol>
+<li>软件交付是软件项目的结束阶段，标志着软件开发任务的完成</li>
+<li>软件交付是软件开发与软件维护两个既连续又不同的软件产品生存状态的分水岭。</li>
+<li>只有做好软件交付工作，才是真正地完成整个项目。</li>
+</ol>
+<h2 id="安装与部署">安装与部署</h2>
+<ol>
+<li>需求阶段：考虑环境约束等</li>
+<li>体系结构设计阶段：进行产品部署的设计决策，包括网络拓扑、库文件、动态链接库、配置文件等
+<ol>
+<li>32 位环境还是 64 位环境等问题</li>
+</ol>
+</li>
+<li>开发阶段：使用的支持软件也会影响到交付，可能要求客户安装特定支撑软件或者硬件</li>
+</ol>
+<h3 id="安装">安装</h3>
+<ol>
+<li>安装是软件交付的最常见形式，现在大多数产品都通过安装的形式交付，它要求开发团队创建一个安装包，用户可以通过的执行将软件产品部署到工作环境。</li>
+<li>安装包需要进行仔细的设计，并使用工具（例如 Advanced Installer 、Setup Factory 等）帮助进行安装包的创建。一个好软件产品应该简单、健壮、可靠、完全。要创建很容易使用的安装包，让用户可以无需创建安装包的人员的帮助就能使用。</li>
+</ol>
+<h3 id="创建安装包的步骤">创建安装包的步骤</h3>
+<h4 id="确定安装环境">确定安装环境</h4>
+<ol>
+<li>确定安装包需要<strong>支持的操作系统</strong>，这既需要考虑当前用户的工作环境，又需要考虑产品未来的市场规划；</li>
+<li>确定软件产品的语言支撑环境，例如使用 Java 语言开发的软件产品就需要安装 JDK；</li>
+<li>确定软件产品需要的软件支持，例如数据库系统、网络系统等；</li>
+<li>确定硬件等其他要求，例如有些软件产品可能会要求扫描仪、视频卡、通信设备等特殊硬件。</li>
+<li>例如，对超市销售系统 MSCS，它的安装环境为：Window XP、 Window Vista、Window 7 三种操作系统；Java 运行环境 JDK；数据库管理系统软件（如果使用了数据库的话）。</li>
+</ol>
+<h4 id="列举安装清单">列举安装清单</h4>
+<ol>
+<li>要根据软件产品的实现情况，结合所需的环境支撑，列举需要安装的文件、初始化数据、注册表等清单信息，要清楚<strong>标明它们在安装后将会出现的位置</strong>。</li>
+<li>在考虑安装位置时要遵守一致性，标记名称的使用要意义清楚，让用户能便利地找出相应文件。</li>
+<li>例如，对超市销售系统 MSCS，它所有的可执行程序文件都是需要安装的文件，初始化数据有两处，一处是设置默认的管理员用户帐号，另一处是设置数据库管理系统连接数据。</li>
+</ol>
+<h4 id="设计和建立安装包">设计和建立安装包</h4>
+<ol>
+<li>要对安装包进行详细的设计，包括一个渐进的安装步骤，各步骤的人机交互方式等等。完成设计后就可以使用安装工具创建安装包。</li>
+<li>例如，超市销售系统 MSCS 安装包可以按照下列步骤建立:
+<ol>
+<li>检查操作系统环境</li>
+<li>检查 JDK，如果没有合适的 JDK，则提醒用户安装 JDK</li>
+<li>检查数据库管理系统软件，如果合适的数据库管理系统软件，则提醒用户进行安装</li>
+<li>设置数据库管理系统连接参数</li>
+<li>连接数据库管理系统，创建 MSCS 的数据库</li>
+<li>拷贝文件</li>
+<li>设置初始化数据，包括数据库系统连接参数和 MSCS 的默认管理帐号</li>
+<li>安装成功。</li>
+</ol>
+</li>
+</ol>
+<h4 id="测试安装包">测试安装包</h4>
+<ol>
+<li>安装包需要在目标环境中进行安装测试，以发现可能的问题。</li>
+<li>需要注意的是：必须以用户的工作环境为<strong>目标环境</strong>进行测试，因为用户使用的机器环境与开发者的机器环境有很大的不同（包括程序环境、操作系统版本、支撑软件版本等等），在开发者机器上可以正确执行的安装包未必能够在用户的机器上运行。</li>
+</ol>
+<h3 id="部署">部署</h3>
+<ol>
+<li>在软件产品比较复杂时，仅仅通过一个安装包无法完成软件交付任务，这时可以使用另一种常见的软件交付方式——部署。</li>
+<li>部署通常是由开发人员直接操纵软件产品的目标环境，使得软件产品能够在目标环境中正常运行。</li>
+<li>部署的过程中通常需要执行安装任务，但是还有很多比安装复杂得多的其他任务，例如：安装、设置或调整操作系统，尤其是权限管理参数；安装、设置和调整数据库系统，包括新建数据库和设置访问权限；安装和设置库文件、应用服务器等应用环境。</li>
+</ol>
+<h3 id="部署的步骤">部署的步骤</h3>
+<h4 id="确定部署环境">确定部署环境</h4>
+<ol>
+<li>和安装一样，软件部署要首先要需要确定部署的目标环境，当然它比安装要求的更高一些。它需要对目标环境进行调查分析，搞清楚部署前的环境细节，然后才能与软件产品需要的环境细节进行比较，才能明确需要执行的部署任务。</li>
+<li>具体来说，软件部署需要了解服务器与网络拓扑、安全控制与权限管理、软硬件系统的配置信息等。</li>
+</ol>
+<h4 id="确定部署任务">确定部署任务</h4>
+<ol>
+<li>将软件产品需要的目标环境与部署前的环境进行比较，分析二者之间的差距，并将其确立为部署的任务。</li>
+<li>确定任务之后，还需要以渐进的方式安排任务之间的执行次序。例如，先安装和配置操作系统，然后安装和配置相应的软硬件系统，最后完成软件产品的安装与配置，等等。</li>
+</ol>
+<h4 id="完成部署准备">完成部署准备</h4>
+<ol>
+<li>有些部署工作可以完全依靠现场执行，但多数的部署任务需要进行一定的事前准备，尤其是要综合考虑部署工作可能出现的各种情况，制定完备的应对方案。</li>
+</ol>
+<h4 id="执行部署任务">执行部署任务</h4>
+<ol>
+<li>按照准备的计划，执行相应的部署任务。</li>
+</ol>
+<h2 id="培训与文档支持">培训与文档支持</h2>
+<ol>
+<li>帮助用户理解产品，并使其能够轻松地使用产品</li>
+<li>不能让用户学会使用软件产品，那么就不算是完成了软件交付任务</li>
+<li>帮助用户学会使用软件产品的两个关键任务：
+<ol>
+<li>培训</li>
+<li>文档支持</li>
+</ol>
+</li>
+</ol>
+<h3 id="培训">培训</h3>
+<ol>
+<li>培训主要是教会用户使用软件产品的功能来完成其工作和任务。依据任务的不同，要为不同的用户进行不同类型的培训。</li>
+<li>例如，对超市销售系统 MSCS
+<ol>
+<li>培训收银员使用系统进行销售和退货</li>
+<li>培训客户经理使用系统进行库存管理和会员管理</li>
+<li>培训总经理使用系统制定销售策略和进行库存分析</li>
+<li>培训系统管理员进行用户管理。</li>
+</ol>
+</li>
+</ol>
+<h4 id="培训的注意点">培训的注意点</h4>
+<ol>
+<li>尤其不能忽略的是对<strong>系统管理员</strong>进行培训。要培训系统管理员如何启动和运行新系统、如何配置系统、如何授权或拒绝对系统的访问、如何支持用户、如何处理异常等。</li>
+<li>在培训中，只介绍能够帮助用户完成主要工作和任务的功能，不要把培训当作软件产品所有功能的展示会。对于一些很少会被使用并且<strong>不太重要</strong>的功能，即使培训也会很快被用户忘记，可以让用户使用<strong>文档支持</strong>来学会使用。</li>
+<li>培训时，要关注用户的工作和任务，不必涉及系统的内部操作，不必知道系统的存储方式、访问方式和权限控制方式。</li>
+</ol>
+<h3 id="文档支持">文档支持</h3>
+<ol>
+<li>文档是软件交付的重要部分
+<ol>
+<li>培训时作为参考材料</li>
+<li>交付完成之后继续帮助用户使用系统</li>
+</ol>
+</li>
+<li>用户文档</li>
+<li>系统管理员文档</li>
+<li>简单的系统只有用户文档，绝大多数系统都有用户文档和系统管理员文档</li>
+</ol>
+<h4 id="用户文档">用户文档</h4>
+<ol>
+<li>用户文档是指为用户编写参考指南或者操作教程，常见的如用户使用手册、联机帮助文档等，统称为用户文档。</li>
+</ol>
+<h4 id="用户文档的形式">用户文档的形式</h4>
+<ol>
+<li>用户文档可以是纸质的，也可以是电子的，可以只有一份文档，也可以是由多份文档组成的集合，具体情况要视用户的特点而定。</li>
+<li>用户文档的写作要考虑用户群体的特点，最好是图文结合的方式，以方便普通用户的使用。用户文档写作应该使用逐层展开和系统化（例如层次编码、列表）的方式描述复杂内容。</li>
+</ol>
+<h4 id="用户文档的内容组织">用户文档的内容组织</h4>
+<ol>
+<li>文档内容的组织应当支持其使用模式，常见的是指导模式和参考模式两种。</li>
+<li>指导模式根据用户的任务组织程序规程，相关的软件任务组织在相同的章节或主题。指导模式要先描述简单的、共性的任务，然后再以其为基础组织更加复杂的任务描述。</li>
+<li>参考模式按照方便随机访问独立信息单元的方式组织内容。例如，按字母顺序排列软件的命令或错误消息列表。</li>
+<li>如果文档需要同时包含两种模式，就需要将其清楚地区分成不同的章节或主题，或者在同一个章节或主题内区分为不同的格式。</li>
+</ol>
+<h4 id="用户文档的要素">用户文档的要素</h4>
+<blockquote>
+<p>表格描述参加课本 339 页</p>
+</blockquote>
+<ol>
+<li>标识信息
+<ol>
+<li>包括文档标题、文档产生的版本和日期、相关的软件产品和版本</li>
+<li>标识信息应该放在包装袋或者封面，用户可以不用翻阅文档就能看到</li>
+</ol>
+</li>
+<li>引言
+<ol>
+<li>正文的第一部分，描述文档的预期读者、描述范围，以及对文档目的、功能和操作环境的概要描述</li>
+</ol>
+</li>
+<li>文档使用信息
+<ol>
+<li>文档使用信息描述了关于文档的使用信息，例如，解释各种图示的含义、介绍如何使用帮助等。</li>
+</ol>
+</li>
+<li>操作模式
+<ol>
+<li>操作模式是使用用户文档的模式，例如对操作流程的图示或者文字性描述，再例如解释操作的理论、原因、算法或者通用概念。</li>
+</ol>
+</li>
+<li>操作规程
+<ol>
+<li>指导模式文档应该包括很多软件功能都会涉及的常见活动规程：
+<ol>
+<li>需要由用户执行的软件安装与卸载</li>
+<li>图形用户界面特性的使用指导</li>
+<li>访问、登录或者关闭软件</li>
+<li>通过软件的导航，访问和退出相关功能</li>
+<li>数据操作（输入、保存、读取、打印、更新和删除）</li>
+<li>取消、中断和重启操作的方法</li>
+</ol>
+</li>
+<li>对于完成用户任务的操作流程，指导模式文档应该从基本信息、指导步骤和结束信息三个方面来描述</li>
+<li>基本信息：
+<ol>
+<li>简要概述操作规程的目的，定义或解释必要的概念</li>
+<li>标明执行任务前需要完成的技术活动</li>
+<li>列举用户完成任务所需要的资源情况，例如数据、文档、密码等</li>
+</ol>
+</li>
+<li>对于完成用户任务的操作流程，指导模式文档应该从基本信息、指导步骤和结束信息三个方面来描述</li>
+<li>指导步骤：使用祈使语句描述用户行为，并指出预期的结果。指导步骤要说明：
+<ol>
+<li>用户输入数据的域值范围、最大长度和格式</li>
+<li>相应的错误消息和恢复办法</li>
+<li>其它可选的步骤和重复步骤</li>
+</ol>
+</li>
+<li>对于完成用户任务的操作流程，指导模式文档应该从基本信息、指导步骤和结束信息三个方面来描述</li>
+<li>结束信息：标明操作规程的最后步骤，让用户知道怎样判断整个操作规程的成功完成，告诉用户如何退出操作规程</li>
+</ol>
+</li>
+<li>软件命令信息
+<ol>
+<li>解释用户输入命令的格式和操作规程，包括必要参数、可选参数、缺省值等，要示例说明命令的使用，说明怎样判断命令是成功完成还是异常中止</li>
+</ol>
+</li>
+<li>错误信息与问题解决
+<ol>
+<li>文档要详细描述软件使用中的已知问题，让用户清楚如何自行解决问题或者怎样向技术支持人员报告准确的信息</li>
+</ol>
+</li>
+<li>导航特征
+<ol>
+<li>包括章节、主题、页码、链接、图标等</li>
+<li>提高导航特征和效率</li>
+</ol>
+</li>
+</ol>
+<h4 id="系统管理员文档">系统管理员文档</h4>
+<ol>
+<li>与用户文档注重系统使用细节不同，系统管理员文档更注重系统维护方面的内容，例如系统性能调整、访问权限控制、常见故障解决等等。因此，系统管理员文档需要详细介绍软硬件的配置方式、网络连接方式、安全验证与访问授权方法、备份与容灾方法、部件替换方法等等。</li>
+</ol>
+<h2 id="项目评价">项目评价</h2>
+<ol>
+<li>开发者自我反省</li>
+</ol>
+<h3 id="为什么要进行项目评价">为什么要进行项目评价</h3>
+<ol>
+<li>设置“项目”是要保证项目中的各种事件与活动能够依照计划顺利进行，项目评价就是检查其事件与活动的实际执行情况。在理论上，项目评价可以发生在项目进行的任何时机，尤其是到达各个里程碑之后。但最重要的项目评价是在项目结束时进行的项目评价，这也是本章节所要描的项目评价。</li>
+<li>虽然从单个项目看，项目已经结束，评价似乎用处不大。但是考虑到一个组织会有很多项目持续进行，那么评价一个已结束项目就可以“以史为鉴”，帮助更好地完成后续项目。而且因为项目已经完成，总结和评价就远比项目进行中更加准确。</li>
+<li>项目评价工作也需要仔细组织，不是简单的开个总结会完事，否则就无法获得比较深入的信息。</li>
+</ol>
+<h3 id="项目评价的内容">项目评价的内容</h3>
+<ol>
+<li>一个已结束的项目具有各种事件和活动的信息，通过组织对项目的不同方面内容进行评价，就可以获得各种不同方面的经验，就可以搞清楚出现了哪些问题、为什么会出现、怎样解决、有哪些偏差、最终结果与质量、以及（最重要的是）在下个项目中有哪些需要提高。</li>
+<li>常见的项目评价针对四个方面：
+<ol>
+<li>项目管理：可以帮助建立对项目的更准确认知，例如常见的管理问题与偏差、时间与成本耗费分布等。</li>
+<li>产品：可以帮助开发者建立对产品的更准确认知，提高产品的开发经验。</li>
+<li>团队：可以帮助开发者更好地组织分工，也可以帮助团队建立更好的沟通与交流途径。</li>
+<li>个人：可以帮助开发者更准确认知自己的生产力，学习常见问题及其处理方法，了解自己的长处和不足并持续提高。</li>
+</ol>
+</li>
+</ol>
+<h3 id="项目评价方法">项目评价方法</h3>
+<ol>
+<li>评审</li>
+<li>度量数据分析</li>
+</ol>
+<h4 id="项目评审">项目评审</h4>
+<ol>
+<li>项目评审通过评审重要项目制品的方法来评价项目，这些重要制品包括项目计划、管理文档、会议记录、历史数据等。</li>
+<li>成功的评审需要评审方法，而不是自由处理。检查列表是最为常用的评审方法。</li>
+<li>checkList 如下</li>
+</ol>
+<h4 id="有关项目管理的问题：">有关项目管理的问题：</h4>
+<ol>
+<li>项目所使用的过程是什么？瀑布/迭代开发</li>
+<li>实际的过程与原先确定的过程有什么不同？</li>
+<li>进度表是如何随着时间的变化而改变的？</li>
+<li>有多少个同步点和里程碑按时达到或错失？</li>
+<li>过程的哪些部分运行得好？</li>
+<li>过程的哪些部分本应该能运行得更好？</li>
+<li>工具支持这个过程吗？</li>
+<li>从整体上讲，这个过程运行得有效吗？</li>
+<li>在今后，尤其要对哪些方面进行改进？</li>
+<li>在每个阶段和每项任务上花费的时间是多少？</li>
+</ol>
+<h4 id="有关产品的问题：">有关产品的问题：</h4>
+<ol>
+<li>在项目的生命周期中，产品是如何变化的？</li>
+<li>有没有出现重要的产品返工的情况？如果有，是在什么时候？</li>
+<li>工具支持产品的制造、维护和测量吗？</li>
+<li>产品最后的规模有多大？产品的质量如何？</li>
+</ol>
+<h4 id="有关团队和个人的问题：">有关团队和个人的问题：</h4>
+<ol>
+<li>团队（个人）工作中哪些个风险发生了，其影响又是怎样的？</li>
+<li>在何时做出了哪项重要决定？</li>
+<li>所遇到的主要问题是什么？</li>
+<li>这个决定又是如何影响这个项目的？</li>
+<li>对这些问题的解决方法产生了什么样的效果？</li>
+<li>开发团队成员是如何看待自己的职责的？</li>
+</ol>
+<h3 id="度量数据分析">度量数据分析</h3>
+<ol>
+<li>度量数据可以提供丰富的信息，通过分析这些信息，开发团队可以获取正确和深入的结论。</li>
+<li>例如，通过分析项目活动的任务量，就可以了解每个人的生产力、项目的工作量分布、特殊任务的工作量耗费等。</li>
+</ol>
+<h4 id="产品信息定量的度量">产品信息定量的度量</h4>
+<ol>
+<li>一个项目常见的产品信息度量应该包括：
+<ol>
+<li>（随着时间而变化的）产品的增长情况和变化历史。</li>
+<li>产品在每个里程碑上的测量。</li>
+<li>产品复杂度和内容的测量。</li>
+<li>过程和工具对产品的影响。</li>
+</ol>
+</li>
+</ol>
+<h4 id="定性文件">定性文件</h4>
+<ol>
+<li>在进行度量数据分析时可能会遇到数据贫乏——这意味着没有足够的定量数据来支持项目评价，这时可以用问卷调查表和面谈来补充数据信息。也可以通过检查定性文件来建立数据信息，这些定性文件可能包括：
+<ol>
+<li>对团队会议和子团队会议所做的记录。</li>
+<li>项目电子邮件的存档（来获得问题确定和决策的日期）。</li>
+<li>任务列表、项目决策和行动条目中的信息。</li>
+</ol>
+</li>
+</ol>
+<h3 id="评价的注意事项">评价的注意事项</h3>
+<h4 id="项目的评价需要仔细的计划">项目的评价需要仔细的计划</h4>
+<ol>
+<li>作为项目管理活动的一部分，项目评价也需要进行计划，计划的内容包括：
+<ol>
+<li>执行项目评价的时间，要在项目结束后，并且不能时间太久导致项目活动细节遗忘</li>
+<li>确定项目评价的关键主题</li>
+<li>确定参与项目评价的人员</li>
+<li>确定需要收集的数据，并将数据收集任务分配给相关人员。</li>
+</ol>
+</li>
+</ol>
+<h4 id="评价要客观">评价要客观</h4>
+<ol>
+<li>对项目的评价要客观，要保持对项目和过程的关注，不要偏离目标指责和突出个人。如果不能做到客观，列举没有进行分析的测量数据或信息，而仅仅为了表明整个项目是一个巨大成功的话，那就无法得到有益的经验，就是浪费时间。评价不是向高级管理层夸夸其谈的文档，而是团队每个成员和组织通过一个又一个项目来不断获得提高的途径。</li>
+</ol>
+<h2 id="总结">总结</h2>
+<ol>
+<li>不要忽视软件交付阶段的任务
+<ol>
+<li>通过安装与部署将软件产品移交给用户</li>
+<li>通过培训与文档支持保障用户能够有效掌握和使用软件</li>
+</ol>
+</li>
+<li>一个项目的成功或失败都值得总结，以改进将来的项目，即要在项目结束后及时进行项目评价</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/58710/" rel="prev" title="软件工程与计算II-19-软件测试">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-19-软件测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/19148/" rel="next" title="软件工程与计算II-22-软件开发过程模型">
+      软件工程与计算II-22-软件开发过程模型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BD%AF%E4%BB%B6%E4%BA%A4%E4%BB%98"><span class="nav-number">1.</span> <span class="nav-text">什么是软件交付</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%B8%8E%E9%83%A8%E7%BD%B2"><span class="nav-number">2.</span> <span class="nav-text">安装与部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%AE%89%E8%A3%85%E5%8C%85%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.2.</span> <span class="nav-text">创建安装包的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E5%AE%89%E8%A3%85%E7%8E%AF%E5%A2%83"><span class="nav-number">2.2.1.</span> <span class="nav-text">确定安装环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%97%E4%B8%BE%E5%AE%89%E8%A3%85%E6%B8%85%E5%8D%95"><span class="nav-number">2.2.2.</span> <span class="nav-text">列举安装清单</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%BB%BA%E7%AB%8B%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">2.2.3.</span> <span class="nav-text">设计和建立安装包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">2.2.4.</span> <span class="nav-text">测试安装包</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="nav-number">2.3.</span> <span class="nav-text">部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.4.</span> <span class="nav-text">部署的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E9%83%A8%E7%BD%B2%E7%8E%AF%E5%A2%83"><span class="nav-number">2.4.1.</span> <span class="nav-text">确定部署环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E9%83%A8%E7%BD%B2%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.4.2.</span> <span class="nav-text">确定部署任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%8C%E6%88%90%E9%83%A8%E7%BD%B2%E5%87%86%E5%A4%87"><span class="nav-number">2.4.3.</span> <span class="nav-text">完成部署准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E9%83%A8%E7%BD%B2%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.4.4.</span> <span class="nav-text">执行部署任务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%B9%E8%AE%AD%E4%B8%8E%E6%96%87%E6%A1%A3%E6%94%AF%E6%8C%81"><span class="nav-number">3.</span> <span class="nav-text">培训与文档支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%B9%E8%AE%AD"><span class="nav-number">3.1.</span> <span class="nav-text">培训</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%B9%E8%AE%AD%E7%9A%84%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">3.1.1.</span> <span class="nav-text">培训的注意点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E6%94%AF%E6%8C%81"><span class="nav-number">3.2.</span> <span class="nav-text">文档支持</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%96%87%E6%A1%A3"><span class="nav-number">3.2.1.</span> <span class="nav-text">用户文档</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%96%87%E6%A1%A3%E7%9A%84%E5%BD%A2%E5%BC%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">用户文档的形式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%96%87%E6%A1%A3%E7%9A%84%E5%86%85%E5%AE%B9%E7%BB%84%E7%BB%87"><span class="nav-number">3.2.3.</span> <span class="nav-text">用户文档的内容组织</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%96%87%E6%A1%A3%E7%9A%84%E8%A6%81%E7%B4%A0"><span class="nav-number">3.2.4.</span> <span class="nav-text">用户文档的要素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E5%91%98%E6%96%87%E6%A1%A3"><span class="nav-number">3.2.5.</span> <span class="nav-text">系统管理员文档</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%AF%84%E4%BB%B7"><span class="nav-number">4.</span> <span class="nav-text">项目评价</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%9B%E8%A1%8C%E9%A1%B9%E7%9B%AE%E8%AF%84%E4%BB%B7"><span class="nav-number">4.1.</span> <span class="nav-text">为什么要进行项目评价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%AF%84%E4%BB%B7%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">4.2.</span> <span class="nav-text">项目评价的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%AF%84%E4%BB%B7%E6%96%B9%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">项目评价方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E8%AF%84%E5%AE%A1"><span class="nav-number">4.3.1.</span> <span class="nav-text">项目评审</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E5%85%B3%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">4.3.2.</span> <span class="nav-text">有关项目管理的问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E5%85%B3%E4%BA%A7%E5%93%81%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">4.3.3.</span> <span class="nav-text">有关产品的问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E5%85%B3%E5%9B%A2%E9%98%9F%E5%92%8C%E4%B8%AA%E4%BA%BA%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">4.3.4.</span> <span class="nav-text">有关团队和个人的问题：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90"><span class="nav-number">4.4.</span> <span class="nav-text">度量数据分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A7%E5%93%81%E4%BF%A1%E6%81%AF%E5%AE%9A%E9%87%8F%E7%9A%84%E5%BA%A6%E9%87%8F"><span class="nav-number">4.4.1.</span> <span class="nav-text">产品信息定量的度量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E6%80%A7%E6%96%87%E4%BB%B6"><span class="nav-number">4.4.2.</span> <span class="nav-text">定性文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BB%B7%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">4.5.</span> <span class="nav-text">评价的注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%9A%84%E8%AF%84%E4%BB%B7%E9%9C%80%E8%A6%81%E4%BB%94%E7%BB%86%E7%9A%84%E8%AE%A1%E5%88%92"><span class="nav-number">4.5.1.</span> <span class="nav-text">项目的评价需要仔细的计划</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%84%E4%BB%B7%E8%A6%81%E5%AE%A2%E8%A7%82"><span class="nav-number">4.5.2.</span> <span class="nav-text">评价要客观</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

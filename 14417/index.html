@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 内聚和耦合概念重要  内聚：内聚表达的是一个模块内部的联系的紧密型：包括信息内聚、功能内聚、通信内聚、过程内聚、时间内聚、逻辑内聚和偶然内聚。  12345public class Rous &#123;    public static int findPattern(String text, Stri">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-13-模块化与信息隐藏">
+<meta property="og:url" content="https://eaglebear2002.github.io/14417/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 内聚和耦合概念重要  内聚：内聚表达的是一个模块内部的联系的紧密型：包括信息内聚、功能内聚、通信内聚、过程内聚、时间内聚、逻辑内聚和偶然内聚。  12345public class Rous &#123;    public static int findPattern(String text, Stri">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161117078.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161121159.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161124650.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161128243.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161139861.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161158183.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161539887.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161418455.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161429121.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161433097.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161439141.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161446495.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161449248.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161455162.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161503559.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161515901.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161519815.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161546811.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161240598.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161246158.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/8-1653988086827555.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161254416.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161258997.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161303393.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161307103.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161311666.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161316174.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161321117.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161616102.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161738984.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161742821.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161746079.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161749643.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161647551.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161757102.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161812857.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161816768.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161840957.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161636991.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161656699.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161836879.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161702684.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161830073.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/34-1653988086830597.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161711277.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161845966.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161721626.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14417/image-20230706161824762.png">
+<meta property="article:published_time" content="2022-05-31T08:55:15.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.630Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/14417/image-20230706161117078.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/14417/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-13-模块化与信息隐藏 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/14417/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-13-模块化与信息隐藏
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 16:55:15" itemprop="dateCreated datePublished" datetime="2022-05-31T16:55:15+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="内聚和耦合概念重要">内聚和耦合概念重要</h2>
+<ol>
+<li>内聚：内聚表达的是一个模块内部的联系的紧密型：包括信息内聚、功能内聚、通信内聚、过程内聚、时间内聚、逻辑内聚和偶然内聚。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Rous</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-title function_">findPattern</span><span class="hljs-params">(String text, String pattern)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-title function_">average</span><span class="hljs-params">(Vector numbers)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> OutputStream <span class="hljs-title function_">openFile</span><span class="hljs-params">(String fileName)</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>耦合：耦合描述的是两个模块之间关系的复杂程度：包括内容耦合，公共耦合，重复耦合，控制耦合，印记耦合，数据耦合</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Employee</span> &#123;<br>    <span class="hljs-keyword">public</span> String name, emailID;<br>&#125;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Emailer</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">sendEmail</span><span class="hljs-params">(Employee e, String text)</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="模块化与信息隐藏思想">模块化与信息隐藏思想</h2>
+<h3 id="设计好的软件">设计好的软件</h3>
+<ol>
+<li>什么是好的软件代表的？</li>
+</ol>
+<h4 id="Parnas-1972">Parnas 1972</h4>
+<ol>
+<li>管理人员（可管理性）</li>
+<li>产品灵活性（灵活性）</li>
+<li>可理解性（可理解性）</li>
+<li>特征
+<ol>
+<li>允许编写一个模块，而几乎不了解另一个模块中的代码</li>
+<li>允许在不重新组装整个系统的情况下重新组装和更换模块。</li>
+</ol>
+</li>
+</ol>
+<h4 id="Stevens-1974">Stevens 1974</h4>
+<ol>
+<li><strong>简洁性</strong>(Simplicity)
+<ol>
+<li>易于调试</li>
+<li>易于分解</li>
+</ol>
+</li>
+<li><strong>可观察性</strong>(Observability)
+<ol>
+<li>易于修改</li>
+</ol>
+</li>
+</ol>
+<h4 id="Beohm-1976">Beohm 1976</h4>
+<ol>
+<li>可维护性</li>
+<li>可扩展性</li>
+<li>可理解性</li>
+<li>可重用性</li>
+</ol>
+<h3 id="动机">动机</h3>
+<ol>
+<li>模块化是关于如何将软件程序划分（分解）为不同模块的思想</li>
+<li>信息隐藏是更多地从模块的外部（抽象）来进行思考</li>
+</ol>
+<h3 id="模块化与信息隐藏思想的发展">模块化与信息隐藏思想的发展</h3>
+<h4 id="背景">背景</h4>
+<ol>
+<li>1960s
+<ol>
+<li>软件和硬件不同</li>
+<li>软件制作</li>
+</ol>
+</li>
+<li>1970s
+<ol>
+<li>软件是数据 + 算法</li>
+<li>瀑布模型</li>
+<li>形式化方法</li>
+</ol>
+</li>
+<li>1980s
+<ol>
+<li>重用</li>
+<li>对象</li>
+<li>人件</li>
+</ol>
+</li>
+</ol>
+<h4 id="历史发展">历史发展</h4>
+<ol>
+<li>萌芽：Wirth1971; Parnas1972;</li>
+<li>形成：Stevens1974; Parnas1978; Parnas1985;</li>
+<li>发展：Eder1992; Hitz1995;</li>
+<li>反思：McConnell1996; Demarco2002</li>
+</ol>
+<h4 id="Wirth1971-萌芽">Wirth1971 - 萌芽</h4>
+<ol>
+<li>软件通过逐步求精发展</li>
+<li>核心思想：逐步求精</li>
+<li>该程序是在一系列优化步骤中逐步开发的
+<ol>
+<li>尽可能分解决策</li>
+<li>解开看似相互依赖的方面</li>
+<li>尽可能推迟有关代表细节的决定</li>
+</ol>
+</li>
+<li>对程序和数据结构的描述的修饰应并行进行。</li>
+<li>以这种方式获得的模块化程度将决定程序可以适应目的变化或扩展或环境变化的难易程度。</li>
+<li>每个优化都基于一组设计标准隐含了许多设计决策。</li>
+<li>仔细编程并不是一件容易的事。</li>
+</ol>
+<h4 id="Parnas-1972-萌芽">Parnas 1972 - 萌芽</h4>
+<ol>
+<li>关于将系统分解为模块的标准</li>
+<li>什么是模块化？
+<ol>
+<li>模块：成为职责分配而不是子程序</li>
+<li>模块化：包括在独立模块上的工作开始之前必须做出的设计决策（“系统级”决策）</li>
+</ol>
+</li>
+<li>分解标准
+<ol>
+<li>信息隐藏</li>
+<li>分解中的每个模块都以其对设计决策的了解为特征，而对其他所有决策则都不了解。</li>
+</ol>
+</li>
+<li>层次结构
+<ol>
+<li>如果可以在模块或程序之间定义某种关系</li>
+<li>该关系是偏序的</li>
+<li>我们关注的关系是“使用”或“依赖”</li>
+</ol>
+</li>
+<li>数据结构，其内部链接，访问过程和修改过程是单个模块的一部分（封装的思想）</li>
+<li>操作系统和类似程序的队列中使用的控制块格式必须在“控制块模块”中隐藏</li>
+<li>在此之前都是想法，而不是方法</li>
+</ol>
+<h4 id="Stevens-1974-形成">Stevens 1974 - 形成</h4>
+<ol>
+<li>&quot;Structured design&quot; 结构化设计</li>
+<li>模块：一组一个或多个连续的程序语句，其名称具有系统其他部分可以调用的名称，并且最好具有其自己独特的变量名称集</li>
+<li>耦合：通过一个模块到另一个模块的连接建立的关联强度的度量</li>
+<li>凝聚力：巧合;逻辑;沟通;顺序;功能性</li>
+<li>模块的控制范围</li>
+<li>决策的效力范围</li>
+<li>当决策的影响范围在包含决策的模块的控制范围内时，系统会更简单</li>
+</ol>
+<h4 id="Stevens-1974：Designing-the-structure-设计结构">Stevens 1974：Designing the structure 设计结构</h4>
+<ul>
+<li>步骤 1：勾画出问题的功能图</li>
+</ul>
+<p><img src="/14417/image-20230706161117078.png" alt></p>
+<ul>
+<li>步骤 2：确定外部概念性数据流。</li>
+<li>步骤 3：确定问题中的主要外部概念数据流</li>
+</ul>
+<p><img src="/14417/image-20230706161121159.png" alt></p>
+<ul>
+<li>步骤 4：使用源模块针对每个概念输入流设计源结构，该模块存在于大多数抽象输入数据的位置；简单的下沉模块</li>
+</ul>
+<p><img src="/14417/image-20230706161124650.png" alt></p>
+<ul>
+<li>步骤 5：对于每个模块，确定产生该模块返回的表单所需的最后一次转换</li>
+</ul>
+<p><img src="/14417/image-20230706161128243.png" alt></p>
+<ul>
+<li>担心的是一个地方的变更会导致其他部分的变更</li>
+</ul>
+<h4 id="Parnas-1978-形成">Parnas 1978 - 形成</h4>
+<ol>
+<li>“设计易于伸缩的软件”</li>
+<li>迈向更好结构的步骤
+<ol>
+<li>需求定义：首先确定子集</li>
+<li>信息隐藏：接口和模块定义</li>
+<li>虚拟机概念</li>
+<li>设计“用途”结构</li>
+</ol>
+</li>
+<li>“依赖”关系
+<ol>
+<li>如果 A 可能需要正确执行 B 才能完成 A 规范中描述的任务，则 A 使用 B</li>
+<li>满足以下所有条件时，允许 A“使用”B：
+<ol>
+<li>A 本质上更简单，因为它使用 B</li>
+<li>B 实际上不复杂，因为它不允许使用 A</li>
+<li>A 有一个有用的子集，包含 B，不需要 A</li>
+<li>没有可以想象的有用的子集包含 A 但不包含 B</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="Parnas-1985-形成">Parnas 1985 - 形成</h4>
+<ol>
+<li>“复杂系统的模块化结构”</li>
+<li>模块说明
+<ol>
+<li>主要隐藏</li>
+<li>角色</li>
+<li>分配模块特定职责的标准</li>
+</ol>
+</li>
+<li>模块层次结构
+<ol>
+<li>顶层分解</li>
+<li>二级分解</li>
+<li>第三级</li>
+</ol>
+</li>
+<li>隐藏
+<ol>
+<li>主要隐藏：模块中包含的隐藏信息。</li>
+<li>次要隐藏：用于实施模块的实施决策。</li>
+</ol>
+</li>
+<li>顶层分解
+<ol>
+<li>硬件隐藏模块</li>
+<li>行为隐藏模块</li>
+<li>软件决策模块</li>
+</ol>
+</li>
+</ol>
+<h4 id="Eder-1992-发展">Eder 1992 - 发展</h4>
+<ol>
+<li>“面向对象系统中的耦合和内聚”</li>
+<li>“良好”设计准则</li>
+<li>面向对象的耦合：相互作用耦合；组件耦合；继承耦合</li>
+<li>面向对象的凝聚力：方法凝聚力；班级凝聚力；继承凝聚力</li>
+</ol>
+<h4 id="Hitz-1995-发展">Hitz 1995 - 发展</h4>
+<ol>
+<li>“在面向对象的系统中测量耦合和内聚”</li>
+<li>类级耦合</li>
+<li>对象级耦合</li>
+<li>耦合和内聚综合指标的框架</li>
+<li>定量分析面向对象系统</li>
+</ol>
+<h4 id="McConnell-1996-反思">McConnell 1996 - 反思</h4>
+<ol>
+<li>&quot;缺少行动：信息隐藏&quot;</li>
+<li>信息隐藏
+<ol>
+<li>是软件工程研讨会的设计思路之一</li>
+<li>不需要或不依赖任何特定的设计方法</li>
+<li>其特点是“隐藏”</li>
+<li>最常见的隐藏是您认为可能会更改的设计决策</li>
+<li>询问需要隐藏哪些内容，可以支持所有级别的良好设计决策</li>
+</ol>
+</li>
+</ol>
+<h4 id="Demarco2002-反思">Demarco2002 - 反思</h4>
+<h5 id="“Structured-Analysis”">“Structured Analysis”</h5>
+<p><img src="/14417/image-20230706161139861.png" alt></p>
+<p><img src="/14417/image-20230706161158183.png" alt></p>
+<ol>
+<li>
+<p>内容：描述了 75 年自己写的文章的内容，什么到现在仍然是对的</p>
+</li>
+<li>
+<p>第五条：接口隔离原则</p>
+</li>
+</ol>
+<h2 id="模块化">模块化</h2>
+<ol>
+<li>计算机系统不是整体的：它们通常由多个交互模块组成。</li>
+<li>长期以来，模块化一直被视为廉价，高质量软件的关键。</li>
+<li>系统设计的目标是决定：
+<ol>
+<li>什么是模块；</li>
+<li>模块应该是什么？</li>
+<li>模块之间如何交互。</li>
+</ol>
+</li>
+</ol>
+<h3 id="什么是模块？">什么是模块？</h3>
+<ol>
+<li>通用视图：一段代码。有局限性。</li>
+<li>编译单元，包括相关的声明和接口</li>
+<li>大卫·帕纳斯：一个工作单元。</li>
+<li>编程单元（程序，类等）的集合
+<ol>
+<li>在整个系统中具有明确定义的界面和目的，</li>
+<li>可以独立分配给开发人员</li>
+</ol>
+</li>
+<li>课本总结：模块是一个词汇上邻接的程序语句序列，由边界元素限制范围，有一个聚合标识符。</li>
+</ol>
+<h3 id="为什么要将系统进行模块化？">为什么要将系统进行模块化？</h3>
+<ol>
+<li>管理：分而治之</li>
+<li>演进：分离系统的各个部分，以便将一个部分的更改与其他部分的更改隔离开
+<ol>
+<li>直接性原则（将需求明确分配到模块，理想情况下一个需求（或多个）映射到一个模块）</li>
+<li>连续性/局部性原则（需求的微小变化仅触发对一个模块的更改）</li>
+</ol>
+</li>
+<li>理解：促使我们的系统更加容易被理解
+<ol>
+<li>作为思维大小的块的组成，例如 $7 \pm 2$ 规则</li>
+<li>一部分只有一个问题，例如本地性原则，封装，关注点分离</li>
+</ol>
+</li>
+<li>关键问题：模块化使用什么标准？-&gt;信息隐藏</li>
+</ol>
+<h3 id="结构化设计中的耦合">结构化设计中的耦合</h3>
+<p><img src="/14417/image-20230706161539887.png" alt></p>
+<h4 id="模块化-2">模块化</h4>
+<ol>
+<li>两种思路</li>
+</ol>
+<p><img src="/14417/image-20230706161418455.png" alt></p>
+<ol start="2">
+<li>可以根据数据总线进行切割</li>
+<li>可以根据门电路进行划分</li>
+</ol>
+<h4 id="模块之间">模块之间</h4>
+<ol>
+<li>连接：连接是对其他地方定义的某些标签或地址的引用</li>
+<li>联系（两个模块之间）的复杂度
+<ol>
+<li>数量</li>
+<li>程度</li>
+</ol>
+</li>
+</ol>
+<h4 id="结构化的耦合">结构化的耦合</h4>
+<ol>
+<li>耦合是对从一个模块到另一个模块的连接所建立的关联强度的度量。
+<ol>
+<li>连接有多复杂</li>
+<li>连接是指模块本身还是模块内部的东西</li>
+<li>正在发送或接收的内容</li>
+</ol>
+</li>
+</ol>
+<h4 id="耦合的强度-1-连接有多复杂">耦合的强度 1 - 连接有多复杂</h4>
+<ol>
+<li>连接模块：对常见的环境：全局变量，范围</li>
+<li>对于其他模块</li>
+</ol>
+<h4 id="原则一：全局变量是被认为是有害的">原则一：全局变量是被认为是有害的</h4>
+<h4 id="连接到全局环境">连接到全局环境</h4>
+<ol>
+<li>假设 N1 + N2 = N，M1 + M2 = M
+<ol>
+<li>如果 M 个模块共享 N 个元素
+<ol>
+<li>有潜在的 N * M 个连接</li>
+<li>(N1 + N2) _ (M1 + M2)= N1 _ M1 + N2 _ M2 + N1 _ M2 + N2 * M1</li>
+</ol>
+</li>
+<li>如果 M1 模块有 N1 个共享元素，而 M2 模块有 N2 个共享元素（也就是 N1 对应 M1，而 N2 对应 M2）：存在潜在的（N1 _ M1 + N2 _ M2）接</li>
+</ol>
+</li>
+<li>封装减少耦合：抽象和分解
+<ol>
+<li>将潜在的共享元素细分成组</li>
+<li>将每个组的访问权限限制为最小的模块子集</li>
+</ol>
+</li>
+</ol>
+<h4 id="常见环境的缺陷">常见环境的缺陷</h4>
+<ol>
+<li>连接将每个模块共享给每个其他这样的模块
+<ol>
+<li>一个模块中的错误和更改可以传播到其他模块</li>
+<li>理解一个模块需要其他人的帮助</li>
+<li>更难于重用</li>
+</ol>
+</li>
+<li>通用环境中的每个元素都会增加整个系统的复杂性</li>
+</ol>
+<h4 id="原则二：如果没有特殊要求，让代码清晰一点">原则二：如果没有特殊要求，让代码清晰一点</h4>
+<ol>
+<li>明确的</li>
+</ol>
+<p><img src="/14417/image-20230706161429121.png" alt></p>
+<ol start="2">
+<li>可修改的</li>
+</ol>
+<p><img src="/14417/image-20230706161433097.png" alt></p>
+<h4 id="明确的和可修改的">明确的和可修改的</h4>
+<ol>
+<li>属性和字典</li>
+<li>明确的电话和事件</li>
+<li>显式子类和数据驱动的代码</li>
+</ol>
+<h4 id="原则三：不要重复">原则三：不要重复</h4>
+<p><img src="/14417/image-20230706161439141.png" alt></p>
+<ul>
+<li>如何消除重复呢？先写接口</li>
+</ul>
+<p><img src="/14417/image-20230706161446495.png" alt></p>
+<ul>
+<li>也就是我们只需要 new 一个 printer 就行</li>
+</ul>
+<p><img src="/14417/image-20230706161449248.png" alt></p>
+<h4 id="耦合的强度-2-连接是指模块本身还是模块内部的东西">耦合的强度 2 - 连接是指模块本身还是模块内部的东西</h4>
+<ol>
+<li>Connections that address or refer to a module as a whole by its name yield lower coupling than connections referring to the internal elements of another module 以其名称寻址或整体引用一个模块的连接产生的耦合比引用另一个模块内部元素的连接产生的耦合低（整体连接的耦合程度高于模块内部元素连接的耦合）</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/14417/image-20230706161455162.png" alt></th>
+<th><img src="/14417/image-20230706161503559.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol start="2">
+<li>关联到内部是不合适的，应该是关联到接口</li>
+<li>接口耦合度低，而如果是具体关联耦合度高</li>
+</ol>
+<h4 id="原则四：面向接口编程">原则四：面向接口编程</h4>
+<h4 id="结构良好的系统">结构良好的系统</h4>
+<ol>
+<li>通过已定义的接口通过传递的参数进行通讯</li>
+</ol>
+<h4 id="耦合的强度-3-应该对外提供什么和接收什么">耦合的强度 3 - 应该对外提供什么和接收什么</h4>
+<ol>
+<li>数据耦合：发送数据正好的耦合
+<ol>
+<li>传递必要数据的连接</li>
+</ol>
+</li>
+<li>印记耦合：发送数据比刚好需要的多
+<ol>
+<li>连接传递的数据超出了必要</li>
+</ol>
+</li>
+<li>控制耦合：除了数据还有控制信号
+<ol>
+<li>传递数据和控制元素的连接</li>
+</ol>
+</li>
+</ol>
+<p><img src="/14417/image-20230706161515901.png" alt></p>
+<ol start="4">
+<li>内容耦合：数据和控制元素的耦合
+<ol>
+<li>另一个模块修改一个模块的代码</li>
+<li>目标模块非常依赖于修改模块。</li>
+</ol>
+</li>
+<li>显然，印记耦合可以实现更多的数据耦合</li>
+<li>控制耦合比数据耦合还耦合更多：信息隐藏</li>
+</ol>
+<h4 id="更简单一点">更简单一点</h4>
+<p><img src="/14417/image-20230706161519815.png" alt></p>
+<ol>
+<li>在上层已经处理好需要处理啥</li>
+<li>不需要传递控制信号</li>
+</ol>
+<h4 id="结构化方法中的耦合度">结构化方法中的耦合度</h4>
+<ol>
+<li>内容耦合</li>
+<li>公共耦合</li>
+<li>重复耦合</li>
+<li>控制耦合：传递的人和接收的人都需要管理控制信号</li>
+<li>印记耦合</li>
+<li>数据耦合</li>
+<li>没有耦合是最好的：但是是做不到的</li>
+<li>从上向下耦合度降低</li>
+<li>几乎没有没有耦合的系统，知识要降低耦合</li>
+<li>重复耦合及以上不允许存在</li>
+<li>控制耦合和印记耦合都要尽量消除</li>
+</ol>
+<blockquote>
+<p>注：内容耦合、重复耦合和公共耦合是不能接受的。数据耦合是最好的，而控制耦合和印记耦合是可以接受的</p>
+</blockquote>
+<h3 id="结构化设计中的内聚">结构化设计中的内聚</h3>
+<p><img src="/14417/image-20230706161546811.png" alt></p>
+<ol>
+<li>偶然内聚：没什么关系（避免）</li>
+<li>逻辑内聚：将一系列操作放在一起，由其他模块进行调用</li>
+<li>时间内聚：操作和时间有关系</li>
+<li>过程内聚：<strong>更强调</strong>按照一定步骤进行调用</li>
+<li>通信内聚：需要操作相同的数据</li>
+<li>功能内聚：只执行一个单一操作和功能</li>
+<li>信息内聚：数据和行为是在一起的</li>
+<li>事件、过程、通信尽量做</li>
+<li>最好能做到功能、信息内聚</li>
+</ol>
+<h4 id="内聚">内聚</h4>
+<ol>
+<li>实现独立模块的方式
+<ol>
+<li>减少不在同一模块中的元素之间的关系</li>
+<li>增加同一模块中元素之间的关系</li>
+</ol>
+</li>
+<li>绑定-凝聚力的度量</li>
+</ol>
+<h4 id="内聚度（绑定类型）">内聚度（绑定类型）</h4>
+<ol>
+<li>从低内聚到高内聚</li>
+<li>巧合的
+<ol>
+<li>逻辑上</li>
+<li>暂时的</li>
+<li>沟通的</li>
+</ol>
+</li>
+<li>功能性</li>
+<li>信息内聚</li>
+</ol>
+<h2 id="KWIC-案例">KWIC 案例</h2>
+<ol>
+<li>一共有 4 种 Java 的实现方式，注意复习</li>
+</ol>
+<h3 id="KWIC">KWIC</h3>
+<ol>
+<li>
+<p>简称 KWIC，又称上下文关键词索引，由 IBM 的卢恩首创，是最早出现的机编索引， 1960 年首次用于美国化学文摘社出版的《化学题录》(Chemical Titles)。</p>
+</li>
+<li>
+<p>KWlC 索引的的编制特点是：</p>
+<ol>
+<li>使用禁用词表选择标题中具有检索意义的词为关键词，并将其作为确定索引条目的依据；</li>
+<li>关键词的排检点设于标题的中部，所有索引条目按关键词的字顺竖向排列；</li>
+<li>保留文献篇名中关键词前后的上下文，如文献名称过长，可以以轮排的形式移至条目的前部或后部；款目后跟随该信息资源的位置。</li>
+</ol>
+</li>
+<li>
+<p>上述条目均按关键词的字顺排列在相应位置，检索时先在检索入口处查找与检索课题有关的关键词，再通过阅读上下文寻找符合检索要求的文献。可以按排检点为中心对同一关键词有关的资源集中检索查找，是这一索引的优点；不足是将索引的排检点设置在中部不符合用户使用习惯。</p>
+</li>
+<li>
+<p>对很多的关键词进行关键词排序</p>
+</li>
+</ol>
+<p><img src="/14417/image-20230706161240598.png" alt></p>
+<p><img src="/14417/image-20230706161246158.png" alt></p>
+<h3 id="KWIC-来实现系统的模块化">KWIC 来实现系统的模块化</h3>
+<ol>
+<li>KWIC 索引系统接受：
+<ol>
+<li>一组有序的线</li>
+<li>每行是一组有序的单词</li>
+<li>每个单词都是一组有序的字符</li>
+</ol>
+</li>
+<li>每行都“循环移位”并通过以下方式复制：
+<ol>
+<li>反复删除第一个单词</li>
+<li>将其附加在行的末尾</li>
+</ol>
+</li>
+<li>输出按字母顺序排列的所有行的所有循环移位的列表</li>
+</ol>
+<p><img src="/14417/8-1653988086827555.png" alt></p>
+<ol start="4">
+<li>通过下标就可以排序数组，下标是 title 的中间</li>
+</ol>
+<h3 id="根据功能进行设计">根据功能进行设计</h3>
+<p><img src="/14417/image-20230706161254416.png" alt></p>
+<h3 id="循环位移算法的实现">循环位移算法的实现</h3>
+<p><img src="/14417/image-20230706161258997.png" alt></p>
+<h3 id="信息隐藏">信息隐藏</h3>
+<ol>
+<li>基本思想：每个模块都隐藏了重要设计决策的实现，因此只有该模块的组成部分才知道详细信息：特别是如果存在所有可能的设计更改的列表-隐藏假设列表</li>
+<li>所有设计决策彼此独立</li>
+<li>两种常见的信息隐藏：
+<ol>
+<li>一是根据需求分配的职责，因为实践表明，需求是经常变化的，频率和幅度都很大；</li>
+<li>二是内部实现机制，常见的变化主题包括硬件依赖，输入输出形式，非标准语言特征和库，负责的设计和实现，复杂的数据结构，复杂的逻辑，全局变量。数据大小限制等。</li>
+</ol>
+</li>
+</ol>
+<h3 id="根据设计决策进行设计">根据设计决策进行设计</h3>
+<p><img src="/14417/image-20230706161303393.png" alt></p>
+<ol>
+<li>模块之间的交互是通过接口实现的</li>
+</ol>
+<h3 id="CircularShifter-的定义">CircularShifter 的定义</h3>
+<p><img src="/14417/image-20230706161307103.png" alt></p>
+<ol>
+<li>有无更改调用的方法：不用</li>
+<li>有无更改调用的方法之中的实现：可能更改</li>
+</ol>
+<p><img src="/14417/image-20230706161311666.png" alt></p>
+<h3 id="分解标准">分解标准</h3>
+<ol>
+<li>第一种模块化：处理过程中的每个主要步骤都是一个模块</li>
+<li>第二种模块化：
+<ol>
+<li>信息隐藏：每个模块都有一个或多个“隐藏”
+<ol>
+<li>行：字符/行的存储方式</li>
+<li>循环位移：旋转算法，旋转存储</li>
+<li>字符表化：alpha 的算法，alpha 的惰性</li>
+<li>每个模块都以其对设计决策的了解为特征，而对其他所有决策则都不了解。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>预期不到的变更是无法进行规避的</li>
+</ol>
+<h3 id="可修改性比较">可修改性比较</h3>
+<p><img src="/14417/image-20230706161316174.png" alt></p>
+<p><img src="/14417/image-20230706161321117.png" alt></p>
+<ol>
+<li>按照算法分解比按照决策分解的修改范围大的多</li>
+</ol>
+<h3 id="独立的发展">独立的发展</h3>
+<ol>
+<li>模块化 1
+<ol>
+<li>必须先设计所有数据结构，然后才能进行并行工作</li>
+<li>需要复杂的描述</li>
+</ol>
+</li>
+<li>模块化 2
+<ol>
+<li>必须先设计接口，然后才能开始并行工作</li>
+<li>仅简单描述</li>
+</ol>
+</li>
+</ol>
+<h3 id="可理解性">可理解性</h3>
+<ol>
+<li>第二种模块化是更好的
+<ol>
+<li>主观性判断</li>
+<li>更低的模块之间的耦合：面向接口编程</li>
+</ol>
+</li>
+</ol>
+<h3 id="模块化-3">模块化</h3>
+<ol>
+<li>一个职责设计而不是一个子程序</li>
+<li>由特定于自己的设计决策表示，而其他模块则未知</li>
+<li>在实现上支持灵活性</li>
+<li>不要代表过程中的步骤</li>
+<li>低耦合，高内聚</li>
+</ol>
+<h3 id="结论">结论</h3>
+<ol>
+<li>模块
+<ul>
+<li>可以被放置到一起的去形成一个完成系统的模块</li>
+<li>职责分配，子过程，内存加载，功能部分</li>
+</ul>
+</li>
+<li>模块化：设计独立的模块</li>
+<li>封装
+<ul>
+<li>语言便利性</li>
+<li>面向对象三大基本思想：数据和行为在一起，体现共同职责</li>
+</ul>
+</li>
+<li>信息隐藏
+<ul>
+<li>设计原则</li>
+<li>信息隐藏是更高的设计原则</li>
+</ul>
+</li>
+</ol>
+<h2 id="结构化的模块化">结构化的模块化</h2>
+<ol>
+<li>1-2 道大题是关于设计模式的</li>
+</ol>
+<h2 id="MSCS-中的模块思想的应用">MSCS 中的模块思想的应用</h2>
+<h3 id="低耦合处理">低耦合处理</h3>
+<ol>
+<li>软件体系结构的分层设计中：
+<ul>
+<li>不同层的模块之间仅能通过程序调用与数据传递实现交互,不能共享数据（例如 Model 层建立一个数据对象并将引用传递给 Logic 层使用）否则会导致公共耦合。</li>
+</ul>
+</li>
+<li>软件体系结构的逻辑包设计中：
+<ul>
+<li>依据功能的特点将三个层次进一步划分为更小的包,而不是只使用 Presentation、Logic 和 Model 三个包,可以通过包分割实现接口最小化,这能去除不必要的耦合。</li>
+</ul>
+</li>
+</ol>
+<h3 id="软件体系结构的物理包设计中">软件体系结构的物理包设计中</h3>
+<ol>
+<li>将不同包的重复内容独立为单独的包以消除重复,避免产生隐式的重复耦合;</li>
+</ol>
+<h3 id="详细设计中对象创建者的选择：">详细设计中对象创建者的选择：</h3>
+<ol>
+<li>如果两个对象 A、B 间已有比较高的耦合度了, 那么使用 A 创建 B 或者反之就不会带来额外的耦合度。这就是表 12-4 内容的核心思想——不增加新的耦合。</li>
+</ol>
+<h3 id="详细设计中选择控制风格：">详细设计中选择控制风格：</h3>
+<ol>
+<li>解除界面与逻辑对象的直接耦合。</li>
+</ol>
+<h3 id="高内聚处理">高内聚处理</h3>
+<ol>
+<li>软件体系结构的分层设计中：
+<ul>
+<li>三个层次都是高内聚的,一个处理交互任务, 一个处理业务逻辑,一个处理数据持久化。</li>
+</ul>
+</li>
+<li>软件体系结构的逻辑包设计中：
+<ul>
+<li>将三个层次进一步划分为更小的包,可以实现每个更小的包都是高内聚的。</li>
+</ul>
+</li>
+<li>详细设计中抽象类的职责：
+<ul>
+<li>要求状态与方法紧密联系就是为了达到高内聚（信息内聚）。</li>
+</ul>
+</li>
+<li>详细设计中使用控制风格：
+<ul>
+<li>控制风格分离了控制逻辑,可以实现业务逻辑对象的高内聚（功能内聚）。因为封装了控制逻辑,所以控制器对象承载了不可避免的顺序内聚、通信内聚和逻辑内聚,这就要求控制器对象必须是受控的,也是它们为什么倾向于对外委托而不是自己进行业务计算的原因。</li>
+</ul>
+</li>
+</ol>
+<h2 id="结构化的信息隐藏">结构化的信息隐藏</h2>
+<h3 id="Information-信息">Information 信息</h3>
+<ol>
+<li>信息隐藏</li>
+<li>什么需要隐藏？变更
+<ol>
+<li>数据表示</li>
+<li>设备的属性（必需属性除外）</li>
+<li>实施世界模型</li>
+<li>支持政策的机制</li>
+</ol>
+</li>
+<li>信息隐藏的核心是将每个模块都隐藏一个重要的设计决策</li>
+</ol>
+<h4 id="最有可能修改的设计领域">最有可能修改的设计领域</h4>
+<ol>
+<li>硬件依赖：外部软件系统</li>
+<li>输入输出格式：DB, Internet, UI, …</li>
+<li>非标准语言特性和依赖路径：Platform：os, middleware, framework…</li>
+<li>困难的设计和实现部分
+<ol>
+<li>通常是被设计的很不好的部分或者是需要被重新设计和重新实现的部分</li>
+<li>Complex…, monitor, exception, log, …</li>
+</ol>
+</li>
+<li>复杂的数据结构，被多个类使用的数据结构，或者是不让你满意的数据结构
+<ol>
+<li>Separate model from logic 逻辑分块</li>
+</ol>
+</li>
+<li><strong>复杂逻辑</strong>，他们被认为就像数据结构一样复杂。</li>
+<li><strong>算法，时间表</strong>，时间紧迫，实现紧迫</li>
+<li><strong>全局变量</strong>：常常并没有并真正使用，但是常常受益于权限访问的隐藏：Data Access Routines</li>
+<li>数组声明的数据量打下和循环限制。</li>
+<li>以及商业规则：比如法律、规则、正则和被转换成计算机系统的过程。</li>
+</ol>
+<h3 id="隐藏">隐藏</h3>
+<ol>
+<li>尝试本地化未来的变化
+<ol>
+<li>隐藏可能会独立更改的系统详细信息</li>
+<li>可能具有不同变化率的独立零件</li>
+<li>暴露接口的假设不太可能改变</li>
+</ol>
+</li>
+<li>容易变化的隐藏，不容易变化的展示</li>
+</ol>
+<h3 id="信息隐藏-2">信息隐藏</h3>
+<ol>
+<li>最常见的隐藏是您认为可能会更改的设计决策。</li>
+<li>然后，您可以通过将每个设计秘密分配给自己的类，子例程或其他设计单元来分离它们。</li>
+<li>接下来，您隔离（封装）每个机密，这样，如果它确实发生了更改，则更改不会影响程序的其余部分。</li>
+</ol>
+<h4 id="接口与实现">接口与实现</h4>
+<ol>
+<li>模块的用户和实施者对此有不同的看法。</li>
+<li>界面：用户对模块的看法。</li>
+<li>仅描述用户使用模块需要知道的内容</li>
+<li>使其更易于理解和使用</li>
+<li>描述了该模块提供的服务，但没有描述如何提供这些服务</li>
+</ol>
+<h4 id="什么是接口">什么是接口</h4>
+<ol>
+<li>作为合同的接口：模块发布的任何内容
+<ul>
+<li>提供的接口：模块的客户端可以依赖于所需的接口：该模块可以依赖于其他模块</li>
+</ul>
+</li>
+<li>语法接口
+<ol>
+<li>如何调用操作
+<ol>
+<li>操作签名列表</li>
+<li>有时也是有效的呼叫操作命令</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>语义接口
+<ol>
+<li>这些操作是做什么的，例如
+<ol>
+<li>前置条件和后置条件</li>
+<li>用例</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="进一步原则">进一步原则</h4>
+<ol>
+<li>显式接口：使模块之间的所有依赖关系明确（无隐藏的耦合）</li>
+<li>低耦合-接口少：最小化模块之间的依赖性</li>
+<li>小接口
+<ol>
+<li>保障小接口
+<ol>
+<li>将许多参数组合到结构/对象中</li>
+<li>将大型接口分为几个接口</li>
+</ol>
+</li>
+<li>面向接口编程</li>
+</ol>
+</li>
+<li>高内聚：一个模块应该封装一些定义良好的，连贯的功能（稍后会详细介绍）</li>
+</ol>
+<h4 id="耦合与内聚">耦合与内聚</h4>
+<ol>
+<li>内聚力是模块之间的一致性的度量。</li>
+<li>耦合是模块之间的交互程度。</li>
+<li>您需要高凝聚力和低耦合。</li>
+</ol>
+<h3 id="Module-Guide">Module Guide</h3>
+<h4 id="模块的主要秘密">模块的主要秘密</h4>
+<ol>
+<li>主要秘密描述的是这个模块所要实现的<strong>用户需求</strong>。是设计者对用户需求的实现的一次职责分配。有了这个描述以后，我们可以利用它检查我们是否完成所有的用户需求，还可以利用它和需求优先级来决定开发的次序。</li>
+</ol>
+<h4 id="模块的次要秘密">模块的次要秘密</h4>
+<ol>
+<li>次要秘密描述的是这个模块在实现职责时候所涉及的具体的<strong>实现细节</strong>。包括数据结构，算法，硬件平台等信息。</li>
+</ol>
+<h4 id="模块的角色">模块的角色</h4>
+<ol>
+<li>描述了独立的模块在整个系统中所承担的角色，所起的作用。以及与哪些模块有相关联的关系。</li>
+</ol>
+<h4 id="模块的对外接口">模块的对外接口</h4>
+<ol>
+<li>模块提供给别的模块的接口。</li>
+</ol>
+<h4 id="循环位移模块的模块说明">循环位移模块的模块说明</h4>
+<p><img src="/14417/image-20230706161616102.png" alt></p>
+<h4 id="复杂系统的快速示例">复杂系统的快速示例</h4>
+<ol>
+<li>A-7E 飞机</li>
+<li>极其复杂的机上飞行计划</li>
+<li>内存有限</li>
+<li>实时约束</li>
+</ol>
+<h4 id="Parnas’s-Experience">Parnas’s Experience</h4>
+<ol>
+<li>&quot;当我们试图在没有指南的情况下工作时，……责任要么以两个模块要么没有。 有了模块指南，设计的进一步进展显示出相对较少的疏忽。&quot;</li>
+<li>集成测试仅用了一周</li>
+<li>仅发现了 9 个错误。</li>
+<li>错误隔离到单个模块的位置。</li>
+<li>所有的 bug 都被很快的修复了</li>
+</ol>
+<h3 id="思想的应用（信息隐藏处理）">思想的应用（信息隐藏处理）</h3>
+<h4 id="在软件体系结构设计的分层设计中：">在软件体系结构设计的分层设计中：</h4>
+<ol>
+<li>经验表明软件系统的界面是最经常变化的, 其次是业务逻辑,最稳定的是业务数据。这就是分层风格建立 Prensentation、 Logic 和 Model 三个层次的原因,它们体现了决策变化的划分类型,它们之间的依赖关系符合各自的稳定性。</li>
+</ol>
+<h4 id="在软件体系结构设计的物理包设计中：">在软件体系结构设计的物理包设计中：</h4>
+<ol>
+<li>消除重复可以避免重复耦合,同时可以避免同一个设计决策出现在多个地方—— 这意味着该决策没有被真正地隐藏（这也是控制耦合比数据耦合差的原因）。</li>
+</ol>
+<h4 id="在软件体系结构设计的物理包设计中：-2">在软件体系结构设计的物理包设计中：</h4>
+<ol>
+<li>建立独立的安全包、通信包和数据库连接包,是为了封装各自的设计决策——安全处理、 网络通信与数据库处理。</li>
+</ol>
+<h4 id="在软件体系结构设计与详细设计中：">在软件体系结构设计与详细设计中：</h4>
+<ol>
+<li>严格要求定义模块与类的接口,可以便利开发,更是为了实现信息隐藏。</li>
+</ol>
+<h4 id="在详细设计中使用控制风格：">在详细设计中使用控制风格：</h4>
+<ol>
+<li>专门用控制器对象封装关于业务逻辑的设计决策, 而不是将其拆散分布到整个对象网络中去。</li>
+</ol>
+<h2 id="内聚的例子">内聚的例子</h2>
+<ol>
+<li>内聚程度从低到高如下</li>
+</ol>
+<h3 id="偶然内聚">偶然内聚</h3>
+<ol>
+<li>模块执行多个完全不相关的操作</li>
+</ol>
+<p><img src="/14417/image-20230706161738984.png" alt></p>
+<h3 id="逻辑内聚">逻辑内聚</h3>
+<ol>
+<li>模块执行一系列相关操作，每个操作的调用由其他模块来决定</li>
+</ol>
+<p><img src="/14417/image-20230706161742821.png" alt></p>
+<h3 id="时间内聚">时间内聚</h3>
+<ol>
+<li>模块执行一系列与时间有关的操作</li>
+</ol>
+<p><img src="/14417/image-20230706161746079.png" alt></p>
+<h3 id="过程内聚">过程内聚</h3>
+<ol>
+<li>模块执行一些与步骤顺序有关的操作</li>
+</ol>
+<p><img src="/14417/image-20230706161749643.png" alt></p>
+<h3 id="通信内聚">通信内聚</h3>
+<ol>
+<li>模块执行一系列与步骤有关的操作，并且这些操作在相同的数据上进行</li>
+<li>和过程内聚的唯一不同：是否在同一块数据结构上操作</li>
+</ol>
+<p><img src="/14417/image-20230706161647551.png" alt></p>
+<p><img src="/14417/image-20230706161757102.png" alt></p>
+<h3 id="功能内聚">功能内聚</h3>
+<ol>
+<li>模块只执行一个操作或达到一个单一目的</li>
+</ol>
+<p><img src="/14417/image-20230706161812857.png" alt></p>
+<h3 id="信息内聚">信息内聚</h3>
+<ol>
+<li>模块进行许多操作，各个都有各自的入口点</li>
+<li>每个操作的代码都相互独立</li>
+<li>所有操作都在相同的数据结构上完成</li>
+</ol>
+<p><img src="/14417/image-20230706161816768.png" alt></p>
+<h2 id="耦合的例子">耦合的例子</h2>
+<ol>
+<li>耦合程度从低到高如下</li>
+</ol>
+<h3 id="数据耦合">数据耦合</h3>
+<ol>
+<li>两个模块的所有参数是同类型的数据项</li>
+</ol>
+<p><img src="/14417/image-20230706161840957.png" alt></p>
+<h3 id="印记耦合">印记耦合</h3>
+<ol>
+<li>共享一个数据结构，但是却只用了其中一部分</li>
+</ol>
+<ul>
+<li>下面传递 d.month 就行</li>
+</ul>
+<p><img src="/14417/image-20230706161636991.png" alt></p>
+<ul>
+<li>传递 i.date.month 就行</li>
+</ul>
+<p><img src="/14417/image-20230706161656699.png" alt></p>
+<ul>
+<li>其实只需要 emailID 即可</li>
+</ul>
+<p><img src="/14417/image-20230706161836879.png" alt></p>
+<h3 id="控制耦合">控制耦合</h3>
+<ol>
+<li>一个模块给另一个模块传递控制信息</li>
+</ol>
+<p><img src="/14417/image-20230706161702684.png" alt></p>
+<p><img src="/14417/image-20230706161830073.png" alt></p>
+<h3 id="重复耦合">重复耦合</h3>
+<ol>
+<li>模块之间有同样（逻辑上同样）的重复代码</li>
+</ol>
+<p><img src="/14417/34-1653988086830597.png" alt></p>
+<h3 id="公共耦合">公共耦合</h3>
+<ol>
+<li>模块之间共享全局的数据（全局变量，全局数据结构）</li>
+</ol>
+<p><img src="/14417/image-20230706161711277.png" alt></p>
+<p><img src="/14417/image-20230706161845966.png" alt></p>
+<h3 id="内容耦合">内容耦合</h3>
+<ol>
+<li>一个模块直接修改或者依赖于另一个模块的内容</li>
+</ol>
+<ul>
+<li>直接修改了 date 部分的 month 的值</li>
+</ul>
+<p><img src="/14417/image-20230706161721626.png" alt></p>
+<ul>
+<li>直接修改了另一个模块对象的成员变量的值</li>
+</ul>
+<p><img src="/14417/image-20230706161824762.png" alt></p>
+<h2 id="KWIC-的四种不同实现">KWIC 的四种不同实现</h2>
+<ol>
+<li>复习本地的四种实现的 Java 代码</li>
+</ol>
+<h3 id="主程序和子程序（MS">主程序和子程序（MS)</h3>
+<ul>
+<li>使用全局变量，减少过多的参数传递</li>
+</ul>
+<h3 id="面向对象（OO">面向对象（OO)</h3>
+<ol>
+<li>中间有一些对象进行存储</li>
+<li>对象写作</li>
+</ol>
+<h3 id="Pipe-Filter">Pipe Filter</h3>
+<ol>
+<li>数据进来通过过滤器</li>
+<li>通过管道串联过滤器</li>
+<li>好处：
+<ol>
+<li>如果有一个过滤器无法使用了直接替换就行</li>
+<li>增加是容易的</li>
+</ol>
+</li>
+<li>各自过滤器是独立工作的，不在意其他人怎么样</li>
+<li>管道不一定是方法调用（独立进程），要不和结构化没有区别</li>
+<li>4 个线程各自跑起来，用 pipe 连接起来</li>
+</ol>
+<h3 id="基于事件">基于事件</h3>
+<ol>
+<li>有一个事件机制，有订阅者和分发者</li>
+<li>GUI：点击 Button 之后，触发事件</li>
+<li>框架帮你完成事件机制</li>
+<li>明确什么监听什么</li>
+<li>观察者模式</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/11677/" rel="prev" title="软件工程与计算II-12-详细设计">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-12-详细设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/18439/" rel="next" title="软件工程与计算II-14-面向对象的模块化">
+      软件工程与计算II-14-面向对象的模块化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E8%81%9A%E5%92%8C%E8%80%A6%E5%90%88%E6%A6%82%E5%BF%B5%E9%87%8D%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">内聚和耦合概念重要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E4%B8%8E%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E6%80%9D%E6%83%B3"><span class="nav-number">2.</span> <span class="nav-text">模块化与信息隐藏思想</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%A5%BD%E7%9A%84%E8%BD%AF%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">设计好的软件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Parnas-1972"><span class="nav-number">2.1.1.</span> <span class="nav-text">Parnas 1972</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stevens-1974"><span class="nav-number">2.1.2.</span> <span class="nav-text">Stevens 1974</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Beohm-1976"><span class="nav-number">2.1.3.</span> <span class="nav-text">Beohm 1976</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%9C%BA"><span class="nav-number">2.2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E4%B8%8E%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E6%80%9D%E6%83%B3%E7%9A%84%E5%8F%91%E5%B1%95"><span class="nav-number">2.3.</span> <span class="nav-text">模块化与信息隐藏思想的发展</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.3.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E5%8F%91%E5%B1%95"><span class="nav-number">2.3.2.</span> <span class="nav-text">历史发展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Wirth1971-%E8%90%8C%E8%8A%BD"><span class="nav-number">2.3.3.</span> <span class="nav-text">Wirth1971 - 萌芽</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parnas-1972-%E8%90%8C%E8%8A%BD"><span class="nav-number">2.3.4.</span> <span class="nav-text">Parnas 1972 - 萌芽</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stevens-1974-%E5%BD%A2%E6%88%90"><span class="nav-number">2.3.5.</span> <span class="nav-text">Stevens 1974 - 形成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stevens-1974%EF%BC%9ADesigning-the-structure-%E8%AE%BE%E8%AE%A1%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.6.</span> <span class="nav-text">Stevens 1974：Designing the structure 设计结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parnas-1978-%E5%BD%A2%E6%88%90"><span class="nav-number">2.3.7.</span> <span class="nav-text">Parnas 1978 - 形成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parnas-1985-%E5%BD%A2%E6%88%90"><span class="nav-number">2.3.8.</span> <span class="nav-text">Parnas 1985 - 形成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Eder-1992-%E5%8F%91%E5%B1%95"><span class="nav-number">2.3.9.</span> <span class="nav-text">Eder 1992 - 发展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hitz-1995-%E5%8F%91%E5%B1%95"><span class="nav-number">2.3.10.</span> <span class="nav-text">Hitz 1995 - 发展</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#McConnell-1996-%E5%8F%8D%E6%80%9D"><span class="nav-number">2.3.11.</span> <span class="nav-text">McConnell 1996 - 反思</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Demarco2002-%E5%8F%8D%E6%80%9D"><span class="nav-number">2.3.12.</span> <span class="nav-text">Demarco2002 - 反思</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E2%80%9CStructured-Analysis%E2%80%9D"><span class="nav-number">2.3.12.1.</span> <span class="nav-text">“Structured Analysis”</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">模块化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%A8%A1%E5%9D%97%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">什么是模块？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%B0%86%E7%B3%BB%E7%BB%9F%E8%BF%9B%E8%A1%8C%E6%A8%A1%E5%9D%97%E5%8C%96%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">为什么要将系统进行模块化？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E8%AE%BE%E8%AE%A1%E4%B8%AD%E7%9A%84%E8%80%A6%E5%90%88"><span class="nav-number">3.3.</span> <span class="nav-text">结构化设计中的耦合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">模块化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E4%B9%8B%E9%97%B4"><span class="nav-number">3.3.2.</span> <span class="nav-text">模块之间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E7%9A%84%E8%80%A6%E5%90%88"><span class="nav-number">3.3.3.</span> <span class="nav-text">结构化的耦合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E7%9A%84%E5%BC%BA%E5%BA%A6-1-%E8%BF%9E%E6%8E%A5%E6%9C%89%E5%A4%9A%E5%A4%8D%E6%9D%82"><span class="nav-number">3.3.4.</span> <span class="nav-text">耦合的强度 1 - 连接有多复杂</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%B8%80%EF%BC%9A%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E6%98%AF%E8%A2%AB%E8%AE%A4%E4%B8%BA%E6%98%AF%E6%9C%89%E5%AE%B3%E7%9A%84"><span class="nav-number">3.3.5.</span> <span class="nav-text">原则一：全局变量是被认为是有害的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E5%88%B0%E5%85%A8%E5%B1%80%E7%8E%AF%E5%A2%83"><span class="nav-number">3.3.6.</span> <span class="nav-text">连接到全局环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%8E%AF%E5%A2%83%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="nav-number">3.3.7.</span> <span class="nav-text">常见环境的缺陷</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%BA%8C%EF%BC%9A%E5%A6%82%E6%9E%9C%E6%B2%A1%E6%9C%89%E7%89%B9%E6%AE%8A%E8%A6%81%E6%B1%82%EF%BC%8C%E8%AE%A9%E4%BB%A3%E7%A0%81%E6%B8%85%E6%99%B0%E4%B8%80%E7%82%B9"><span class="nav-number">3.3.8.</span> <span class="nav-text">原则二：如果没有特殊要求，让代码清晰一点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E7%9A%84%E5%92%8C%E5%8F%AF%E4%BF%AE%E6%94%B9%E7%9A%84"><span class="nav-number">3.3.9.</span> <span class="nav-text">明确的和可修改的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%B8%89%EF%BC%9A%E4%B8%8D%E8%A6%81%E9%87%8D%E5%A4%8D"><span class="nav-number">3.3.10.</span> <span class="nav-text">原则三：不要重复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E7%9A%84%E5%BC%BA%E5%BA%A6-2-%E8%BF%9E%E6%8E%A5%E6%98%AF%E6%8C%87%E6%A8%A1%E5%9D%97%E6%9C%AC%E8%BA%AB%E8%BF%98%E6%98%AF%E6%A8%A1%E5%9D%97%E5%86%85%E9%83%A8%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="nav-number">3.3.11.</span> <span class="nav-text">耦合的强度 2 - 连接是指模块本身还是模块内部的东西</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E5%9B%9B%EF%BC%9A%E9%9D%A2%E5%90%91%E6%8E%A5%E5%8F%A3%E7%BC%96%E7%A8%8B"><span class="nav-number">3.3.12.</span> <span class="nav-text">原则四：面向接口编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E8%89%AF%E5%A5%BD%E7%9A%84%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.3.13.</span> <span class="nav-text">结构良好的系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E7%9A%84%E5%BC%BA%E5%BA%A6-3-%E5%BA%94%E8%AF%A5%E5%AF%B9%E5%A4%96%E6%8F%90%E4%BE%9B%E4%BB%80%E4%B9%88%E5%92%8C%E6%8E%A5%E6%94%B6%E4%BB%80%E4%B9%88"><span class="nav-number">3.3.14.</span> <span class="nav-text">耦合的强度 3 - 应该对外提供什么和接收什么</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E7%AE%80%E5%8D%95%E4%B8%80%E7%82%B9"><span class="nav-number">3.3.15.</span> <span class="nav-text">更简单一点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E6%96%B9%E6%B3%95%E4%B8%AD%E7%9A%84%E8%80%A6%E5%90%88%E5%BA%A6"><span class="nav-number">3.3.16.</span> <span class="nav-text">结构化方法中的耦合度</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E8%AE%BE%E8%AE%A1%E4%B8%AD%E7%9A%84%E5%86%85%E8%81%9A"><span class="nav-number">3.4.</span> <span class="nav-text">结构化设计中的内聚</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E8%81%9A"><span class="nav-number">3.4.1.</span> <span class="nav-text">内聚</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E8%81%9A%E5%BA%A6%EF%BC%88%E7%BB%91%E5%AE%9A%E7%B1%BB%E5%9E%8B%EF%BC%89"><span class="nav-number">3.4.2.</span> <span class="nav-text">内聚度（绑定类型）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KWIC-%E6%A1%88%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">KWIC 案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#KWIC"><span class="nav-number">4.1.</span> <span class="nav-text">KWIC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KWIC-%E6%9D%A5%E5%AE%9E%E7%8E%B0%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">KWIC 来实现系统的模块化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E5%8A%9F%E8%83%BD%E8%BF%9B%E8%A1%8C%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.3.</span> <span class="nav-text">根据功能进行设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E4%BD%8D%E7%A7%BB%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.4.</span> <span class="nav-text">循环位移算法的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F"><span class="nav-number">4.5.</span> <span class="nav-text">信息隐藏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E8%AE%BE%E8%AE%A1%E5%86%B3%E7%AD%96%E8%BF%9B%E8%A1%8C%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.6.</span> <span class="nav-text">根据设计决策进行设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CircularShifter-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">4.7.</span> <span class="nav-text">CircularShifter 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E8%A7%A3%E6%A0%87%E5%87%86"><span class="nav-number">4.8.</span> <span class="nav-text">分解标准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E4%BF%AE%E6%94%B9%E6%80%A7%E6%AF%94%E8%BE%83"><span class="nav-number">4.9.</span> <span class="nav-text">可修改性比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E7%9A%84%E5%8F%91%E5%B1%95"><span class="nav-number">4.10.</span> <span class="nav-text">独立的发展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E7%90%86%E8%A7%A3%E6%80%A7"><span class="nav-number">4.11.</span> <span class="nav-text">可理解性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96-3"><span class="nav-number">4.12.</span> <span class="nav-text">模块化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.13.</span> <span class="nav-text">结论</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E7%9A%84%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">结构化的模块化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSCS-%E4%B8%AD%E7%9A%84%E6%A8%A1%E5%9D%97%E6%80%9D%E6%83%B3%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">MSCS 中的模块思想的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8E%E8%80%A6%E5%90%88%E5%A4%84%E7%90%86"><span class="nav-number">6.1.</span> <span class="nav-text">低耦合处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%9A%84%E7%89%A9%E7%90%86%E5%8C%85%E8%AE%BE%E8%AE%A1%E4%B8%AD"><span class="nav-number">6.2.</span> <span class="nav-text">软件体系结构的物理包设计中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E4%B8%AD%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA%E8%80%85%E7%9A%84%E9%80%89%E6%8B%A9%EF%BC%9A"><span class="nav-number">6.3.</span> <span class="nav-text">详细设计中对象创建者的选择：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E4%B8%AD%E9%80%89%E6%8B%A9%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC%EF%BC%9A"><span class="nav-number">6.4.</span> <span class="nav-text">详细设计中选择控制风格：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E5%86%85%E8%81%9A%E5%A4%84%E7%90%86"><span class="nav-number">6.5.</span> <span class="nav-text">高内聚处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E7%9A%84%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F"><span class="nav-number">7.</span> <span class="nav-text">结构化的信息隐藏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Information-%E4%BF%A1%E6%81%AF"><span class="nav-number">7.1.</span> <span class="nav-text">Information 信息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E6%9C%89%E5%8F%AF%E8%83%BD%E4%BF%AE%E6%94%B9%E7%9A%84%E8%AE%BE%E8%AE%A1%E9%A2%86%E5%9F%9F"><span class="nav-number">7.1.1.</span> <span class="nav-text">最有可能修改的设计领域</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E8%97%8F"><span class="nav-number">7.2.</span> <span class="nav-text">隐藏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F-2"><span class="nav-number">7.3.</span> <span class="nav-text">信息隐藏</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E4%B8%8E%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.3.1.</span> <span class="nav-text">接口与实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8E%A5%E5%8F%A3"><span class="nav-number">7.3.2.</span> <span class="nav-text">什么是接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%8E%9F%E5%88%99"><span class="nav-number">7.3.3.</span> <span class="nav-text">进一步原则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E4%B8%8E%E5%86%85%E8%81%9A"><span class="nav-number">7.3.4.</span> <span class="nav-text">耦合与内聚</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Module-Guide"><span class="nav-number">7.4.</span> <span class="nav-text">Module Guide</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84%E4%B8%BB%E8%A6%81%E7%A7%98%E5%AF%86"><span class="nav-number">7.4.1.</span> <span class="nav-text">模块的主要秘密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84%E6%AC%A1%E8%A6%81%E7%A7%98%E5%AF%86"><span class="nav-number">7.4.2.</span> <span class="nav-text">模块的次要秘密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84%E8%A7%92%E8%89%B2"><span class="nav-number">7.4.3.</span> <span class="nav-text">模块的角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E7%9A%84%E5%AF%B9%E5%A4%96%E6%8E%A5%E5%8F%A3"><span class="nav-number">7.4.4.</span> <span class="nav-text">模块的对外接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E4%BD%8D%E7%A7%BB%E6%A8%A1%E5%9D%97%E7%9A%84%E6%A8%A1%E5%9D%97%E8%AF%B4%E6%98%8E"><span class="nav-number">7.4.5.</span> <span class="nav-text">循环位移模块的模块说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%BF%AB%E9%80%9F%E7%A4%BA%E4%BE%8B"><span class="nav-number">7.4.6.</span> <span class="nav-text">复杂系统的快速示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parnas%E2%80%99s-Experience"><span class="nav-number">7.4.7.</span> <span class="nav-text">Parnas’s Experience</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E6%83%B3%E7%9A%84%E5%BA%94%E7%94%A8%EF%BC%88%E4%BF%A1%E6%81%AF%E9%9A%90%E8%97%8F%E5%A4%84%E7%90%86%EF%BC%89"><span class="nav-number">7.5.</span> <span class="nav-text">思想的应用（信息隐藏处理）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E4%B8%AD%EF%BC%9A"><span class="nav-number">7.5.1.</span> <span class="nav-text">在软件体系结构设计的分层设计中：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%89%A9%E7%90%86%E5%8C%85%E8%AE%BE%E8%AE%A1%E4%B8%AD%EF%BC%9A"><span class="nav-number">7.5.2.</span> <span class="nav-text">在软件体系结构设计的物理包设计中：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%89%A9%E7%90%86%E5%8C%85%E8%AE%BE%E8%AE%A1%E4%B8%AD%EF%BC%9A-2"><span class="nav-number">7.5.3.</span> <span class="nav-text">在软件体系结构设计的物理包设计中：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E4%B8%AD%EF%BC%9A"><span class="nav-number">7.5.4.</span> <span class="nav-text">在软件体系结构设计与详细设计中：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E4%B8%AD%E4%BD%BF%E7%94%A8%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC%EF%BC%9A"><span class="nav-number">7.5.5.</span> <span class="nav-text">在详细设计中使用控制风格：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E8%81%9A%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">8.</span> <span class="nav-text">内聚的例子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%B6%E7%84%B6%E5%86%85%E8%81%9A"><span class="nav-number">8.1.</span> <span class="nav-text">偶然内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E5%86%85%E8%81%9A"><span class="nav-number">8.2.</span> <span class="nav-text">逻辑内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%86%85%E8%81%9A"><span class="nav-number">8.3.</span> <span class="nav-text">时间内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%86%85%E8%81%9A"><span class="nav-number">8.4.</span> <span class="nav-text">过程内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E5%86%85%E8%81%9A"><span class="nav-number">8.5.</span> <span class="nav-text">通信内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%86%85%E8%81%9A"><span class="nav-number">8.6.</span> <span class="nav-text">功能内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%86%85%E8%81%9A"><span class="nav-number">8.7.</span> <span class="nav-text">信息内聚</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">9.</span> <span class="nav-text">耦合的例子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%80%A6%E5%90%88"><span class="nav-number">9.1.</span> <span class="nav-text">数据耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%B0%E8%AE%B0%E8%80%A6%E5%90%88"><span class="nav-number">9.2.</span> <span class="nav-text">印记耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E8%80%A6%E5%90%88"><span class="nav-number">9.3.</span> <span class="nav-text">控制耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%A4%8D%E8%80%A6%E5%90%88"><span class="nav-number">9.4.</span> <span class="nav-text">重复耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AC%E5%85%B1%E8%80%A6%E5%90%88"><span class="nav-number">9.5.</span> <span class="nav-text">公共耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%E8%80%A6%E5%90%88"><span class="nav-number">9.6.</span> <span class="nav-text">内容耦合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KWIC-%E7%9A%84%E5%9B%9B%E7%A7%8D%E4%B8%8D%E5%90%8C%E5%AE%9E%E7%8E%B0"><span class="nav-number">10.</span> <span class="nav-text">KWIC 的四种不同实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%AD%90%E7%A8%8B%E5%BA%8F%EF%BC%88MS"><span class="nav-number">10.1.</span> <span class="nav-text">主程序和子程序（MS)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%EF%BC%88OO"><span class="nav-number">10.2.</span> <span class="nav-text">面向对象（OO)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pipe-Filter"><span class="nav-number">10.3.</span> <span class="nav-text">Pipe Filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E4%BA%8B%E4%BB%B6"><span class="nav-number">10.4.</span> <span class="nav-text">基于事件</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

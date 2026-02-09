@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="什么是聚类 聚类是一种无监督学习，有时候被叫做被统计学分类、被物理学家排序、被营销人员分段。 将数据划分成类，并且满足以下两个条件：  类内相似度高 类间相似度低  不同于分类问题的是，我们直接从数据中获取到类标签和类的数量，也就是找到自然分类。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-07-聚类">
+<meta property="og:url" content="https://eaglebear2002.github.io/12678/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="什么是聚类 聚类是一种无监督学习，有时候被叫做被统计学分类、被物理学家排序、被营销人员分段。 将数据划分成类，并且满足以下两个条件：  类内相似度高 类间相似度低  不同于分类问题的是，我们直接从数据中获取到类标签和类的数量，也就是找到自然分类。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/31-1676530585187-351.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/32-1676530585187-352.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/29-1676530585187-353.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/30-1676530585187-354.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/1-1676530585188-355.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221102230134626.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/3-1676530585188-356.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/4-1676530585188-357.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/5-1676530585188-358.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/6-1676530585188-359.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/7-1676530585188-360.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/8-1676530585188-361.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/9-1676530585189-362.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/10-1676530585189-363.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/11-1676530585189-364.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/13-1676530585189-365.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/12-1676530585189-366.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/14-1676530585189-367.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/15-1676530585189-368.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/16-1676530585189-369.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/17-1676530585189-370.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221102232734557.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221102232741401.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/20-1676530585190-371.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/21-1676530585190-372.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/22-1676530585190-373.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/23-1676530585190-374.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221102234456565.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221103000605237.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221103000631463.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221103000640067.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/image-20221103000650960.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/27-1676530585191-375.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/12678/28-1676530585191-376.png">
+<meta property="article:published_time" content="2022-11-02T16:08:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.537Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/12678/31-1676530585187-351.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/12678/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-07-聚类 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/12678/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-07-聚类
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-03 00:08:00" itemprop="dateCreated datePublished" datetime="2022-11-03T00:08:00+08:00">2022-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是聚类">什么是聚类</h2>
+<p>聚类是一种无监督学习，有时候被叫做被统计学分类、被物理学家排序、被营销人员分段。</p>
+<p>将数据划分成类，并且满足以下两个条件：</p>
+<ol>
+<li>类内相似度高</li>
+<li>类间相似度低</li>
+</ol>
+<p>不同于分类问题的是，我们直接从数据中获取到类标签和类的数量，也就是找到自然分类。</p>
+<h2 id="聚类的应用">聚类的应用</h2>
+<table>
+<thead>
+<tr>
+<th>应用方向</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>市场营销</td>
+<td>帮助市场营销人员根据他们的用户发现独特的分组，然后使用这个发现（只是）来发展有针对性营销程序</td>
+</tr>
+<tr>
+<td>土地使用</td>
+<td>在地球观测数据库中确定类似土地利用的区域</td>
+</tr>
+<tr>
+<td>保险</td>
+<td>发现具有索赔成本的汽车保险持有人分组</td>
+</tr>
+<tr>
+<td>城市规划</td>
+<td>根据房屋类型识别房屋组，重视地理位置</td>
+</tr>
+<tr>
+<td>地震学</td>
+<td>观察到的地震震中应沿大陆断层聚集</td>
+</tr>
+</tbody>
+</table>
+<h2 id="聚类度量">聚类度量</h2>
+<h3 id="度量距离">度量距离</h3>
+<ol>
+<li>定义：令 $O_1$ 和 $O_2$ 是来自可能对象集合的两个对象。$O_1$ 和 $O_2$ 之间的距离是一个实数，表示为 $D(O_1, O_2)$</li>
+</ol>
+<p><img src="/12678/31-1676530585187-351.png" alt></p>
+<h4 id="度量距离的性质引入">度量距离的性质引入</h4>
+<p>我们观察黑盒，我们可以发现关于两个变量的一个函数，这个函数可能比较简单，也可能比较复杂，但是我们很自然的想要知道这个函数有什么性质。</p>
+<p><img src="/12678/32-1676530585187-352.png" alt></p>
+<h4 id="度量距离的性质">度量距离的性质</h4>
+<table>
+<thead>
+<tr>
+<th>性质</th>
+<th>形式化表述</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>对称性</td>
+<td>$D(A, B) = D(B, A)$</td>
+<td>若无此性质， A 和 B 相似，但是 B 和 A 不相似</td>
+</tr>
+<tr>
+<td>自相似常量</td>
+<td>$D(A, A) = 0$</td>
+<td>若无此性质，A 比 B 还像 B</td>
+</tr>
+<tr>
+<td>正向性</td>
+<td>$D(A, B) = 0 \iff A = B$</td>
+<td>若无此性质，你的世界里有不同的物体，但是你不能分辨他们</td>
+</tr>
+<tr>
+<td>三角不等式</td>
+<td>$D(A, B) \leq D(A, C) + D(B, C)$</td>
+<td>若无此性质，A 非常像 B，A 非常像 C，但是 B 很不像 C</td>
+</tr>
+</tbody>
+</table>
+<h3 id="编辑距离">编辑距离</h3>
+<ol>
+<li>我们是可以只使用替换、插入和删除将字符串 Q 转换为字符串 C</li>
+<li>假设每一个操作都有一个代价与之相关联</li>
+<li>两个字符串之间的相似度被从字符串 Q 转换为字符串 C 的最小代价</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/12678/29-1676530585187-353.png" alt></th>
+<th><img src="/12678/30-1676530585187-354.png" style="zoom:67%;"></th>
+</tr>
+</thead>
+</table>
+<h3 id="聚类算法的理想特性">聚类算法的理想特性</h3>
+<ol>
+<li>时间和空间上规模可控，对输入顺序不敏感，可以结合用户给定的约束</li>
+<li>有能力处理不同的数据类型：可以处理二维及以上平面</li>
+<li>有能力去处理噪声和离群点</li>
+<li>需要极少的领域知识去了解输入变量参数</li>
+<li>可解释容易使用</li>
+</ol>
+<h2 id="聚类问题定义">聚类问题定义</h2>
+<p>给定一组点，并带有点之间的距离的概念，将这些点分组为一定数量的簇，以便</p>
+<ol>
+<li>一个簇中的成员彼此之间足够相似</li>
+<li>不同簇间的成员彼此并不相似</li>
+</ol>
+<p>通常：</p>
+<ol>
+<li>数据点是在高维空间</li>
+<li>相似度是通过举例度量来定义：欧几里得，余弦，雅卡德，编辑距离等</li>
+</ol>
+<h3 id="类簇和离群点">类簇和离群点</h3>
+<p><img src="/12678/1-1676530585188-355.png" alt></p>
+<h3 id="难点与挑战">难点与挑战</h3>
+<ol>
+<li>二维空间下的聚类问题相对比较简单，然而在很多的应用中，并不是在二维空间上操作，而是十维或者更高维度。</li>
+<li>小数据量的聚类问题相对比较简单，然而在很多的应用中，数据量是相对比较大的。</li>
+<li>在大多数情况下，外观并不具有欺骗性（指类的形状）</li>
+<li>高维空间则是不一样，几乎所有成对的点都在大约相同的距离处</li>
+</ol>
+<h3 id="星系问题">星系问题</h3>
+<p>20 亿个“天体”的目录通过其在 7 个维度（频带）中的辐射来表示对象</p>
+<p>问题：聚集到类似的物体中，例如星系，附近的恒星，类星体等</p>
+<p><img src="/12678/image-20221102230134626.png" alt="斯隆数字天空调查"></p>
+<h3 id="音乐-CD-问题">音乐 CD 问题</h3>
+<p>音乐分为几类，客户更喜欢几类</p>
+<p>问题：类别到底是什么？</p>
+<p>由一组购买 CD 的客户代表 CD</p>
+<p>相似的 CD 具有相似的客户群，反之亦然</p>
+<p>所有 CD 的空间：</p>
+<ol>
+<li>假设有一个一维空间（即向量）。对于每个客户：
+<ol>
+<li>向量中的值只能是 0（未购买）或 1（已购买）</li>
+<li>CD 是此空间中的一个点 $(x_1, x_2, ..., x_k)$，如果第 i 个客户购买了 CD，则 $x_i=1$</li>
+</ol>
+</li>
+<li>对于亚马逊，规模为数千万甚至更多。</li>
+<li>任务：查找相似的 CD 的簇</li>
+</ol>
+<h3 id="文档">文档</h3>
+<p>使用向量来代表一个文档：$(x_1,x_2,...,x_k)$ 如果在排列中第 i 个位置上的单词出现在文档中，则$x_i = 1$</p>
+<p>如果 k 是无限的也没有什么问题，我们不限制词集的大小</p>
+<p>带有相似词集的文档可能涉及同一主题</p>
+<h4 id="距离度量">距离度量</h4>
+<p>理想：语义相似。</p>
+<p>实用：术语统计相似性</p>
+<ol>
+<li>我们将使用余弦相似度</li>
+<li>文档被存储成向量</li>
+<li>对于许多算法，更容易根据文档之间的距离（而不是相似性）来考虑。</li>
+<li>我们将主要讲欧几里德距离：但是实际实现上使用的是余弦相似度</li>
+</ol>
+<p>与 CD 一样，当我们将文档视为单词时，我们可以选择：</p>
+<ol>
+<li>集合作为向量：使用余弦夹角</li>
+<li>集合作为集合：使用 Jaccard 距离：用 1-Jaccard index（相交元素处理其并集）</li>
+<li>集合作为点：使用欧几里得距离</li>
+</ol>
+<h4 id="硬聚类和软聚类">硬聚类和软聚类</h4>
+<p>硬聚类：每个文档恰好属于一个聚类（更简单，更容易做到）</p>
+<p>软聚类：一个文档可以属于多个聚类</p>
+<ol>
+<li>对于创建可浏览层次结构的应用程序更有意义</li>
+<li>您可能希望将一双运动鞋分为两类：
+<ol>
+<li>运动服装</li>
+<li>鞋子</li>
+</ol>
+</li>
+<li>您只能使用软聚类方法来做到这一点。</li>
+</ol>
+<h2 id="聚类方法">聚类方法</h2>
+<ol>
+<li>划分方法</li>
+<li>基于层次的方法</li>
+<li>基于模型的方法</li>
+<li>基于密度的方法</li>
+</ol>
+<h3 id="划分方法">划分方法</h3>
+<p>分割方法：将 n 个对象的数据库 D 的分区构造为 k 个聚类的集合</p>
+<p>给定一个 k，找到一个 k 簇的分区，以优化所选分区标准</p>
+<ol>
+<li>全局优化：详尽列举所有分区，属于启发式算法</li>
+<li>启发式方法：k-mean 和 k-medoids 算法</li>
+<li>k-mean 法：每个聚类由聚类的中心表示，聚类中心不一定是实际存在的点</li>
+<li>k-medoids 法：每个聚类由聚类中的一个对象表示</li>
+</ol>
+<h3 id="启发式">启发式</h3>
+<ol>
+<li>启发式方法用于快速得出希望接近最佳答案的解决方案，即“最佳解决方案”。</li>
+<li>启发式是“经验法则”，有根据的猜测，直观的判断或简单的常识。</li>
+<li>启发式是解决问题的一种通用方法。启发式作为名词是启发式方法的另一个名称。</li>
+</ol>
+<h3 id="启发式算法">启发式算法</h3>
+<p>仿动物类的算法：</p>
+<ol>
+<li>粒子群优化</li>
+<li>蚂蚁优化</li>
+<li>鱼群算法</li>
+<li>蜂群算法</li>
+</ol>
+<p>仿植物类的算法：</p>
+<ol>
+<li>向光性算法</li>
+<li>杂草优化算法</li>
+</ol>
+<p>仿人类的算法：</p>
+<ol>
+<li>和声搜索算法</li>
+</ol>
+<h2 id="k-mean-算法（启发式算法）">k-mean 算法（启发式算法）</h2>
+<p>假设文档是一个实数向量，基于类中点的 centroid（也称为重心或均值）的类</p>
+<p>$$
+\vec{\mu}(c) = \frac{1}{|c|}\sum\limits_{\vec{x} \in c}\vec{x}
+$$</p>
+<p>将实例重新分配给类是基于到当前类 centroid 的距离：或者可以用相似性来等同地表述。</p>
+<h3 id="欧式空间的-k-mean-算法描述">欧式空间的 k-mean 算法描述</h3>
+<p>假设是欧几里得空间/距离，k-mean 算法过程</p>
+<ol>
+<li>首先确定 k（簇数）</li>
+<li>随机选择 k 个点作为 k 个聚类的中心来初始化聚类，保证每一点都与其他的点尽可能的远</li>
+<li>填充每个聚类
+<ol>
+<li>对于每个点，将其放置在当前 centroid 最近的聚类中</li>
+<li>分配所有点后，更新 k 个聚类的 centroid 的位置</li>
+<li>将所有点重新分配到它们最近的 centroid：有时在群集之间移动点</li>
+<li>重复 2 和 3 直到收敛，收敛被定义为点在簇之间不移动，centroid 稳定</li>
+</ol>
+</li>
+</ol>
+<p>终止条件：（有很多的候选条件）</p>
+<ol>
+<li>一个固定数量的循环次数</li>
+<li>文档向量分簇不变</li>
+<li>centroid 的位置不变</li>
+</ol>
+<h3 id="k-mean-算法示例">k-mean 算法示例</h3>
+<h4 id="例子一">例子一</h4>
+<p><img src="/12678/3-1676530585188-356.png" alt></p>
+<h4 id="例子二">例子二</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/12678/4-1676530585188-357.png" alt></th>
+<th><img src="/12678/5-1676530585188-358.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/12678/6-1676530585188-359.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="如何正确的选择-k-值">如何正确的选择 k 值</h3>
+<ol>
+<li><strong>尝试不同的 k</strong>，观察随着 k 增大，到 centroid 的平均距离的变化</li>
+<li>平均值迅速下降直到右 k，然后变化很小</li>
+</ol>
+<p><img src="/12678/7-1676530585188-360.png" alt></p>
+<table>
+<thead>
+<tr>
+<th>K 值选择过少</th>
+<th>K 值选择刚好</th>
+<th>K 值选择过多</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/12678/8-1676530585188-361.png" alt></td>
+<td><img src="/12678/9-1676530585189-362.png" alt></td>
+<td><img src="/12678/10-1676530585189-363.png" alt></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>k 值选择过少：距离 centroid 长度过大</li>
+<li>k 值选择过多：在平均距离上很难有提升</li>
+</ul>
+<h3 id="k-mean-的优缺点">k-mean 的优缺点</h3>
+<h4 id="优点">优点</h4>
+<ol>
+<li><strong>相对高效</strong>： $O(tkn)$，n 是物体数量，k 是聚类数量，t 是迭代次数，一般来讲：$k,t \ll n$</li>
+<li>通常以局部最优值终止。可以使用诸如<strong>模拟退火和遗传算法</strong>之类的技术找到全局最优值</li>
+</ol>
+<h4 id="缺点">缺点</h4>
+<ol>
+<li>仅在定义均值时适用</li>
+<li>需要预先指定 k，即簇数</li>
+<li>嘈杂的数据和异常值的问题</li>
+<li>不适合发现具有<strong>非凸形状</strong>的聚类</li>
+</ol>
+<h2 id="基于层次的方法">基于层次的方法</h2>
+<p>使用距离矩阵作为聚类标准。此方法不需要输入簇数 k，但是需要终止条件。</p>
+<p>数据点的划分：数据点属于一个簇或者是数据点属于最近的一个簇。</p>
+<p><img src="/12678/11-1676530585189-364.png" alt></p>
+<h3 id="基于层次的方法分类">基于层次的方法分类</h3>
+<ol>
+<li>基于聚合（自下而上）：AGNES，最初每一个点都是一个簇，重复将两个最近的群集合并为一个</li>
+<li>基于切分（自上而下）：DIANA，从一个簇开始，进行递归拆分</li>
+</ol>
+<h3 id="基于层次的核心操作">基于层次的核心操作</h3>
+<p>重复合并（或拆分）距离最近的两个簇</p>
+<h3 id="度量簇距离的变量">度量簇距离的变量</h3>
+<ol>
+<li>单链接：余弦相似度最高的相似度（单链接）</li>
+<li>全链接：最远点的相似度，最小余弦相似度</li>
+<li>质心：centroid 最接近余弦的聚类</li>
+<li>平均链接：成对元素之间的平均余弦</li>
+</ol>
+<h3 id="基于层次的方法的三个重要问题">基于层次的方法的三个重要问题</h3>
+<blockquote>
+<p>分为欧式空间和非欧式空间进行讨论：在非欧式空间中，我们唯一可以谈论的“位置”就是数据点本身，没有两点的“平均值”</p>
+</blockquote>
+<ol>
+<li>您如何表示一个多点的簇？</li>
+<li>您如何确定簇的“附近”？</li>
+<li>什么时候停止合并簇？</li>
+</ol>
+<h4 id="您如何表示一个多点的簇？">您如何表示一个多点的簇？</h4>
+<p><img src="/12678/13-1676530585189-365.png" alt></p>
+<p>欧式空间：</p>
+<ul>
+<li>centroid = 数据点的均值</li>
+<li>我们选择使用质心 centroid 作为簇的代表</li>
+</ul>
+<p>非欧式空间：</p>
+<ul>
+<li>clustroid = 与其他点“最近”的一个点</li>
+<li>最近的含义：
+<ul>
+<li>最小化每个点之间的最大距离</li>
+<li>最小化每个点之间的平均距离</li>
+<li>最小化和其他店之间的距离平方和：对于距离矩阵 d，簇 C 的中心 c 是：$\min\limits_c\sum\limits_{x \in C} d(x, c)^2$</li>
+</ul>
+</li>
+</ul>
+<h4 id="如何确定簇的附近">如何确定簇的附近</h4>
+<p>欧式空间：</p>
+<ul>
+<li>我们使用 centroid 的距离来度量簇的距离</li>
+</ul>
+<p>非欧式空间</p>
+<ul>
+<li>当计算类间距离时，我们把 clustroid 作为 centroid</li>
+<li>clustroid 的计算方法：
+<ul>
+<li>簇内距离：任何两个点之间的最小距离，每个群集中的一个</li>
+<li>选择簇的“内聚”概念，例如距 clusteroid 的最大距离，合并两个簇如果这两个簇的并集是最内聚的。</li>
+</ul>
+</li>
+<li>内聚的定义：
+<ul>
+<li>方法一：使用合并簇的直径=簇中点之间的最大距离</li>
+<li>方法二：使用簇中点之间的平均距离</li>
+<li>方法三：使用基于密度的方法，取直径或平均值。 距离，例如，除以群集中的点数</li>
+</ul>
+</li>
+</ul>
+<h4 id="欧式空间的合并层次方法实例">欧式空间的合并层次方法实例</h4>
+<p><img src="/12678/12-1676530585189-366.png" alt></p>
+<h3 id="基于层次的聚类的实现">基于层次的聚类的实现</h3>
+<ol>
+<li>在每个步骤中，计算所有簇对之间的成对距离，然后合并</li>
+<li>时间复杂度：$O(N^3)$</li>
+<li>如果我们使用优先级队列可以将时间复杂度降解到 $O(N^2 \log N)$，但是对于无法容纳在内存的大型数据集来说仍然太昂贵</li>
+</ol>
+<h3 id="其他层次聚类方法">其他层次聚类方法</h3>
+<p>聚集聚类方法的主要缺点：</p>
+<ol>
+<li>伸缩性不好：时间复杂度至少为 $O(n^2)$，其中 n 是对象总数</li>
+<li>永远不能撤销以前所做的事情</li>
+</ol>
+<p>将层次结构与基于距离的聚类集成</p>
+<ol>
+<li>BIRCH：使用 CF 树并逐步调整子簇的质量</li>
+<li>CURE：从聚类中选择分散良好的点，然后将它们向聚类中心缩小指定比例</li>
+</ol>
+<h3 id="BIRCH（层次聚类方法改进）">BIRCH（层次聚类方法改进）</h3>
+<ol>
+<li>BIRCH：平衡迭代减少和聚类使用层次结构（Zhang，Ramakrishnan &amp; Livny，1996）</li>
+<li>逐步构建 CF（聚类特征）树：
+<ol>
+<li>参数：最大直径，最大子代数</li>
+<li>阶段 1：扫描数据库以构建初始的内存 CF 树（每个节点：#points，总和，平方和）</li>
+<li>阶段 2：使用任意聚类算法对 CF 树的叶子节点进行聚类</li>
+</ol>
+</li>
+<li>线性扩展：通过一次扫描即可找到良好的聚类，并通过几次其他扫描来提高质量</li>
+<li>弱点：仅处理对数据记录顺序敏感的数字数据。</li>
+</ol>
+<h4 id="聚类特征向量">聚类特征向量</h4>
+<p><img src="/12678/14-1676530585189-367.png" alt></p>
+<h4 id="CF-Tree">CF Tree</h4>
+<p><img src="/12678/15-1676530585189-368.png" alt></p>
+<h3 id="CURE（Clustering-Using-REpresentatives），层次聚类方法的改进">CURE（Clustering Using REpresentatives），层次聚类方法的改进</h3>
+<p>CURE：非球形簇，鲁棒的离群值</p>
+<ol>
+<li>使用多个代表点评估群集之间的距离</li>
+<li>如果一个级别包含 k 个簇，则停止创建簇层次结构</li>
+</ol>
+<h4 id="基于平方误差的聚类方法的缺点">基于平方误差的聚类方法的缺点</h4>
+<ol>
+<li>仅考虑一个点作为簇的代表</li>
+<li>仅适用于大小和密度相似的凸簇，并且如果可以合理估计 k</li>
+</ol>
+<h4 id="CURE-算法">CURE 算法</h4>
+<ol>
+<li>抽取随机样本 s</li>
+<li>分区样本为大小为 $\frac{s}{p}$ 的 p 个分区</li>
+<li>部分簇分区为 $\frac{s}{pq}$ 簇</li>
+<li>簇部分簇，不断缩小中心点</li>
+<li>磁盘上的标签数据</li>
+</ol>
+<h4 id="数据划分和聚类">数据划分和聚类</h4>
+<p><img src="/12678/16-1676530585189-369.png" alt></p>
+<h4 id="缩小代表点">缩小代表点</h4>
+<ul>
+<li>将多个代表点向重心缩小几分之一。</li>
+<li>多个代表捕获簇的形状</li>
+</ul>
+<p><img src="/12678/17-1676530585189-370.png" alt></p>
+<h2 id="模型方法（Model-based-methods）">模型方法（Model-based methods）</h2>
+<p>基本思想：</p>
+<ol>
+<li>把聚类作为概率估计</li>
+<li>每个簇一个模型，提供一些参数</li>
+</ol>
+<p>主要使用的是<strong>生成模型（Generative Model）</strong>：假设数据是通过典型的概率分布生成的，满足相应的概率模型</p>
+<ol>
+<li>选择簇的可能性</li>
+<li>在簇中生成对象的可能性</li>
+<li>推荐阅读：LDA 的推导</li>
+</ol>
+<p>找到最大似然或 MAP 模型</p>
+<p>使用 EM 算法</p>
+<p>聚类的质量：测试集的结果</p>
+<h3 id="使用高斯方法合并">使用高斯方法合并</h3>
+<ol>
+<li>聚类模型：正态分布（均值，协方差）</li>
+<li>假设：对角协方差，已知方差，所有聚类均相同</li>
+<li>最大可能性：平均值 = 样本均值</li>
+<li>但是给定簇的样本是什么？对应点属于簇的概率</li>
+<li>平均值=点数和权的加权平均值，权就是概率</li>
+<li>但要估计概率。我们需要模型</li>
+<li>“鸡和鸡蛋”问题：使用 EM 算法</li>
+</ol>
+<h3 id="使用-EM-算法合并">使用 EM 算法合并</h3>
+<ol>
+<li>初始化：随机选择均值</li>
+<li>E 步骤：
+<ol>
+<li>对于所有的 point 和 mean，计算 $Prob(mean|point) = \frac{Prob(point|mean)}{Prob(point)}$</li>
+</ol>
+</li>
+<li>M 步骤
+<ol>
+<li>每一个 mean 都等于所有点的加权（Weight）均值</li>
+<li>权（Weight）= $Prob(mean|point)$</li>
+</ol>
+</li>
+<li>重复直到收敛</li>
+<li>保证收敛到局部最优</li>
+<li>K 均值算法是 EM 算法的特例</li>
+</ol>
+<h3 id="EM-算法">EM 算法</h3>
+<p>【机器学习基础】EM 算法：<a target="_blank" rel="noopener" href="https://blog.csdn.net/u010834867/article/details/90762296">https://blog.csdn.net/u010834867/article/details/90762296</a></p>
+<h3 id="使用自分类合并">使用自分类合并</h3>
+<ol>
+<li>由 NASA 发明，使用了贝叶斯模型，在实践中被广泛使用</li>
+<li>$Prob(attribute|class)$ 的各种可能模型</li>
+<li>缺少信息：每个样本点的类簇</li>
+<li>像以前一样应用 EM 算法</li>
+<li>缺少值的学习贝叶斯网的特殊情况</li>
+</ol>
+<h3 id="COBWEB-方法">COBWEB 方法</h3>
+<ol>
+<li>生成聚类树</li>
+<li>每一个节点都有 $P(cluster)$ 和 $P(attribute|cluster)$ 对每一个属性</li>
+<li>物体被线性按序表示</li>
+<li>操作：添加节点、新节点、合并、划分</li>
+<li>质量度量：类别实用程序：增加属性/簇的可预测性</li>
+</ol>
+<p><img src="/12678/image-20221102232734557.png" alt></p>
+<h3 id="神经网络方法">神经网络方法</h3>
+<ol>
+<li>神经元 = 簇 = 内部空间的 centroid</li>
+<li>层 = 层次的级别</li>
+<li>每层中有几个竞争的簇集</li>
+<li>将对象顺序呈现给网络</li>
+<li>在每个集合中，神经元竞争赢得对象</li>
+<li>获胜的神经元移向物体</li>
+<li>可以看作是从低级功能到高级功能的映射</li>
+</ol>
+<p><img src="/12678/image-20221102232741401.png" alt></p>
+<h3 id="自组织特征映射（Self-organizing-Feature-Maps）">自组织特征映射（Self-organizing Feature Maps）</h3>
+<ol>
+<li>通过让多个单元竞争当前对象来执行聚类</li>
+<li>权重向量最接近当前物体的单位获胜</li>
+<li>获胜者及其邻居通过调整权重来学习</li>
+<li>SOM 被认为类似于大脑中可能发生的过程</li>
+<li>有助于可视化二维或 3-D 空间中的高维数据</li>
+</ol>
+<h3 id="基于密度的方法">基于密度的方法</h3>
+<p>可以处理非凸数据</p>
+<p>基于密度（局部聚类标准）的聚类，例如密度连接点</p>
+<p>主要特点：</p>
+<ol>
+<li>发现任意形状的簇</li>
+<li>处理噪音</li>
+<li>一次扫描</li>
+<li>需要密度参数作为终止条件</li>
+</ol>
+<p>代表性算法：</p>
+<ol>
+<li>DBSCAN（Ester 等，1996）</li>
+<li>DENCLUE（Hinneburg &amp; Keim，1998）</li>
+</ol>
+<h4 id="基于密度的方法的参数">基于密度的方法的参数</h4>
+<ol>
+<li>两个参数
+<ol>
+<li><code>Eps</code>：最大邻域半径</li>
+<li><code>MinPts</code>：点的 Eps 邻域中的最小点数</li>
+</ol>
+</li>
+</ol>
+<p>$$
+N_{Eps}(p) = \set{q \in D | dist(p, q) \leq Eps}
+$$</p>
+<ol start="2">
+<li>直接密度可达：一个点和另一个点直接密度可达，当且仅当 q 关于 Eps, MinPts 满足如下条件
+<ol>
+<li>$p \in N_{Eps}(q)$</li>
+<li>q 是关键点：$|N_{Eps}(q)|\geq MinPts$</li>
+</ol>
+</li>
+<li>如果使用 p 进行计算，没有找到点，则为边界点，然后使用下一个点进行查找</li>
+</ol>
+<p><img src="/12678/20-1676530585190-371.png" alt></p>
+<ol start="4">
+<li>密度可达：如果有一条链$p_1,...,p_n, p_1 = q,p_2 = p$，并且$p_i$和$p_{i+1}$两两可达，则点 p 和点 q 关于 Eps、MinPts 密度可达</li>
+<li>密度连接：如果这里有一个点 o，对于点 p 和点 q 都是点 o 关于 Eps、MinPts 密度可达，则点 p 和点 q 密度连接</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Density-reachable</th>
+<th>Density-connected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/12678/21-1676530585190-372.png" alt></td>
+<td><img src="/12678/22-1676530585190-373.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h4 id="BNSCAN：Density-Based-Spatial-Clustering-of-Applications-with-Noise">BNSCAN：Density Based Spatial Clustering of Applications with Noise</h4>
+<ul>
+<li>依靠基于密度的聚类概念：聚类定义为密度连接点的最大集合</li>
+<li>发现带有噪声的空间数据库中任意形状的簇</li>
+</ul>
+<p><img src="/12678/23-1676530585190-374.png" alt></p>
+<p><img src="/12678/image-20221102234456565.png" alt></p>
+<h4 id="DENCLUE：使用密度函数">DENCLUE：使用密度函数</h4>
+<ul>
+<li>基于密度的簇（Hinneburg &amp; Keim，1998）</li>
+<li>主要特点：
+<ul>
+<li>适用于<strong>噪声较大</strong>的数据集</li>
+<li>允许对高维数据集中任意形状的簇进行紧凑的数学描述</li>
+<li>比其他算法快很多（比 DBSCAN 快 45 倍）,但是需要大量参数</li>
+</ul>
+</li>
+<li>使用网格单元，但仅保留有关确实包含数据点的网格单元的信息，并在基于树的访问结构中管理这些单元。</li>
+<li>影响功能：描述数据点在其邻域内的影响。</li>
+<li>数据空间的整体密度可以计算为所有数据点的影响函数的总和。</li>
+<li>可通过识别密度吸引子以数学方式确定聚类。</li>
+<li>密度吸引子是整体密度函数的局部最大值。</li>
+<li>影响函数例子</li>
+</ul>
+<p>$$
+\begin{array}{l}
+f_{Guassian}(x,y) = e^{-\frac{d(x,y)^2}{2\delta^2}} \
+f^D_{Gaussian}(x) = \sum\limits_{i=1}^{N} e^{-\frac{d(x, x_i)^2}{2\delta^2}} \
+\triangledown f_{Gaussian(x, x_i)}^D(x, x_i) = \sum\limits_{i=1}^{N} (x_i - x) e^{-\frac{d(x, x_i)^2}{2\delta^2}}
+\end{array}
+$$</p>
+<table>
+<thead>
+<tr>
+<th><img src="/12678/image-20221103000605237.png" alt></th>
+<th><img src="/12678/image-20221103000631463.png" alt></th>
+<th><img src="/12678/image-20221103000640067.png" alt></th>
+</tr>
+</thead>
+</table>
+<p><img src="/12678/image-20221103000650960.png" alt></p>
+<h2 id="评价聚类的好坏">评价聚类的好坏</h2>
+<h3 id="内部标准">内部标准</h3>
+<p>良好的簇将产生高质量的簇，其中：</p>
+<ol>
+<li>组内（即组内）相似度很高</li>
+<li>组间相似度低</li>
+<li>群集的测量质量取决于文档表示形式和所使用的相似性度量</li>
+</ol>
+<h3 id="外部标准">外部标准</h3>
+<ol>
+<li>通过发现黄金标准数据中某些或所有隐藏模式或潜在类别的能力来衡量质量</li>
+<li>评估关于真正的聚类：需要标记的数据</li>
+<li>假设文档使用 C 黄金标准类，而我们的聚类算法将生成带有$n_i$个成员的 K 个聚类$w_1, w_2, ..., w_n$。</li>
+</ol>
+<h4 id="简单的度量：纯度">简单的度量：<strong>纯度</strong></h4>
+<ol>
+<li>群集 $\pi i$ 中的优势类与群集 $\omega i$ 的大小之比</li>
+</ol>
+<p>$$
+Purity(w_i) = \frac{1}{n_i}\max\limits_{j}(n_{ij}), j \in C
+$$</p>
+<ol start="2">
+<li>有偏差，因为具有 n 个簇使纯度最大化</li>
+<li>其他是簇中类的熵（或类与簇之间的相互信息）</li>
+</ol>
+<p><img src="/12678/27-1676530585191-375.png" alt></p>
+<h4 id="配对决策之间的兰德指数度量（RI-0-68）">配对决策之间的兰德指数度量（RI = 0.68）</h4>
+<p><img src="/12678/28-1676530585191-376.png" alt></p>
+<h4 id="Rand-Index-和簇-F-度量">Rand Index 和簇 F 度量</h4>
+<p>$$
+RI = \frac{A + D}{A + B + C + D}
+$$</p>
+<ol>
+<li>比较标准准确率和召回率</li>
+</ol>
+<p>$$
+\begin{array}{l}
+P = \frac{A}{A + B} \
+R = \frac{A}{A + C} \
+\end{array}
+$$</p>
+<ol start="2">
+<li>人们还定义和使用簇 F 度量，这可能是更好的度量。</li>
+</ol>
+<h2 id="总结">总结</h2>
+<ol>
+<li>在聚类中，无需人工输入即可从数据推断聚类（无监督学习）</li>
+<li>但是，在实践中，还不太清楚：影响聚类结果的方法有很多：聚类数，相似性度量，文档表示，</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/29085/" rel="prev" title="大数据分析-06-分类">
+      <i class="fa fa-chevron-left"></i> 大数据分析-06-分类
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/28280/" rel="next" title="大数据分析-08-推荐系统">
+      大数据分析-08-推荐系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%81%9A%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">什么是聚类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">聚类的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E5%BA%A6%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">聚类度量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E8%B7%9D%E7%A6%BB"><span class="nav-number">3.1.</span> <span class="nav-text">度量距离</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E8%B7%9D%E7%A6%BB%E7%9A%84%E6%80%A7%E8%B4%A8%E5%BC%95%E5%85%A5"><span class="nav-number">3.1.1.</span> <span class="nav-text">度量距离的性质引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E8%B7%9D%E7%A6%BB%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="nav-number">3.1.2.</span> <span class="nav-text">度量距离的性质</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BB"><span class="nav-number">3.2.</span> <span class="nav-text">编辑距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95%E7%9A%84%E7%90%86%E6%83%B3%E7%89%B9%E6%80%A7"><span class="nav-number">3.3.</span> <span class="nav-text">聚类算法的理想特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="nav-number">4.</span> <span class="nav-text">聚类问题定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E7%B0%87%E5%92%8C%E7%A6%BB%E7%BE%A4%E7%82%B9"><span class="nav-number">4.1.</span> <span class="nav-text">类簇和离群点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%BE%E7%82%B9%E4%B8%8E%E6%8C%91%E6%88%98"><span class="nav-number">4.2.</span> <span class="nav-text">难点与挑战</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%9F%E7%B3%BB%E9%97%AE%E9%A2%98"><span class="nav-number">4.3.</span> <span class="nav-text">星系问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9F%B3%E4%B9%90-CD-%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.</span> <span class="nav-text">音乐 CD 问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3"><span class="nav-number">4.5.</span> <span class="nav-text">文档</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E5%BA%A6%E9%87%8F"><span class="nav-number">4.5.1.</span> <span class="nav-text">距离度量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E8%81%9A%E7%B1%BB%E5%92%8C%E8%BD%AF%E8%81%9A%E7%B1%BB"><span class="nav-number">4.5.2.</span> <span class="nav-text">硬聚类和软聚类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">聚类方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%92%E5%88%86%E6%96%B9%E6%B3%95"><span class="nav-number">5.1.</span> <span class="nav-text">划分方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8F%91%E5%BC%8F"><span class="nav-number">5.2.</span> <span class="nav-text">启发式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8F%91%E5%BC%8F%E7%AE%97%E6%B3%95"><span class="nav-number">5.3.</span> <span class="nav-text">启发式算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#k-mean-%E7%AE%97%E6%B3%95%EF%BC%88%E5%90%AF%E5%8F%91%E5%BC%8F%E7%AE%97%E6%B3%95%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">k-mean 算法（启发式算法）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AC%A7%E5%BC%8F%E7%A9%BA%E9%97%B4%E7%9A%84-k-mean-%E7%AE%97%E6%B3%95%E6%8F%8F%E8%BF%B0"><span class="nav-number">6.1.</span> <span class="nav-text">欧式空间的 k-mean 算法描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#k-mean-%E7%AE%97%E6%B3%95%E7%A4%BA%E4%BE%8B"><span class="nav-number">6.2.</span> <span class="nav-text">k-mean 算法示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%E4%B8%80"><span class="nav-number">6.2.1.</span> <span class="nav-text">例子一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%E4%BA%8C"><span class="nav-number">6.2.2.</span> <span class="nav-text">例子二</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E7%9A%84%E9%80%89%E6%8B%A9-k-%E5%80%BC"><span class="nav-number">6.3.</span> <span class="nav-text">如何正确的选择 k 值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#k-mean-%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">6.4.</span> <span class="nav-text">k-mean 的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">6.4.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">6.4.2.</span> <span class="nav-text">缺点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%82%E6%AC%A1%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">7.</span> <span class="nav-text">基于层次的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%82%E6%AC%A1%E7%9A%84%E6%96%B9%E6%B3%95%E5%88%86%E7%B1%BB"><span class="nav-number">7.1.</span> <span class="nav-text">基于层次的方法分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%82%E6%AC%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C"><span class="nav-number">7.2.</span> <span class="nav-text">基于层次的核心操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E7%B0%87%E8%B7%9D%E7%A6%BB%E7%9A%84%E5%8F%98%E9%87%8F"><span class="nav-number">7.3.</span> <span class="nav-text">度量簇距离的变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%82%E6%AC%A1%E7%9A%84%E6%96%B9%E6%B3%95%E7%9A%84%E4%B8%89%E4%B8%AA%E9%87%8D%E8%A6%81%E9%97%AE%E9%A2%98"><span class="nav-number">7.4.</span> <span class="nav-text">基于层次的方法的三个重要问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%82%A8%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA%E4%B8%80%E4%B8%AA%E5%A4%9A%E7%82%B9%E7%9A%84%E7%B0%87%EF%BC%9F"><span class="nav-number">7.4.1.</span> <span class="nav-text">您如何表示一个多点的簇？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A1%AE%E5%AE%9A%E7%B0%87%E7%9A%84%E9%99%84%E8%BF%91"><span class="nav-number">7.4.2.</span> <span class="nav-text">如何确定簇的附近</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AC%A7%E5%BC%8F%E7%A9%BA%E9%97%B4%E7%9A%84%E5%90%88%E5%B9%B6%E5%B1%82%E6%AC%A1%E6%96%B9%E6%B3%95%E5%AE%9E%E4%BE%8B"><span class="nav-number">7.4.3.</span> <span class="nav-text">欧式空间的合并层次方法实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B1%82%E6%AC%A1%E7%9A%84%E8%81%9A%E7%B1%BB%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.5.</span> <span class="nav-text">基于层次的聚类的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%B1%82%E6%AC%A1%E8%81%9A%E7%B1%BB%E6%96%B9%E6%B3%95"><span class="nav-number">7.6.</span> <span class="nav-text">其他层次聚类方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BIRCH%EF%BC%88%E5%B1%82%E6%AC%A1%E8%81%9A%E7%B1%BB%E6%96%B9%E6%B3%95%E6%94%B9%E8%BF%9B%EF%BC%89"><span class="nav-number">7.7.</span> <span class="nav-text">BIRCH（层次聚类方法改进）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%9A%E7%B1%BB%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F"><span class="nav-number">7.7.1.</span> <span class="nav-text">聚类特征向量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CF-Tree"><span class="nav-number">7.7.2.</span> <span class="nav-text">CF Tree</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CURE%EF%BC%88Clustering-Using-REpresentatives%EF%BC%89%EF%BC%8C%E5%B1%82%E6%AC%A1%E8%81%9A%E7%B1%BB%E6%96%B9%E6%B3%95%E7%9A%84%E6%94%B9%E8%BF%9B"><span class="nav-number">7.8.</span> <span class="nav-text">CURE（Clustering Using REpresentatives），层次聚类方法的改进</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%B9%B3%E6%96%B9%E8%AF%AF%E5%B7%AE%E7%9A%84%E8%81%9A%E7%B1%BB%E6%96%B9%E6%B3%95%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">7.8.1.</span> <span class="nav-text">基于平方误差的聚类方法的缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CURE-%E7%AE%97%E6%B3%95"><span class="nav-number">7.8.2.</span> <span class="nav-text">CURE 算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%88%92%E5%88%86%E5%92%8C%E8%81%9A%E7%B1%BB"><span class="nav-number">7.8.3.</span> <span class="nav-text">数据划分和聚类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%A9%E5%B0%8F%E4%BB%A3%E8%A1%A8%E7%82%B9"><span class="nav-number">7.8.4.</span> <span class="nav-text">缩小代表点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%96%B9%E6%B3%95%EF%BC%88Model-based-methods%EF%BC%89"><span class="nav-number">8.</span> <span class="nav-text">模型方法（Model-based methods）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%AB%98%E6%96%AF%E6%96%B9%E6%B3%95%E5%90%88%E5%B9%B6"><span class="nav-number">8.1.</span> <span class="nav-text">使用高斯方法合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-EM-%E7%AE%97%E6%B3%95%E5%90%88%E5%B9%B6"><span class="nav-number">8.2.</span> <span class="nav-text">使用 EM 算法合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EM-%E7%AE%97%E6%B3%95"><span class="nav-number">8.3.</span> <span class="nav-text">EM 算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%88%86%E7%B1%BB%E5%90%88%E5%B9%B6"><span class="nav-number">8.4.</span> <span class="nav-text">使用自分类合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#COBWEB-%E6%96%B9%E6%B3%95"><span class="nav-number">8.5.</span> <span class="nav-text">COBWEB 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%96%B9%E6%B3%95"><span class="nav-number">8.6.</span> <span class="nav-text">神经网络方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E7%BB%84%E7%BB%87%E7%89%B9%E5%BE%81%E6%98%A0%E5%B0%84%EF%BC%88Self-organizing-Feature-Maps%EF%BC%89"><span class="nav-number">8.7.</span> <span class="nav-text">自组织特征映射（Self-organizing Feature Maps）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%AF%86%E5%BA%A6%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">8.8.</span> <span class="nav-text">基于密度的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%AF%86%E5%BA%A6%E7%9A%84%E6%96%B9%E6%B3%95%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">8.8.1.</span> <span class="nav-text">基于密度的方法的参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BNSCAN%EF%BC%9ADensity-Based-Spatial-Clustering-of-Applications-with-Noise"><span class="nav-number">8.8.2.</span> <span class="nav-text">BNSCAN：Density Based Spatial Clustering of Applications with Noise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DENCLUE%EF%BC%9A%E4%BD%BF%E7%94%A8%E5%AF%86%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">8.8.3.</span> <span class="nav-text">DENCLUE：使用密度函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E4%BB%B7%E8%81%9A%E7%B1%BB%E7%9A%84%E5%A5%BD%E5%9D%8F"><span class="nav-number">9.</span> <span class="nav-text">评价聚类的好坏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E6%A0%87%E5%87%86"><span class="nav-number">9.1.</span> <span class="nav-text">内部标准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E9%83%A8%E6%A0%87%E5%87%86"><span class="nav-number">9.2.</span> <span class="nav-text">外部标准</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%BA%A6%E9%87%8F%EF%BC%9A%E7%BA%AF%E5%BA%A6"><span class="nav-number">9.2.1.</span> <span class="nav-text">简单的度量：纯度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E5%AF%B9%E5%86%B3%E7%AD%96%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B0%E5%BE%B7%E6%8C%87%E6%95%B0%E5%BA%A6%E9%87%8F%EF%BC%88RI-0-68%EF%BC%89"><span class="nav-number">9.2.2.</span> <span class="nav-text">配对决策之间的兰德指数度量（RI &#x3D; 0.68）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Rand-Index-%E5%92%8C%E7%B0%87-F-%E5%BA%A6%E9%87%8F"><span class="nav-number">9.2.3.</span> <span class="nav-text">Rand Index 和簇 F 度量</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

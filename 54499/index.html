@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="SentiStrength is a sentiment analysis tool developed by Mike Thelwall etc [^1] in 2010. In this manual, we will first briefly introduce this tool, describe its functions, and show how to use this tool">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SentiStrength Manual">
+<meta property="og:url" content="https://eaglebear2002.github.io/54499/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="SentiStrength is a sentiment analysis tool developed by Mike Thelwall etc [^1] in 2010. In this manual, we will first briefly introduce this tool, describe its functions, and show how to use this tool">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-02T12:22:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.714Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/54499/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SentiStrength Manual | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/54499/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SentiStrength Manual
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-02 20:22:00" itemprop="dateCreated datePublished" datetime="2023-03-02T20:22:00+08:00">2023-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/EASIEST/" itemprop="url" rel="index"><span itemprop="name">EASIEST</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>29k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>27 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>SentiStrength is a sentiment analysis tool developed by Mike Thelwall etc [^1] in 2010. In this manual, we will first briefly introduce this tool, describe its functions, and show how to use this tool. More details can be found in its paper and SentiStrength's official website [^2].</p>
+<blockquote>
+<p>SentiStrength 是 Mike Thelwall 等 [^1] 于 2010 年开发的情感分析工具。在本手册中，我们将首先简要介绍该工具，描述其功能，并展示如何使用该工具。更多详细信息可以在其论文和 SentiStrength 的官方网站 [^2] 中找到。</p>
+</blockquote>
+<h2 id="Introduce">Introduce</h2>
+<p>SentiStrength is a tool developed from comments on social networking sites (MySpace [^3]). Its core function is to use dictionary-based algorithms to analyse sentiment for text. Specifically, it first assigns priori sentimental scores to words according to the sentiment dictionary, and then adjusts the assignation result with several heuristic rules. It can give a sentimental score pair $(\rho, \eta)$ for each input text, where $\rho$ represents the positive score of the text, and $\eta$ represents the negative score. The scale and meaning for $\rho$ and $\eta$ are as below:</p>
+<blockquote>
+<p>SentiStrength 是一种根据社交网站（MySpace [^3]）上的评论开发的工具。它的核心功能是使用基于字典的算法来分析文本的情感。具体来说，它首先根据情感词典为单词分配先验情感分数，然后使用多种启发式规则调整分配结果。它可以为每个输入文本给出一个情感分数对 $(\rho, \eta)$，其中 $\rho$ 表示文本的正面分数，$\eta$ 表示负面分数。$\rho$ 和 $\eta$ 的尺度和含义如下：</p>
+</blockquote>
+<p>$$
+[\text{no positive sentiment}] +1, +2, +3, +4, +5 [\text{very strong positive sentiment}]
+\newline
+[\text{no negative sentiment}] -1, -2, -3, -4, -5 [\text{very strong negative sentiment}]
+$$</p>
+<h2 id="Core-Function">Core Function</h2>
+<p>SentiStrength's core function is to use a set of dictionaries and several heuristic rules to conduct sentimental analysis on the text. The key elements of SentiStrength are listed below.</p>
+<blockquote>
+<p>SentiStrength 的核心功能是使用一组词典和若干启发式规则对文本进行情感分析。下面列出了 SentiStrength 的关键要素。</p>
+</blockquote>
+<h3 id="UC-1-Assigning-Sentiment-Scores-for-Words">UC-1 Assigning Sentiment Scores for Words</h3>
+<p>The core of the algorithm is the sentiment word strength list (<code>EmotionLookupTable</code> in SentiStrength). <code>EmotionLookupTable</code> contains 2546 words or wildcards (hereinafter collectively referred to as items). Each item was preseted a sentimental score, which is an integer ranging from -5 to 5. SentiStrength will assign sentimental scores to each word in the sentence based on the <code>EmotionLookupTable</code>. If the word does not exist in the <code>EmotionLookupTable</code>, it defaults to neutral. It is noteworthy that the word &quot;miss&quot; was allocated a positive and negative strength of 2. This was the only word classed as both positive and negative. It was typically used in the phrase &quot;I miss you&quot;, suggesting both sadness and love.</p>
+<blockquote>
+<p>该算法的核心是情感词强度表（SentiStrength 中的 <code>EmotionLookupTable</code>）。<code>EmotionLookupTable</code> 包含 2546 个词或通配符（以下统称为项）。每个项目都预设了一个情感分数，它是一个介于 -5 到 5 之间的整数。SentiStrength 会根据 <code>EmotionLookupTable</code> 为句子中的每个单词分配情感分数。如果 <code>EmotionLookupTable</code> 中不存在该词，则默认为中性。值得注意的是，“miss”这个词被分配了 2 的正面和负面强度。这是唯一一个同时被归类为正面和负面的词。它通常用于短语“我想你”中，暗示着悲伤和爱。</p>
+</blockquote>
+<h3 id="UC-2-Assigning-Sentiment-Scores-for-Phrases">UC-2 Assigning Sentiment Scores for Phrases</h3>
+<p><code>EmotionLookupTable</code> is used to assign sentimental scores for uni-grams, while <code>IdiomLookupTable</code> is used to assign scores for the phrases which often contain multiple words. When an idiom is recognized, the sentimental score of the idiom will cover the sentimental score of the single word that constitutes the idiom. For example, In the text &quot;It's a killer feature.&quot;, &quot;killer feature&quot; is a phrase in the dictionary with positive score 02. Although the word 'kill' carries negative sentiment, its effect is overridden by the sentimental score of the enclosing phrase. So the text is analyzed as positive finally.</p>
+<blockquote>
+<p><code>EmotionLookupTable</code> 用于为 uni-gram 分配情感分数，而 <code>IdiomLookupTable</code> 用于为通常包含多个单词的短语分配分数。当一个成语被识别时，该成语的情感分数将覆盖构成该成语的单个词的情感分数。例如，在文本“It's a killer feature.”中，“killer feature”在字典中是一个积极得分为 2 的短语。虽然“kill”这个词带有负面情绪，但它的效果会被短语所包含的情绪得分所覆盖。所以文本最终被分析为正面的。</p>
+</blockquote>
+<h3 id="UC-3-Spelling-Correction">UC-3 Spelling Correction</h3>
+<p>A algorithm identifies the standard spellings of words that have been miss-spelled by the inclusion of repeated letters. For example, hellllloooo would be identified as &quot;hello&quot; by this algorithm. The algorithm (a) automatically deletes repeated letters above twice (e.g., helllo $\to$ hello); (b) deletes repeated letters occurring twice for letters rarely occurring twice in English (e.g., niice $\to$ nice) and (c) deletes letters occurring twice if not a standard word but would form a standard word if deleted (e.g., nnice $\to$ nice but not hoop $\to$ hop nor baaz $\to$ baz). <code>EnglishWordList</code> will be used to check whether the spelling of the word is correct.</p>
+<blockquote>
+<p>一种算法可以识别因包含重复字母而拼写错误的单词的标准拼写。例如，helllllooooo 将被该算法识别为“hello”。算法（a）自动删除上面两次重复的字母（例如，hello $\to$ hello）；（b）删除在英语中很少出现两次的字母重复出现两次的字母（例如，niice $\to$ nice）和（c）删除出现两次的字母如果不是标准词但如果删除将形成标准词（例如 nnice $\to$ nice） 不错，但不是 hoop $\to$ hop 或 baaz $\to$ baz）。<code>EnglishWordList</code> 将用于检查单词的拼写是否正确。</p>
+</blockquote>
+<h3 id="UC-4-Booster-Word-Rule">UC-4 Booster Word Rule</h3>
+<p>A booster word list (<code>BoosterWordList</code>) contains words that boost or reduce the emotion of subsequent words, whether positive or negative. Each word increases emotion strength by 1 or 2 (e.g., very, extremely) or decreases it by 1 (e.g., some).</p>
+<blockquote>
+<p>增强词列表（<code>BoosterWordList</code>）包含可以增强或降低后续词的情绪的词，无论是正面的还是负面的。每个词都会将情绪强度增加 1 或 2（例如，very 和 extremely）或减少 1（例如，some）。</p>
+</blockquote>
+<h3 id="UC-5-Negating-Word-Rule">UC-5 Negating Word Rule</h3>
+<p>A negating word list (<code>NegatingWordList</code>) contains words that invert subsequent emotion words (including any preceding booster words). For example, if &quot;very happy&quot; had positive strength 4 then &quot;not very happy&quot; would have negative strength 4. The possibility that some negating terms do not negate was not incorporated as this did not seem to occur often in the pilot data set.</p>
+<blockquote>
+<p>否定词列表（<code>NegatingWordList</code>）包含反转后续情感词（包括任何前面的助推词）的词。例如，如果“very happy”的正强度为 4，那么“not very happy”的负强度为 4。一些否定词不否定的可能性没有被纳入，因为这在试验数据集中似乎并不经常发生。</p>
+</blockquote>
+<h3 id="UC-6-Repeated-Letter-Rule">UC-6 Repeated Letter Rule</h3>
+<p>Repeated letters above those needed for correct spelling are used to give a strength boost of 1 to sentimental words, as long as there are at least two additional letters. The use of repeated letters is a common device for expressing emotion or energy in MySpace comments, but one repeated letter often appeared to be a typing error.</p>
+<blockquote>
+<p>只要有至少两个额外的字母，重复的字母高于正确拼写所需的字母，就会使情感词的强度提高 1。使用重复的字母是 MySpace 评论中表达情感或能量的常用手段，但重复的字母往往看起来像是打字错误。</p>
+</blockquote>
+<h3 id="UC-7-Emoji-Rule">UC-7 Emoji Rule</h3>
+<p>An emoticon list (<code>EmotionLookupTable</code>) with associated strengths (positive or negative 2) supplements the sentiment word strength list (and punctuation included in emoticons is not processed further for the purposes below).</p>
+<blockquote>
+<p>具有相关强度（正面或负面 2）的表情符号列表（<code>EmotionLookupTable</code>）补充了情感词强度列表（并且表情符号中包含的标点符号不会出于以下目的进一步处理）。</p>
+</blockquote>
+<h3 id="UC-8-Exclamation-Mark-Rule">UC-8 Exclamation Mark Rule</h3>
+<p>Any sentence with an exclamation mark was allocated a minimum positive strength of 2.</p>
+<blockquote>
+<p>任何带有感叹号的句子都被分配了 2 的最小正强度。</p>
+</blockquote>
+<h3 id="UC-9-Repeated-Punctuation-Rule">UC-9 Repeated Punctuation Rule</h3>
+<p>Repeated punctuation including at least one exclamation mark gives a strength boost of 1 to the immediately preceding emotion word (or sentence).</p>
+<blockquote>
+<p>包括至少一个感叹号在内的重复标点符号会使紧接在前的情感词（或句子）的强度提高 1。</p>
+</blockquote>
+<h3 id="UC-10-Negative-Sentiment-Ignored-in-Questions">UC-10 Negative Sentiment Ignored in Questions</h3>
+<p>For example, the question &quot;are you angry?&quot; would be classified as not containing sentiment, despite the presence of the word &quot;angry&quot;. This was not applied to positive sentiment because many question sentences appeared to contain mild positive sentiment. In particular, sentences like &quot;whats up?&quot; were typically classified as containing mild positive sentiment (strength 2). QuestionWord is used to identify question words.</p>
+<p>The above factors were applied separately to each sentence, with the sentence being assigned with both the most positive and most negative sentiments identified in it. Each overall text was assigned with the most positive of its sentence sentiments and the most negative of its sentence sentiments. Sentences were split either by line breaks in comments or after punctuation other than emoticons. The example in Table 1 shows how SentiStrength analyses.</p>
+<blockquote>
+<p>例如，“are you angry?”这个问题。将被归类为不包含情绪，尽管存在“愤怒”一词。这不适用于积极情绪，因为许多问题句子似乎包含温和的积极情绪。特别是像“whats up?”这样的句子。通常被归类为包含温和的积极情绪（强度 2）。QuestionWord 用于识别疑问词。</p>
+<p>上述因素分别应用于每个句子，该句子被分配了其中确定的最积极和最消极的情绪。每个整体文本都被分配了最积极的句子情绪和最消极的句子情绪。句子被评论中的换行符或除表情符号以外的标点符号分隔。表 1 中的示例显示了 SentiStrength 如何分析。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>$\rho$</th>
+<th>$\eta$</th>
+<th>Dictionary/Rule Used</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>It's a good feature.</td>
+<td>2</td>
+<td>-1</td>
+<td><code>EmotionLookupTable</code></td>
+<td>The sentimental score of the word 'good' is pre-assigned to 02; so the sentence is assigned positive score 02.</td>
+</tr>
+<tr>
+<td>It's a very good feature.</td>
+<td>3</td>
+<td>-1</td>
+<td><code>EmotionLookupTable</code><br><code>BoosterWordList</code></td>
+<td>As booster word 'very' is used before the sentimental word, the sentence is assigned a positive score 03.</td>
+</tr>
+<tr>
+<td>It's not good feature.</td>
+<td>1</td>
+<td>-2</td>
+<td><code>EmotionLookupTable</code><br><code>NegatingWordList</code></td>
+<td>Sentimental polarity of the sentimental word is inverted in here due to the use of the negation word 'not' before sentimental word.</td>
+</tr>
+<tr>
+<td>It's a good feature!</td>
+<td>3</td>
+<td>-1</td>
+<td><code>EmotionLookupTable</code> <br><code>&quot;!&quot; Rule</code></td>
+<td>&quot;!&quot; will strengthen the sentimental strength</td>
+</tr>
+<tr>
+<td>It's a gooood feature.</td>
+<td>3</td>
+<td>-1</td>
+<td><code>Repeated Letter Rule</code></td>
+<td>Repeated letters above those needed for correct spelling are used to give a strength boost of 1 to sentimental words.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Other-Functions">Other Functions</h2>
+<p>SentiStrength was initially released in the form of a jar package. In this section, we will introduce some non-core functions and explain how to set options to use these functions when analysing. For a more comprehensive description of options, please refer to the manual on the official website.</p>
+<blockquote>
+<p>SentiStrength 最初以 jar 包的形式发布。在本节中，我们将介绍一些非核心功能，并说明在分析时如何设置选项以使用这些功能。更全面的选项说明，请参考官网说明书。</p>
+</blockquote>
+<h3 id="Complete-Different-Classification-Tasks-6">Complete Different Classification Tasks (6)</h3>
+<p>SentiStrength can classify individual texts or multiple texts and can be invoked in many different ways. This section covers these methods although most users only need one of them.</p>
+<blockquote>
+<p>SentiStrength 可以对单个文本或多个文本进行分类，并且可以通过许多不同的方式调用。本节涵盖这些方法，尽管大多数用户只需要其中一种方法。</p>
+</blockquote>
+<h4 id="UC-11-Classify-a-single-text">UC-11 Classify a single text</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">text [text to process]<br></code></pre></td></tr></table></figure>
+<p>The submitted text will be classified and the result returned in the form +ve –space- -ve. If the classification method is trinary, binary or scale then the result will have the form +ve –space- -ve –space- overall. E.g.,</p>
+<blockquote>
+<p>提交的文本将被分类，结果以+ve –space- -ve 的形式返回。如果分类方法是三元法、二元法或尺度法，则结果的形式为 +ve –space- -ve –space- overall。例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar sentidata C:/SentiStrength_Data/ text i+love+your+dog.<br></code></pre></td></tr></table></figure>
+<p>The result will be: 3 -1</p>
+<h4 id="UC-12-Classify-all-lines-of-text-in-a-file-for-sentiment-includes-accuracy-evaluations">UC-12 Classify all lines of text in a file for sentiment [includes accuracy evaluations]</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">input [filename]<br></code></pre></td></tr></table></figure>
+<p>Each line of [filename] will be classified for sentiment. Here is an example.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar sentidata C:/SentiStrength_Data/ input myfile.txt<br></code></pre></td></tr></table></figure>
+<p>A new file will be created with the sentiment classifications added to the end of each line.</p>
+<p>If the task is to test the accuracy of SentiStrength, then the file may have +ve codes in the 1st column, then negative codes in the 2nd column and text in the last column. If using binary/trinary/scale classification then the first column can contain the human coded values. Columns must be tab-separated. If human coded sentiment scores are included in the file then the accuracy of SentiStrength will be compared against them.</p>
+<blockquote>
+<p>将创建一个新文件，并将情感分类添加到每行的末尾。</p>
+<p>如果任务是测试 SentiStrength 的准确性，那么文件可能在第一列中有 +ve 代码，然后在第二列中有负代码，在最后一列中有文本。如果使用二元/三元/尺度分类，那么第一列可以包含人类编码值。列必须以制表符分隔。如果文件中包含人工编码的情感分数，则将与它们比较 SentiStrength 的准确性。</p>
+</blockquote>
+<h4 id="UC-13-Classify-texts-in-a-column-within-a-file-or-folder">UC-13 Classify texts in a column within a file or folder</h4>
+<p>For each line, the text in the specified column will be extracted and classified, with the result added to an extra column at the end of the file (all three parameters are compulsory).</p>
+<blockquote>
+<p>对于每一行，将提取和分类指定列中的文本，并将结果添加到文件末尾的额外列中（所有三个参数都是必需的）。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">annotateCol [col <span class="hljs-comment"># 1..] (classify text in col, result at line end)</span><br>inputFolder [foldername] (all files <span class="hljs-keyword">in</span> folder will be _annotated_)<br>fileSubstring [text] (string must be present <span class="hljs-keyword">in</span> files to annotate)<br>Ok to overwrite files [overwrite]<br></code></pre></td></tr></table></figure>
+<p>If a folder is specified instead of a filename (i.e., an input parameter) then all files in the folder are processed as above. If a fileSubstring value is specified, then only files matching the substring will be classified. The parameter overwrite must be specified to explicitly allow the input files to be modified. This is a purely safety feature. E.g.,</p>
+<blockquote>
+<p>如果指定文件夹而不是文件名（即输入参数），则文件夹中的所有文件都按上述方式处理。如果指定了 fileSubstring 值，则只会对匹配该子字符串的文件进行分类。必须指定参数 overwrite 以明确允许修改输入文件。这是一个纯粹的安全功能。例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar sentidata C:/SentiStrength_Data/ annotateCol 1 inputFolder C:/textfiles/ fileSubstring txt<br></code></pre></td></tr></table></figure>
+<h4 id="UC-14-Listen-at-a-port-for-texts-to-classify">UC-14 Listen at a port for texts to classify</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">listen [port number to listen at - call OR<br></code></pre></td></tr></table></figure>
+<p>This sets the program to listen at a port number for texts to classify, e.g., to listen at port 81 for texts for trinary classification:</p>
+<blockquote>
+<p>这将程序设置为在端口号上侦听要分类的文本，例如，在端口 81 上侦听三元分类的文本：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar sentidata C:/SentiStrength_Data/ listen 81 trinary<br></code></pre></td></tr></table></figure>
+<p>The texts must be URLEncoded and submitted as part of the URL. E.g., if the listening was set up on port 81 then requesting the following URL would trigger classification of the text &quot;love you&quot;: <a target="_blank" rel="noopener" href="http://127.0.0.1:81/love%20you">http://127.0.0.1:81/love you</a></p>
+<p>The result for this would be 3 -1 1. This is: (+ve classification) (-ve classification) (trinary classification)</p>
+<blockquote>
+<p>文本必须经过 URLEncoded 并作为 URL 的一部分提交。例如，如果在端口 81 上设置了监听，那么请求以下 URL 将触发文本“love you”的分类：<a target="_blank" rel="noopener" href="http://127.0.0.1:81/love%20you">http://127.0.0.1:81/love you</a></p>
+<p>结果为 3 -1 1。这是：(+ve 分类） (-ve 分类） （三元分类）</p>
+</blockquote>
+<h4 id="UC-15-Run-interactively-from-the-command-line">UC-15 Run interactively from the command line</h4>
+<p>cmd (can also set options and sentidata folder). E.g.,</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar c:\SentiStrength.jar cmd sentidata C:/SentiStrength_Data/<br></code></pre></td></tr></table></figure>
+<p>This allows the program to classify texts from the command prompt. After running this every line you enter will be classified for sentiment. To finish enter @end</p>
+<blockquote>
+<p>这允许程序对来自命令提示符的文本进行分类。运行此命令后，您输入的每一行都将根据情绪进行分类。完成输入@end</p>
+</blockquote>
+<h4 id="UC-16-Process-stdin-and-send-to-stdout">UC-16 Process stdin and send to stdout</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">stdin (can also <span class="hljs-built_in">set</span> options and sentidata folder). E.g.,<br>java -jar c:\SentiStrength.jar stdin sentidata C:/SentiStrength_Data/<br></code></pre></td></tr></table></figure>
+<p>SentiStrength will classify all texts sent to it from stdin and then will close. This probably the most efficient way of integrating SentiStrength efficiently with non-Java programs. The alternatives are the Listen at a port option or dumping the texts to be classified into a file and then running SentiStrength on the file.</p>
+<p>The parameter textCol can be set [default 0 for the first column] if the data is sent in multiple tab-separated columns and one column contains the text to be classified. The results will be appended to the end of the input data and send to STD out. The Java loop code for this is essentially:</p>
+<blockquote>
+<p>SentiStrength 将对从 stdin 发送给它的所有文本进行分类，然后关闭。这可能是将 SentiStrength 与非 Java 程序有效集成的最有效方式。备选方案是在端口选项上监听或将要分类的文本转储到文件中，然后在该文件上运行 SentiStrength。</p>
+<p>如果数据以多个制表符分隔的列发送，并且一列包含要分类的文本，则可以设置参数 textCol [第一列默认为 0]。结果将附加到输入数据的末尾并发送到 STD 输出。Java 循环代码本质上是：</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">while</span>((textToParse = stdin.readLine()) != <span class="hljs-literal">null</span>) &#123;<br>	<span class="hljs-comment">//code to analyse sentiment and return results</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<p>So for greatest efficiency, null should not be sent to stdin as this will close the program.</p>
+<blockquote>
+<p>因此，为了获得最高效率，不应将 null 发送到标准输入，因为这将关闭程序。</p>
+</blockquote>
+<h3 id="Set-Location-of-Data-4">Set Location of Data (4)</h3>
+<h4 id="UC-17-Location-of-linguistic-data-folder">UC-17 Location of linguistic data folder</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">sentidata [folder <span class="hljs-keyword">for</span> SentiStrength data (end <span class="hljs-keyword">in</span> slash, no spaces)]<br></code></pre></td></tr></table></figure>
+<p>This option is used to set which folder the tool searches for the dictionary needed for analysis (such as <code>EmotionLookupTable</code>, <code>IdiomLookupTable</code>, etc).</p>
+<blockquote>
+<p>此选项用于设置工具在哪个文件夹中搜索分析所需的词典（如 <code>EmotionLookupTable</code>、<code>IdiomLookupTable</code> 等）。</p>
+</blockquote>
+<h4 id="UC-18-Location-of-sentiment-term-weights">UC-18 Location of sentiment term weights</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">EmotionLookupTable [filename (default: EmotionLookupTable.txt or SentimentLookupTable.txt)].<br></code></pre></td></tr></table></figure>
+<p>This option is used to set which file will be set as the core sentiment word strength list for the tool. The default value is <code>EmotionLookupTable</code>.txt or <code>SentimentLookupTable.txt</code>. This file must be in the directory specified by sentidata.</p>
+<blockquote>
+<p>此选项用于设置将哪个文件设置为该工具的核心情感词强度列表。默认值为 <code>EmotionLookupTable.txt</code> 或 <code>SentimentLookupTable.txt</code>。此文件必须位于 sentidata 指定的目录中。</p>
+</blockquote>
+<h4 id="UC-19-Location-of-output-folder">UC-19 Location of output folder</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">outputFolder [foldername <span class="hljs-built_in">where</span> to put the output (default: folder of input)]<br></code></pre></td></tr></table></figure>
+<p>This option is used to set the name of the folder to put the output.</p>
+<blockquote>
+<p>此选项用于设置放置输出的文件夹的名称。</p>
+</blockquote>
+<h4 id="UC-20-File-name-extension-for-output">UC-20 File name extension for output</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">resultsextension [file-extension <span class="hljs-keyword">for</span> output (default _out.txt)]<br></code></pre></td></tr></table></figure>
+<p>This option is used to set what identifier will be used to mark out the output file. Its default value is &quot;_out.txt&quot;. For example, if you set &quot;input.txt&quot; as the input file, the first output file will be &quot;input0_out.txt&quot; (input file name + index + result extension).</p>
+<blockquote>
+<p>此选项用于设置将使用什么标识符来标记输出文件。它的默认值是 <code>_out.txt</code>。例如，如果您将 <code>input.txt</code> 设置为输入文件，则第一个输出文件将为 <code>input0_out.txt</code>（输入文件名+索引+结果扩展名）。</p>
+</blockquote>
+<h3 id="Set-Different-Type-of-Output-4">Set Different Type of Output (4)</h3>
+<h4 id="UC-21-Classify-positive-1-to-5-and-negative-1-to-5-sentiment-strength-separately">UC-21 Classify positive (1 to 5) and negative (-1 to -5) sentiment strength separately</h4>
+<p>This is the default and is used unless binary, trinary or scale is selected. Note that 1 indicates no positive sentiment and -1 indicates no negative sentiment. There is no output of 0.</p>
+<blockquote>
+<p>这是默认值，除非选择二元、三元或范围，否则将使用它。请注意，1 表示没有正面情绪，-1 表示没有负面情绪。没有 0 的输出。</p>
+</blockquote>
+<h4 id="UC-22-Use-trinary-classification-positive-negative-neutral">UC-22 Use trinary classification (positive-negative-neutral)</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">trinary (report positive-negative-neutral classification instead)<br></code></pre></td></tr></table></figure>
+<p>The result for this would be like 3 -1 1. This is: (+ve classification) (-ve classification) (trinary classification)</p>
+<blockquote>
+<p>其结果类似于 3 -1 1。这是：（+ve 分类）（-ve 分类）（三元分类）</p>
+</blockquote>
+<h4 id="UC-23-Use-binary-classification-positive-negative">UC-23 Use binary classification (positive-negative)</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">binary (report positive-negative classification instead)<br></code></pre></td></tr></table></figure>
+<p>The result for this would be like 3 -1 1. This is: (+ve classification) (-ve classification) (binary classification)</p>
+<blockquote>
+<p>其结果类似于 3 -1 1。这是：（+ve 分类）（-ve 分类）（二元分类）</p>
+</blockquote>
+<h4 id="UC-24-Use-a-single-positive-negative-scale-classification">UC-24 Use a single positive-negative scale classification</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">scale (report single -4 to +4 classification instead)<br></code></pre></td></tr></table></figure>
+<p>The result for this would be like 3 -4 -1. This is: (+ve classification) (-ve classification) (scale classification)</p>
+<blockquote>
+<p>其结果类似于 3 -4 -1。这是：（+ve 分类）（-ve 分类）（尺度分类）</p>
+</blockquote>
+<h3 id="UC-25-Explain-the-classification">UC-25 Explain the classification</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">explain<br></code></pre></td></tr></table></figure>
+<p>Adding this parameter to most of the options results in an approximate explanation being given for the classification. E.g.,</p>
+<blockquote>
+<p>将此参数添加到大多数选项会导致对分类给出近似解释。例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar text i+don<span class="hljs-string">&#x27;t+hate+you. explain</span><br></code></pre></td></tr></table></figure>
+<h3 id="UC-26-Set-Classification-Algorithm-Parameters">UC-26 Set Classification Algorithm Parameters</h3>
+<p>Please note that most of these options can be mapped to the core function of SentiStrength. They can change how the sentiment analysis algorithm works.</p>
+<ul>
+<li>alwaysSplitWordsAtApostrophes (split words when an apostrophe is met – important for languages that merge words with ', like French (e.g., t'aime $\to$ t ' aime with this option t'aime without))</li>
+<li>noBoosters (ignore sentiment booster words (e.g., very))</li>
+<li>noNegatingPositiveFlipsEmotion (don't use negating words to flip +ve words)</li>
+<li>noNegatingNegativeNeutralisesEmotion (don't use negating words to neuter -ve words)</li>
+<li>negatedWordStrengthMultiplier (strength multiplier when negated (default=0.5))</li>
+<li>maxWordsBeforeSentimentToNegate (max words between negator &amp; sentiment word (default 0))</li>
+<li>noIdioms (ignore idiom list)</li>
+<li>questionsReduceNeg (-ve sentiment reduced in questions)</li>
+<li>noEmoticons (ignore emoticon list)</li>
+<li>exclamations2 (exclamation marks count them as +2 if not -ve sentence)</li>
+<li>mood [-1,0,1] (interpretation of neutral emphasis (e.g., miiike; hello!!). -1 means neutral emphasis interpreted as –ve; 1 means interpreted as +ve; 0 means emphasis ignored)</li>
+<li>noMultiplePosWords (don't allow multiple +ve words to increase +ve sentiment)</li>
+<li>noMultipleNegWords (don't allow multiple -ve words to increase -ve sentiment)</li>
+<li>noIgnoreBoosterWordsAfterNegatives (don't ignore boosters after negating words)</li>
+<li>noDictionary (don't try to correct spellings using the dictionary by deleting duplicate letters from unknown words to make known words)</li>
+<li>noDeleteExtraDuplicateLetters (don't delete extra duplicate letters in words even when they are impossible, e.g., heyyyy) [this option does not check if the new word is legal, in contrast to the above option]</li>
+<li>illegalDoubleLettersInWordMiddle [letters never duplicate in word middles] this is a list of characters that never occur twice in succession. For English the following list is used (default): ahijkquvxyz Never include w in this list as it often occurs in www</li>
+<li>illegalDoubleLettersAtWordEnd [letters never duplicate at word ends] this is a list of characters that never occur twice in succession at the end of a word. For English the following list is used (default): achijkmnpqruvwxyz</li>
+<li>noMultipleLetters (don't use the presence of additional letters in a word to boost sentiment)</li>
+</ul>
+<blockquote>
+<p>请注意，这些选项中的大多数都可以映射到 SentiStrength 的核心功能。他们可以改变情绪分析算法的工作方式。</p>
+<ul>
+<li>alwaysSplitWordsAtApostrophes（遇到撇号时拆分单词 - 对于将单词与 ' 合并的语言很重要，例如法语（例如，t'aime $\to$ t ' aime 带有此选项 t'aime 没有））</li>
+<li>noBoosters（忽略情绪助推词（例如，非常））</li>
+<li>noNegatingPositiveFlipsEmotion（不要使用否定词来翻转 +ve 词）</li>
+<li>noNegatingNegativeNeutralisesEmotion（不要使用否定词来中和 -ve 词）</li>
+<li>negatedWordStrengthMultiplier（否定时的强度乘数（默认值=0.5））</li>
+<li>maxWordsBeforeSentimentToNegate（否定词和情感词之间的最大词数（默认为 0））</li>
+<li>noIdioms（忽略成语列表）</li>
+<li>questionsReduceNeg（-ve 情绪在问题中减少）</li>
+<li>noEmoticons（忽略表情符号列表）</li>
+<li>exclamations2（如果不是 -ve 句子，感叹号将它们计为 +2）</li>
+<li>mood [-1,0,1]（中性强调的解释（例如，miiike; hello!!）。-1 表示中性强调解释为 –ve；1 表示解释为 +ve；0 表示忽略强调）</li>
+<li>noMultiplePosWords（不允许多个+ve 词来增加+ve 情绪）</li>
+<li>noMultipleNegWords（不允许多个 -ve 词增加 -ve 情绪）</li>
+<li>noIgnoreBoosterWordsAfterNegatives（否定词后不要忽略助推器）</li>
+<li>noDictionary（不要试图通过删除未知单词中的重复字母来制作已知单词来使用字典来纠正拼写）</li>
+<li>noDeleteExtraDuplicateLetters（不要删除单词中多余的重复字母，即使它们是不可能的，例如 heyyyy）[与上述选项相反，此选项不检查新单词是否合法]</li>
+<li>illegalDoubleLettersInWordMiddle [字母从不在单词中间重复] 这是一个永远不会连续出现两次的字符列表。对于英语，使用以下列表（默认）：ahijkquvxyz 切勿在此列表中包含 w，因为它经常出现在 www 中</li>
+<li>illegalDoubleLettersAtWordEnd [字母从不在词尾重复] 这是一个从不在词尾连续出现两次的字符列表。对于英语，使用以下列表（默认）：achijkmnpqruvwxyz</li>
+<li>noMultipleLetters（不要在单词中使用额外的字母来提升情绪）</li>
+</ul>
+</blockquote>
+<h3 id="Improving-the-accuracy-of-SentiStrength-2">Improving the accuracy of SentiStrength(2)</h3>
+<h4 id="Basic-manual-improvements">Basic manual improvements</h4>
+<p>If you see a systematic pattern in the results, such as the term &quot;disgusting&quot; typically having a stronger or weaker sentiment strength in your texts than given by SentiStrength then you can edit the text files with SentiStrength to change this. Please edit SentiStrength's input files using a plain text editor because if it is edited with a word processor then SentiStrength may not be able to read the file afterwards.</p>
+<blockquote>
+<p>如果您在结果中看到系统模式，例如术语“disgusting”通常在您的文本中具有比 SentiStrength 给出的更强或更弱的情绪强度，那么您可以使用 SentiStrength 编辑文本文件来更改它。请使用纯文本编辑器编辑 SentiStrength 的输入文件，因为如果使用文字处理器编辑，SentiStrength 之后可能无法读取该文件。</p>
+</blockquote>
+<h4 id="UC-27-Optimise-sentiment-strengths-of-existing-sentiment-terms">UC-27 Optimise sentiment strengths of existing sentiment terms</h4>
+<p>SentiStrength can suggest revised sentiment strengths for the <code>EmotionLookupTable.txt</code> in order to give more accurate classifications for a given set of texts. This option needs a large (&gt;500) set of texts in a plain text file with a human sentiment classification for each text. SentiStrength will then try to adjust the <code>EmotionLookupTable.txt</code> term weights to be more accurate when classifying these texts. It should then also be more accurate when classifying similar texts.</p>
+<blockquote>
+<p>SentiStrength 可以为 <code>EmotionLookupTable.txt</code> 建议修改后的情绪强度，以便为给定的文本集提供更准确的分类。此选项需要纯文本文件中的大量（&gt;500）文本，每个文本都有人类情感分类。然后，SentiStrength 将尝试调整 <code>EmotionLookupTable.txt</code> 术语权重，以便在对这些文本进行分类时更加准确。在对相似文本进行分类时，它也应该更加准确。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">optimise [Filename <span class="hljs-keyword">for</span> optimal term strengths (e.g. EmotionLookupTable2.txt)]<br></code></pre></td></tr></table></figure>
+<p>This creates a new emotion lookup table with improved sentiment weights based upon an input file with human coded sentiment values for the texts. This feature allows SentiStrength term weights to be customised for new domains. E.g.,</p>
+<blockquote>
+<p>这将创建一个新的情感查找表，该表具有基于文本的人工编码情感值的输入文件改进的情感权重。此功能允许为新域自定义 SentiStrength 术语权重。例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar c:/SentiStrength.jar minImprovement 3 input C:/twitter4242.txt optimise C:/twitter4242OptimalSentimentLookupTable.txt<br></code></pre></td></tr></table></figure>
+<p>This is very slow (hours or days) if the input file is large (hundreds of thousands or millions, respectively). The main optional parameter is minImprovement (default value 2). Set this to specify the minimum overall number of additional correct classifications to change the sentiment term weighting. For example, if increasing the sentiment strength of love from 3 to 4 improves the number of correctly classified texts from 500 to 502 then this change would be kept if minImprovement was 1 or 2 but rejected if minImprovement was &gt;2. Set this higher to have more robust changes to the dictionary. Higher settings are possible with larger input files.</p>
+<p>To check the performance on the new dictionary, the file could be reclassified using it instead of the original SentimentLookupTable.txt as follows:</p>
+<blockquote>
+<p>如果输入文件很大（数十万或数百万），这将非常慢（分别为数小时或数天）。主要的可选参数是 <code>minImprovement</code>（默认值 2）。设置此项以指定额外正确分类的最小总数，以更改情绪术语权重。例如，如果将 love 的情感强度从 3 增加到 4，将正确分类的文本数量从 500 增加到 502，那么如果 <code>minImprovement</code> 为 1 或 2，则此更改将被保留，但如果 <code>minImprovement &gt; 2</code>，则会被拒绝。将此值设置得更高，可以对字典进行更稳健的更改。较大的输入文件可以进行较高的设置。</p>
+<p>要检查新词典的性能，可以使用它而不是原始 <code>SentimentLookupTable.txt</code> 对文件进行重新分类，如下所示：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar c:/SentiStrength.jar input C:/twitter4242.txt EmotionLookupTable C:/twitter4242OptimalSentimentLookupTable.txt<br></code></pre></td></tr></table></figure>
+<h4 id="UC-28-Suggest-new-sentiment-terms-from-terms-in-misclassified-texts">UC-28 Suggest new sentiment terms (from terms in misclassified texts)</h4>
+<p>SentiStrength can suggest a new set of terms to add to the <code>EmotionLookupTable.txt</code> in order to give more accurate classifications for a given set of texts. This option needs a large (&gt;500) set of texts in a plain text file with a human sentiment classification for each text. SentiStrength will then list words not found in the <code>EmotionLookupTable.txt</code> that may indicate sentiment. Adding some of these terms should make SentiStrength more accurate when classifying similar texts.</p>
+<blockquote>
+<p>SentiStrength 可以建议一组新的术语添加到 <code>EmotionLookupTable.txt</code>，以便为给定的一组文本提供更准确的分类。此选项需要纯文本文件中的大量（&gt;500）文本，每个文本都有人类情感分类。然后，SentiStrength 将列出在 <code>EmotionLookupTable.txt</code> 中找不到的可能表示情绪的词。添加其中一些术语应该会使 SentiStrength 在对相似文本进行分类时更加准确。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">termWeights<br></code></pre></td></tr></table></figure>
+<p>This lists all terms in the data set and the proportion of times they are in incorrectly classified positive or negative texts. Load this into a spreadsheet and sort on the PosClassAvDiff and NegClassAvDiff to get an idea about terms that either should be added to the sentiment dictionary because one of these two values is high. This option also lists words that are already in the sentiment dictionary. Must be used with a text file containing correct classifications. E.g.,</p>
+<blockquote>
+<p>这列出了数据集中的所有术语以及它们在错误分类的正面或负面文本中的次数比例。将其加载到电子表格中，然后对 <code>PosClassAvDiff</code> 和 <code>NegClassAvDiff</code> 进行排序，以了解哪些术语应该添加到情绪词典中，因为这两个值之一很高。此选项还列出了情感词典中已有的单词。必须与包含正确分类的文本文件一起使用。例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar c:/SentiStrength.jar input C:/twitter4242.txt termWeights<br></code></pre></td></tr></table></figure>
+<p>This is very slow (hours or days) if the input file is large (tens of thousands or millions, respectively).</p>
+<p>Interpretation: In the output file, the column PosClassAvDiff means the average difference between the predicted sentiment score and the human classified sentiment score for texts containing the word. For example, if the word &quot;nasty&quot; was in two texts and SentiStrength had classified them both as +1,-3 but the human classifiers had classified the texts as (+2,-3) and (+3,-5) then PosClassAvDiff would be the average of 2-1 (first text) and 3-1 (second text) which is 1.5. All the negative scores are ignored for PosClassAvDiff</p>
+<p>NegClassAvDiff is the same as for PosClassAvDiff except for the negative scores.</p>
+<blockquote>
+<p>如果输入文件很大（分别为数万或数百万），这会非常慢（数小时或数天）。</p>
+<p>解释：在输出文件中，PosClassAvDiff 列表示包含该词的文本的预测情绪得分与人类分类情绪得分之间的平均差异。例如，如果单词“nasty”出现在两个文本中，SentiStrength 将它们都分类为 +1,-3，但人工分类器将文本分类为 (+2,-3) 和 (+3,-5)，则 PosClassAvDiff 将是 2-1（第一个文本）和 3-1（第二个文本）的平均值，即 1.5。PosClassAvDiff 忽略所有负分数</p>
+<p>除了负分数外，NegClassAvDiff 与 PosClassAvDiff 相同。</p>
+</blockquote>
+<h3 id="UC-29-Machine-learning-evaluations">UC-29 Machine learning evaluations</h3>
+<p>These are machine learning options to evaluate SentiStrength for academic research. The basic command is train.</p>
+<p><code>train</code> (evaluate SentiStrength by training term strengths on results in file). An input file of 500+ human classified texts is also needed - e.g.,</p>
+<blockquote>
+<p>这些是评估学术研究的 SentiStrength 的机器学习选项。基本命令是 train。</p>
+<p><code>train</code> （通过训练文件中结果的术语强度来评估 SentiStrength）。还需要包含 500 多个人类分类文本的输入文件 - 例如，</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar train input C:\1041MySpace.txt<br></code></pre></td></tr></table></figure>
+<p>This attempts to optimise the sentiment dictionary using a machine learning approach and 10-fold cross validation. This is equivalent to using the command optimise on a random 90% of the data, then evaluating the results on the remaining 10% and repeating this 9 more times with the remaining 9 sections of 10% of the data. The accuracy results reported are the average of the 10 attempts. This estimates the improved accuracy gained from using the optimise command to improve the sentiment dictionary.</p>
+<p>The output of this is two files. The file ending in _out.txt reports various accuracy statistics (e.g., number and proportion correct, number and proportion within 1 of the correct value; correlation between SentiStrength and human coded values. The file ending in _out_termStrVars.txt reports the changes to the sentiment dictionary in each of the folds. Both files also report the parameters used for the sentiment algorithm and machine learning. See the What do the results mean? section at the end for more information.</p>
+<blockquote>
+<p>这尝试使用机器学习方法和 10 折交叉验证来优化情感词典。这相当于对随机 90% 的数据使用命令优化，然后评估剩余 10% 的结果，并用 10% 的数据的剩余 9 个部分再重复这 9 次。报告的准确性结果是 10 次尝试的平均值。这估计了使用优化命令改进情感词典所获得的提高的准确性。</p>
+<p>其输出是两个文件。以 <code>_out.txt</code> 结尾的文件报告各种精度统计（例如，数字和比例正确，数字和比例在正确值的 1 以内；SentiStrength 与人类编码值之间的相关性。以 <code>_out_termStrVars.txt</code> 结尾的文件报告更改到 每个折叠中的情感词典。这两个文件还报告了用于情感算法和机器学习的参数。有关更多信息，请参阅末尾的“What do the results mean?”部分。</p>
+</blockquote>
+<h4 id="Evaluation-options">Evaluation options</h4>
+<ul>
+<li><code>all</code> Test all option variations listed in Classification Algorithm Parameters above rather than use the default options</li>
+<li><code>tot</code> Optimise by the number of correct classifications rather than the sum of the classification differences</li>
+<li><code>iterations</code> [number of 10-fold iterations (default 1)] This sets the number of times that the training and evaluation is conducted. A value of 30 is recommended to help average out differences between runs.</li>
+<li><code>minImprovement</code> [min extra correct class. to change sentiment weights (default 2)] This sets the minimum number of extra correct classifications necessary to adjust a term weight during the training phase.</li>
+<li><code>multi</code> [# duplicate term strength optimisations to change sentiment weights (default 1)] This is a kind of super-optimisation. Instead of being optimised once, term weights are optimised multiple times from the starting values and then the average of these weights is taken and optimised and used as the final optimised term strengths. This should in theory give better values than optimisation once. e.g.,</li>
+</ul>
+<blockquote>
+<ul>
+<li><code>all</code> 测试上面分类算法参数中列出的所有选项变体，而不是使用默认选项</li>
+<li><code>tot</code> 按正确分类的数量而不是分类差异的总和进行优化</li>
+<li><code>iterations</code> [10 次迭代次数（默认 1）] 这设置了进行训练和评估的次数。建议将值设为 30 以帮助平均计算运行之间的差异。</li>
+<li><code>minImprovement</code> [最小额外正确类。改变情绪权重（默认 2）] 这设置了在训练阶段调整术语权重所需的额外正确分类的最小数量。</li>
+<li><code>multi</code> [# duplicate term strength optimisations to change sentiment weights (default 1)] 这是一种超级优化。不是优化一次，而是从起始值开始多次优化术语权重，然后取这些权重的平均值并进行优化，并将其用作最终优化的术语强度。这在理论上应该比优化一次提供更好的价值。例如。，</li>
+</ul>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar multi 8 input C:\1041MySpace.txt iterations 2<br></code></pre></td></tr></table></figure>
+<p>Example: Using SentiStrength for 10-fold cross-validation</p>
+<p>What is this? This estimates the accuracy of SentiStrength <strong>after</strong> it has optimised the term weights for the sentiment words (i.e., the values in the file <code>EmotionLookupTable.txt</code>).</p>
+<p>What do I need for this test? You need an input file that is a list of texts with human classified values for positive (1-5) and negative (1-5) sentiment. Each line of the file should be in the format:</p>
+<p>Positive <code>&lt;tab&gt;</code> Negative <code>&lt;tab&gt;</code> text</p>
+<p>How do I run the test? Type the following command, replacing the filename with your own file name.</p>
+<blockquote>
+<p>示例：使用 SentiStrength 进行 10 折交叉验证</p>
+<p>这是什么？ 这估计了 SentiStrength 的准确性在它优化了情感词的术语权重（即文件 <code>EmotionLookupTable.txt</code> 中的值）<strong>之后</strong>。</p>
+<p>这个测试我需要什么？ 您需要一个输入文件，它是一个文本列表，其中包含正面 (1-5) 和负面 (1-5) 情绪的人类分类值。文件的每一行应采用以下格式：</p>
+<p>正 <code>&lt;tab&gt;</code> 负 <code>&lt;tab&gt;</code> 文本</p>
+<p>我如何运行测试？ 键入以下命令，将文件名替换为您自己的文件名。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">java -jar SentiStrength.jar input C:\1041MySpace.txt iterations 30<br></code></pre></td></tr></table></figure>
+<p>This should take up to one hour – much longer for longer files. The output will be a list of accuracy statistics. Each 10-fold cross-validation</p>
+<p>What does 10-fold cross-validation mean? See the k-fold section in <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Cross-validation_(statistics)">http://en.wikipedia.org/wiki/Cross-validation_(statistics)</a>. Essentially, it means that the same data is used to identify the best sentiment strength values for the terms in <code>EmotionLookupTable.txt</code> as is used to evaluate the accuracy of the revised (trained) algorithm – but this isn't cheating when it is done this way.</p>
+<p>The first line in the results file gives the accuracy of SentiStrength with the original term weights in <code>EmotionLookupTable.txt</code>.</p>
+<p>What do the results mean? The easiest way to read the results is to copy and paste them into a spreadsheet like Excel. The table created lists the options used to classify the texts and well as the results. Here is an extract from the first two rows of the key results. It gives the total number correct for positive sentiment (Pos Correct) and the proportion correct (Pos Correct/Total). It also reports the number of predictions that are correct or within 1 of being correct (Pos Within1). The same information is given for negative sentiment.</p>
+<blockquote>
+<p>这最多需要一个小时——对于较长的文件，时间会更长。输出将是准确度统计列表。每 10 折交叉验证。</p>
+<p>10 折交叉验证是什么意思？ 请参阅 <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Cross-validation_(statistics)">http://en.wikipedia.org/wiki/Cross-validation_(statistics)</a> 中的 k 折部分。从本质上讲，这意味着使用相同的数据来确定 <code>EmotionLookupTable.txt</code> 中术语的最佳情绪强度值，就像用于评估修订（训练）算法的准确性一样——但这并不是作弊 方式。</p>
+<p>结果文件中的第一行给出了 SentiStrength 的准确性以及 <code>EmotionLookupTable.txt</code> 中的原始项权重。</p>
+<p>结果意味着什么？ 阅读结果的最简单方法是将它们复制并粘贴到 Excel 等电子表格中。创建的表格列出了用于对文本和结果进行分类的选项。这是关键结果前两行的摘录。它给出了积极情绪的正确总数 (Pos Correct) 和正确的比例 (Pos Correct/Total)。它还报告正确或在 1 内的正确预测数 (Pos Within1)。负面情绪给出了相同的信息。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Pos Correct</th>
+<th>Pos Correct/ Total</th>
+<th>Neg Correct</th>
+<th>Neg Correct/ Total</th>
+<th>Pos Within1</th>
+<th>Pos Within1/ Total</th>
+<th>Neg Within1</th>
+<th>Neg Within1/ Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>653</td>
+<td>0.627281</td>
+<td>754</td>
+<td>0.724304</td>
+<td>1008</td>
+<td>0.9683</td>
+<td>991</td>
+<td>0.951969</td>
+</tr>
+</tbody>
+</table>
+<p>Here is another extract of the first two rows of the key results. It gives the correlation between the positive sentiment predictions and the human coded values for positive sentiment (Pos Corr) and the Mean Percentage Error (PosMPEnoDiv). The same information is given for negative sentiment.</p>
+<blockquote>
+<p>这是关键结果前两行的另一个摘录。它给出了积极情绪预测与积极情绪的人类编码值 (Pos Corr) 和平均百分比误差 (PosMPEnoDiv) 之间的相关性。负面情绪给出了相同的信息。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Pos Corr</th>
+<th>NegCorr</th>
+<th>PosMPE</th>
+<th>NegMPE</th>
+<th>PosMPEnoDiv</th>
+<th>NegMPEnoDiv</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.638382</td>
+<td>0.61354</td>
+<td>Ignore this</td>
+<td>Ignore this</td>
+<td>0.405379</td>
+<td>0.32853</td>
+</tr>
+</tbody>
+</table>
+<p>If you specified 30 iterations then there will be 31 rows, one for the header and 1 for each iteration. Take the average of the rows as the value to use.</p>
+<blockquote>
+<p>如果您指定了 30 次迭代，那么将有 31 行，一行用于标题，一行用于每次迭代。取行的平均值作为要使用的值。</p>
+</blockquote>
+<p>[^1]: THELWALL M, BUCKLEY K, PALTOGLOU G, et al. Sentiment strength detection in short informal text[J]. Journal of the American society for information science and technology, 2010, 61(12) : 2544 – 2558.
+[^2]: <a target="_blank" rel="noopener" href="http://sentistrength.wlv.ac.uk">http://sentistrength.wlv.ac.uk</a>
+[^3]: <a target="_blank" rel="noopener" href="https://myspace.com/">https://myspace.com/</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/51565/" rel="prev" title="软件详细设计-03-工厂模式">
+      <i class="fa fa-chevron-left"></i> 软件详细设计-03-工厂模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/24409/" rel="next" title="赵家祥-“否定的否定”在事物发展全过程中的核心地位">
+      赵家祥-“否定的否定”在事物发展全过程中的核心地位 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduce"><span class="nav-number">1.</span> <span class="nav-text">Introduce</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Core-Function"><span class="nav-number">2.</span> <span class="nav-text">Core Function</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-1-Assigning-Sentiment-Scores-for-Words"><span class="nav-number">2.1.</span> <span class="nav-text">UC-1 Assigning Sentiment Scores for Words</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-2-Assigning-Sentiment-Scores-for-Phrases"><span class="nav-number">2.2.</span> <span class="nav-text">UC-2 Assigning Sentiment Scores for Phrases</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-3-Spelling-Correction"><span class="nav-number">2.3.</span> <span class="nav-text">UC-3 Spelling Correction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-4-Booster-Word-Rule"><span class="nav-number">2.4.</span> <span class="nav-text">UC-4 Booster Word Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-5-Negating-Word-Rule"><span class="nav-number">2.5.</span> <span class="nav-text">UC-5 Negating Word Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-6-Repeated-Letter-Rule"><span class="nav-number">2.6.</span> <span class="nav-text">UC-6 Repeated Letter Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-7-Emoji-Rule"><span class="nav-number">2.7.</span> <span class="nav-text">UC-7 Emoji Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-8-Exclamation-Mark-Rule"><span class="nav-number">2.8.</span> <span class="nav-text">UC-8 Exclamation Mark Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-9-Repeated-Punctuation-Rule"><span class="nav-number">2.9.</span> <span class="nav-text">UC-9 Repeated Punctuation Rule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-10-Negative-Sentiment-Ignored-in-Questions"><span class="nav-number">2.10.</span> <span class="nav-text">UC-10 Negative Sentiment Ignored in Questions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Other-Functions"><span class="nav-number">3.</span> <span class="nav-text">Other Functions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Complete-Different-Classification-Tasks-6"><span class="nav-number">3.1.</span> <span class="nav-text">Complete Different Classification Tasks (6)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-11-Classify-a-single-text"><span class="nav-number">3.1.1.</span> <span class="nav-text">UC-11 Classify a single text</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-12-Classify-all-lines-of-text-in-a-file-for-sentiment-includes-accuracy-evaluations"><span class="nav-number">3.1.2.</span> <span class="nav-text">UC-12 Classify all lines of text in a file for sentiment [includes accuracy evaluations]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-13-Classify-texts-in-a-column-within-a-file-or-folder"><span class="nav-number">3.1.3.</span> <span class="nav-text">UC-13 Classify texts in a column within a file or folder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-14-Listen-at-a-port-for-texts-to-classify"><span class="nav-number">3.1.4.</span> <span class="nav-text">UC-14 Listen at a port for texts to classify</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-15-Run-interactively-from-the-command-line"><span class="nav-number">3.1.5.</span> <span class="nav-text">UC-15 Run interactively from the command line</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-16-Process-stdin-and-send-to-stdout"><span class="nav-number">3.1.6.</span> <span class="nav-text">UC-16 Process stdin and send to stdout</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Set-Location-of-Data-4"><span class="nav-number">3.2.</span> <span class="nav-text">Set Location of Data (4)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-17-Location-of-linguistic-data-folder"><span class="nav-number">3.2.1.</span> <span class="nav-text">UC-17 Location of linguistic data folder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-18-Location-of-sentiment-term-weights"><span class="nav-number">3.2.2.</span> <span class="nav-text">UC-18 Location of sentiment term weights</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-19-Location-of-output-folder"><span class="nav-number">3.2.3.</span> <span class="nav-text">UC-19 Location of output folder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-20-File-name-extension-for-output"><span class="nav-number">3.2.4.</span> <span class="nav-text">UC-20 File name extension for output</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Set-Different-Type-of-Output-4"><span class="nav-number">3.3.</span> <span class="nav-text">Set Different Type of Output (4)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-21-Classify-positive-1-to-5-and-negative-1-to-5-sentiment-strength-separately"><span class="nav-number">3.3.1.</span> <span class="nav-text">UC-21 Classify positive (1 to 5) and negative (-1 to -5) sentiment strength separately</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-22-Use-trinary-classification-positive-negative-neutral"><span class="nav-number">3.3.2.</span> <span class="nav-text">UC-22 Use trinary classification (positive-negative-neutral)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-23-Use-binary-classification-positive-negative"><span class="nav-number">3.3.3.</span> <span class="nav-text">UC-23 Use binary classification (positive-negative)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-24-Use-a-single-positive-negative-scale-classification"><span class="nav-number">3.3.4.</span> <span class="nav-text">UC-24 Use a single positive-negative scale classification</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-25-Explain-the-classification"><span class="nav-number">3.4.</span> <span class="nav-text">UC-25 Explain the classification</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-26-Set-Classification-Algorithm-Parameters"><span class="nav-number">3.5.</span> <span class="nav-text">UC-26 Set Classification Algorithm Parameters</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Improving-the-accuracy-of-SentiStrength-2"><span class="nav-number">3.6.</span> <span class="nav-text">Improving the accuracy of SentiStrength(2)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Basic-manual-improvements"><span class="nav-number">3.6.1.</span> <span class="nav-text">Basic manual improvements</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-27-Optimise-sentiment-strengths-of-existing-sentiment-terms"><span class="nav-number">3.6.2.</span> <span class="nav-text">UC-27 Optimise sentiment strengths of existing sentiment terms</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UC-28-Suggest-new-sentiment-terms-from-terms-in-misclassified-texts"><span class="nav-number">3.6.3.</span> <span class="nav-text">UC-28 Suggest new sentiment terms (from terms in misclassified texts)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UC-29-Machine-learning-evaluations"><span class="nav-number">3.7.</span> <span class="nav-text">UC-29 Machine learning evaluations</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Evaluation-options"><span class="nav-number">3.7.1.</span> <span class="nav-text">Evaluation options</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

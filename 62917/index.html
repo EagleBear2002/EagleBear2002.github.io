@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="表驱动法  表驱动法是一种编程模式（scheme）：从表里面查找信息而不使用逻辑语句（if 和 case） 表驱动法适用于复杂的逻辑 表驱动法的另一个好处是可以将复杂逻辑从代码中独立出来，以便于单独维护  表驱动示例  Java 示例：使用复杂的逻辑对字符分类  123456789101112if (((&#x27;a&#x27; &lt;&#x3D; inputChar) &amp;&amp; (inpu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件详细设计-10-表驱动">
+<meta property="og:url" content="https://eaglebear2002.github.io/62917/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="表驱动法  表驱动法是一种编程模式（scheme）：从表里面查找信息而不使用逻辑语句（if 和 case） 表驱动法适用于复杂的逻辑 表驱动法的另一个好处是可以将复杂逻辑从代码中独立出来，以便于单独维护  表驱动示例  Java 示例：使用复杂的逻辑对字符分类  123456789101112if (((&#x27;a&#x27; &lt;&#x3D; inputChar) &amp;&amp; (inpu">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/1-1686484597817-1102.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611192942719.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/3-1686484597817-1103.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/4-1686484597817-1104.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611193049331.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611193113719.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/6-1686484597818-1105.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611193211263.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611200758899.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611200904216.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62917/image-20230611200912358.png">
+<meta property="article:published_time" content="2023-06-09T03:03:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.700Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/62917/1-1686484597817-1102.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/62917/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件详细设计-10-表驱动 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/62917/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件详细设计-10-表驱动
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-09 11:03:00" itemprop="dateCreated datePublished" datetime="2023-06-09T11:03:00+08:00">2023-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="表驱动法">表驱动法</h2>
+<ol>
+<li>表驱动法是一种编程模式（scheme）：从表里面查找信息而不使用逻辑语句（if 和 case）</li>
+<li>表驱动法适用于复杂的逻辑</li>
+<li>表驱动法的另一个好处是可以将复杂逻辑从代码中独立出来，以便于单独维护</li>
+</ol>
+<h3 id="表驱动示例">表驱动示例</h3>
+<ol>
+<li>Java 示例：使用复杂的逻辑对字符分类</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (((<span class="hljs-string">&#x27;a&#x27;</span> &lt;= inputChar) &amp;&amp; (inputChar &lt;= <span class="hljs-string">&#x27;z&#x27;</span>)) ||<br>        ((<span class="hljs-string">&#x27;A&#x27;</span> &lt;= inputChar) &amp;&amp; (inputChar &lt;= <span class="hljs-string">&#x27;Z&#x27;</span>))) &#123;<br>    charType = CharacterType.Letter;<br>&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ((inputChar == <span class="hljs-string">&#x27; &#x27;</span>) || (inputChar == <span class="hljs-string">&#x27;,&#x27;</span>) ||<br>        (inputChar == <span class="hljs-string">&#x27;.&#x27;</span>) || (inputChar == <span class="hljs-string">&#x27;!&#x27;</span>) ||<br>        (inputChar == <span class="hljs-string">&#x27;(&#x27;</span>) || (inputChar == <span class="hljs-string">&#x27;)&#x27;</span>) ||<br>        (inputChar == <span class="hljs-string">&#x27;:&#x27;</span>) || (inputChar == <span class="hljs-string">&#x27;;&#x27;</span>) ||<br>        (inputChar == <span class="hljs-string">&#x27;?&#x27;</span>) || (inputChar == <span class="hljs-string">&#x27;-&#x27;</span>)) &#123;<br>    charType = CharacterType.Punctuation;<br>&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ((<span class="hljs-string">&#x27;0&#x27;</span> &lt;= inputChar) &amp;&amp; (inputChar &lt;= <span class="hljs-string">&#x27;9&#x27;</span>)) &#123;<br>    charType = CharacterType.Digit;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>构造一个查询表：把每一个字符的类型保存在一个字符编码访问的数组</li>
+<li>Java 示例：使用查询表对字符分类 <code>chartype = charTypeTable[inputChar];</code></li>
+</ol>
+<h3 id="使用表驱动法的两个问题">使用表驱动法的两个问题</h3>
+<ol>
+<li>在表里存放什么信息：主要存放的是数据，但在一些特殊情况下也存放动作</li>
+<li>如何快速从表中查询条目
+<ol>
+<li>直接访问（Direct access）</li>
+<li>索引访问（Indexed access）</li>
+<li>阶梯访问（Stair-step access）：连续性条件方法</li>
+</ol>
+</li>
+</ol>
+<h3 id="直接访问表">直接访问表</h3>
+<ol>
+<li>所谓“直接访问”是指通过索引值（如下标）可以直接从表中找到对应的条目</li>
+</ol>
+<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs vb"><span class="hljs-comment">&#x27;VB示例：确定各月天数的笨拙做法</span><br><span class="hljs-keyword">If</span> (month = <span class="hljs-number">1</span>) <span class="hljs-keyword">Then</span><br>  days = <span class="hljs-number">31</span><br><span class="hljs-keyword">ElseIf</span> (month = <span class="hljs-number">2</span>) <span class="hljs-keyword">Then</span><br>  days = <span class="hljs-number">28</span><br><span class="hljs-keyword">ElseIf</span> (month = <span class="hljs-number">3</span>) <span class="hljs-keyword">Then</span><br>  days = <span class="hljs-number">31</span><br>...<br><span class="hljs-keyword">ElseIf</span> (month = <span class="hljs-number">11</span>) <span class="hljs-keyword">Then</span><br>  days = <span class="hljs-number">30</span><br><span class="hljs-keyword">ElseIf</span> (month = <span class="hljs-number">12</span>) <span class="hljs-keyword">Then</span><br>  days = <span class="hljs-number">31</span><br><span class="hljs-keyword">End</span> <span class="hljs-keyword">If</span><br><br><span class="hljs-comment">&#x27; 你需要首先创建出这张表用来存放各个月份的天数</span><br><span class="hljs-comment">&#x27; VB示例：确定各月天数的优雅做法</span><br><span class="hljs-keyword">Dim</span> daysPerMonth() <span class="hljs-keyword">As</span> <span class="hljs-type">Integer</span> = _<br>&#123;<span class="hljs-number">31</span>, <span class="hljs-number">28</span>, <span class="hljs-number">31</span>, <span class="hljs-number">30</span>, <span class="hljs-number">31</span>, <span class="hljs-number">30</span>, <span class="hljs-number">31</span>, <span class="hljs-number">31</span>, <span class="hljs-number">30</span>, <span class="hljs-number">31</span>, <span class="hljs-number">30</span>, <span class="hljs-number">31</span>&#125;<br>days = daysPerMonth(month-<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+<h4 id="例子：灵活的消息格式">例子：灵活的消息格式</h4>
+<p>假设你编写一个子程序，打印存储在一份文件中的消息：</p>
+<ol>
+<li>通常该文件中会存储大约 500 条消息，而每份文件中会存有大约 20 种不同的消息。这些消息源自于一些浮标（Buoy），提供有关水温、浮标位置等信息。</li>
+<li>每一条消息都有若干字段，并且每条消息都有一个消息头，其中有一个 ID ，告诉你该消息属于这 20 多种消息中的哪一种。</li>
+<li>这些消息的格式并不是固定不变的消息的存储方式消息头（ID 确定了该消息所属的类型）</li>
+</ol>
+<h5 id="消息的存储方式">消息的存储方式</h5>
+<p><img src="/62917/1-1686484597817-1102.png" alt></p>
+<h5 id="消息的格式细节">消息的格式细节</h5>
+<p><img src="/62917/image-20230611192942719.png" alt></p>
+<h5 id="基于逻辑的方法">基于逻辑的方法</h5>
+<p>读取每一条消息，检查其 ID，然后调用一个用来阅读、解释以 及打印一种消息的子程序</p>
+<ol>
+<li>消息阅读子程序包含一个循环，用来读入消息、解释其 ID，以及根据该 ID 调用 20 个子程序中的某一个</li>
+<li>如果你有 20 种消息，那么就要有 20 个子程序</li>
+<li>每次有任何一种消息的格式变了，你就不得不修改负责
+处理该消息的子程序或者类的逻辑</li>
+</ol>
+<h5 id="基于逻辑方法所用的伪代码">基于逻辑方法所用的伪代码</h5>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">While more messages to read<br>  Read a message header<br>  Decode the message ID from the message header<br>  If the message header is type 1 then<br>    Print a type 1 message<br>  Else if the message header is type 2 then<br>    Print a type 2 message<br>  ...<br>  Else if the message header is type 19 then<br>    Print a type 19 message<br>  Else if the message header is type 20 then<br>    Print a type 20 message<br></code></pre></td></tr></table></figure>
+<p>如何修改？将动作存储到表中可以将子程序入口地址存储，类似的有多态的实现</p>
+<h5 id="画向对象的方法">画向对象的方法</h5>
+<ol>
+<li>但是基本结构还是同样复杂</li>
+<li>问题的逻辑可以隐藏在对象继承结构里</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">While more messages to read<br>  Read a message header<br>  Decode the message ID from the message header<br>  If the message header is type 1 then<br>    Instantiate a type 1 message object<br>  Else if the message header is type 2 then<br>    Instantiate a type 2 message object<br>  ...<br>  Else if the message header is type 19 then<br>    Instantiate a type 19 message object<br>  Else if the message header is type 20 then<br>    Instantiate a type 20 message object<br>  End if<br>  End While<br></code></pre></td></tr></table></figure>
+<h5 id="读取和打印浮标温度消息子程序">读取和打印浮标温度消息子程序</h5>
+<p><img src="/62917/3-1686484597817-1103.png" alt></p>
+<h4 id="表驱动法-2">表驱动法</h4>
+<ol>
+<li>消息阅读子程序由一个循环组成，该循环负责读入每一个消息头，对其 ID 解码，在 Message 数组中查询其消息描述，然后每次都调用同一个子程序来解释该消息</li>
+<li>只需要用一张表来描述每种消息的格式，而不用再把它们硬编码进程序逻辑里</li>
+</ol>
+<h4 id="定义所有可能的字段类型">定义所有可能的字段类型</h4>
+<p>在定义消息表项之前先定义消息中可能出现的所有字段类型</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// C++ 示例：定义消息数据类型</span><br><span class="hljs-keyword">enum</span> <span class="hljs-title class_">FieldType</span> &#123;<br>    FieldType_FloatingPoint,<br>    FieldType_Integer,<br>    FieldType_String,<br>    FieldType_TimeOfDay,<br>    FieldType_Boolean,<br>    FieldType_BitField,<br>    FieldType_Last = FieldType_BitField<br>&#125;;<br></code></pre></td></tr></table></figure>
+<h4 id="消息的表记录-浮标温度消息">消息的表记录-浮标温度消息</h4>
+<p><img src="/62917/4-1686484597817-1104.png" alt></p>
+<h4 id="表驱动法代码">表驱动法代码</h4>
+<p>表驱动法中最上层循环的伪代码：这部分的代码与前面的方法差别不大</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">While more messages to read<br>  Read a message header<br>  Decode the message ID from the message header<br>  Look up the message description in the message-description table<br>  Read the message fields and print them based on the message<br>description<br>End While<br></code></pre></td></tr></table></figure>
+<h4 id="消息打印子程序">消息打印子程序</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">While more fields to print<br>Get the field type from the message description<br>  case ( field type )<br>    of ( floating point )<br>      read a floating-point value<br>      print the field label<br>      print the floating-point value<br>    of ( integer )<br>      read an integer value<br>      print the field label<br>      print the integer value<br>    of ( character string )<br>      read a character string<br>      print the field label<br>      print the character string<br>    ...<br>  End Case<br>End While<br></code></pre></td></tr></table></figure>
+<p>用一个打印子程序取代了 19 种消息的打印子程序。</p>
+<h3 id="索引访问表">索引访问表</h3>
+<ol>
+<li>当无法直接从表中查询需要的条目时，就需要借助其他办法先获取表键值</li>
+<li>索引访问的方法：就是先用一个基本类型的数据从一张索引表中查出一个键值，然后再用这一键值查出你感兴趣的主数据</li>
+<li>索引表是一种间接访问的技术</li>
+</ol>
+<h4 id="示例">示例</h4>
+<ol>
+<li>假设你经营着一家商店，有大约 100 种商品。再假设每种商品都有一个 4 位数字的物品编号， 其范围是 0000 到 9999
+<ol>
+<li>如果你想用这个编号作为键值直接查询一张描述商品信息的表，那么就要生成一个具有 10000 条记录的访问表</li>
+</ol>
+</li>
+<li>利用索引表：
+<ol>
+<li>如果用这个编号作为键值直接查询一张描述商品信息的表，那么就生成一个具有 10000 条记录的索引数组（从 0 到 9999）</li>
+<li>该数组中除了与你商店中的货物的标志相对应的 100 条记录以外，其余记录都是空的索引</li>
+</ol>
+</li>
+</ol>
+<img src="/62917/image-20230611193049331.png" style="zoom: 50%;">
+<h4 id="索引访问技术的主要优点：">索引访问技术的主要优点：</h4>
+<ol>
+<li>如果主查询表中的每一条记录都很大，那么索引数组就可以节省很多空间
+<ol>
+<li>一般而言索引表中的每条记录需要占用 2-4 字节</li>
+</ol>
+</li>
+<li>即使你用了索引以后没有节省内存空间，操作位于索引中的记录有时也要比操作位于主表中的记录更方便更廉价</li>
+<li>编写到表里面的数据比嵌入代码中的数据更容易维护</li>
+</ol>
+<h3 id="阶梯访问表">阶梯访问表</h3>
+<ol>
+<li>阶梯访问方法不像索引结构那样直接， 但是它要比索引访问方法节省空间</li>
+<li>阶梯结构的基本想法：通过确定每项命中的阶梯层次确定其归类</li>
+</ol>
+<img src="/62917/image-20230611193113719.png" style="zoom:50%;">
+<ol start="3">
+<li>如果你正在开发一个等级评定的应用程序，按照如下等级区间对分数定级
+<ol>
+<li>你不能用简单的数据转换函数来把表键值转换为 A 至 F 字母所代表的等级</li>
+<li>用索引也不合适，因为这里用的是浮点数</li>
+</ol>
+</li>
+</ol>
+<img src="/62917/6-1686484597818-1105.png" style="zoom:50%;">
+<h4 id="使用阶梯方法">使用阶梯方法</h4>
+<ol>
+<li>把每一区间的上限写入一张表里， 然后写一个循环，按照各区间的上限来检查分数
+<ol>
+<li>当分数第一次超过某个区间的上限时， 你就知道相应的等级了</li>
+<li>区间表：<code>{ 50.0, 65.0, 75.0, 90.0, 100.0 }</code></li>
+</ol>
+</li>
+<li>Visual Basic 示例：阶梯表查询</li>
+</ol>
+<figure class="highlight vb"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs vb"><span class="hljs-comment">&#x27; set up data for grading table</span><br><span class="hljs-keyword">Dim</span> rangeLimit() <span class="hljs-keyword">As</span> <span class="hljs-type">Double</span> = &#123; <span class="hljs-number">50.0</span>, <span class="hljs-number">65.0</span>, <span class="hljs-number">75.0</span>, <span class="hljs-number">90.0</span>, <span class="hljs-number">100.0</span> &#125;<br><span class="hljs-keyword">Dim</span> grade() <span class="hljs-keyword">As</span> <span class="hljs-type">String</span> = &#123; <span class="hljs-string">&quot;F&quot;</span>, <span class="hljs-string">&quot;D&quot;</span>, <span class="hljs-string">&quot;C&quot;</span>, <span class="hljs-string">&quot;B&quot;</span>, <span class="hljs-string">&quot;A&quot;</span> &#125;<br>maxGradeLevel = grade.Length - <span class="hljs-number">1</span><br>...<br><span class="hljs-comment">&#x27; assign a grade to a student based on the student&#x27;s score</span><br>gradeLevel = <span class="hljs-number">0</span><br>studentGrade = <span class="hljs-string">&quot;A&quot;</span><br><span class="hljs-keyword">While</span> ( gradeLevel &lt; maxGradeLevel )<br>  <span class="hljs-keyword">If</span> ( studentScore &lt; rangeLimit( gradeLevel ) ) <span class="hljs-keyword">Then</span><br>    studentGrade = grade( gradeLevel )<br>  <span class="hljs-keyword">End</span> <span class="hljs-keyword">If</span><br>  gradeLevel = gradeLevel + <span class="hljs-number">1</span><br>Wend<br></code></pre></td></tr></table></figure>
+<h4 id="注意事项">注意事项</h4>
+<ol>
+<li>注意端点</li>
+<li>二分查找取代顺序查找</li>
+</ol>
+<h2 id="示例：CDF">示例：CDF</h2>
+<img src="/62917/image-20230611193211263.png" style="zoom:33%;">
+<h3 id="改进：别名方法">改进：别名方法</h3>
+<img src="/62917/image-20230611200758899.png" style="zoom:50%;">
+<img src="/62917/image-20230611200904216.png" style="zoom:50%;">
+<img src="/62917/image-20230611200912358.png" style="zoom:50%;">
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/18541/" rel="prev" title="软件架构设计-07-Microservice Architecture">
+      <i class="fa fa-chevron-left"></i> 软件架构设计-07-Microservice Architecture
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/51953/" rel="next" title="软件架构设计-08-复习">
+      软件架构设计-08-复习 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E9%A9%B1%E5%8A%A8%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">表驱动法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E9%A9%B1%E5%8A%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.</span> <span class="nav-text">表驱动示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%A1%A8%E9%A9%B1%E5%8A%A8%E6%B3%95%E7%9A%84%E4%B8%A4%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">使用表驱动法的两个问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E8%AE%BF%E9%97%AE%E8%A1%A8"><span class="nav-number">1.3.</span> <span class="nav-text">直接访问表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A%E7%81%B5%E6%B4%BB%E7%9A%84%E6%B6%88%E6%81%AF%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.3.1.</span> <span class="nav-text">例子：灵活的消息格式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%9A%84%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">消息的存储方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%9A%84%E6%A0%BC%E5%BC%8F%E7%BB%86%E8%8A%82"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">消息的格式细节</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%80%BB%E8%BE%91%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">基于逻辑的方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%80%BB%E8%BE%91%E6%96%B9%E6%B3%95%E6%89%80%E7%94%A8%E7%9A%84%E4%BC%AA%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">基于逻辑方法所用的伪代码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%BB%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">画向对象的方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E5%92%8C%E6%89%93%E5%8D%B0%E6%B5%AE%E6%A0%87%E6%B8%A9%E5%BA%A6%E6%B6%88%E6%81%AF%E5%AD%90%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.3.1.6.</span> <span class="nav-text">读取和打印浮标温度消息子程序</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E9%A9%B1%E5%8A%A8%E6%B3%95-2"><span class="nav-number">1.3.2.</span> <span class="nav-text">表驱动法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%89%80%E6%9C%89%E5%8F%AF%E8%83%BD%E7%9A%84%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.3.</span> <span class="nav-text">定义所有可能的字段类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%9A%84%E8%A1%A8%E8%AE%B0%E5%BD%95-%E6%B5%AE%E6%A0%87%E6%B8%A9%E5%BA%A6%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.4.</span> <span class="nav-text">消息的表记录-浮标温度消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E9%A9%B1%E5%8A%A8%E6%B3%95%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.5.</span> <span class="nav-text">表驱动法代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%89%93%E5%8D%B0%E5%AD%90%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.3.6.</span> <span class="nav-text">消息打印子程序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E8%AE%BF%E9%97%AE%E8%A1%A8"><span class="nav-number">1.4.</span> <span class="nav-text">索引访问表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.1.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E8%AE%BF%E9%97%AE%E6%8A%80%E6%9C%AF%E7%9A%84%E4%B8%BB%E8%A6%81%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="nav-number">1.4.2.</span> <span class="nav-text">索引访问技术的主要优点：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%A2%AF%E8%AE%BF%E9%97%AE%E8%A1%A8"><span class="nav-number">1.5.</span> <span class="nav-text">阶梯访问表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%98%B6%E6%A2%AF%E6%96%B9%E6%B3%95"><span class="nav-number">1.5.1.</span> <span class="nav-text">使用阶梯方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">1.5.2.</span> <span class="nav-text">注意事项</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9ACDF"><span class="nav-number">2.</span> <span class="nav-text">示例：CDF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B%EF%BC%9A%E5%88%AB%E5%90%8D%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">改进：别名方法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

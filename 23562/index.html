@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Document Architecture Why to document software architecture?  这是记录软件架构的几个很好的理由，例如：There are several good reasons for documenting software architecture such as:  交流和社交化架构设计决策 Communicating and socialis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构设计-05-Document">
+<meta property="og:url" content="https://eaglebear2002.github.io/23562/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="Document Architecture Why to document software architecture?  这是记录软件架构的几个很好的理由，例如：There are several good reasons for documenting software architecture such as:  交流和社交化架构设计决策 Communicating and socialis">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/8.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/13.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/23562/14.png">
+<meta property="article:published_time" content="2023-05-31T08:43:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.670Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/23562/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/23562/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构设计-05-Document | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/23562/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构设计-05-Document
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-31 16:43:00" itemprop="dateCreated datePublished" datetime="2023-05-31T16:43:00+08:00">2023-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Document-Architecture">Document Architecture</h2>
+<h3 id="Why-to-document-software-architecture">Why to document software architecture?</h3>
+<ol>
+<li>这是记录软件架构的几个很好的理由，例如：There are several good reasons for documenting software architecture such as:
+<ol>
+<li>交流和社交化架构设计决策 Communicating and socialising architecture design decisions</li>
+<li>帮助理解和评估架构设计决策 Helping understand and assess architecture design decisions</li>
+<li>刷新设计师对某些决策的记忆 Refreshing designers' memories about certain decisions</li>
+<li>培训架构设计人员 Training people in designing architecture</li>
+<li>支持地理位置分散的团队 Supporting geographically ditributed teams</li>
+</ol>
+</li>
+<li>体系结构文档用于以下活动：Architecture documentation is used for several activities:
+<ol>
+<li>架构设计分析 Architecture design analysis.</li>
+<li>工作分解和分配 Work breakdown and assignment.</li>
+<li>部署后维护 Post-deployment maintenance.</li>
+</ol>
+</li>
+<li>软件体系结构文档提供了维护和修改决策的框架 Software architecture documentation provides a framework for maintenance and modification decisions.</li>
+</ol>
+<h3 id="Challenges-in-documenting-architecture">Challenges in documenting architecture</h3>
+<ol>
+<li>没有普遍接受的记录软件架构的标准或方法。No universally accepted standard or method of documenting software architecture.</li>
+<li>记录大型系统的架构可能是一项耗时且重要的任务。 Documenting architecture of large-scale system can be time consuming and non-trivial task.</li>
+<li>对用于记录架构的视图的数量和性质没有达成共识 - 资源密集型活动。No consensus on the number and nature of views used to document architecture-resource intensive activity.</li>
+<li>迫在眉睫的最后期限和不断发展的架构性质不利于架构文档的流通。Looming deadlines and evolving nature of architecture are detrimental to the currency of architecture documentation.</li>
+<li>缺乏全面的符号和工具。Absence of a comprehensive notation and tooling.</li>
+</ol>
+<h3 id="What-to-document">What to document?</h3>
+<ol>
+<li>许多值得记录的事情，例如：Many things worth of documenting such as:
+<ol>
+<li>组件接口和依赖项 Component interfaces and dependencies</li>
+<li>子系统约束 Subsystems constraints</li>
+<li>测试场景 Test scenarios</li>
+<li>围绕设计决策的上下文信息 Contextual information surrounding design decisions</li>
+</ol>
+</li>
+<li>有几个因素会影响对记录内容的决定 Several factors affect the decision of what to document:
+<ol>
+<li>被记录的架构的复杂性 Complexity of the architecture being documented</li>
+<li>应用程序的寿命 Longevity of an application</li>
+<li>基于涉众对文档的预期使用 Based on the expected use of documentation by stakeholders</li>
+</ol>
+</li>
+</ol>
+<h3 id="7-Rules-for-Architecture-Documentation">7 Rules for Architecture Documentation</h3>
+<ol>
+<li>从读者的角度撰写文档 Write documentation from the reader's point of view</li>
+<li>避免没有意义的重复 Avoid unnecessary repetition.</li>
+<li>避免模糊性 Avoid ambiguity.</li>
+<li>使用标准的文档组织方式 Use a standard organization.</li>
+<li>记录理由 Record rationale.</li>
+<li>保持文档最新但不要太最新 Keep documentation current but not too current</li>
+<li>审查文件是否适合用途 Review documentation for fitness of purpose</li>
+</ol>
+<h2 id="Views">Views</h2>
+<h3 id="Styles-and-Views">Styles and Views</h3>
+<h4 id="Three-Categories-of-Styles">Three Categories of Styles</h4>
+<table>
+<thead>
+<tr>
+<th>Views</th>
+<th>描述</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Module Views</td>
+<td>它是如何构建为一组实现单元的？How it is structured as a set of implementation units?</td>
+<td>分解视图、使用视图、泛化视图、分层视图、领域视图、数据模型视图</td>
+</tr>
+<tr>
+<td>Component-connector(C&amp;C) styles</td>
+<td>它是如何构建为一组具有运行时行为和交互的元素的？How it is structured as a set of elements that have runtime behavior and interactions?</td>
+<td>管道-过滤器视图、客户端-服务器视图、点对点视图、面向服务视图、发布-订阅视图</td>
+</tr>
+<tr>
+<td>Allocation style</td>
+<td>它与环境中的非软件结构有何关系？How it relates to non-software structures in its environment?</td>
+<td>部署视图、安装视图、工作分配视图、其他分配视图</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Styles-vs-Patterns">Styles vs. Patterns</h4>
+<ol>
+<li>架构风格是元素和关系类型的特殊化，以及关于如何使用它们的一组约束 An architecture style is a&quot;specialization of element and relation types, together with a set of constraints on how they can be used&quot; (Bass, Clements, and Kazman 2003)</li>
+<li>架构模式表达了软件系统的基本结构组织模式 An architecture pattern&quot;expresses a fundamental structural organization schema for software systems&quot;(Buschmann et al. 1996)</li>
+<li>架构模式的一个重要部分是关注问题和上下文，以及如何在该上下文中解决问题。An essential part of an architecture pattern is its focus on the problem and context as well as how to solve the problem in that context.</li>
+<li>架构风格侧重于架构方法，对特定风格何时有用或无用提供更轻量级的指导。An architecture style focuses on the architecture approach, with more lightweight guidance on when a particular style may or may not be useful.</li>
+<li>架构模式：{问题，上下文} --&gt; 架构方法 Architecture pattern: {problem, context} --&gt; architecture approach</li>
+<li>架构风格：架构方式 Architecture style: architecture approach</li>
+<li>风格描述通常不包括详细的问题/上下文信息；架构模式可以。A style description does not generally include detailed problem/context information; architecture patterns do.</li>
+<li>微服务知识定义了 element，和 element 通过什么方式进行交互。</li>
+</ol>
+<h4 id="Architectural-Views">Architectural Views</h4>
+<ol>
+<li>视图是一组系统元素和它们之间关系的表示——不是所有的系统元素，而是特定类型的那些元素 A view is a representation of a set of system elements and relations among them - not all system elements, but those of a particular type.</li>
+<li>视图让我们将系统的实体划分为有趣且易于管理的系统表示 Views let us divide the system's entity into interesting and manageable representations of the system.</li>
+<li>不同的视图支持不同的目标和用户，突出不同的系统元素和关系 Different views support different goals and users, and highlight different system elements and relations</li>
+<li>不同的视图在不同程度上暴露了不同的质量属性。 Different views expose different quality attributes to different degrees.</li>
+</ol>
+<h3 id="Structural-Views">Structural Views</h3>
+<h4 id="Module-Views">Module Views</h4>
+<p>模块是提供一组连贯职责的实现单元 A module is an implementation unit that provides a coherent set of responsibility.</p>
+<p>没有至少一个模块视图，任何软件架构的文档都不可能是完整的 It is unlikely that the documentation of any software architecture can be complete without at least one module view.</p>
+<h5 id="视图示例">视图示例</h5>
+<ol>
+<li>分解视图 Decomposition view</li>
+<li>使用视图 Uses view</li>
+<li>泛化视图 Generalization view</li>
+<li>分层视图 Layered view</li>
+<li>领域视图 Aspects View</li>
+<li>数据模型视图 Data model view</li>
+</ol>
+<h5 id="Summary-of-Module-Views">Summary of Module Views</h5>
+<img src="/23562/1.png" style="zoom: 50%;">
+<h4 id="Component-Connector-Views">Component-Connector Views</h4>
+<p>组件和连接器视图显示具有某些运行时存在的元素，例如进程、对象、客户端、服务器和数据存储（称为“组件”）。 Component-and-connector views show elements that have some runtime presence, e.g, processes, objects, clients, servers, and data stores (being termed 'components).</p>
+<p>附件指示哪些连接器连接到哪些组件 Attachments indicate which connectors are attached to which components.</p>
+<p>通过将连接器的端点连接到组件的端口来显示附件。 Attachment is shown by connecting the endpoints of the connector to the ports of components.</p>
+<h5 id="视图示例-2">视图示例</h5>
+<ol>
+<li>管道和过滤器视图 Pipe-and-filter view</li>
+<li>客户端-服务器视图 Client-server view</li>
+<li>点对点视图 Peer-to-peer view</li>
+<li>面向服务的架构 (SOA) 视图 Service-oriented architecture (SOA) view</li>
+<li>发布订阅视图 Publish-subscribe view</li>
+<li>共享数据视图 Shared-data view</li>
+<li>多层视图 Multi-tier view</li>
+</ol>
+<h5 id="Summary-of-C-C-Views">Summary of C&amp;C Views</h5>
+<img src="/23562/2.png" style="zoom: 50%;">
+<h4 id="Allocation-Views">Allocation Views</h4>
+<ol>
+<li>分配视图描述了软件单元到软件开发或执行环境元素的映射 Allocation views describe the mapping of software units to elements of an environment in which the software is developed or in which it executes.</li>
+<li>分配视图的通常目标是将软件元素所需的属性与环境元素提供的属性进行比较，以确定分配是否成功 The usual goal of an allocation view is to compare the properties required by the software element with the properties provided by the environmental elements to determine whether the allocation will be successful or not.</li>
+<li>分配视图可以描绘静态或动态视图 Allocation views can depict static or dynamic views</li>
+</ol>
+<h5 id="视图实例">视图实例</h5>
+<ol>
+<li>部署视图 Deployment view</li>
+<li>安装视图 Install view</li>
+<li>工作分配视图 Work assignment view</li>
+<li>其他分配视图 Other allocation views</li>
+</ol>
+<h5 id="Summary-of-Allocation-Views">Summary of Allocation Views</h5>
+<img src="/23562/3.png" style="zoom: 50%;">
+<img src="/23562/4.png" style="zoom:50%;">
+<h3 id="Quality-Views">Quality Views</h3>
+<ol>
+<li>安全视图 Security view</li>
+<li>性能视图 Performance view</li>
+<li>可靠性视图 Reliability view</li>
+<li>通信视图 Communication View</li>
+<li>异常（错误处理）视图 Exception(error-handling) view</li>
+</ol>
+<h3 id="Documenting-Views">Documenting Views</h3>
+<h4 id="3-Step-for-Choosing-Views">3-Step for Choosing Views</h4>
+<ol>
+<li>步骤 1：构建涉众/视图表 Step-1: Build a stakeholder/view table</li>
+<li>步骤 2：合并视图 Step-2: Combine views
+<ol>
+<li>2.1 识别上表中的边缘视图 2.1 Identify marginal views in the above table</li>
+<li>2.2 通过关联一个视图中的元素和另一个视图中的元素，将每个边缘视图与另一个具有更强选区的视图相结合 2.2 Combine each marginal views with another view with stronger constituency by associating between elements in one view and elements in the other</li>
+</ol>
+</li>
+<li>步骤 3：确定优先级和阶段 Step-3: Prioritize and stage
+<ol>
+<li>分解视图 decomposition view</li>
+<li>80/20 原则 80/20 principle</li>
+<li>按顺序完成所有视图？complete all views in sequence?</li>
+</ol>
+</li>
+</ol>
+<h4 id="Stakeholder-and-Documentation">Stakeholder and Documentation</h4>
+<img src="/23562/5.png" style="zoom: 80%;">
+<h4 id="Stackholder-View-Table">Stackholder-View Table</h4>
+<img src="/23562/6.png" style="zoom: 80%;">
+<p>上图中每一个格子是指涉众对某一个部分的细节了解程度。</p>
+<h4 id="Combining-Views">Combining Views</h4>
+<ol>
+<li>各种 C&amp;C 视图 Various C&amp;C view</li>
+<li>带有 SOA 或通信进程视图的部署视图 Deployment view with either SOA or communicating- process Views</li>
+<li>分解视图和任何工作分配、实施、使用或分层视图 Decomposition view and any of work assignment, implementation, uses, or layered views</li>
+</ol>
+<img src="/23562/7.png" style="zoom: 67%;">
+<ul>
+<li>使用一张视图说明整个系统的部署信息</li>
+</ul>
+<img src="/23562/8.png" style="zoom: 80%;">
+<ul>
+<li>描述了 component 之间的关系</li>
+</ul>
+<h4 id="View-Template">View Template</h4>
+<img src="/23562/9.png" style="zoom:50%;">
+<ol>
+<li>第 1 部分：主要介绍 Section-1: The Primary Presentation
+<ol>
+<li>显示视图的元素和关系 shows the elements and relations of the view</li>
+<li>通常带有一个键的图形 often graphical with a key</li>
+</ol>
+</li>
+<li>第 2 部分：元素目录 Section-2: The Element Catalog
+<ol>
+<li>详细介绍了第 1 节中描述的元素。details the elements depicted in Sect.1</li>
+<li>元素及其属性 Elements and their properties</li>
+<li>关系及其属性 Relations and their properties</li>
+<li>元素接口和行为 Element interfaces and behavior</li>
+</ol>
+</li>
+<li>第 3 部分：上下文图 Section-3: Context Diagram
+<ol>
+<li>系统或其部分如何与其环境相关 how the system or its portion relates to its envlronment</li>
+</ol>
+</li>
+<li>第 4 部分：可变性指南 Section-4: Variability Guide
+<ol>
+<li>如何在此视图中练习架构的任何变化点 how to exercise any variation points of the architecture in this view</li>
+</ol>
+</li>
+<li>第 5 节：基本原理 Section-5: Rationale
+<ol>
+<li>为什么设计反映在视图中 why the design reflected in the view</li>
+<li>提供了一个令人信服的论据，证明它是合理的。 provides a convincing argument that it is sound .</li>
+</ol>
+</li>
+</ol>
+<h3 id="Context-Diagram">Context Diagram</h3>
+<img src="/23562/10.png" style="zoom:67%;">
+<h2 id="Beyond-Information-Beyond-Views">Beyond (Information Beyond Views)</h2>
+<h3 id="Documentation-Beyond-Views">Documentation Beyond Views</h3>
+<img src="/23562/11.png" style="zoom: 50%;">
+<p>第 1 部分：文档路线图说明文档中的信息以及在哪里可以找到它 Section-1: Documentation Roadmap tells what in formation is in the documentation and where to find it</p>
+<ol>
+<li>范围和总结 Scope and summary</li>
+<li>文档的组织方式 How the documentation is organized
+<ol>
+<li>简短的概要 short synopsis</li>
+<li>带注释的目录 annotated table of contents</li>
+</ol>
+</li>
+<li>查看概览 View overview</li>
+<li>利益相关者如何使用文档 How stakeholders can use the documentation</li>
+</ol>
+<h3 id="Document-Control-information">Document Control information</h3>
+<img src="/23562/12.png" style="zoom:50%;">
+<h3 id="Mapping-between-Views">Mapping between Views</h3>
+<img src="/23562/13.png" style="zoom: 50%;">
+<h3 id="Documentation-Package">Documentation Package</h3>
+<img src="/23562/14.png" style="zoom:50%;">
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20764/" rel="prev" title="软件架构设计-04-Designing Architecture">
+      <i class="fa fa-chevron-left"></i> 软件架构设计-04-Designing Architecture
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/23894/" rel="next" title="Call Center Customer Care System">
+      Call Center Customer Care System <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Document-Architecture"><span class="nav-number">1.</span> <span class="nav-text">Document Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-to-document-software-architecture"><span class="nav-number">1.1.</span> <span class="nav-text">Why to document software architecture?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Challenges-in-documenting-architecture"><span class="nav-number">1.2.</span> <span class="nav-text">Challenges in documenting architecture</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#What-to-document"><span class="nav-number">1.3.</span> <span class="nav-text">What to document?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Rules-for-Architecture-Documentation"><span class="nav-number">1.4.</span> <span class="nav-text">7 Rules for Architecture Documentation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Views"><span class="nav-number">2.</span> <span class="nav-text">Views</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Styles-and-Views"><span class="nav-number">2.1.</span> <span class="nav-text">Styles and Views</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Three-Categories-of-Styles"><span class="nav-number">2.1.1.</span> <span class="nav-text">Three Categories of Styles</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Styles-vs-Patterns"><span class="nav-number">2.1.2.</span> <span class="nav-text">Styles vs. Patterns</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Architectural-Views"><span class="nav-number">2.1.3.</span> <span class="nav-text">Architectural Views</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Structural-Views"><span class="nav-number">2.2.</span> <span class="nav-text">Structural Views</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Module-Views"><span class="nav-number">2.2.1.</span> <span class="nav-text">Module Views</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">视图示例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Summary-of-Module-Views"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">Summary of Module Views</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Component-Connector-Views"><span class="nav-number">2.2.2.</span> <span class="nav-text">Component-Connector Views</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE%E7%A4%BA%E4%BE%8B-2"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">视图示例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Summary-of-C-C-Views"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">Summary of C&amp;C Views</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Allocation-Views"><span class="nav-number">2.2.3.</span> <span class="nav-text">Allocation Views</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE%E5%AE%9E%E4%BE%8B"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">视图实例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Summary-of-Allocation-Views"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">Summary of Allocation Views</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Quality-Views"><span class="nav-number">2.3.</span> <span class="nav-text">Quality Views</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Documenting-Views"><span class="nav-number">2.4.</span> <span class="nav-text">Documenting Views</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Step-for-Choosing-Views"><span class="nav-number">2.4.1.</span> <span class="nav-text">3-Step for Choosing Views</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stakeholder-and-Documentation"><span class="nav-number">2.4.2.</span> <span class="nav-text">Stakeholder and Documentation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stackholder-View-Table"><span class="nav-number">2.4.3.</span> <span class="nav-text">Stackholder-View Table</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Combining-Views"><span class="nav-number">2.4.4.</span> <span class="nav-text">Combining Views</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#View-Template"><span class="nav-number">2.4.5.</span> <span class="nav-text">View Template</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Context-Diagram"><span class="nav-number">2.5.</span> <span class="nav-text">Context Diagram</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Beyond-Information-Beyond-Views"><span class="nav-number">3.</span> <span class="nav-text">Beyond (Information Beyond Views)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Documentation-Beyond-Views"><span class="nav-number">3.1.</span> <span class="nav-text">Documentation Beyond Views</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Document-Control-information"><span class="nav-number">3.2.</span> <span class="nav-text">Document Control information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapping-between-Views"><span class="nav-number">3.3.</span> <span class="nav-text">Mapping between Views</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Documentation-Package"><span class="nav-number">3.4.</span> <span class="nav-text">Documentation Package</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

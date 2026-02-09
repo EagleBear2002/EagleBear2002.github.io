@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="背景 汽车上的刹车踏板和油门踏板相距很近，且刹车踏板要比油门踏板大很多：  经验告诉我们，可达到以最快的速度准确制动的目的 但是，依据的原理是什么呢？  设计学科通常借助模型生成新的想法并对其测试：如建筑学领域，有重量分布模型、空气环流模型、流体力学模型和光学模型等 交互设计领域：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="人机交互系统-11-交互模型与理论">
+<meta property="og:url" content="https://eaglebear2002.github.io/55876/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="背景 汽车上的刹车踏板和油门踏板相距很近，且刹车踏板要比油门踏板大很多：  经验告诉我们，可达到以最快的速度准确制动的目的 但是，依据的原理是什么呢？  设计学科通常借助模型生成新的想法并对其测试：如建筑学领域，有重量分布模型、空气环流模型、流体力学模型和光学模型等 交互设计领域：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223233058319.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223233326134.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223233536954.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223233822867.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223233826002.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223234509980.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223234517046.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55876/image-20231223234612613.png">
+<meta property="article:published_time" content="2023-12-20T15:26:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.647Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/55876/image-20231223233058319.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/55876/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>人机交互系统-11-交互模型与理论 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/55876/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          人机交互系统-11-交互模型与理论
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-12-20 23:26:00" itemprop="dateCreated datePublished" datetime="2023-12-20T23:26:00+08:00">2023-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Fall-%E4%BA%BA%E6%9C%BA%E4%BA%A4%E4%BA%92%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">2023Fall-人机交互系统</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景">背景</h2>
+<p>汽车上的刹车踏板和油门踏板相距很近，且刹车踏板要比油门踏板大很多：</p>
+<ol>
+<li>经验告诉我们，可达到以最快的速度准确制动的目的</li>
+<li>但是，依据的原理是什么呢？</li>
+</ol>
+<p>设计学科通常借助模型生成新的想法并对其测试：如建筑学领域，有重量分布模型、空气环流模型、流体力学模型和光学模型等</p>
+<p>交互设计领域：</p>
+<ol>
+<li>计算用户完成任务的时间：KLM</li>
+<li>描述交互过程中系统状态的变化：状态转移网</li>
+<li>探讨任务的执行方法等：GOMS</li>
+</ol>
+<h2 id="预测模型">预测模型</h2>
+<p>能够预测用户的执行情况，但不需要对用户做实际测试</p>
+<p>特别适合于无法进行用户测试的情形。</p>
+<p>举例：为改进对员工使用计算机的支持，设计了许多可行方案。如何判断那一种方法更有效？</p>
+<p>不同模型关注用户执行的不同方面：</p>
+<ol>
+<li>GOMS：击键层次模型 KLM</li>
+<li>Fitts 定律</li>
+</ol>
+<h2 id="GOMS-模型">GOMS 模型</h2>
+<p>最著名的预测模型，1983 年由 Card, Morgan 和 Newell 提出。</p>
+<p>基于人类处理机模型，泛指整个 GOMS 模型体系，是关于人类如何执行认知—动作型任务以及如何与系统交互的理论模型。</p>
+<ol>
+<li>采用“分而治之”的思想，将一个任务进行多层次的细化</li>
+<li>把每个操作的时间相加就可以得到一项任务的时间：操作指用户的目光从屏幕的一处移到另一处、识别出某个图标、手移到鼠标上</li>
+</ol>
+<h3 id="GOMS-全称">GOMS 全称</h3>
+<ol>
+<li>Goal-目标：用户要达到什么目的</li>
+<li>Operator-操作：任务执行的底层行为，不能分解：为达到目标而使用的认知过程和物理行为。如点击鼠标</li>
+<li>Method-方法：如何完成目标的过程，即对应目标的子目标序列和所需操作。如移动鼠标，输入关键字，点击 Go 按钮</li>
+<li>Selection-选择规则：确定当有多种方法时选择和方法。GOMS 认为方法的选择不是随机的</li>
+</ol>
+<h3 id="举例">举例</h3>
+<p>使用 GOMS 模型描述在 Word 中删除文本的过程</p>
+<ol>
+<li>目标：删除 Word 中的文本</li>
+<li>方法 1：使用菜单删除文本
+<ol>
+<li>步骤 1：思考，需要选定待删除的文本</li>
+<li>步骤 2：思考，应使用“剪裁”命令</li>
+<li>步骤 3：思考，“剪裁”命令在“编辑”菜单中</li>
+<li>步骤 4：选定待删除文本，执行“剪裁”命令</li>
+<li>步骤 5：达到目标，返回</li>
+</ol>
+</li>
+</ol>
+<h3 id="GOMS-方法步骤">GOMS 方法步骤</h3>
+<ol>
+<li>选出最高层的用户目标</li>
+<li>写出具体的完成目标的方法：即激活子目标</li>
+<li>写出子目标的方法：递归过程，一直分解到最底层操作时停止</li>
+<li>子目标的关系：
+<ol>
+<li>顺序关系</li>
+<li>选择关系：以 select：引导</li>
+</ol>
+</li>
+</ol>
+<p><img src="/55876/image-20231223233058319.png" alt></p>
+<h3 id="GOMS-模型分析">GOMS 模型分析</h3>
+<p>优点：</p>
+<ol>
+<li>能够容易地对不同的界面或系统进行比较分析</li>
+<li>美国电话公司 NYNEX：利用 GOMS 分析一套即将被采用的新的计算机系统的应用效果不理想，放弃了使用新系统，为公司节约了数百万的资金。</li>
+</ol>
+<p>局限性：</p>
+<ol>
+<li>假设用户完全按一种正确的方式进行人机交互，没有清楚地描述错误处理的过程</li>
+<li>只针对那些不犯任何错误的专家用户</li>
+<li>任务之间的关系描述过于简单</li>
+<li>忽略了用户间的个体差异</li>
+</ol>
+<h2 id="KLM-击键层次模型">KLM 击键层次模型</h2>
+<p>Card 等 1983。对用户执行情况进行量化预测：仅涉及任务性能的一个方面：时间</p>
+<p>用途：</p>
+<ol>
+<li>预测无错误情况下专家用户在下列输入前提下完成任务的时间</li>
+<li>便于比较不同系统</li>
+<li>确定何种方案能最有效地支持特定任务</li>
+</ol>
+<p><img src="/55876/image-20231223233326134.png" alt></p>
+<h3 id="使用">使用</h3>
+<p>执行时间预测方法：</p>
+<ol>
+<li>列出操作次序，累加每一项操作的预计时间</li>
+<li>$T_\text{execute}=T_K+T_P+T_H+T_D+T_M+T_R$</li>
+</ol>
+<p>举例：</p>
+<ol>
+<li>DOS 环境下执行“ipconfig”命令：
+<ol>
+<li><code>M K[i] K[p] K[c] K[o] K[n] K[f] K[i] K[g] K[回车]</code></li>
+<li>简略表达版本：<code>M9K[ipconfig 回车]</code></li>
+<li>$T_\text{execute}=1.35 + 9 × 0.28 = 3.87\text{s}$</li>
+</ol>
+</li>
+<li>菜单选择（不一定对，点击鼠标应该用 P~1~ 而不是 K）
+<ol>
+<li><code>H[鼠标]MP[网络连接图标]K[右键]P[修复]K[左键]</code></li>
+<li>$T_\text{execute}=0.40+1.35+2P+2K=4.35s$</li>
+</ol>
+</li>
+</ol>
+<h3 id="编码方法">编码方法</h3>
+<p><img src="/55876/1.png" alt></p>
+<h3 id="放置-M-操作符的启发规则">放置 M 操作符的启发规则</h3>
+<p>问题：如何确定是否需要在具体操作之前引入一个思维过程呢？</p>
+<p>答案：</p>
+<p><img src="/55876/image-20231223233536954.png" alt></p>
+<ol>
+<li>在每一步需要访问长时记忆区的操作前放置一个 M</li>
+<li>在所有 K 和 P 之前放置 M：K $\to$ MK; P $\to$ MP</li>
+<li>删除键入单词或字符串之间的 M：$MKMKMK \to MKKK$</li>
+<li>删除复合操作之间的 M （如, 选中 P 和点击 P1)：$MPMP_1 \to MPP_1$</li>
+</ol>
+<h4 id="KLM-分析">KLM 分析</h4>
+<p>建模可以给出执行标准任务的时间</p>
+<p>但没有考虑下面的问题：</p>
+<ol>
+<li>错误</li>
+<li>学习性</li>
+<li>功能性</li>
+<li>回忆</li>
+<li>专注程度</li>
+<li>疲劳</li>
+<li>可接受性</li>
+</ol>
+<h2 id="Fitts-定律">Fitts 定律</h2>
+<p>Fitts，1954。用户访问屏幕组件的时间对于系统的使用效率是至关重要的。哪些特性会影响访问效率呢？</p>
+<ol>
+<li>能够预测使用某种定位设备指向某个目标的时间</li>
+<li>人机交互中，根据目标大小及至目标的距离，计算指向该目标的时间：可指导设计人员设计按钮的位置、大小和密集程度</li>
+<li>对图形用户界面设计有明显的意义</li>
+<li>“最健壮并被广泛采用的人类运动模型之一”</li>
+</ol>
+<h3 id="“轮流轻拍”实验">“轮流轻拍”实验</h3>
+<ol>
+<li>记录拍中和失误的情况</li>
+<li>指令：尽可能准确而不是快速的轮流轻拍两个薄板</li>
+<li>以实验数据为依据，得到困难指数如下</li>
+</ol>
+<p>$$
+ID = \log_2{\frac{2A}{W}}
+$$</p>
+<p><img src="/55876/image-20231223233822867.png" alt></p>
+<p><img src="/55876/image-20231223233826002.png" alt></p>
+<h3 id="概述">概述</h3>
+<p>Fitts 定律描述了人类运动系统的信息量</p>
+<p>信息论中的 Shannon 定理</p>
+<p>$$
+C = B \log_2(\frac{S}{N}+1)
+$$</p>
+<p>C 是有效信息量（比特），B 是通道带宽，S 是信号能量，N 是噪声</p>
+<p>Fitts 定律：S 映射为运动距离或振幅（A），N 映射为目标的宽度（W）</p>
+<h3 id="三个部分">三个部分</h3>
+<ol>
+<li>困难指数 ID (Index of Difficulty) = $\log_2{\frac{2A}{W}}$
+<ol>
+<li>对任务困难程度的量化</li>
+<li>与宽度和距离有关</li>
+</ol>
+</li>
+<li>运动时间 MT (Movement Time) = a + b*ID (secs)：在 ID 基础上将完成任务的时间量化</li>
+<li>性能指数 IP (Index of Performance) = ID/MT (bits/sec)
+<ol>
+<li>基于 MT 和 ID 的关系</li>
+<li>也称吞吐量</li>
+</ol>
+</li>
+<li>MacKenzie 改写为
+<ol>
+<li>ID = log2(2A /W )</li>
+<li>ID = log2(A /W +1)</li>
+<li>更好地符合观察数据</li>
+<li>精确地模拟了支撑 Fitts 定律的信息论：C = B log2(S/N+1)</li>
+<li>计算出的任务困难指数总是整数</li>
+</ol>
+</li>
+<li>平均时间 MT
+<ol>
+<li>$MT = a+b \log_2{(\frac{A}{W} + 1)}$</li>
+<li>常数 a 和 b 来自实验数据的线性回归</li>
+</ol>
+</li>
+</ol>
+<h3 id="说明">说明</h3>
+<ol>
+<li>如果 MT 的计算单位是秒，则 a 的测量单位是秒，b 的测量单位是秒/比特（ID 的测量单位是比特）</li>
+<li>系数 a（截距）和 b（斜率）由经验数据确定，且与设备相关</li>
+<li>对于一般性计算，可使用 a=50,b=150（单位是毫秒）</li>
+<li>A 和 W 在距离测量单位上必须一致，但是不需要说明使用的具体单位</li>
+</ol>
+<h3 id="Fitts-Law">Fitts' Law</h3>
+<p><img src="/55876/5.png" alt></p>
+<p><img src="/55876/6.png" alt></p>
+<p><img src="/55876/7.png" alt></p>
+<h3 id="Fitts-定律建议">Fitts 定律建议</h3>
+<ol>
+<li>大目标、小距离具有优势：对选择任务而言，其移动时间随到目标距离的增加而增加，随目标的大小减小而增加</li>
+<li>屏幕元素应该尽可能多的占据屏幕空间</li>
+<li>最好的像素是光标所处的像素</li>
+<li>屏幕元素应尽可能利用屏幕边缘的优势</li>
+<li>大菜单，如饼型菜单，比其他类型的菜单使用简单</li>
+</ol>
+<p>$$
+ID = \log_2{(\frac{A}{W} + 1)}
+$$</p>
+<h3 id="Fitts-定律应用">Fitts 定律应用</h3>
+<p>首先被 Card 等人应用在 HCI 领域：</p>
+<ol>
+<li>鼠标的定位时间和错误率都优于其他设备</li>
+<li>鼠标速率接近最快速率</li>
+<li>使用鼠标完成运动任务比使用其他设备更加协调，这在交互设计中非常重要</li>
+</ol>
+<ul>
+<li>策略一：缩短当前位置到目标区域的距离，如右键菜单技术</li>
+<li>策略二：增大目标大小以缩短定位时间：Windows 操作系统和 Macintosh 操作系统中的应用程序菜单区域位置的设计</li>
+</ul>
+<h3 id="应用实例">应用实例</h3>
+<p>Mac OS 和 Windows XP 的比较（苹果专利）</p>
+<ol>
+<li>Mac OS 的菜单是沿着屏幕边缘排列的</li>
+<li>Windows OS 的菜单位于标题栏下面</li>
+</ol>
+<p><img src="/55876/image-20231223234509980.png" alt></p>
+<p><img src="/55876/image-20231223234517046.png" alt></p>
+<h3 id="Jeff-Raskin">Jeff Raskin</h3>
+<ol>
+<li>用户往往在距离屏幕边缘 50 毫米处停下来：50 毫米作为 Mac OS 的菜单宽度</li>
+<li>对于 Mac OS：MT = 50 + 150 log2(80/50+1) = 256 ms</li>
+<li>对于 Windows OS：MT = 50 + 150 log2(80/5+1) = 663 ms</li>
+</ol>
+<h3 id="Mac-OS-“dock”">Mac OS “dock”</h3>
+<p>工具栏组件大小可以动态改变：</p>
+<ol>
+<li>为用户提供了一个放大的目标区域</li>
+<li>可显示更多图标</li>
+<li>新版 Mac 操作系统中都实现了扩展工具栏</li>
+</ol>
+<p><img src="/55876/image-20231223234612613.png" alt></p>
+<p>思考：该工具栏存在何种优缺点？</p>
+<h3 id="Fitts-定律测验一">Fitts 定律测验一</h3>
+<ol>
+<li>微软工具栏允许用户在图标下方显示图标标签</li>
+<li>列举一条原因，解释为什么显示标签后工具条的访问速度更快？</li>
+<li>假设用户明确每个图标的用途</li>
+<li>参考答案
+<ol>
+<li>加大了图标面积。根据 Fitts 定律，在其他条件不变的情况下，目标越大，访问越快</li>
+<li>改变了工具栏图标过于拥挤的情况</li>
+</ol>
+</li>
+</ol>
+<h3 id="Fitts-定律测验二">Fitts 定律测验二</h3>
+<ol>
+<li>图形应用工具中的调色板如左图
+<ol>
+<li>每个图标的大小为 16X16 像素</li>
+<li>以 2 列 X8 行排列在屏幕左侧</li>
+</ol>
+</li>
+<li>问题：不改变图标大小，且保持图标阵列位于屏幕左侧，采取何种方式可减少访问每个图标所需的时间？</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2162/" rel="prev" title="程序员实用软件推荐">
+      <i class="fa fa-chevron-left"></i> 程序员实用软件推荐
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/62402/" rel="next" title="人机交互系统-08-交互式系统的需求">
+      人机交互系统-08-交互式系统的需求 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">预测模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GOMS-%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">GOMS 模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GOMS-%E5%85%A8%E7%A7%B0"><span class="nav-number">3.1.</span> <span class="nav-text">GOMS 全称</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B"><span class="nav-number">3.2.</span> <span class="nav-text">举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GOMS-%E6%96%B9%E6%B3%95%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.3.</span> <span class="nav-text">GOMS 方法步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GOMS-%E6%A8%A1%E5%9E%8B%E5%88%86%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">GOMS 模型分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KLM-%E5%87%BB%E9%94%AE%E5%B1%82%E6%AC%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">KLM 击键层次模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">4.1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%96%B9%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">编码方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%BE%E7%BD%AE-M-%E6%93%8D%E4%BD%9C%E7%AC%A6%E7%9A%84%E5%90%AF%E5%8F%91%E8%A7%84%E5%88%99"><span class="nav-number">4.3.</span> <span class="nav-text">放置 M 操作符的启发规则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KLM-%E5%88%86%E6%9E%90"><span class="nav-number">4.3.1.</span> <span class="nav-text">KLM 分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fitts-%E5%AE%9A%E5%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">Fitts 定律</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9C%E8%BD%AE%E6%B5%81%E8%BD%BB%E6%8B%8D%E2%80%9D%E5%AE%9E%E9%AA%8C"><span class="nav-number">5.1.</span> <span class="nav-text">“轮流轻拍”实验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">5.2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E4%B8%AA%E9%83%A8%E5%88%86"><span class="nav-number">5.3.</span> <span class="nav-text">三个部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B4%E6%98%8E"><span class="nav-number">5.4.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fitts-Law"><span class="nav-number">5.5.</span> <span class="nav-text">Fitts&#39; Law</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fitts-%E5%AE%9A%E5%BE%8B%E5%BB%BA%E8%AE%AE"><span class="nav-number">5.6.</span> <span class="nav-text">Fitts 定律建议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fitts-%E5%AE%9A%E5%BE%8B%E5%BA%94%E7%94%A8"><span class="nav-number">5.7.</span> <span class="nav-text">Fitts 定律应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">5.8.</span> <span class="nav-text">应用实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jeff-Raskin"><span class="nav-number">5.9.</span> <span class="nav-text">Jeff Raskin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mac-OS-%E2%80%9Cdock%E2%80%9D"><span class="nav-number">5.10.</span> <span class="nav-text">Mac OS “dock”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fitts-%E5%AE%9A%E5%BE%8B%E6%B5%8B%E9%AA%8C%E4%B8%80"><span class="nav-number">5.11.</span> <span class="nav-text">Fitts 定律测验一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fitts-%E5%AE%9A%E5%BE%8B%E6%B5%8B%E9%AA%8C%E4%BA%8C"><span class="nav-number">5.12.</span> <span class="nav-text">Fitts 定律测验二</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

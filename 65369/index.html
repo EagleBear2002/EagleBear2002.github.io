@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 流行的隔离级别多版本读已提交（RC）用牺牲强大的可串行化保证来换取事务吞吐量的提高。尽管如此，事务工作负载有时可以在 RC 下执行，同时仍能以较低的成本保证可串行化。这样的工作负载被称为对 RC 具有鲁棒性。本文概述了确定对 RC 的鲁棒性。特别是，我们讨论了如何通过事务模板的形式化来获得合理完整的测试。然后，我们通过使用功能约束来扩展事务模板，从而提高其建模能力，这些功能约束可用于捕获外键">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SIGMOD&#39;23-When is it safe to run a transactional workload under Read Committed">
+<meta property="og:url" content="https://eaglebear2002.github.io/65369/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 流行的隔离级别多版本读已提交（RC）用牺牲强大的可串行化保证来换取事务吞吐量的提高。尽管如此，事务工作负载有时可以在 RC 下执行，同时仍能以较低的成本保证可串行化。这样的工作负载被称为对 RC 具有鲁棒性。本文概述了确定对 RC 的鲁棒性。特别是，我们讨论了如何通过事务模板的形式化来获得合理完整的测试。然后，我们通过使用功能约束来扩展事务模板，从而提高其建模能力，这些功能约束可用于捕获外键">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-23T03:46:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.769Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/65369/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SIGMOD'23-When is it safe to run a transactional workload under Read Committed | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/65369/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SIGMOD'23-When is it safe to run a transactional workload under Read Committed
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-23 11:46:00" itemprop="dateCreated datePublished" datetime="2024-08-23T11:46:00+08:00">2024-08-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>摘要</strong></p>
+<p>流行的隔离级别多版本读已提交（RC）用牺牲强大的可串行化保证来换取事务吞吐量的提高。尽管如此，事务工作负载有时可以在 RC 下执行，同时仍能以较低的成本保证可串行化。这样的工作负载被称为对 RC 具有鲁棒性。本文概述了确定对 RC 的鲁棒性。特别是，我们讨论了如何通过事务模板的形式化来获得合理完整的测试。然后，我们通过使用功能约束来扩展事务模板，从而提高其建模能力，这些功能约束可用于捕获外键等数据依赖关系。我们表明，加入功能约束可以将更多的工作负载识别为鲁棒的，而不是其他情况。即使鲁棒性问题在其最一般的形式下变得不可判定，我们仍确定对功能约束的各种限制会导致可判定甚至可处理的结果，这些结果可用于对实际场景的 RC 鲁棒性进行建模和测试。</p>
+<p>作者：</p>
+<ul>
+<li>Brecht Vandevoort, UHasselt, Data Science Institute, ACSL, Belgium</li>
+<li>Bas Ketsman, Vrije Universiteit Brussel, Belgium</li>
+<li>Christoph Koch, École Polytechnique Fédérale de Lausanne, Switzerland</li>
+<li>Frank Neven, UHasselt, Data Science Institute, ACSL, Belgium</li>
+</ul>
+<h2 id="INTRODUCTION">INTRODUCTION</h2>
+<p>可序列化是理想事务语义的黄金标准，许多研究和技术开发都致力于创建提供最大事务吞吐量的系统。然而，在实践中，可以使用不同强度的替代隔离级别层次结构，允许用户权衡语义保证以获得更好的性能。一个突出的例子是隔离级别（多版本）读取已提交 (RC)，它不保证可序列化，但可以比隔离级别 Serializable 更有效地实现。我们在本文中讨论的核心问题是：在 RC 下运行事务工作负载何时是安全的？</p>
+<p>许多研究人员都研究过所谓的事务稳健性问题 [1-4、6-10、16、18]，该问题围绕着确定对于给定的工作负载，低于 Serializable 的隔离级别是否足以保证可序列化性。具体而言，如果在指定的隔离级别下允许的执行程序的所有可能的交错都是可序列化的，则一组事务程序被称为对给定的隔离级别具有稳健性。众所周知的 TPCC 基准测试对快照隔离具有稳健性 [10]，这一事实可能最好地证明了非平凡稳健的工作负载确实存在。更具体地说，在快照隔离下允许的任何调度，只要只包含来自 TPC-C 的事务程序的实例，都是可序列化的。</p>
+<p>在数据库上执行事务程序会导致对具体数据库对象进行一系列读写操作，我们将其简称为事务。当多个程序同时执行时，由此产生的交错事务序列称为调度。在这样的调度中，事务在访问相同的数据库对象时可以引入依赖关系。例如，如果事务 T1 写入一个对象，而另一个事务 T2 随后读取该对象，则 T2 依赖于 T1。调度 s 的依赖图 CG(s) 是以 s 的事务为顶点、以事务之间的依赖关系为边的图。众所周知，当且仅当调度的依赖图是无环的，调度才是（冲突）可序列化的 [14]。</p>
+<p>对于指定为一组具体事务的给定工作负载，其稳健性显然是可判定的，因为可以简单地枚举所选隔离级别下允许的所有调度，并验证它们的依赖关系图是否是非循环的。但是，存在更有效的方法，这些方法基于特定反例调度的特征，当一组事务对隔离级别不稳健时，必须存在该反例调度。这些方法如下：在基于读写锁实现并发控制的单版本数据库中，针对读取未提交和读取已提交的拆分调度和多拆分调度 [12]；针对（多版本）读取已提交的多版本拆分调度 [16]；以及针对快照隔离的多版本拆分调度 [9, 13]。然后，判定稳健性就简化为寻找遵循特定形式的反例调度。</p>
+<p>这些结果不会立即扩展到将工作负载指定为一组事务程序（例如，TPC-C 基准）的情况。实际上，事务程序代表了无限数量的具体事务实例，从而产生无限数量的可能调度。在这种情况下，检测稳健性的常用方法是基于在静态依赖图中总结所有潜在调度 [6,10]。更具体地说，该图中的顶点是事务程序，如果存在一对事务 T1 和 T2，分别从 P1 和 P2 实例化，其中 T2 依赖于 T1，则存在从程序 P1 到程序 P2 的边。通过构造，该图包含可以从给定的事务程序集派生的所有可能的调度依赖图。具体而言，非可序列化调度的依赖图中的每个循环都由静态依赖图中的一个循环见证。因此，稳健性的充分条件依赖于静态依赖图中没有循环。请注意，这只是鲁棒性的充分条件，因为静态依赖图中的循环并不一定意味着存在不可序列化的调度。</p>
+<p>已经确定了额外的隔离级别特定条件，这些条件必须适用于依赖图中出现非稳健性的循环：快照隔离的危险结构 [10] 和读取已提交的逆流边缘的存在 [2]。因此，只要静态依赖图中的所有循环不满足相应条件，就可以保证对这些隔离级别的稳健性。我们强调，这种方法依赖于静态依赖图的构建，而这本身就是一项不简单的任务。事实上，需要对每对程序进行手动分析以识别可能的依赖关系。IsoDiff [11] 通过分析执行跟踪（即通过执行事务程序获得的一组具体事务）来自动化此构建。但这种方法的缺点是它可能会错过不经常执行的程序，因此不在执行跟踪中。因此，IsoDiff 可能会错误地将应用程序识别为对较低的隔离级别具有稳健性。</p>
+<p>我们在稳健性方面的工作与刚才提到的方法有以下不同：</p>
+<ol>
+<li>我们引入了一种形式化方法来表达事务程序，称为事务模板，它有助于根据反例计划进行推理，本质上允许自动构建静态依赖图而无需人工干预；</li>
+<li>我们提供了一个既健全又完整的针对多版本读取已提交的稳健性决策程序。</li>
+</ol>
+<p>与早期的工作相比，早期的工作只提供了健全但不完整的方法，我们的方法能够检测更多和更大的工作负载组，以抵御读取已提交。我们方法的一个限制是，我们必须假设有一组固定的只读属性，这些属性无法更新，用于选择元组。最典型的例子是作为参数传递给事务模板的主键值。我们参考[16]进行更深入的讨论。在 [20] 中，我们提出了一个充分条件（但不再完整）用于测试模板扩展的鲁棒性，其中元组的所有属性都可以修改，并且包含插入、删除和谓词读取。</p>
+<p>本文旨在更通俗易懂地概述 [16] 和 [18] 中提出的主要思想。许多概念只是非正式地介绍，有关更多详细信息，请参阅原始论文。有关我们工作的更完整概述，请参阅 [17]。有关针对数据库理论家的并发控制介绍，请参阅 [14] 和 [13]。有关相关工作的更完整讨论，请参阅 [16, 18]。</p>
+<h2 id="DEFINITIONS">DEFINITIONS</h2>
+<h2 id="TRANSACTION-TEMPLATES">TRANSACTION TEMPLATES</h2>
+<h2 id="ROBUSTNESS">ROBUSTNESS</h2>
+<h2 id="FUNCTIONAL-CONSTRAINTS">FUNCTIONAL CONSTRAINTS</h2>
+<h3 id="Templates-admitting-multi-tree-bijectivity">Templates admitting multi-tree bijectivity</h3>
+<h3 id="Templates-over-acyclic-schemas">Templates over acyclic schemas</h3>
+<h2 id="CONCLUSION">CONCLUSION</h2>
+<p>我们对最近关于确定事务模板对 RC 的鲁棒性的工作进行了高层次概述。应该清楚的是，这些技术只能在事先知道允许的事务模板集（例如，通过 API 公开时）时使用，并且在可以插入完全任意的事务时不适用。正如介绍中已经提到的，我们的技术只有在存在一组固定的只读属性时才有效，这些属性无法更新，并且用于选择要更新的元组。我们不相信这些限制可以轻易解除。尽管如此，我们确实认为，通过研究事务模板获得的见解可以帮助建立充分（但不再完整）的条件来测试一般事务程序对 RC 的鲁棒性。我们在 [20] 中介绍了这方面的一些初步结果。</p>
+<p>一个相关的问题是，当发现一组事务模板对 RC 不具有鲁棒性时，可以做些什么。在 [16] 中，我们提出了一种模板修改技术，该技术基于这样的见解：可以<strong>通过将 R 操作提升为写回读取值的 U 操作来创建一组对 RC 具有鲁棒性的等效事务模板</strong>。这样的更改不会改变事务模板的效果，但新引入的写入操作将触发数据库中的并发机制。Alomari 和 Fekete [2] 提出了一种修改技术，该技术依赖于<strong>向数据库添加新元组，这些元组充当有问题的事务组合的锁，从而强制这些事务不能相互交错</strong>，从而确保对 RC 的鲁棒性。一种完全不同的方法是不再要求所有事务都必须在相同的隔离级别下执行，而<strong>只为有问题的事务分配更严格的隔离级别</strong>。快照隔离和两相锁 [9] 以及 RC、快照隔离和可序列化快照隔离 [21] 的事务级别上已研究了相应的分配问题。在事务模板的上下文中研究分配问题将会很有趣。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/8969/" rel="prev" title="PODS'22-Robustness Against Read Committed-A Free Transactional Lunch">
+      <i class="fa fa-chevron-left"></i> PODS'22-Robustness Against Read Committed-A Free Transactional Lunch
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/61214/" rel="next" title="ICDT'22-Robustness Against Read Committed for Transaction Templates with Functional Constraints">
+      ICDT'22-Robustness Against Read Committed for Transaction Templates with Functional Constraints <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#INTRODUCTION"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DEFINITIONS"><span class="nav-number">2.</span> <span class="nav-text">DEFINITIONS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TRANSACTION-TEMPLATES"><span class="nav-number">3.</span> <span class="nav-text">TRANSACTION TEMPLATES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ROBUSTNESS"><span class="nav-number">4.</span> <span class="nav-text">ROBUSTNESS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FUNCTIONAL-CONSTRAINTS"><span class="nav-number">5.</span> <span class="nav-text">FUNCTIONAL CONSTRAINTS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Templates-admitting-multi-tree-bijectivity"><span class="nav-number">5.1.</span> <span class="nav-text">Templates admitting multi-tree bijectivity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Templates-over-acyclic-schemas"><span class="nav-number">5.2.</span> <span class="nav-text">Templates over acyclic schemas</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CONCLUSION"><span class="nav-number">6.</span> <span class="nav-text">CONCLUSION</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

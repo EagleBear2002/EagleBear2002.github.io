@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 为什么文档化需求  方便团队工作和沟通 方便项目管理 更加明确的体系架构 方便软件设计 方便编码 方便维护  为什么建立需求规格说明？结合试验说明重要  方便交流，软件开发过程中，子任务与人员之间存在错综复杂的关系，存在大量的沟通和交流，所以要编写软件开发中要编写不同类型的文档，每种文档都是针对项目中需要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-07-需求文档化与验证">
+<meta property="og:url" content="https://eaglebear2002.github.io/18275/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 为什么文档化需求  方便团队工作和沟通 方便项目管理 更加明确的体系架构 方便软件设计 方便编码 方便维护  为什么建立需求规格说明？结合试验说明重要  方便交流，软件开发过程中，子任务与人员之间存在错综复杂的关系，存在大量的沟通和交流，所以要编写软件开发中要编写不同类型的文档，每种文档都是针对项目中需要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/1-1676529026155-1182.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/2-1676529026156-1183.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/3-1676529026156-1184.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145518766.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/5-1676529026156-1186.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145551399.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/6-1676529026157-1187.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145623200.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145632833.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145652933.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145733348.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18275/image-20230706145739407.png">
+<meta property="article:published_time" content="2022-05-31T06:49:05.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.624Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18275/1-1676529026155-1182.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18275/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-07-需求文档化与验证 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18275/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-07-需求文档化与验证
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 14:49:05" itemprop="dateCreated datePublished" datetime="2022-05-31T14:49:05+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="为什么文档化需求">为什么文档化需求</h2>
+<ol>
+<li>方便团队工作和沟通</li>
+<li>方便项目管理</li>
+<li>更加明确的体系架构</li>
+<li>方便软件设计</li>
+<li>方便编码</li>
+<li>方便维护</li>
+</ol>
+<h2 id="为什么建立需求规格说明？结合试验说明重要">为什么建立需求规格说明？结合试验说明重要</h2>
+<ol>
+<li>方便交流，软件开发过程中，<strong>子任务与人员</strong>之间存在错综复杂的关系，存在大量的沟通和交流，所以要编写软件开发中要编写不同类型的文档，每种文档都是针对项目中需要广泛交流的内容。因为<strong>软件需求</strong>需要进行<strong>广泛交流</strong>，所以要把需求文档化。</li>
+<li>需求规格说明是在<strong>软件产品的角度以系统级需求列表的方式</strong>描述软件系统解决方案，书写需求规格说明，可以建立管理控制的基线，方便任务分配，制定工作计划，进行跟踪和度量。</li>
+<li>在实验中，需求规格的重要性不只体现在结果上，还包括中间过程，在书写需求规格过程中，才真正把问题域的问题和分析模型的成果转化为系统级需求，方便小组成员真正明确需求，个人认为在这个阶段包含一部分的需求在发现和完整化。</li>
+</ol>
+<h2 id="需求文档基础">需求文档基础</h2>
+<h3 id="需求文档的交流对象">需求文档的交流对象</h3>
+<ol>
+<li>用户：用户要验证文档内描述的需求信息是否和最初的意图一致</li>
+<li>项目管理者：软件需求文档全面、准确地定义了软件的功能和非功能要求。</li>
+<li>设计人员和程序员：设计人员和程序员需要根据软件需求文档来完成自己的任务</li>
+<li>测试人员：测试人员需要根据文档的需求内容进行验收测试，确保最终产生的软件系统能满足用户的需求</li>
+<li>文档编写人员：用户使用手册的编写人员需要根据需求信息编写用户使用手册</li>
+<li>维护人员：在软件维护中，维护人员需要在充分理解软件原有需求的基础上进行信息的修改</li>
+</ol>
+<h3 id="用例文档">用例文档</h3>
+<ol>
+<li>在用户的角度以用例文本为主描述软件系统与外界的交互</li>
+<li>基本职责是把问题域信息和需求传达给软件系统解决方案的设计者</li>
+<li>示例</li>
+</ol>
+<p><img src="/18275/1-1676529026155-1182.png" alt></p>
+<ol start="4">
+<li>用例图等描述图可以更加直观的了解这部分。</li>
+</ol>
+<h3 id="软件需求规格说明文档（SRS，software-Requirements-Specification">软件需求规格说明文档（SRS，software Requirements Specification)</h3>
+<ol>
+<li>在软件产品的角度以系统级需求列表的方式描述软件系统解决方案</li>
+</ol>
+<p><img src="/18275/2-1676529026156-1183.png" alt></p>
+<h4 id="实例">实例</h4>
+<ol>
+<li>在一栋大楼中有一个电梯，现在有人打算从 1 楼使用电梯到达 x 楼。
+<ul>
+<li>请写出其用例的场景描述</li>
+<li>根据用例场景编写 SRS 片段</li>
+</ul>
+</li>
+<li>用例的场景描述：
+<ol>
+<li>这个人在 1 楼按的按钮，等待电梯（系统调度图）</li>
+<li>电梯到达，电梯开门，登上电梯</li>
+<li>用户按 x 楼的按钮，系统关门</li>
+<li>电梯启动开始上行</li>
+<li>该人到达 x 楼，电梯开门</li>
+<li>电梯关门</li>
+</ol>
+</li>
+<li>异常流程：
+<ol>
+<li>电梯故障：和电梯、人无关的不加入</li>
+<li>超载超重</li>
+<li>其他楼层按钮</li>
+<li>电梯运行方向</li>
+</ol>
+</li>
+</ol>
+<h3 id="SRS-模板">SRS 模板</h3>
+<p><img src="/18275/3-1676529026156-1184.png" alt></p>
+<h2 id="技术文档写作要点">技术文档写作要点</h2>
+<ol>
+<li>简洁：动词名词+辅助词，不要使用复杂长句、形容词和副词。</li>
+<li>精确：不能产生起义或无法理解。</li>
+</ol>
+<p><img src="/18275/image-20230706145518766.png" alt></p>
+<ol start="3">
+<li>易读（查询）
+<ol>
+<li>有效使用引言、目录、索引等能够增强文档易读性的方法。</li>
+<li>使用系统化的方式组织内容信息，提供文档内容的可读性。</li>
+</ol>
+</li>
+<li>易修改：使用相同的语句格式组织相关联或相似的信息；使用列表组织独立、并列的信息；使用编号表达繁杂信息之间的关系。引用而不是重复</li>
+</ol>
+<h3 id="系统化的方式">系统化的方式</h3>
+<ol>
+<li>使用<strong>相同</strong>的语句格式来描述相似、关联的信息。</li>
+<li>使用<strong>列表或者表格</strong>来组织独立、并列的信息。</li>
+<li>使用<strong>编号</strong>来表达繁杂信息之间的关系,包括顺序关系、嵌套关系和层次关系。
+<ul>
+<li>对图、表进行编号</li>
+<li>对文档的章节进行编号</li>
+<li>对信息内容进行标识和编号</li>
+</ul>
+</li>
+</ol>
+<h3 id="需求书写要点">需求书写要点</h3>
+<ol>
+<li>需求书写要点
+<ol>
+<li>使用用户术语：不要使用计算机术语（导致用户无法理解）</li>
+<li>可验证：不可验证的需求一般是因为描述模糊或者过于抽象</li>
+<li>可行性：需求必须能够在系统及其运行环境的已知条件和约束下实现。要考虑在限定成本、时间和人力约束内，实现需求的可能性</li>
+</ol>
+</li>
+<li>需求规格说明文档书写要点
+<ol>
+<li>充分利用标准的文档模版，保持所有内容位置得当</li>
+<li>保持文档内的需求集具有完备性和一致性。</li>
+<li>为需求划分优先级（可以分为高中低、也可以分为 1-10 等分）</li>
+</ol>
+</li>
+</ol>
+<h3 id="Requirements-Review">Requirements Review</h3>
+<ol>
+<li>&quot;After the payment process is complete, the relevant information should be appended to a log file.&quot;(b)
+<ul>
+<li>a. This requirement should be rewritten; it is incorrect. 不正确</li>
+<li>b. This requirement should be rewritten; it is ambiguous or inconsistent. 模糊的</li>
+<li>c. This requirement should be rewritten; it is unrealistic. 不现实的</li>
+<li>d. This requirement should be rewritten; it is unverifiable. 不可验证的</li>
+<li>e. This requirement is fine. 好的</li>
+</ul>
+</li>
+<li>&quot;The system should be constructed so that it will be easy to add new functionality in the future.&quot;(b)
+<ul>
+<li>a. This requirement should be rewritten; it is incorrect.</li>
+<li>b. This requirement should be rewritten; it is ambiguous or inconsistent.</li>
+<li>c. This requirement should be rewritten; it is unrealistic.</li>
+<li>d. This requirement should be rewritten; it is unverifiable.</li>
+<li>e. This requirement is fine.</li>
+</ul>
+</li>
+<li>&quot;The price of a gasoline purchase is computed as the price per gallon for the type of gas purchased, multiplied by the number of gallons purchased (use two decimal points for representing fractions of gallons).&quot;(e)
+<ul>
+<li>a. This requirement should be rewritten; it is incorrect.</li>
+<li>b. This requirement should be rewritten; it is ambiguous or inconsistent.</li>
+<li>c. This requirement should be rewritten; it is unrealistic.</li>
+<li>d. This requirement should be rewritten; it is unverifiable.</li>
+<li>e. This requirement is fine.</li>
+</ul>
+</li>
+<li>&quot;The system should be available 24 hours a day, 7 days a week.(c)
+<ul>
+<li>a. This requirement should be rewritten; it is incorrect.</li>
+<li>b. This requirement should be rewritten; it is ambiguous or inconsistent.</li>
+<li>c. This requirement should be rewritten; it is unrealistic.</li>
+<li>d. This requirement should be rewritten; it is unverifiable.</li>
+<li>e. This requirement is fine.</li>
+</ul>
+</li>
+</ol>
+<h2 id="验证需求的方法">验证需求的方法</h2>
+<h3 id="评审">评审</h3>
+<ol>
+<li>重视需求评审：坚实的需求基础是影响项目成败的重要因素</li>
+<li>需求评审的组织
+<ol>
+<li>评审的人员不能仅由技术人员组成，必须包括客户和用户</li>
+<li>在评审中使用线索，用户对场景与线索表现出了最大的兴趣</li>
+<li>使用需求检查列表</li>
+</ol>
+</li>
+</ol>
+<h3 id="开发系统测试用例">开发系统测试用例</h3>
+<ol>
+<li>以需求为线索，开发测试用例套件；</li>
+<li>使用测试技术确定输入/输出数据，开发测试用例。</li>
+<li>我们可以开发出黑盒测试用例</li>
+</ol>
+<h4 id="测试用例套件">测试用例套件</h4>
+<ol>
+<li>基于用例描述，可以为销售处理确定测试用例套件</li>
+<li>测试用例套件是测试用例的集合，将有关测试用例集合在一起</li>
+</ol>
+<p><img src="/18275/5-1676529026156-1186.png" alt></p>
+<h3 id="测试用例对需求的覆盖情况">测试用例对需求的覆盖情况</h3>
+<p><img src="/18275/image-20230706145551399.png" alt></p>
+<h4 id="建立测试用例">建立测试用例</h4>
+<ol>
+<li>主要是基于规格的技术，设计测试场景的输入与输出数据</li>
+</ol>
+<p><img src="/18275/6-1676529026157-1187.png" alt></p>
+<ol start="2">
+<li>不断地添加测试用例来完成测试</li>
+</ol>
+<h3 id="度量">度量</h3>
+<ol>
+<li>度量需求功能点</li>
+</ol>
+<h4 id="度量需求">度量需求</h4>
+<ol>
+<li>用例的数量
+<ul>
+<li>平均每个用例中的场景数量</li>
+<li>平均用例行数</li>
+<li>在一个尺度下进行分析</li>
+</ul>
+</li>
+<li>软件需求数量</li>
+<li>非功能需求数量</li>
+<li>功能点数量</li>
+</ol>
+<h4 id="度量的意义">度量的意义</h4>
+<ol>
+<li>如果平均的用例场景<strong>数量过低</strong>，那么就可能存在对<strong>异常流程考虑不周</strong>的可能。</li>
+<li>如果<strong>平均用例行数过大或者过小</strong>，那么可能对用例的细分粒度过大或者过小。</li>
+<li>用例数量、软件需求数量和功能点数量应该是相对比例均衡的，如果三者之间有着<strong>非常大的差距</strong>，那么可能会有需求的遗漏。</li>
+</ol>
+<h4 id="功能点度量">功能点度量</h4>
+<ol>
+<li>用于<strong>估算和度量软件系统规模与复杂度</strong>的抽象单位。</li>
+<li>在需求开发阶段，估计代码行数误差较大，使用功能点来估算和度量软件系统的规模与复杂度则有较好的效果。
+<ol>
+<li>输入数量：一次有意义的输入，需要程序员进行一次编程处理</li>
+<li>输出数量：系统需要对外展示的内容组，表现为屏幕界面、打印输出、错误提示等等。</li>
+<li>查询数量：用户的“命令”输入，通常表现为鼠标点击和键盘输入（热键）</li>
+<li>逻辑文件数量：系统内部的持久化数据，包括文件、数据表等</li>
+<li>对外接口数量：与外部系统交换数据的软硬件通信接口。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18275/image-20230706145623200.png" alt></p>
+<h3 id="功能点测度总数">功能点测度总数</h3>
+<p><img src="/18275/image-20230706145632833.png" alt></p>
+<p><img src="/18275/image-20230706145652933.png" alt></p>
+<p>F~i~ 为调整系统复杂度的因子，每一项都是经验估计数值，从 0（不重要或不需要）到 5（必须且重要）</p>
+<p><img src="/18275/image-20230706145733348.png" alt></p>
+<ol>
+<li>0.65 是一个标准值的测算值</li>
+</ol>
+<h3 id="销售用例的功能点">销售用例的功能点</h3>
+<p><img src="/18275/image-20230706145739407.png" alt></p>
+<p>$$
+FP(Sale) = 215 * (0.65+0.01*40) = 225.75
+$$</p>
+<h2 id="对给定的需求规格说明实例，判定并修正其错误-Summary">对给定的需求规格说明实例，判定并修正其错误-Summary</h2>
+<p>首先了解需求文档化要点：</p>
+<ol>
+<li>技术文档写作要点（简洁，精确，易读，易修改）；</li>
+<li>需求书写要点（使用用户术语，可验证，可行性）；</li>
+<li>需求规格说明文档书写要点（充分利用标准的文档模板，保持所以内容位置得当；保持文档内的需求集具有完备性和一致性；为需求划分优先级）</li>
+</ol>
+<h2 id="将需求制品纳入配置管理">将需求制品纳入配置管理</h2>
+<p>重要的需求制品：</p>
+<ol>
+<li>需求分析模型</li>
+<li>需求文档</li>
+<li>系统测试用例</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/16162/" rel="prev" title="软件工程与计算II-06-需求分析方法">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-06-需求分析方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/1343/" rel="next" title="软件工程与计算II-08-软件设计基础">
+      软件工程与计算II-08-软件设计基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%96%87%E6%A1%A3%E5%8C%96%E9%9C%80%E6%B1%82"><span class="nav-number">1.</span> <span class="nav-text">为什么文档化需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BB%BA%E7%AB%8B%E9%9C%80%E6%B1%82%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E%EF%BC%9F%E7%BB%93%E5%90%88%E8%AF%95%E9%AA%8C%E8%AF%B4%E6%98%8E%E9%87%8D%E8%A6%81"><span class="nav-number">2.</span> <span class="nav-text">为什么建立需求规格说明？结合试验说明重要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E6%96%87%E6%A1%A3%E5%9F%BA%E7%A1%80"><span class="nav-number">3.</span> <span class="nav-text">需求文档基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E6%96%87%E6%A1%A3%E7%9A%84%E4%BA%A4%E6%B5%81%E5%AF%B9%E8%B1%A1"><span class="nav-number">3.1.</span> <span class="nav-text">需求文档的交流对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%96%87%E6%A1%A3"><span class="nav-number">3.2.</span> <span class="nav-text">用例文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E9%9C%80%E6%B1%82%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3%EF%BC%88SRS%EF%BC%8Csoftware-Requirements-Specification"><span class="nav-number">3.3.</span> <span class="nav-text">软件需求规格说明文档（SRS，software Requirements Specification)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.3.1.</span> <span class="nav-text">实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SRS-%E6%A8%A1%E6%9D%BF"><span class="nav-number">3.4.</span> <span class="nav-text">SRS 模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%96%87%E6%A1%A3%E5%86%99%E4%BD%9C%E8%A6%81%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">技术文档写作要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%8C%96%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">4.1.</span> <span class="nav-text">系统化的方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E4%B9%A6%E5%86%99%E8%A6%81%E7%82%B9"><span class="nav-number">4.2.</span> <span class="nav-text">需求书写要点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Requirements-Review"><span class="nav-number">4.3.</span> <span class="nav-text">Requirements Review</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E9%9C%80%E6%B1%82%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">验证需求的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E5%AE%A1"><span class="nav-number">5.1.</span> <span class="nav-text">评审</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E7%B3%BB%E7%BB%9F%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">5.2.</span> <span class="nav-text">开发系统测试用例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E5%A5%97%E4%BB%B6"><span class="nav-number">5.2.1.</span> <span class="nav-text">测试用例套件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E5%AF%B9%E9%9C%80%E6%B1%82%E7%9A%84%E8%A6%86%E7%9B%96%E6%83%85%E5%86%B5"><span class="nav-number">5.3.</span> <span class="nav-text">测试用例对需求的覆盖情况</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">5.3.1.</span> <span class="nav-text">建立测试用例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F"><span class="nav-number">5.4.</span> <span class="nav-text">度量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E9%9C%80%E6%B1%82"><span class="nav-number">5.4.1.</span> <span class="nav-text">度量需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E7%9A%84%E6%84%8F%E4%B9%89"><span class="nav-number">5.4.2.</span> <span class="nav-text">度量的意义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E7%82%B9%E5%BA%A6%E9%87%8F"><span class="nav-number">5.4.3.</span> <span class="nav-text">功能点度量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E7%82%B9%E6%B5%8B%E5%BA%A6%E6%80%BB%E6%95%B0"><span class="nav-number">5.5.</span> <span class="nav-text">功能点测度总数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%80%E5%94%AE%E7%94%A8%E4%BE%8B%E7%9A%84%E5%8A%9F%E8%83%BD%E7%82%B9"><span class="nav-number">5.6.</span> <span class="nav-text">销售用例的功能点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E7%BB%99%E5%AE%9A%E7%9A%84%E9%9C%80%E6%B1%82%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E%E5%AE%9E%E4%BE%8B%EF%BC%8C%E5%88%A4%E5%AE%9A%E5%B9%B6%E4%BF%AE%E6%AD%A3%E5%85%B6%E9%94%99%E8%AF%AF-Summary"><span class="nav-number">6.</span> <span class="nav-text">对给定的需求规格说明实例，判定并修正其错误-Summary</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E9%9C%80%E6%B1%82%E5%88%B6%E5%93%81%E7%BA%B3%E5%85%A5%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">将需求制品纳入配置管理</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

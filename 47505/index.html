@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\SER{\mathsf{SER}} \def\PSI{\mathsf{PSI}} \def\SI{\mathsf{SI}} \def\PC{\mathsf{PC}} \def\CC{\mathsf{CC}} \def\RA{\mathsf{RA}} \def\read{\mathtt{read}} \def\write{\mathtt{write}} \def\Event{\mat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CONCUR&#39;16-Robustness against Consistency Models with Atomic Visibility">
+<meta property="og:url" content="https://eaglebear2002.github.io/47505/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\SER{\mathsf{SER}} \def\PSI{\mathsf{PSI}} \def\SI{\mathsf{SI}} \def\PC{\mathsf{PC}} \def\CC{\mathsf{CC}} \def\RA{\mathsf{RA}} \def\read{\mathtt{read}} \def\write{\mathtt{write}} \def\Event{\mat">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240926231213115.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240926232749214.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240926232823371.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927135725346.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927135926828.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927140730181.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927140746982.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927140829642.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/47505/image-20240927140946401.png">
+<meta property="article:published_time" content="2024-08-29T08:03:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.763Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/47505/image-20240926231213115.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/47505/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CONCUR'16-Robustness against Consistency Models with Atomic Visibility | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/47505/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CONCUR'16-Robustness against Consistency Models with Atomic Visibility
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-29 16:03:00" itemprop="dateCreated datePublished" datetime="2024-08-29T16:03:00+08:00">2024-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\SER{\mathsf{SER}}
+\def\PSI{\mathsf{PSI}}
+\def\SI{\mathsf{SI}}
+\def\PC{\mathsf{PC}}
+\def\CC{\mathsf{CC}}
+\def\RA{\mathsf{RA}}
+\def\read{\mathtt{read}}
+\def\write{\mathtt{write}}
+\def\Event{\mathsf{Event}}
+\def\Obj{\mathsf{Obj}}
+\def\hist{\mathsf{hist}}
+\def\level{\mathsf{level}}
+\def\before{\mathsf{before}}
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\ww{\mathsf{\textcolor{red}{ww}}}
+\def\rw{\mathsf{\textcolor{blue}{rw}}}
+\def\co{\mathsf{\textcolor{orange}{co}}}
+\def\CO{\mathsf{\textcolor{brown}{CO}}}
+\def\Int{\mathtt{Int}}
+\def\Ext{\mathtt{Ext}}
+\def\Prefix{\mathtt{Prefix}}
+\def\Conflict{\mathtt{Conflict}}
+\def\SerTotal{\mathtt{SerTotal}}
+\def\lthb{\lt_\mathsf{hb}}
+\def\ltar{\lt_\mathsf{ar}}
+\def\ltpo{\lt_\mathsf{po}}
+\def\DDG{\mathsf{DDG}}
+\def\SDG{\mathsf{SDG}}
+\def\I{\mathcal{I}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>为了实现可扩展性，现代互联网服务通常依赖于分布式数据库，其事务一致性模型比可序列化性要弱。目前，应用程序员通常缺乏确保这些一致性模型的弱点不会违反应用程序正确性的技术。我们提出了一些标准来检查依赖于仅提供弱一致性的数据库的应用程序是否具有鲁棒性，即其行为是否像使用提供可序列化的数据库一样。在这种情况下，应用程序员可以获得弱一致性的可扩展性优势，同时能够轻松检查所需的正确性属性。我们的结果系统而统一地处理了最近提出的几种弱一致性模型，以及一种增强应用程序各部分一致性的机制。</p>
+<p>本文的研究对象的是分布式数据库及其一致性。</p>
+<p>作者：</p>
+<ul>
+<li>Giovanni Bernardi, IMDEA Software Institute</li>
+<li>Alexey Gotsman, IMDEA Software Institute</li>
+</ul>
+<h2 id="Introduction">Introduction</h2>
+<p>为了实现可扩展性和可用性，现代互联网服务通常依赖于大型数据库，这些数据库在大量节点和/或广阔的地理跨度上复制和分区数据（例如，[14、20、26、3、6、4、5、11、22、27、10]）。数据库客户端在任何节点上调用数据事务，节点之间使用消息传递相互传达更改。理想情况下，我们希望这个分布式系统能够提供关于事务处理的强保证，例如可序列化性 [8]：如果这些事务按某种顺序串行执行，则可以获得并发执行一组事务的结果。可序列化性很有用，因为它允许应用程序程序员轻松建立所需的正确性属性。例如，要检查应用程序的事务是否保留给定的数据完整性约束，程序员只需检查每个事务在单独执行时是否都保留了约束，而不必担心并发性。不幸的是，实现可串行化需要数据库节点之间进行过多的同步，这会减慢数据库的速度，甚至在副本之间的网络连接失败时导致数据库不可用 [17, 1]。因此，如今的大型数据库通常提供弱一致性保证，这允许非串行化行为，称为异常。</p>
+<p><img src="/47505/image-20240926231213115.png" alt></p>
+<p>作为一个激励性的例子，考虑一个玩具在线拍卖应用程序，其交易由图 1 中的交易程序定义。程序 RegUser 创建一个新用户帐户。它操作表 USERS，该表的行包含主键 (uId) 和昵称。只有昵称 uname 未出现在 USERS 中时，RegUser(uname) 的调用才会在 USERS 中插入新行，以确保昵称是唯一的。程序 ViewUsers 可用于查看所有用户。某些数据库 [22, 26, 3] 可能允许执行 RegUser 和 ViewUsers，例如图 2(c) 中所示的那个。RegUser 的两次调用生成事务 T1 和 T2；它们写入两行 USERS，用 x 和 y 表示，以注册用户 Alice 和 Bob。然后程序 ViewUsers() 被调用两次；T3 中的调用看到 Alice 但没有 Bob，而 T4 中的调用看到 Bob 但没有 Alice。这个结果称为长分叉异常，无法通过以任何顺序执行这四个事务来获得，因此是不可序列化的。</p>
+<p>过去几年，针对现代大型数据库提出了许多新的事务一致性模型 [22、11、26、3、5]，这些模型的不同之处在于它们通过暴露此类异常来削弱一致性，以换取更好的性能。不幸的是，应用程序程序员通常缺乏确保这些一致性模型的弱点不会违反应用程序正确性的技术。这种情况阻碍了主流数据库开发人员和应用程序程序员采用新的一致性模型。</p>
+<p>解决此问题的一种方法是使用应用程序鲁棒性的概念 [16, 15, 9]。如果应用程序在使用该模型或序列化能力的数据库时表现相同，则该应用程序对特定弱一致性模型具有鲁棒性。如果应用程序对给定的弱一致性模型具有鲁棒性，那么程序员就可以获得使用弱一致性的性能优势，同时能够轻松检查所需的正确性属性。</p>
+<p>在本文中，我们制定了针对三种最近提出的一致性模型检查应用程序鲁棒性的标准——因果（又名因果+）一致性（CC）[22]、前缀一致性[11]（PC）和并行快照隔离[26]（PSI，又名非单调快照隔离[3]）。作为我们研究结果的推论，我们还推导出了经典快照隔离模型[6]（SI）的现有鲁棒性标准[16]。我们的标准还处理一致性模型的变体，这些变体允许应用程序员要求在可序列化性下执行某些事务，从而确保原本不稳健的应用程序的鲁棒性。</p>
+<p>我们利用最近提出的框架 [12] 以声明方式指定其语义（第 2 节），以统一和系统的方式处理上述四种一致性模型。特别是，我们考虑的所有一致性模型都保证事务的原子可见性：事务执行的所有写入操作要么可以被其他事务观察到，要么都不能被观察到。这使我们能够通过从应用程序执行中的事务内部抽象出来，来简化建立鲁棒性标准所需的推理。我们首先提出一个动态鲁棒性标准，用于检查给定执行是否可序列化（第 3 节）。我们根据执行的依赖关系图 [2] 制定此标准，描述其事务之间的几种关系：如果执行的依赖关系图不包含某种形式的循环，则执行是可序列化的，我们称之为关键（critical）。针对不同一致性模型的鲁棒性标准在哪些循环被视为关键方面有所不同。然后，我们说明如何将单个执行上的动态鲁棒性标准提升为静态标准，以检查给定应用程序的所有执行是否可序列化（第 4 节）。</p>
+<h2 id="Consistency-Model-Specifications">Consistency Model Specifications</h2>
+<p>我们首先回顾一下 [12] 中数据库计算的正式模型和我们处理的一致性模型的规范。这些规范是声明性的，这大大简化了我们的形式化开发。尽管如此，如 [12] 所示，这些规范相当于某些操作规范，接近于实现。</p>
+<blockquote>
+<p>定义 1</p>
+<p>事务 $T, S, \dots$ 是一对 $(E, \ltpo)$，其中 $E \subseteq \Event$ 是具有不同标识符的有限非空事件集，程序顺序 $\ltpo$ 是 $E$ 上的全序。历史 $H$ 是具有不相交事件标识符集的事务的有限集。带注释的历史 $(H, \level)$ 是一对，其中 $H$ 是历史，$\level: H \to \set{\SER, \perp}$。执行是三元组 $X = ((H, \level), \lthb, \ltar)$，其中 $(H, \level)$ 是带注释的历史，$\lthb$ 是 $H$ 上的严格偏序，$\ltar$ 是 $H$ 上的全序，且满足 $\lthb \subseteq \ltar$。我们称 $\lthb$ 为 先行发生关系（happens-before），称 $\ltar$ 为 仲裁（arbitration）。</p>
+</blockquote>
+<p>我们将执行的组件表示为 $X.H$，并对类似的结构使用相同的符号。</p>
+<p>事务记录了一组操作以及客户端程序调用它们的顺序。历史记录了在有限的数据库计算中提交的事务。为了简化，我们省略了对已中止和进行中的事务以及无限数据库计算的处理。带注释的历史通过一个函数 $\level$ 丰富了历史，该函数记录了程序员请求在可串行化条件下执行的事务，以及在底层数据库提供的弱一致性模型下执行的事务。最后，执行通过先行发生关系和仲裁顺序丰富了带注释的历史，这些关系以声明的方式表示了内部数据库的处理过程。直观上，$T \lthb S$ 表示 $S$ 知道 $T$ 执行的更新，因此 $S$ 中操作的结果可能取决于 $T$ 的效果。我们称那些没有先行发生关系的事务为并发（concurrent）。关系 $T \ltar S$ 表示 $S$ 写入的对象版本取代了 $T$ 写入的版本。约束 $\lthb \subseteq \ltar$ 确保事务 $T$ 写入的数据版本不会被 $T$ 知道的写入所取代。</p>
+<p>我们使用集合 $\set{\CC, \PC, \PSI, \SI, \SER}$ 来表示我们在第 1 节（Section 1）中处理的一致性模型，并且我们通过 $wm$ 遍历这个集合。在图 4 中，我们指定了这些一致性模型，作为图 3 中公理的组合，以约束执行。形式上，我们令由一致性模型 $wm$ 允许的带注释历史集由 $\hist(wm) = \set{(X.H, X.\level) \mid X \models wm}$ 给出。现在我们解释这些公理以及它们（不）允许的异常。我们在图 2 中总结了这些异常。</p>
+<p><img src="/47505/image-20240926232749214.png" alt></p>
+<p>给定一个全序 $\lt \subseteq A \times A$ 和一个集合 $B \subseteq A$，我们写作 $\max(B, \lt)$ 表示元素 $b \in B$，使得 $\forall a \in B. a \le b$；如果 $A = \emptyset$，则 $\max(B, \lt)$ 未定义。我们以显而易见的对偶方式定义 $\min$。在下文中，当我们写 $\max(B, \lt)$ 或 $\min(B, \lt)$ 时，我们假设它们是已定义的。给定一个偏序 $\lt \subseteq A \times A$ 和元素 $a \in A$，我们定义 $a$ 的下集（downset）为 $\before(a, \lt) = \set{a' \in A \mid a' \lt a}$，并令 $\before(a, \lt, op\ x) = \before(a, \lt) \cap \set{a' \in A \mid a' \Vdash op(x, _)}$。</p>
+<p>内部一致性公理（$\Int$）确保在一个事务中，数据库提供顺序语义：在事务 $(E, \ltpo)$ 中，对象 $x$ 上的读取事件 $e$ 返回 $e$ 之前在 $x$ 上发生的最后一个事件的值。由集合 $\before(e, \ltpo, _x)$ 给出的事件。在 $(E, \ltpo)$ 中，如果读取 $e$ 之前没有在同一对象上（即 $\before(e, \ltpo, _x) = \emptyset$）的操作，那么它的值由其他事务的写入决定，使用外部一致性公理（$\Ext$）。为了形式化 $\Ext$，我们将 $\vdash$ 符号扩展到事务的操作。对于给定的事务 $T = (E, &lt;_{\po})$，对象 $x \in \Obj$ 和自然数 $n \in \mathbb{N}$，我们写作：</p>
+<ul>
+<li>$T \vdash \write(x, n)$ 当且仅当 $\max\set{e \in E | e \vdash\write(x,_) }, &lt;_{\po}) \vdash\write(x, n) $；</li>
+<li>$T \vdash\read(x, n) $ 当且仅当 $\min\set{e \in E | e \vdash_(x,_) }, &lt;_{\po}) \vdash\read(x, n) $。</li>
+</ul>
+<p>根据 $\Ext$，如果一个事务 $T$ 在对对象 $x$ 进行写操作之前对其进行了读操作，那么这个读操作返回的值由那些在 $T$ 之前发生并且写入了 $x$ 的事务决定；这些事务的集合由 $\before(T,\lthb, \write x)$ 给出。如果这个集合是空的，那么 $T$ 读取初始值 0；否则，它读取由 $\ltar$ 中的最后一个事务写入的值。$\Ext$ 保证了事务的原子可见性（atomic visibility）：一个事务的所有写入操作要么全部对另一个事务可见，要么全不可见。关于此问题的详细讨论可参见 [12] 第 3 节。</p>
+<p>$\SER$ 公理形式化了应用程序员要求以串行化方式执行的事务所提供的附加保证，这些要求记录在 $\level$ 中。我们将在后文详细讨论此公理；现在我们假设对所有执行来说 $\level = (λT.\bot)$。</p>
+<p>公理 $\Int$、$\Ext$ 和 $\SER$ 定义了因果一致性（$\CC$） [22]。它禁止了图 2(a) 中所示的因果性违背异常（causality violation anomaly），在该异常中，一个用户看到了评论内容，但没有看到与该评论相关联的图书。这一异常被禁止是因为 $\lthb$ 是传递的，因此必须有 $T_1 \lthb T_3$。由于 $T_1 \ltar T_2$，$T_2$ 的写入覆盖了 $T_1$ 的写入，因此 $\Ext$ 推导出 $T_3 \vdash\read(y, review) $ 和 $T_3 \vdash\read(x, book) $。</p>
+<p>因果一致性允许丢失更新异常（lost update anomaly），如图 2(b) 所示。该异常可能由程序 $\mathtt{ViewItem}$ 和 $\mathtt{StoreBid}$ 产生，前者允许用户查询某物品的信息，后者允许用户对物品进行出价操作。它们访问一张 $\mathtt{ITEMS}$ 表，其中的行代表物品，并包含主键 $\mathtt{iId}$、物品描述 $\mathtt{desc}$ 和当前出价数 $\mathtt{nbids}$。图 2(b) 中的异常由两次 $\mathtt{StoreBid}$ 调用产生，它们分别生成了事务 $T_1$ 和 $T_2$，目的是增加某物品的出价数。这两个事务读取了物品的初始出价数（即 0），并发地修改了它，导致其中一次更新被丢失。此结果由第三个事务 $T_3$（由 $\mathtt{ViewItem}$ 生成）观察到。丢失更新异常由公理 $\mathtt{Conflict}$ 禁止，该公理保证更新相同对象的事务不能并发执行。此公理排除了图 2(b) 中的执行历史。我们通过加强因果一致性并引入 $\mathtt{Conflict}$ 公理来定义并行快照隔离（parallel snapshot isolation, $\PSI$） [26]。这种一致性模型允许出现图 2(c) 所示的长分叉异常（long fork anomaly），该异常在第 1 节中讨论过。</p>
+<p>我们通过使用公理 $\Prefix$ 来加强因果一致性（$\CC$）和并行快照隔离（$\PSI$），从而定义前缀一致性（prefix consistency, $\PC$） [11] 和快照隔离（snapshot isolation, $\SI$） [6]。$\Prefix$ 公理的含义是：如果事务 $T$ 观察到了事务 $S$，那么它也必须观察到所有在 $\ltar$ 中位于 $S$ 之前的事务，这一性质使用关系的顺序组合 $;$ 来形式化。$\Prefix$ 公理禁止了图 2(c) 中的执行历史：$T_1$ 和 $T_2$ 必须通过 $\ltar$ 相关联；但若如此，要么 $T_4$ 必须观察到 $\mathtt{Alice}$，要么 $T_3$ 必须观察到 $\mathtt{Bob}$。与因果一致性一样，前缀一致性允许出现图 2(b) 中的丢失更新异常。快照隔离禁止了丢失更新，但允许图 2(d) 所示的写偏差异常（write skew anomaly）。此异常可能由 $\mathtt{RegUser}$ 生成的执行产生，图 1 中的对象 $x$ 和 $y$ 分别对应于 $\mathtt{USERS}$ 表的不同行。$\mathtt{RegUser}$ 的两次调用生成了未能看到彼此写入的事务，结果是两位用户使用了相同的昵称并同时注册成功。</p>
+<p><img src="/47505/image-20240926232823371.png" alt></p>
+<h2 id="Dynamic-Robustness-Criteria">Dynamic Robustness Criteria</h2>
+<p>我们的第一个目标是定义标准来检查我们考虑的一致性模型之一中的单个执行 $X$ 是否具有可序列化历史记录：$X.H \in \hist(\SER)$。从这些动态稳健性标准中，在下一节中，我们将得出静态标准来检查给定应用程序的所有执行是否都是这种情况。</p>
+<p>我们的动态标准是基于依赖图来制定的，这在数据库文献中被广泛使用 [2]。设标签集 $L$ 定义如下：$D = \set{(\wr, x), (\ww, x) | x \in \Obj}, L = D \cup \set{(\rw, x) | x \in \Obj}$。我们使用 $\lambda$ 来表示 $L$ 中的元素，并用 $s, t$ 表示 $L^*$ 的元素。一个图 $G$ 是一个有序对 $(H, \longrightarrow)$，其中 $H \in \text{Hist}$，且 $\longrightarrow \subseteq H \times L \times H$。我们用 $T \overset{\lambda}{\longrightarrow} S \in G$ 来表示 $(T, \lambda, S) \in \longrightarrow$。我们还使用一些图论的概念。图 $G$ 中的路径 $\pi$ 是一系列非空有限边的序列 $T_0 \overset{\lambda_0}{\longrightarrow} T_1 \overset{\lambda_1}{\longrightarrow} \ldots \overset{\lambda_{n-1}}{\longrightarrow} T_n$。在这种情况下，我们写作 $\pi \in G$。如果 $T_0 = T_n$，则该路径是一个环；如果路径上所有其他事务对都是不同的，则它是一个简单循环。我们还写作 $T \overset{\lambda}{\longrightarrow} S \in \pi$ 来表示边 $T \overset{\lambda}{\longrightarrow} S$ 出现在路径 $\pi$ 中。</p>
+<p>给定一个图 $G = (H, \longrightarrow)$，我们用 $s \longrightarrow^+$ 表示最小关系，使得：</p>
+<ol>
+<li>如果 $T \overset{\lambda}{\longrightarrow} S \in G$，则 $T \overset{\lambda}{\longrightarrow}^+ S$；</li>
+<li>如果 $T \overset{\lambda}{\longrightarrow} T_0 \in G$，并且存在某个 $T' \in H$ 使得 $T' \overset{s}{\longrightarrow}^+ S$，则 $T \overset{\lambda s}{\longrightarrow}^+ S$。</li>
+</ol>
+<p>我们用 $\overset{s}{\longrightarrow}^<em>$ 表示 $\overset{s}{\longrightarrow}^+$ 的自反闭包，因此对于每个 $T \in H$，都有 $T \overset{\varepsilon}\longrightarrow^</em> T$。现在我们定义一个将执行映射到依赖图的映射。</p>
+<blockquote>
+<p>定义 2 依赖图</p>
+<p>执行 $X = ((H, _), \lthb, \ltar )$ 的动态依赖图是 $\DDG(X) = (H, \longrightarrow)$，其中对于每个 $x \in \Obj$，$\longrightarrow$ 包含了下列三元组：</p>
+<ul>
+<li>读依赖：$T \overset{\wr, x}{\longrightarrow} S$，若 $S \vdash \read(x, _)$ 并且 $T = \max(\before(S, \lthb, \write \ x), \ltar)$；</li>
+<li>写依赖：$T \overset{\ww, x}{\longrightarrow} S$，若 $T \vdash \write(x, _), S \vdash \write(x, _)$ 并且 $T \ltar S$；</li>
+<li>反向依赖：$T \overset{\rw, x}{\longrightarrow} S$ 若 $T \ne S$ 并且满足以下的一个条件：
+<ol>
+<li>$T \vdash \read(x, _), S \vdash \write(x, _)$ 并且 $\before(T, \lthb, \write \ x) = \emptyset$；</li>
+<li>$\exist T' \in H. T' \overset{\wr, x}{\longrightarrow} S \land T' \overset{\ww, x}{\longrightarrow} S$。</li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<blockquote>
+<p>引理 3</p>
+<p>对于每个 $X$，若 $X$ 满足 $\Int$ 和 $\Ext$ 公理（这意味着 $X$ 符合 $\RA$），且 $\DDG(X)$ 无环，则 $X.H \in \hist(\SER)$。</p>
+</blockquote>
+<blockquote>
+<p>定义 4 执行的关键环</p>
+<p>给定一个执行 $X$，某个边 $T \overset{\lambda}{\longrightarrow} S \in \DDG(X)$ 是不被保护的，若 $X.\level(T) \ne \SER$ 或 $X.\level(S) \ne \SER$。$T_0, T_1, \dots, T_n$（其中 $T_0 = T_n$）包含某个简单无弦且 rw-最小的环 $\pi \in \DDG(X)$ 是：</p>
+<ul>
+<li>CC-critical：若 $\pi$ 包含两个未被保护的边 $T_i \overset{\rw, _}{\longrightarrow} T_{i+1}$ 和 $T_j \overset{\lambda}{\longrightarrow} T_{j+1}$，其中 $i \ne j$ 且 $\lambda \in \set{(\ww, _), (\rw, _)}$；</li>
+<li>PC-critical：若 $\pi$ 包含一个未被保护的边 $T_i \overset{\rw, _}{\longrightarrow} T_{i+1}$ 和至少两个相邻的未被保护的标记属于 $\set{(\ww, _), (\rw, _)}$ 边；</li>
+<li>PSI-critical：若
+<ol>
+<li>$\pi$ 包含至少两个未被保护的 $\rw$ 边，并且；</li>
+<li>对每个 $T_i \overset{\rw, x}{\longrightarrow} T_{i+1}, T_j \overset{\rw, y}{\longrightarrow} T_{j+1} \in \pi$，若 $i \ne j$，则 $x \ne y$；</li>
+</ol>
+</li>
+<li>SI-critical：若
+<ol>
+<li>$\pi$ 包含至少两个相邻的未被保护的 $\rw$ 边，并且；</li>
+<li>对每个 $T_i \overset{\rw, x}{\longrightarrow} T_{i+1}, T_j \overset{\rw, y}{\longrightarrow} T_{j+1} \in \pi$，若 $i \ne j$，则 $x \ne y$。</li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<p>图 2 中的执行图（级别为 $(\lambda T.\bot)$）包含关键环：（c）包含一个 PSI 关键环，（d）包含一个 SI 关键环。</p>
+<blockquote>
+<p>定理 5</p>
+<p>对于每个 $wm$ 和 $X$，如果 $X \models wm$，则 $\DDG(X)$ 包含一个环，当且仅当它包含一个 $wm$ 关键环。</p>
+</blockquote>
+<p>根据定理 5 和引理 3，我们得到我们的动态鲁棒性标准。</p>
+<blockquote>
+<p>推论 6 动态鲁棒性充分条件（其实也是充要条件）</p>
+<p>对于每个 $wm$ 和每个 $X$，如果 $X \models wm$ 且 $\DDG(X)$ 不包含任何 $wm$ 关键环，则 $X.H \in \hist(\SER)$。</p>
+</blockquote>
+<p>我们注意到，上述 SI 鲁棒性标准是现有标准的一个变体 [16, 15]。在我们的设置中，它只是我们新标准的一个结果。</p>
+<p>为了证明定理 5，我们展示图 3 中的公理如何影响依赖图中的边和路径的性质。首先，观察到 $wr$、$ww$ 边与路径之间的关系。对于每个 $X$ 和每个 $T, S \in X.H$，定义确保：</p>
+<p>$$
+T \overset{\wr}{\longrightarrow} S \in \DDG(X) \Rightarrow T \lthb S\
+$$</p>
+<p>$$
+(T \overset{\wr}{\longrightarrow} S \in \DDG(X) \lor T \overset{\ww}{\longrightarrow} S \in \DDG(X)) \Rightarrow T \ltar S\
+$$</p>
+<p>$$
+X \models \Conflict \land T \overset{\ww}{\longrightarrow} S \in \DDG(X) \Rightarrow T \lthb S
+$$</p>
+<p>这些蕴含关系使我们得以证明，在某些条件下，如果两个事务在依赖图中通过路径连接，它们也通过发生前关系或仲裁相互关联。</p>
+<blockquote>
+<p>引理 7</p>
+<p>对于任意 $X$，$s \in L^+$，且 $T \overset{s}{\longrightarrow}^{+} S \in \DDG(X)$，如果 $X \models \SerTotal$，则：</p>
+<ol>
+<li>如果所有 $\rw$ 和 $\ww$ 边在 $T \overset{s}{\longrightarrow}^{+} S$ 中受到保护，则 $T \lthb S$；</li>
+<li>如果所有 $\rw$ 边在 $T \overset{s}{\longrightarrow}^{+} S$ 中受到保护，则 $T \ltar S$；</li>
+<li>如果 $X \models \Conflict$ 并且所有 $\rw$ 边在 $T \overset{s}{\longrightarrow} S$ 中受到保护，则 $T \lthb S$。</li>
+</ol>
+</blockquote>
+<p>接下来的引理表明，如果 $T \overset{\rw,x}{\longrightarrow} S$，则 $T$ 不能发生在 $S$ 之前：在这种情况下，$T$ 必须读取至少与 $S$ 写入的值相同或更新的值，这与反依赖的定义相矛盾。</p>
+<blockquote>
+<p>引理 8
+$$
+\forall X, \forall x \in \Obj, \forall T, S \in X.H.T \overset{\rw,x}{\longrightarrow} S \in \DDG(X) \implies S \not\le_{hb} T \land T \vdash \read(x,_) \land S \vdash \write(x, _)
+$$</p>
+</blockquote>
+<blockquote>
+<p>定理 5 证明</p>
+<p>该命题的“如果”蕴含关系是显而易见的，因此让我们证明“当且仅当”的含义。假设图 $\DDG(X)$ 包含一个循环 $\pi'$。从 $\pi'$ 我们可以很容易地构建一个循环：</p>
+<p>$$
+\pi = T_0 \overset{\lambda_0}{\longrightarrow} T_1 \overset{\lambda_1}{\longrightarrow} \ldots \overset{\lambda_{n-1}}{\longrightarrow} T_n, (\text{where } T_0 = T_n, n \geq 2)
+$$</p>
+</blockquote>
+<p>在 $\DDG(X)$ 中，该循环是简单的、无弦的且 $\rw$ 最小的。该论证是案例分析关于 $wm$ 的。我们考虑 CC 和 PSI，并推迟完整证明到 [7]。</p>
+<h3 id="从依赖图推导执行">从依赖图推导执行</h3>
+<p>在 CONCUR'16 原文中：</p>
+<ol>
+<li>$\wr$ 边意味着 $\lthb$ 关系；</li>
+<li>$\Conflict$ 公理下的 $\ww$ 边意味着 $\lthb$ 关系；</li>
+<li>$\wr \cup \ww$ 边意味着 $\ltar$ 关系；</li>
+</ol>
+<p>对于 $\rw$ 边，我们能得到的限制只有：</p>
+<blockquote>
+<p>定理 $\alpha$</p>
+<p>在 $\SerTotal$ 公理约束下，被保护的 $\rw$ 边意味着 $\ltar$ 和 $\lthb$；</p>
+</blockquote>
+<p>定理 7 实际上是这一命题利用 $\lthb$ 的传递性得到的引理。</p>
+<p>如果对 $\level=(\SER)$ 的事务的限制从 $\SerTotal$ 强化为 SER-(2)，定理 $\alpha$ 仍然成立。其他性质在表格第 4 列。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">RA</th>
+<th style="text-align:center">Update Atomic</th>
+<th style="text-align:center">SI</th>
+<th style="text-align:center">SER</th>
+<th style="text-align:center">protected edge<br>（$\SerTotal$）</th>
+<th style="text-align:center">$T_1[wm] \longrightarrow T_2[\SER]$<br>（by SER-(2)）</th>
+<th style="text-align:center">$T_1[wm] \longrightarrow T_2[\SI]$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">$\wr$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+</tr>
+<tr>
+<td style="text-align:center">$\ww$</td>
+<td style="text-align:center">$\ltar$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+</tr>
+<tr>
+<td style="text-align:center">$\rw$</td>
+<td style="text-align:center">none</td>
+<td style="text-align:center">none</td>
+<td style="text-align:center">none</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">$\lthb$</td>
+<td style="text-align:center">none</td>
+<td style="text-align:center">none</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Static-Robustness-Criteria">Static Robustness Criteria</h2>
+<p>我们现在说明如何将动态鲁棒性标准（推论 6）提升为静态标准，这使得程序员能够分析其应用程序的行为，并可作为静态分析工具的基础。</p>
+<p>我们通过一组事务程序 fi 来定义应用程序 A，并给出其事务代码：A = {f1, ..., fn}（例如，参见图 1）。按照数据库文献 [16] 中的标准，这从应用程序逻辑的其余部分中抽象出来，以专注于直接与数据库交互的部分。我们将程序对 I = (f, v) 和其实际参数向量称为程序实例。应用程序实例 I 是一组程序实例，带注释的应用程序实例是一对 (I, levelS)，其中 levelS : I → {SER, ⊥} 定义程序员请求在可序列化下执行哪些程序。我们首先制定检查特定带注释的应用程序实例的稳健性的标准，该标准是通过使用给定参数运行一组事务程序得出的。然后，我们概述了如何将这些标准推广到整个应用程序。</p>
+<p>我们旨在以最简单的形式说明将动态稳健性标准提升为静态稳健性标准的想法。为此，我们从编程语言的语法中抽象出来，并假设我们只给出了每个事务程序读取或写入的对象集的近似信息。也就是说，我们假设一个函数 rwsets 将每个程序实例 I 映射到三元组 rwsets(I) = (R3, W3, W2)。非正式地说，R3 和 W3 是可能在 I 的某些执行中读取或写入的所有对象的集合，而 W2 是必须在 I 的任何执行中写入的对象的集合，但前提是 W2 ⊆ W3。例如，对于 I = (StoreBid,hiId1, 7i)（图 1），我们有</p>
+<p><img src="/47505/image-20240927135725346.png" alt></p>
+<p>其中 $∗$ 表示“所有字段”或“所有行”。</p>
+<p>为了形式化读/写集的含义，我们定义了一个关系，该关系确定是否可以由给定的 I 生成历史记录。我们让 T I 对于 rwsets(I) = (R3, W3, W2)，如果：</p>
+<p><img src="/47505/image-20240927135926828.png" alt></p>
+<p>我们将 与带注释的历史和带注释的应用实例的关系提升：</p>
+<p><img src="/47505/image-20240927140730181.png" alt></p>
+<p><img src="/47505/image-20240927140746982.png" alt></p>
+<blockquote>
+<p>定义 9 静态依赖图</p>
+<p><img src="/47505/image-20240927140829642.png" alt></p>
+</blockquote>
+<p>图 6 显示了 (3) 中 I 的静态依赖图。非正式地，静态依赖图 SDG(I) 的边描述了由 I 产生的执行中事务之间可能存在的依赖关系：边 I λ &gt; J 表示可能存在的依赖关系，边 I λ ←→ J 表示必须存在的依赖关系。正式地，给定一个带注释的应用程序实例 (I, levelS)，我们说对 (DDG(X), X.level) 被对 (SDG(I), levelS) 过度近似，写为 (DDG(X), X.level) (SDG(I), levelS)（即，前者是后者的子图），如果对于某个总函数 f : X.H → I 我们有：</p>
+<p><img src="/47505/image-20240927140946401.png" alt></p>
+<blockquote>
+<p>引理 10
+$$
+\forall X . \forall (\I, \level_S).(X.H, X.\level) \Vdash (\I, \level_S) \Rightarrow (\DDG(X), \level) \triangleleft (\SDG(\I), \level_S)
+$$</p>
+</blockquote>
+<p>我们现在通过使用与动态依赖图相同的路径和循环概念来制定静态鲁棒性标准（第 3 节）。给定一对 (I, levelS) 和程序实例 I0, I1, . . . , In（其中 I0 = In）中 π ∈ SDG(I) 中的一个循环。</p>
+<blockquote>
+<p>定义 11 程序实例的关键环</p>
+<p>对于一对 $(\I, \level_S)$，若 $\level_S(I_i) \ne \SER$ 或 $\level_S(I_{i+1}) \ne \SER$，则称 $I_i \overset{\lambda}{\dashrightarrow} I_{i+1} \in \SDG(\I)$ 是未被保护的。一个环 $\pi \in \SDG(\I)$ 包括 $I_0, I_1, \dots, I_n$（其中 $I_0 = I_n$）是：</p>
+<ul>
+<li>CC-critical：若 $\pi$ 包含两条未被保护的边 $I_i \overset{\rw, _}{\dashrightarrow} I_{i+1}, I_j \overset{\lambda}{\dashrightarrow} I_{j+1}$，其中 $i \ne j$ 并且 $\lambda \in \set{(\ww, _), (\rw, _)}$；</li>
+<li>PC-critical：若 $\pi$ 包含一个未被保护的边 $I_i \overset{\rw, _}{\dashrightarrow} I_{i+1}$ 和至少两个相邻的未被保护的标记属于 $\set{(\ww, _), (\rw, _)}$ 边；</li>
+<li>PSI-critical：若
+<ol>
+<li>$\pi$ 包含至少两个未被保护的 $\rw$ 边，并且；</li>
+<li>对每个 $I_i \overset{\rw, x}{\dashrightarrow} I_{i+1}, I_j \overset{\rw, y}{\dashrightarrow} I_{j+1} \in \pi$，若 $i \ne j$，则 $x \ne y$；</li>
+</ol>
+</li>
+<li>SI-critical：若
+<ol>
+<li>$\pi$ 包含至少两个相邻的未被保护的 $\rw$ 边，并且；</li>
+<li>对每个 $I_i \overset{\rw, x}{\dashrightarrow} I_{i+1}, I_j \overset{\rw, y}{\dashrightarrow} I_{j+1} \in \pi$，若 $i \ne j$，则 $x \ne y$。</li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<p>请注意，与动态依赖图中的关键循环（定义 4）不同，静态图中的关键循环不必是简单的。以下引理指出 $\triangleleft$ 保留了关键循环。</p>
+<blockquote>
+<p>定理 12</p>
+<p>对每个 $(G, \level), (F, \level_S)$ 和 $wm$，使得 $(G, \level) \triangleleft (F, \level_S)$，若 $G$ 包含 wm-critical 环，则 $F$ 包含 wm-critical 环。</p>
+<p>换言之，若 $F$ 不包含 wm-critical 环，则 $G$ 不包含 wm-critical 环。该关系是单向的。</p>
+</blockquote>
+<blockquote>
+<p>定理 13 静态鲁棒性充分条件</p>
+<p>对每个 $(H, \level), (\I, \level_S)$ 和 $wm$，若 $\SDG(\I)$ 不包含 wm-critical 环并且 $(H, \level) \in \hist(wm)$，则若 $(H, \level) \Vdash (\I, \level_S)$，我们有 $H \in \hist(\SER)$。</p>
+</blockquote>
+<ul>
+<li>静态鲁棒性充分条件：若程序 $\I$ 满足某条件，则 $\I$ 产生的所有历史 $H \in \hist(\SER)$；反之，若 $\I$ 不满足这些条件，则<strong>不能保证</strong>所有 $H \in \hist(\SER)$；</li>
+<li>程序鲁棒性充要条件：若程序 $\I$ 满足某条件，则 $\I$ 产生的所有历史 $H \in \hist(\SER)$；反之，若 $\I$ 不满足这些条件，则<strong>保证并非</strong>所有 $H \in \hist(\SER)$。</li>
+</ul>
+<p>如果在定理 13 的基础上，能构造出某个反例 $(H, \level) \Vdash (\I, \level_S)$ 但 $H \not \in \hist(\SER)$，则充分条件上升为充要条件。</p>
+<h3 id="Analysing-Whole-Applications">Analysing Whole Applications</h3>
+<p>定理 13 中的静态标准允许程序员分析给定应用程序实例的鲁棒性。使用定理完整分析应用程序需要考虑其无限数量的实例，这项任务最好由自动静态分析工具完成。我们现在概述如何使用抽象解释 [13, 25] 中的想法来有限地表示和分析应用程序的所有实例集。在未来，这可以为在静态分析工具中自动化我们的鲁棒性标准铺平道路。由于篇幅限制，我们仅通过示例介绍这些概念。</p>
+<h2 id="Related-Work">Related Work</h2>
+<p>在数据库环境中，应用程序鲁棒性最早是由 Fekete 等人 [16] 研究的，他们提出了针对快照隔离 (SI) 的鲁棒性标准 [6]。然后，Fekete 将该标准扩展到 SI 数据库，允许程序员为某些事务请求可序列化性 [15]，我们也考虑了这种机制。我们的标准的制定方式与 Fekete 等人的类似，使用依赖图 [2]。然而，与他们的工作相比，我们考虑了更微妙的并行快照隔离、前缀一致性和因果一致性模型，这些模型允许比 SI 更多的异常。我们使用的方法也不同于 Fekete 等人的方法。他们考虑了 SI 的操作规范 [6]，这使得鲁棒性标准的证明高度复杂。相比之下，我们可以从使用声明性规范中受益，通过利用事务的原子可见性 [12] 实现简洁性。这使我们能够更系统地提出鲁棒性标准。</p>
+<p>还研究了在常见多处理器和编程语言的弱共享内存模型上运行的应用程序的鲁棒性（例如 [9]）。然而，这方面的工作尚未考虑使用事务的应用程序。事务使一致性模型语义复杂化，这使得建立鲁棒性标准更具挑战性。</p>
+<p>应用程序中事务的可序列化性简化了其正确性属性的建立，但对此并非必要。因此，建立应用程序正确性的另一种方法是直接证明其所需属性，而不要求事务仅产生可序列化的行为。Lu 等人 [23] 为 ANSI SQL 隔离级别和 SI 提出了相应的方法，Gotsman 等人 [18] 为 PSI 和其他一些最新模型提出了相应的方法。这些方法是我们的补充：它们所需的条件可以被更多应用程序满足，但比健壮性更难检查。</p>
+<h2 id="Conclusion">Conclusion</h2>
+<p>在本文中，我们迈出了理解最近提出的大型数据库事务一致性模型对使用它们的应用程序的正确性属性的影响的第一步。为此，我们提出了检查使用弱一致性模型的应用程序何时仅表现出强一致性行为的标准。这使程序员能够检查应用程序的正确性是否会因选择特定的一致性模型或要在可序列化下执行的事务而得到保留。</p>
+<p>Fekete 等人对 SI 的鲁棒性结果此前已催生出用于静态检测应用程序中异常的自动工具 [19]。我们的工作可以为提供较弱一致性模型的数据库的类似进展奠定基础。我们的动态鲁棒性标准也具有独立意义：除了作为静态分析的基础外，此类标准还可用于优化运行时监控算法 [24, 28]。</p>
+<p>在建立鲁棒性标准时，我们采用了一种利用公理规范的系统方法 [12]：使用一致性模型的公理，我们表征了模型执行依赖图中允许的循环，并利用这些表征提供了可靠的静态分析技术。我们希望这种方法可以适用于针对大型数据库提出的其他一致性模型。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/5054/" rel="prev" title="CONCUR'17-Algebraic Laws for Weak Consistency">
+      <i class="fa fa-chevron-left"></i> CONCUR'17-Algebraic Laws for Weak Consistency
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/30786/" rel="next" title="融媒体中心撰稿须知">
+      融媒体中心撰稿须知 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Consistency-Model-Specifications"><span class="nav-number">2.</span> <span class="nav-text">Consistency Model Specifications</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dynamic-Robustness-Criteria"><span class="nav-number">3.</span> <span class="nav-text">Dynamic Robustness Criteria</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E4%BE%9D%E8%B5%96%E5%9B%BE%E6%8E%A8%E5%AF%BC%E6%89%A7%E8%A1%8C"><span class="nav-number">3.1.</span> <span class="nav-text">从依赖图推导执行</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Static-Robustness-Criteria"><span class="nav-number">4.</span> <span class="nav-text">Static Robustness Criteria</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Analysing-Whole-Applications"><span class="nav-number">4.1.</span> <span class="nav-text">Analysing Whole Applications</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Related-Work"><span class="nav-number">5.</span> <span class="nav-text">Related Work</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

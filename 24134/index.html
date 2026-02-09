@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 嵌入式软件概述 嵌入式软件开发路线图  系统越来越复杂，嵌入式系统的软件开发逐渐变成了软件专家的工作。 对电子硬件很了解，也愿意做一些和硬件密切相关的工作。 最近 10-15 年，伴随着嵌入式软件规模和复杂性的爆炸性增长，专门的软件开发团队进入了视野。软件团队在不断壮大，但这种增长不仅仅是因为完成所需的代">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式系统概论-06-嵌入式软件系统">
+<meta property="og:url" content="https://eaglebear2002.github.io/24134/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 嵌入式软件概述 嵌入式软件开发路线图  系统越来越复杂，嵌入式系统的软件开发逐渐变成了软件专家的工作。 对电子硬件很了解，也愿意做一些和硬件密切相关的工作。 最近 10-15 年，伴随着嵌入式软件规模和复杂性的爆炸性增长，专门的软件开发团队进入了视野。软件团队在不断壮大，但这种增长不仅仅是因为完成所需的代">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028192706903.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028192725068.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028193705833.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028193846411.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028194634375.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028195000138.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028195524284.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/13.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/14.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028201745196.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/16.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028202845308.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028203043746.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028203055481.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028203125597.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/23.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028203613699.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028205722628.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/28.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/29.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/30.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/32.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/33.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/34.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/35.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/36.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/37.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/38.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210016916.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210206007.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210209106.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210222115.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210227540.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210229830.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210236677.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210304227.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210249125.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210312798.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210317875.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24134/image-20221028210336101.png">
+<meta property="article:published_time" content="2022-10-27T08:20:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.548Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/24134/image-20221028192706903.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/24134/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>嵌入式系统概论-06-嵌入式软件系统 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/24134/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式系统概论-06-嵌入式软件系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-27 16:20:00" itemprop="dateCreated datePublished" datetime="2022-10-27T16:20:00+08:00">2022-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%AE%BA/" itemprop="url" rel="index"><span itemprop="name">2022Fall-嵌入式系统概论</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="嵌入式软件概述">嵌入式软件概述</h2>
+<h3 id="嵌入式软件开发路线图">嵌入式软件开发路线图</h3>
+<ol>
+<li>系统越来越复杂，嵌入式系统的软件开发逐渐变成了软件专家的工作。</li>
+<li>对电子硬件很了解，也愿意做一些和硬件密切相关的工作。</li>
+<li>最近 10-15 年，伴随着嵌入式软件规模和复杂性的爆炸性增长，专门的软件开发团队进入了视野。软件团队在不断壮大，但这种增长不仅仅是因为完成所需的代码。嵌入式软件团队中有不同领域的专家，包括网络、用户界面设计、硬件设备、传统嵌入式软件设计等方面。</li>
+</ol>
+<h3 id="嵌入式软件与桌面软件的对比">嵌入式软件与桌面软件的对比</h3>
+<h4 id="内存">内存</h4>
+<p>有限，影响编程语言的选择以及开发工具的使用（比如编译器优化）。</p>
+<h4 id="CPU-处理能力">CPU 处理能力</h4>
+<p>成本和功耗的考虑，ES 不得不采用保守的设计方案，其中的 CPU 往往只是恰好满足要求。</p>
+<h4 id="操作系统">操作系统</h4>
+<p>OS（Windows/Linux）、RTOS、专有 OS 或裸机</p>
+<h4 id="实时性">实时性</h4>
+<ol>
+<li>实时系统不一定会运行得很快，但一定是可预测的，通常的术语叫做确定性</li>
+<li>实时性的要求对于 OS 的选择和程序设计都有影响</li>
+</ol>
+<h4 id="开发流程">开发流程</h4>
+<ol>
+<li>ES 往往没有足够的资源进行软件开发。交叉开发对于工具的选择有很大影响。</li>
+<li>开发过程也不同，编辑/编译/调试的循环是一样的，但执行程序这一步却非常复杂，需要把代码转移到目标机上或者在某种环境下运行。</li>
+</ol>
+<h4 id="执行流程">执行流程</h4>
+<p>多数嵌入式设备从开机开始就会运行某个程序，该程序会一直运行到系统关机。这个程序可能存储在 ROM，也可能是从非易失性存储器转移到 RAM 中执行。</p>
+<h4 id="每一个嵌入式设备都是不同的">每一个嵌入式设备都是不同的</h4>
+<ol>
+<li>可能是技术层面的：不同的 CPU 架构、内存、外设、应用程序和操作系统</li>
+<li>也可能是商业运作层面的，比如手机开发、生产的商业模式就和核磁共振扫描仪完全不同。</li>
+</ol>
+<h4 id="嵌入式软件工具和组件">嵌入式软件工具和组件</h4>
+<p>与桌面软开发一样，嵌入式软件工程师需要运用工具来构建和测试软件。同时，也很可能会引入可重用的软件组件</p>
+<h4 id="开发工具">开发工具</h4>
+<p>从表面上看，嵌入式软件的开发过程和桌面软件很像：编译代码模块，然后在调试器的控制下执行。然而，并不这么简单，有着显著的不同。</p>
+<ul>
+<li>往往是使用交叉编译器来进行嵌入式软件的开发。</li>
+<li>有时候嵌入式应用中会直接包含小部分的汇编代码：出于对性能的考量。</li>
+<li>嵌入式链接器除了将多个对象模块和函数库例程整合在一起以外，链接器还负责在内存中正确定位代码和数据。嵌入式系统的内存映射十分复杂，对于精确性的要求也十分严格。链接器必需能够灵活地应对这些要求。</li>
+<li>嵌入式调试器并不是一个单一的组件，而是一系列对应不同运行环境的工具。借由在本地或者指令集模拟器中运行代码，代码可以仅在宿主机上运行。调试器也可以和一个目标板相连接（JTAG 或其他方式，如以太网），并执行代码。</li>
+<li>其他一些更有针对性的工具，典型的选项包括分析实时性能、代码执行时设备功耗情况的分析器。</li>
+</ul>
+<h4 id="软件组件">软件组件</h4>
+<p>最简单和显而易见的可重用的软件组件是库。一些库是由编译器提供的，嵌入式编译器提供的库应当是适合嵌入式环境的：可以重入、可以被存储在 ROM 中。（不会使用 printf：会有问题）</p>
+<p>其他可用的库，特别是针对 C++ 的库，如标准模板库 STL。这些库可能并不适合嵌入式应用，在使用时要多加小心。</p>
+<p>与硬件交互是难点之一。在 OS 内部设备驱动提供了这样的接口</p>
+<p>ES 的互联性不断提高，需要不同的网络支持，TCP/IP 或总线 CAN\I2C，其他网络技术 SNMP、Zigbee、Bluetooth、WiFi 和 USB。最重要的是应该检查有效性，确保符合标准，并能和其他系统互通互联。</p>
+<p>嵌入式设备对于有组织的数据存储是有需求的，比如能够应对电源故障和支持多线程。</p>
+<p>LCD（往往是触摸式的）成本减低让其能够被应用到嵌入式设计中。软件于是迎来了一项挑战：支持复杂的图像和用户界面。</p>
+<h2 id="软件如何影响硬件设计">软件如何影响硬件设计</h2>
+<h3 id="谁设计硬件？">谁设计硬件？</h3>
+<ol>
+<li>可能有同时负责软件和硬件的嵌入式工程师</li>
+<li>更有可能拥有两个团队：只有少数人同时掌握两项知识</li>
+<li>有关硬件的决定可能会对软件产生持久影响</li>
+</ol>
+<h3 id="软件-硬件的权衡">软件/硬件的权衡</h3>
+<p>微处理器选择：可能会影响软件效率</p>
+<p>内存大小和混合：</p>
+<ol>
+<li>延迟承诺是可取的</li>
+<li>ROM/RAM 互换性很有用</li>
+</ol>
+<p>外围设备实现：有时可通过软件替换。例如：计时器</p>
+<h3 id="调试硬件">调试硬件</h3>
+<ol>
+<li>在线仿真器：不广泛使用，</li>
+<li>监控调试器：
+<ol>
+<li>需要沟通渠道，额外的性能消耗</li>
+<li>需要 RAM/ROM 交换</li>
+</ol>
+</li>
+<li>片上调试：
+<ol>
+<li>需要板载连接器，相当于协议转换器</li>
+<li>需要 RAM/ROM 交换</li>
+</ol>
+</li>
+</ol>
+<h3 id="自检支持">自检支持</h3>
+<ol>
+<li>I/O 电路：“回送”可能有用</li>
+<li>板载开关：适用于配置或模式选择</li>
+<li>状态显示：提供对用户额外的信息</li>
+<li>可能是字符或只是 LED</li>
+<li>LED 至少可以具有 3 种状态：开，关，闪烁</li>
+</ol>
+<h2 id="嵌入式系统软件架构">嵌入式系统软件架构</h2>
+<h3 id="软件分层">软件分层</h3>
+<p><img src="/24134/image-20221028192706903.png" alt>
+<img src="/24134/image-20221028192725068.png" alt="Apollo 3.5 Architecture"></p>
+<h3 id="为何要为实时系统建立模型">为何要为实时系统建立模型</h3>
+<ol>
+<li>辅助测试和完善最终系统</li>
+<li>更重要的是，模型利用它所知的系统属性来描述整个系统，并能够被用于对系统特性的进一步研究</li>
+<li>实时工程师使用程序模型来开发软件和硬件，以便能将整个实时系统全盘考虑</li>
+<li>模型使得工程师能够预测程序的运行，从而满足系统的性能需求和功能需求</li>
+</ol>
+<h3 id="模型间的差异">模型间的差异</h3>
+<ol>
+<li>一些模型易于编写，但调试不易</li>
+<li>另一些难于编写，但调试容易</li>
+<li>一些模型使得程序运行得更快，但需要付出更多内存资源消耗的代价</li>
+<li>一些鲁棒性更好，但维护很简单的模型</li>
+</ol>
+<h3 id="嵌入式系统的可视化程序模型">嵌入式系统的可视化程序模型</h3>
+<p>实时系统有两种基本的程序模型：</p>
+<ol>
+<li>将实时应用视为单个执行线程</li>
+<li>将实时应用视为多个执行线程</li>
+</ol>
+<p>取决于需要构建什么类型的系统</p>
+<h4 id="单线程程序模型优缺点">单线程程序模型优缺点</h4>
+<p>优点：</p>
+<ol>
+<li>编程和再编程非常快速简单</li>
+<li>改变系统响应的特性的同时，往模型上添加新功能插件也相当容易</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>在于应用领域的限制</li>
+<li>难以做到安全地再编程</li>
+<li>很难应用到不同行为或不同环境的运行系统中去。</li>
+</ol>
+<h4 id="多线程程序模型的优缺点">多线程程序模型的优缺点</h4>
+<p>优点：</p>
+<ol>
+<li>允许将系统工作划分为几个逻辑阶段，然后编写相互独立的程序来处理各自的工作。</li>
+<li>所有处理过程并行。</li>
+<li>如果有更高吞吐量的需求，工程师可以在任务中引入新的通信和协作模型</li>
+</ol>
+<p>缺点：可能引入资源竞争，也就是不得不付出代价</p>
+<h3 id="嵌入式软件体系结构概述">嵌入式软件体系结构概述</h3>
+<ol>
+<li>轮询</li>
+<li>有限状态机</li>
+<li>带中断的轮询</li>
+<li>仅有中断</li>
+<li>功能队列调度</li>
+<li>实时操作系统（RTOS）</li>
+</ol>
+<h4 id="轮询">轮询</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">//Round Robin / Control Loop</span><br><span class="hljs-comment">//Everything is a function call from the main loop</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>&#123;<br>   <span class="hljs-keyword">while</span>(TRUE) &#123;<br>      <span class="hljs-keyword">if</span> (device_A <span class="hljs-keyword">requires</span> service)<br>         <span class="hljs-function">service device_A</span><br><span class="hljs-function">      <span class="hljs-title">if</span> <span class="hljs-params">(device_B <span class="hljs-keyword">requires</span> service)</span></span><br><span class="hljs-function">         service device_B</span><br><span class="hljs-function">      <span class="hljs-title">if</span> <span class="hljs-params">(device_A <span class="hljs-keyword">requires</span> service)</span></span><br><span class="hljs-function">         service device_A</span><br><span class="hljs-function">      <span class="hljs-title">if</span> <span class="hljs-params">(device_C <span class="hljs-keyword">requires</span> service)</span></span><br><span class="hljs-function">         service device_C</span><br><span class="hljs-function">      <span class="hljs-title">if</span> <span class="hljs-params">(device_A <span class="hljs-keyword">requires</span> service)</span></span><br><span class="hljs-function">         service device_A</span><br><span class="hljs-function">      <span class="hljs-comment">// ... and so on, making sure high-priority device_A always serviced on time</span></span><br><span class="hljs-function">   &#125;</span><br><span class="hljs-function">&#125;</span><br></code></pre></td></tr></table></figure>
+<p>可确定性：如果有任务不能确定时间，会导致其他所有的任务都被影响到。而这不符合嵌入式的实时性要求。</p>
+<p>轮询的特点：</p>
+<ol>
+<li>优先级：无，一切按顺序进行。</li>
+<li>响应时间：所有任务的总和。</li>
+<li>变更的影响：重大。改变执行任务时间或添加任务会影响所有其他任务。</li>
+<li>简单，没有共享数据问题：线性并行执行</li>
+</ol>
+<p><img src="/24134/image-20221028193705833.png" alt></p>
+<h5 id="Arduino-按下按钮时打开-LED">Arduino - 按下按钮时打开 LED</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">const</span> <span class="hljs-type">int</span> LED = <span class="hljs-number">13</span>; <span class="hljs-comment">// the pin for the LED</span><br><span class="hljs-type">const</span> <span class="hljs-type">int</span> BUTTON = <span class="hljs-number">7</span>; <span class="hljs-comment">// the input pin where the</span><br><span class="hljs-comment">// pushbutton is connected</span><br><span class="hljs-type">int</span> val = <span class="hljs-number">0</span>; <span class="hljs-comment">// val will be used to store the state</span><br><span class="hljs-comment">// of the input pin</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span> </span>&#123;<br>   <span class="hljs-built_in">pinMode</span>(LED, OUTPUT); <span class="hljs-comment">// tell Arduino LED is an output</span><br>   <span class="hljs-built_in">pinMode</span>(BUTTON, INPUT); <span class="hljs-comment">// and BUTTON is an input</span><br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span></span>&#123;<br>   val = <span class="hljs-built_in">digitalRead</span>(BUTTON); <span class="hljs-comment">// read input value and store</span><br>   it<br>   <span class="hljs-comment">// check whether the input is HIGH (button pressed)</span><br>   <span class="hljs-keyword">if</span> (val == HIGH) &#123;<br>      <span class="hljs-built_in">digitalWrite</span>(LED, HIGH); <span class="hljs-comment">// turn LED ON</span><br>   &#125;<span class="hljs-keyword">else</span>&#123;<br>      <span class="hljs-built_in">digitalWrite</span>(LED, LOW);<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="Arduino-Watchdog">Arduino - Watchdog</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;avr/wdt.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> TIMEOUT WDTO_8S <span class="hljs-comment">// predefine time, refer avr/wdt.h</span></span><br><span class="hljs-type">const</span> <span class="hljs-type">int</span> ledPin = <span class="hljs-number">13</span>; <span class="hljs-comment">// the number of the LED pin</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">setup</span><span class="hljs-params">()</span></span>&#123;<br>   <span class="hljs-comment">// disable the watchdog</span><br>   <span class="hljs-comment">//wdt_disable();</span><br>   <span class="hljs-built_in">pinMode</span>(ledPin, OUTPUT);<br>   <span class="hljs-comment">// LED light once after start or if timeout</span><br>   <span class="hljs-built_in">digitalWrite</span>(ledPin, HIGH);<br>   <span class="hljs-built_in">delay</span>(<span class="hljs-number">1000</span>);<br>   <span class="hljs-comment">// enable the watchdog</span><br>   <span class="hljs-built_in">wdt_enable</span>(TIMEOUT);<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span></span>&#123;<br>   <span class="hljs-comment">// process runing</span><br>   <span class="hljs-built_in">digitalWrite</span>(ledPin,LOW);<br>   <span class="hljs-built_in">delay</span>(<span class="hljs-number">9000</span>); <span class="hljs-comment">//if timeout trig the reset</span><br>   <span class="hljs-comment">//feed dog</span><br>   <span class="hljs-built_in">wdt_reset</span>();<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="有限状态机">有限状态机</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) &#123;<br>   <span class="hljs-keyword">switch</span>(state) &#123;<br>      <span class="hljs-keyword">case</span> IDLE:<br>         <span class="hljs-built_in">check_buttons</span>();<br>         <span class="hljs-built_in">LEDisplay_hex</span>(NUM1);<br>         <span class="hljs-keyword">if</span> (BUTTON1 | BUTTON2 | BUTTON3)<br>            state = SHOW;<br>         <span class="hljs-keyword">break</span>;<br>      <span class="hljs-keyword">case</span> SHOW:<br>         NUM1 = <span class="hljs-number">0</span>;<br>         <span class="hljs-keyword">if</span> (BUTTON1) NUM1 += <span class="hljs-number">0x0001</span>;<br>         <span class="hljs-keyword">if</span> (BUTTON2) NUM1 += <span class="hljs-number">0x0010</span>;<br>         <span class="hljs-keyword">if</span> (BUTTON3) NUM1 += <span class="hljs-number">0x0100</span>;<br>         state = IDLE;<br>         <span class="hljs-keyword">break</span>;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>与轮询类似，但只有当前状态被执行。</li>
+<li>每个状态决定下一个状态（非顺序执行）。</li>
+<li>优先级：每个状态确定下一个状态的优先级。</li>
+<li>响应时间：所有任务的总和。</li>
+<li>变更的影响：重大。更改任务的执行时间或添加任务会影响所有其他任务。</li>
+<li>简单性：没有共享数据问题。</li>
+</ol>
+<h4 id="带有中断的轮询">带有中断的轮询</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs cpp">BOOL flag_A = FALSE; <span class="hljs-comment">/* Flag for device_A follow-up processing */</span><br><span class="hljs-comment">/* Interrupt Service Routine for high priority device_A */</span><br><span class="hljs-built_in">ISR_A</span>(<span class="hljs-type">void</span>) &#123;<br>   ... handle urgent requirements <span class="hljs-keyword">for</span> device_A in the ISR,<br>   then set flag <span class="hljs-keyword">for</span> follow-up processing in the main loop ...<br>   flag_A = TRUE;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>&#123;<br>   <span class="hljs-keyword">while</span>(TRUE) &#123;<br>      <span class="hljs-keyword">if</span> (flag_A)<br>         <span class="hljs-comment">//中断任务优先</span><br>         flag_A = FALSE<br>         <span class="hljs-comment">//... do follow-up processing with data from device_A</span><br>      <span class="hljs-keyword">if</span> (device_B <span class="hljs-keyword">requires</span> service)<br>         service device_B<br>      <span class="hljs-keyword">if</span> (device_C <span class="hljs-keyword">requires</span> service)<br>         service device_C<br>      <span class="hljs-comment">//... and so on until all high and low priority devices have been serviced</span><br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="/24134/image-20221028193846411.png" alt></p>
+<ol>
+<li>优先级：中断优先于主循环，中断的优先级也是如此</li>
+<li>响应时间：所有任务的总和以及中断执行时间</li>
+<li>更改的影响：对于中断服务程序而言意义不大。与轮询作为主循环相同</li>
+<li>共享数据-必须处理与中断服务程序共享的数据</li>
+<li>MCU 中使用最多的</li>
+</ol>
+<h4 id="仅有中断">仅有中断</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">SET_VECTOR</span>(P3AD, button_isr);<br><span class="hljs-built_in">SET_VECTOR</span>(TIMER1, display_isr);<br><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) &#123;&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>如果 ISR 过多，可能会有问题</li>
+<li>如果高优先级的中断执行所需的时间比低优先级的中断所需的时间长，那么某些中断将被错过，或者您需要处理嵌套中断。</li>
+<li>优先级：中断优先</li>
+<li>响应时间：中断执行时间</li>
+<li>变化的影响：对于中断服务程序而言意义不大。</li>
+<li>共享数据：必须处理与中断服务程序共享的数据</li>
+</ol>
+<h4 id="函数队列调度">函数队列调度</h4>
+<ol>
+<li>函数指针被添加到队列中。</li>
+<li>主循环在队列中循环并执行任务。</li>
+<li>任务或中断将新任务添加到函数队列中。</li>
+<li>最坏情况时机 The worst case timing</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">define</span> MAX_TASKS 20</span><br><span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span> <span class="hljs-params">(*FuncPtr)</span><span class="hljs-params">()</span></span>;<br>FuncPtr tasks[MAX_TASKS] <span class="hljs-type">int</span> current_task = <span class="hljs-number">0</span>;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">add_task</span><span class="hljs-params">(FuncPtr func)</span> </span>&#123;<br>	<span class="hljs-type">int</span> n;<br>	<span class="hljs-keyword">for</span> (n = current_task + <span class="hljs-number">1</span>; n &lt; MAX_TASKS - <span class="hljs-number">1</span>; n++) &#123;<br>		<span class="hljs-keyword">if</span> (tasks[n] == <span class="hljs-literal">NULL</span>) &#123;<br>			tasks[n] = func;<br>			<span class="hljs-keyword">return</span>;<br>		&#125;<br>	&#125;<br>	<span class="hljs-keyword">for</span> (n = <span class="hljs-number">0</span>; n &lt; current_task; n++) &#123;<br>		<span class="hljs-keyword">if</span> (tasks[n] == <span class="hljs-literal">NULL</span>) &#123;<br>			tasks[n] = func;<br>			<span class="hljs-keyword">return</span>;<br>		&#125;<br>	&#125;<br><br>	<span class="hljs-function">id <span class="hljs-title">display_task</span><span class="hljs-params">()</span> </span>&#123;<br>		<span class="hljs-built_in">LEDisplay_hex</span>(NUM1);<br>		<span class="hljs-built_in">add_task</span>(button_task);<br>	&#125;<br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">button_task</span><span class="hljs-params">()</span> </span>&#123;<br>		<span class="hljs-built_in">check_buttons</span>();<br>		NUM1 = <span class="hljs-number">0</span>;<br>		<span class="hljs-keyword">if</span> (BUTTON1)<br>			NUM1 += <span class="hljs-number">0x0001</span>;<br>		<span class="hljs-keyword">if</span> (BUTTON2)<br>			NUM1 += <span class="hljs-number">0x0010</span>;<br>		<span class="hljs-keyword">if</span> (BUTTON3)<br>			NUM1 += <span class="hljs-number">0x0100</span>;<br>		<span class="hljs-built_in">add_task</span>(display_task);<br>	&#125;<br><br>	<span class="hljs-built_in">main</span>() &#123;<br>		<span class="hljs-built_in">LEDisplay_init</span>();<br>		<span class="hljs-built_in">LEDisplay_clear</span>();<br>		<span class="hljs-built_in">init_buttons</span>();<br><br>		<span class="hljs-built_in">add_task</span>(button_task);<br><br>		<span class="hljs-keyword">while</span> (<span class="hljs-number">1</span>) &#123;<br>			<span class="hljs-keyword">if</span> (tasks[current_task] == <span class="hljs-literal">NULL</span>) &#123;<br>				;<br>			&#125; <span class="hljs-keyword">else</span> &#123;<br>				(*tasks[current_task])();<br>				tasks[current_task] = <span class="hljs-literal">NULL</span>;<br>			&#125;<br>			current_task++;<br>			<span class="hljs-keyword">if</span> (current_task &gt;= MAX_TASKS)<br>				current_task = <span class="hljs-number">0</span>;<br>		&#125;<br>	&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>优先级：中断优先。任务按顺序执行</li>
+<li>响应时间：最长任务的执行时间</li>
+<li>变更的影响：低。中断管理优先级功能。队列管理较低的优先级。</li>
+<li>共享数据：必须处理与中断服务程序共享的数据</li>
+</ol>
+<h5 id="函数队列优化">函数队列优化</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 添加时间队列</span><br><span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span><span class="hljs-params">(*FuncPtr)</span></span>;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> &#123;<br>	<span class="hljs-type">long</span> timer;<br>	<span class="hljs-type">int</span> status;<br>	FuncPtr;<br>&#125; Task;<br><br>Task task_list[MAX_TASKS];<br><br><span class="hljs-comment">// 添加任务优先级</span><br><span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">int</span><span class="hljs-params">(*FuncPtr)</span></span>;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> &#123;<br>	<span class="hljs-type">int</span> priority;<br>	FuncPtr;<br>&#125; Task;<br><br>Task task_list[MAX_TASKS];<br></code></pre></td></tr></table></figure>
+<h4 id="抢占式多任务或多线程">抢占式多任务或多线程</h4>
+<p>在这种类型的系统中，一段低级代码基于定时器（连接到中断）在任务或线程之间切换。这是系统通常被认为具有“操作系统”内核的级别。根据需要多少功能，它或多或少地引入了管理概念上并行运行的多个任务的复杂性。</p>
+<p>要访问共享数据，必须通过某种同步策略来控制，例如消息队列，信号量或非阻塞同步方案。</p>
+<p>由于这些复杂性，组织通常使用实时操作系统（RTOS），从而使应用程序程序员可以专注于设备功能而不是操作系统服务。</p>
+<h3 id="内核分类">内核分类</h3>
+<h4 id="实时内核">实时内核</h4>
+<p><img src="/24134/image-20221028194634375.png" alt></p>
+<h4 id="微内核">微内核</h4>
+<p>微内核是实时操作系统的逻辑升级。通常的安排是操作系统内核分配内存并将 CPU 切换到不同的执行线程。用户态进程实现文件系统、网络接口等主要功能。</p>
+<p>一般来说，微内核在任务切换和任务间通信快速时成功，而在它们缓慢时失败。</p>
+<h4 id="单内核">单内核</h4>
+<p>具有复杂功能的相对较大的内核适用于嵌入式环境。</p>
+<p>示例：嵌入式 Linux 和 Windows CE</p>
+<p>尽管硬件成本增加，但这种嵌入式系统却越来越受欢迎，尤其是在功能更强大的嵌入式设备（例如无线路由器和 GPS 导航系统）上。原因如下：</p>
+<ol>
+<li>提供了通用嵌入式芯片组的端口。</li>
+<li>它们允许将公共可用代码重复用于设备驱动程序，Web 服务器，防火墙和其他代码。</li>
+<li>开发系统可以从广泛的功能集开始，然后可以将该发行版配置为排除不需要的功能，并节省其消耗的内存开销。</li>
+<li>许多工程师认为，在用户模式下运行应用程序代码更可靠且更容易调试，从而使开发过程更容易且代码更可移植。</li>
+<li>需要可以保证更快响应的功能通常可以放在硬件中。</li>
+</ol>
+<h2 id="实时操作系统-RTOS">实时操作系统 RTOS</h2>
+<h3 id="通用操作系统模型（和-Linux-相似）">通用操作系统模型（和 Linux 相似）</h3>
+<p><img src="/24134/image-20221028195000138.png" alt></p>
+<h3 id="操作系统-2">操作系统</h3>
+<p>操作系统控制资源：</p>
+<ol>
+<li>谁获得 CPU；</li>
+<li>I/O 何时发生；</li>
+<li>分配了多少内存；</li>
+<li>流程如何通信。</li>
+</ol>
+<p>最重要的资源是 CPU 本身：由调度程序控制的 CPU 访问。</p>
+<h3 id="RTOS-和通用操作系统（GPOS）">RTOS 和通用操作系统（GPOS）</h3>
+<p>相似的功能：</p>
+<ol>
+<li>多任务级别</li>
+<li>软件和硬件资源管理</li>
+<li>为应用提供基本的 OS 服务</li>
+<li>从软件应用抽象硬件</li>
+</ol>
+<h3 id="RTOS-从-GPOS-中分离出来的不同功能">RTOS 从 GPOS 中分离出来的不同功能</h3>
+<ol>
+<li>嵌入式应用上下文中具有的更好的可靠性</li>
+<li>满足应用需要的裁剪能力</li>
+<li>更快的特性</li>
+<li>减少内存需求</li>
+<li>为实时嵌入式系统提供可裁剪的调度策略</li>
+<li>支持无盘化嵌入式系统，允许从 ROM 或 RAM 上引导并运行</li>
+<li>对不同硬件平台具有更好的可移植性。</li>
+</ol>
+<h3 id="RTOS-的特性">RTOS 的特性</h3>
+<ul>
+<li>可靠性</li>
+<li>可预测性、确定性</li>
+<li>表现</li>
+<li>紧凑</li>
+<li>可扩展性</li>
+</ul>
+<h3 id="实时操作系统">实时操作系统</h3>
+<p>为什么要实现 RTOS？</p>
+<ol>
+<li>灵活性</li>
+<li>响应时间</li>
+</ol>
+<p><img src="/24134/image-20221028195524284.png" alt></p>
+<p>一个个实时系统（RTS）是指计算的正确性不仅取决于程序的逻辑正确性，也取决于结果产生的时间，如果系统的时间约束条件得不到满足，将会发生系统出错。</p>
+<h4 id="术语">术语</h4>
+<p>TODO：调整字体</p>
+<ul>
+<li>确定性（Determinism）：如果一个系统始终会为某个已知输入产生相同的输出，则该系统是确定性的。 非确定性系统的输出具有随机变化特征。</li>
+<li>截止时限（Deadline）：截止时限就是必须完成某项任务的有限时间窗口。指明计算何时必须结束。</li>
+<li>服务质量（QoS，Quality of Service）：指一个网络的整体性能，包括带宽、吞吐量、可用性、抖动（jitter）、延迟和错误率等因素。</li>
+<li>到达时刻：任务实例所属任务的起始时刻称为该任务实例的到达时刻。</li>
+<li>释放时刻：任务实例被置为就绪态的时刻称为该任务实例的释放时刻。</li>
+<li>硬实时（Hard real-time）软件系统有一组严格的截止时间，且错过一个截止时间就会认为系统失败。硬实时系统的示例包括：飞机传感器和自动驾驶系统、航天器和行星探测器。</li>
+<li>软实时（Soft real-time）系统会试图满足截止时间要求，但如果错过了某个截止时间也不会认为系统失败。但是，在这样一个事件中，软实时系统可能会降低其服务质量以改进其响应能力。软实时系统的示例包括：用于娱乐的音频和视频传输软件（延迟是不可取的，但不是灾难性的）。</li>
+<li>准实时（Firm real-time）系统会将截止时间之后交付的信息/计算视为无效。与软实时系统一样，准实时系统在错过某个截止时间后不会认为系统失败，并且如果错过了某个截止时间，准实时系统可能会降低服务质量（QoS）。准实时系统的示例包括：财务预测系统、机器人装配线。</li>
+</ul>
+<h3 id="任务的周期">任务的周期</h3>
+<ul>
+<li>周期任务：周期任务是指按一定周期达到并请求运行，每次请求称为任务的一个任务实例，任务实例所属任务的起始时刻称为该任务实例的到达时刻，任务实例被置为就绪态的时刻称为该任务实例的释放时刻。</li>
+<li>偶发任务：在偶发任务中，虽然其任务实例的到达时刻不是严格周期的，但相邻任务实例到达时刻的时间间隔一定大于等于某个最小值，即偶发任务的各任务实例按照不高于某个值的速率到达。因此在实际应用中，偶发任务经常被当作周期任务进行处理，其周期为相邻任务实例到达时刻的最小时间时隔。</li>
+<li>非周期任务：非周期任务是指随机到达系统的任务。</li>
+</ul>
+<h4 id="基本单位">基本单位</h4>
+<ol>
+<li>实时操作系统的基本组成部分是进程。</li>
+<li>由于没有主循环，因此可以轻松添加新进程或删除过时的进程。</li>
+<li>RTOS 根据进程的优先级安排运行时间。</li>
+</ol>
+<h4 id="调度程序">调度程序</h4>
+<ol>
+<li>RTOS 的调度程序用来跟踪每个进程的状态，并确定应该运行的进程。</li>
+<li>调度基本单位是进程，调度是通过有限状态机完成的</li>
+</ol>
+<h3 id="时序约束">时序约束</h3>
+<p>执行计算以符合外部时序约束。</p>
+<p>截止时间频率：</p>
+<ol>
+<li>周期性</li>
+<li>非周期性的</li>
+</ol>
+<p>截止时间类型：</p>
+<ol>
+<li>硬性：未能按时完成会导致系统故障</li>
+<li>软性：未按时完成进程会导致响应降低</li>
+</ol>
+<p>偶发进程：具有一定时钟周期的进程</p>
+<h4 id="进程时序的规范">进程时序的规范</h4>
+<ul>
+<li>释放时间：进程处于就绪态的时间</li>
+<li>截止时间：进程必须结束的时间</li>
+</ul>
+<h4 id="释放时间和截止时间">释放时间和截止时间</h4>
+<p><img src="/24134/9.png" alt></p>
+<ul>
+<li>非周期性的进程</li>
+<li>紫色表示占用 CPU 的时间，紫色右侧是结束时间</li>
+</ul>
+<p><img src="/24134/10.png" alt></p>
+<ul>
+<li>周期性进程</li>
+<li>截止时间默认和周期时间相同</li>
+</ul>
+<p><img src="/24134/11.png" alt></p>
+<ul>
+<li>周期性进程</li>
+<li>比较复杂，时序的截止时间小于其周期性</li>
+</ul>
+<h3 id="进程速率要求">进程速率要求</h3>
+<ul>
+<li>周期：进程激活之间的间隔。</li>
+<li>速率：周期的倒数。</li>
+<li>启动速率可能高于周期：一次运行多个副本。</li>
+</ul>
+<p><img src="/24134/12.png" alt></p>
+<h3 id="时间冲突">时间冲突</h3>
+<p>如果流程没有在截止时间之前完成，会发生什么？</p>
+<ul>
+<li>硬截止时间：如果错过了系统就会失败。</li>
+<li>软截止时间：用户可能会注意到，但系统不一定会出现故障。</li>
+</ul>
+<p>我们希望通过自己的调度算法来尽可能避免这种问题</p>
+<h3 id="示例：航天飞机软件错误">示例：航天飞机软件错误</h3>
+<p>航天飞机的首次发射由于软件计时错误而延迟：</p>
+<ol>
+<li>主控制系统 PASS 和备用系统 BFS。</li>
+<li>BFS 无法与 PASS 同步。</li>
+<li>更改为一个例行增加的延迟，这会延迟开始时间的计算。</li>
+<li>$\frac{1}{61}$ 的概率发生计时问题</li>
+</ol>
+<h3 id="进程执行特征">进程执行特征</h3>
+<p>进程执行时间 T~i~：</p>
+<ul>
+<li>没有抢占的执行时间。</li>
+<li>可能的时间单位：秒、时钟周期</li>
+<li>在某些情况下，最坏、最好情况的执行时间可能会有用。</li>
+</ul>
+<p>变化来源：</p>
+<ul>
+<li>数据依赖性。</li>
+<li>内存系统。</li>
+<li>CPU 管道。</li>
+</ul>
+<p>主备冗余、多机热备</p>
+<h3 id="利用率">利用率</h3>
+<p>CPU 利用率：CPU 执行有用的工作的比率</p>
+<p>通常在没有调度开销的情况下进行计算</p>
+<p>$$
+U = \frac{\text{CPU time for userful work}}{\text{total available CPU time}} = \frac{\sum\limits_{t_1\leq t \leq t_2}T(t)}{t_2 - t_2} = \frac{T}{t}
+$$</p>
+<h3 id="进程状态">进程状态</h3>
+<p>进程可以处于以下三种状态之一：</p>
+<ol>
+<li>在 CPU 上执行；</li>
+<li>准备执行；</li>
+<li>等待数据。</li>
+</ol>
+<p><img src="/24134/13.png" alt></p>
+<h3 id="调度问题">调度问题</h3>
+<ol>
+<li>我们可以在所有截止日期之前完成吗？在所有情况下都必须能够按时完成进程。</li>
+<li>我们需要多少个 CPU 才能按时完成进程？</li>
+</ol>
+<h4 id="嵌入式与通用调度">嵌入式与通用调度</h4>
+<ol>
+<li>调度工作尝试避免使 CPU 访问过程变得空闲：公平=访问 CPU。</li>
+<li>嵌入式系统必须符合所有截止时间：低优先级进程可能长时间不会运行。</li>
+</ol>
+<h4 id="OS-进程管理">OS 进程管理</h4>
+<ol>
+<li>操作系统需要跟踪：进程优先级、时序状态、进程激活记录</li>
+<li>进程可以被创建：系统启动前静态、在执行期间动态：比如电话来电</li>
+</ol>
+<h4 id="多道程序操作系统">多道程序操作系统</h4>
+<p><img src="/24134/14.png" alt></p>
+<p>进程 = 程序的唯一执行</p>
+<ol>
+<li>代码 + 数据</li>
+<li>多进程可能会共享代码</li>
+<li>每一个进程都会有唯一的数据（CPU 寄存器，栈空间、内存空间）</li>
+<li>进程会被他们的激活记录定义</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/image-20221028201745196.png" alt></th>
+<th><img src="/24134/16.png" alt></th>
+</tr>
+</thead>
+</table>
+<p>线程有他们自己 CPU 寄存器值，但是共享相同的内存空间，所以他们可以通过其他线程来影响数据</p>
+<ol>
+<li>一个进程可能有不同的线程</li>
+<li>线程可能会运行在划分出来的 CPU 核心栈上</li>
+</ol>
+<h4 id="典型的进程-任务激活记录（任务控制块）">典型的进程/任务激活记录（任务控制块）</h4>
+<ul>
+<li>任务 ID</li>
+<li>任务状态（运行，就绪，已阻止）</li>
+<li>任务优先级</li>
+<li>任务起始地址</li>
+<li>任务堆栈</li>
+<li>任务 CPU 寄存器</li>
+<li>任务数据指针</li>
+<li>任务时间</li>
+</ul>
+<h4 id="什么时候可以分派新线程？">什么时候可以分派新线程？</h4>
+<p>在非抢占式调度中：当前线程完成时可以分派新线程</p>
+<p>在抢占式调度下：</p>
+<ol>
+<li>在计时器中断时</li>
+<li>在 I/O 中断时可能会分派新线程</li>
+<li>创建新线程或完成一个新线程时</li>
+<li>当前线程阻塞或释放互斥锁时</li>
+<li>当前线程阻塞信号量时</li>
+<li>更改信号量状态时</li>
+<li>当前线程进行任何 OS 调用时
+<ol>
+<li>文件系统访问</li>
+<li>网络访问</li>
+</ol>
+</li>
+</ol>
+<h4 id="当前的焦点：如何决定要安排哪个线程？">当前的焦点：如何决定要安排哪个线程？</h4>
+<p>需要关注的内容有：</p>
+<ul>
+<li>抢占式与非抢占式调度</li>
+<li>定期与非定期任务</li>
+<li>固定优先级与动态优先级</li>
+<li>优先反转异常</li>
+<li>其他计划异常</li>
+</ul>
+<h4 id="指标">指标</h4>
+<p>我们如何评估调度策略？</p>
+<ol>
+<li>能够满足所有截止时间</li>
+<li>CPU 利用率-有效工作的时间百分比</li>
+<li>计划开销：制定计划所需的时间</li>
+<li>延迟</li>
+<li>总完成时间</li>
+</ol>
+<h3 id="抢占式调度">抢占式调度</h3>
+<p>假设所有线程都有优先级：</p>
+<ul>
+<li>静态分配的（在线程持续时间内恒定）</li>
+<li>动态分配的（可能有所不同）</li>
+</ul>
+<p>进一步假设内核跟踪“启用”了哪些线程（能够执行，例如在等待信号量或互斥量或时间到期之前不会被阻塞）。</p>
+<p>抢占式调度：</p>
+<ul>
+<li>在任何时候，具有最高优先级的已启用线程正在执行。</li>
+<li>每当任何线程更改优先级或启用状态时，内核都可以分派新线程。</li>
+</ul>
+<h3 id="速率单调调度-RMS">速率单调调度 RMS</h3>
+<p>假设使用以下命令定期调用 n 个任务：</p>
+<ul>
+<li>周期 T~1~，...，T~n~（施加实时约束）</li>
+<li>所有任务都是独立的。</li>
+<li>最坏情况执行时间（WCET）C~1~，...，C~n~：假定没有互斥请锁、信号量或阻塞的 I/O</li>
+<li>没有优先级限制</li>
+<li>固定优先级</li>
+<li>上下文切换所需的时间可以忽略不计</li>
+<li>抢占式调度</li>
+</ul>
+<p>定理：如果任何优先级分配产生一个可行的调度，那么按周期排序的优先级（最小的周期具有最高优先级）也产生一个可行的调度。</p>
+<p>就可行性而言，RMS 是最佳的。</p>
+<h4 id="RMS-的可行性-Feasibility">RMS 的可行性 Feasibility</h4>
+<p>为 RMS 定义的可行性是指每个任务在其指定时间内执行一次完成。</p>
+<h4 id="显示-RMS-的优越性：考虑两个不同周期的任务">显示 RMS 的优越性：考虑两个不同周期的任务</h4>
+<blockquote>
+<p>非抢占式时序是否可行？</p>
+</blockquote>
+<p>非抢占式的时间表是不可行的。红色任务的某些实例（2）如果我们进行非抢占式调度，则不会在其期限内完成。</p>
+<p>如果我们对红色任务有优先级更高的抢占式调度该怎么办？</p>
+<p><img src="/24134/image-20221028202845308.png" alt></p>
+<p>具有较高优先级的红色任务的抢占式调度是可行的。请注意，抢占蓝色任务会延长其完成时间。</p>
+<p><img src="/24134/image-20221028203043746.png" alt></p>
+<h4 id="显示-RMS-的优越性：任务调整">显示 RMS 的优越性：任务调整</h4>
+<ul>
+<li>当低优先级任务的开始阶段与高优先级任务的开始阶段匹配时，其完成时间最差。</li>
+<li>因此，在检查计划的可行性时，仅考虑最坏的情况就足够了：所有任务都同时开始其周期，如下就是最差情况</li>
+</ul>
+<p><img src="/24134/image-20221028203055481.png" alt></p>
+<h4 id="显示-RMS-的优越：用于两个任务">显示 RMS 的优越：用于两个任务</h4>
+<p>足以表明，如果非 RMS 调度是可行的，则 RMS 调度是可行的。</p>
+<p>考虑以下两个任务：</p>
+<p><img src="/24134/image-20221028203125597.png" alt></p>
+<p>非 RMS 固定优先级时间表如下所示：我们可以观察到对于非 RMS 时序如果可行当且仅当 $C_1 + C_2 \leq T_2$</p>
+<p><img src="/24134/23.png" alt></p>
+<p>RMS 时间表如下所示：周期较短的任务会提前移动，而对于 RMS 是可行的</p>
+<p><img src="/24134/24.png" alt></p>
+<h4 id="总结">总结</h4>
+<p>该证明可以扩展到任意数量的任务（尽管它变得更加乏味）。</p>
+<p>该证明仅具有最优性、可行性。它没有说其他最优标准。</p>
+<p>实际实施：</p>
+<ul>
+<li>定时器中断在周期的最大公约数</li>
+<li>多个计时器</li>
+</ul>
+<h4 id="RMS-的可行性调度分析">RMS 的可行性调度分析</h4>
+<p>可调度性分析：如果需要，可以使用 RM 调度一组定期任务：</p>
+<p>$$
+\sum\limits^n\limits_{i=1} \leq n(2^{\frac{1}{n}} - 1)
+$$</p>
+<p>此条件足够，但不是必需的。</p>
+<p>$$
+U = \sum\limits_{i=1}^{n}\frac{C_i}{T_i}
+$$</p>
+<p>上式表示处理器利用率因子 U，它是执行任务集所花费的处理器时间的一部分。</p>
+<p><img src="/24134/image-20221028203613699.png" alt></p>
+<h3 id="DDL-驱动调度">DDL 驱动调度</h3>
+<h4 id="Jackson-s-Algorithm：EDD，Earliest-Due-Date（1955）">Jackson's Algorithm：EDD，Earliest Due Date（1955）</h4>
+<ol>
+<li>给定 n 个具有期限 d~1~，...，d~n~ 的独立一次性任务，对它们进行调度以最大程度地减少最大延迟，定义为：</li>
+</ol>
+<p>$$
+L_{max} = \max\limits_{1 \leq i \leq n}\set{f_i - d_i}
+$$</p>
+<ol start="2">
+<li>其中 f~i~ 是任务 i 的完成时间。请注意，如果所有截止日期都得到满足，则这是负的。</li>
+<li>EDD 算法：按不递减的截止日期顺序执行它们。</li>
+<li>请注意，这不需要抢占。</li>
+</ol>
+<p>定理：从最大延迟的意义上讲，EDD 是最佳的</p>
+<ol>
+<li>为了证明这一点，请使用互换参数。如果给定的时间表 S 不是 EDD，则必须存在任务 a 和 b，其中时间表中 a 紧接在 b 之前，但 $d_a &gt; d_b$。为什么？</li>
+<li>我们可以证明通过交换 a 和 b 可以改善此调度。因此，没有任何一个非 EDD 时间表可以达到比 EDD 更小的最大延迟，因此 EDD 时间表必须是最佳的。</li>
+</ol>
+<h5 id="考虑一个非-EDD-调度-S">考虑一个非 EDD 调度 S</h5>
+<p>在调度中必须存在任务 a 和 b，其中 a 紧接在 b 之前，但 $d_a &gt; d_b$</p>
+<p><img src="/24134/image-20221028205722628.png" alt></p>
+<p>所以 S' 绝对不会比 S 的情况更差</p>
+<h4 id="Horn-的算法：EDF，Earliest-deadline-first（1974）">Horn 的算法：EDF，Earliest deadline first（1974）</h4>
+<ol>
+<li>通过允许任务随时“到达”（准备就绪）来扩展 EDD。</li>
+<li>最早截止时间优先（EDF）：给定 n 个独立任务的集合，它们具有任意的到达时间，任何算法在任何到达的任务中以绝对绝对最早的时间最早执行任务的任何算法都是最优的。最大程度地减少<strong>延迟</strong>。</li>
+<li>证明使用类似的互换参数。</li>
+</ol>
+<h5 id="使用-EDF-执行定期任务">使用 EDF 执行定期任务</h5>
+<p>EDF 算法可以被同等地应用于周期性任务和非周期性任务。</p>
+<ul>
+<li>最简单的用法：截止时间是该期限的结束。</li>
+<li>替代用途：分别指定时间（相对于期间开始时间）和期限。</li>
+</ul>
+<h5 id="RMS-和-EDF-哪个好">RMS 和 EDF 哪个好</h5>
+<p>RMS 优点：调度决策更简单（固定优先级与 EDF 所需的动态优先级。EDF 调度程序必须维护按优先级排序的就绪任务列表。）</p>
+<p>EDF 优点：</p>
+<ol>
+<li>由于 EDF 是关于最大延迟的最优，也是关于可行性的最优选择。RMS 仅是关于可行性的最优选择。对于不可行的调度，RMS 会完全阻止优先级较低的任务，从而导致无限的最大延迟。</li>
+<li>如果 RMS 无法做到这一点，那么 EDF 可以充分利用</li>
+<li>EDF 实际上减少了抢占，因此减少了上下文切换的开销。</li>
+<li>截止时间可能与周期不同。</li>
+</ol>
+<h5 id="优先级约束">优先级约束</h5>
+<p>有向无环图（DAG）显示优先级，这些优先级指示哪些任务必须在其他任务开始之前完成。</p>
+<p>DAG，表明任务 1 必须在任务 2 和 3 开始之前完成，依此类推。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/27.png" alt></th>
+<th><img src="/24134/28.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/24134/29.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>它不需要抢占。我们会看到 EDF 确实如此。</p>
+<h4 id="最新截止日期优先，Latest-Deadline-First，LDF">最新截止日期优先，Latest Deadline First，LDF</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/30.png" alt></th>
+<th><img src="/24134/31.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/24134/32.png" alt></td>
+<td><img src="/24134/33.png" alt></td>
+</tr>
+<tr>
+<td><img src="/24134/34.png" alt></td>
+<td><img src="/24134/35.png" alt></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>C~i~：进程时间</p>
+</li>
+<li>
+<p>D~i~：表示截止时间</p>
+</li>
+<li>
+<p>LDF 在最大程度减少最大延迟方面是最佳的。</p>
+</li>
+<li>
+<p>但是，它要求所有任务都可用，并且在执行任何任务之前必须知道其优先级。</p>
+</li>
+</ul>
+<h4 id="EDF">EDF*</h4>
+<p>如果任务是可抢占的，则可以用多项式时间复杂度解决调度具有优先级约束的 n 个任务的集合（并发激活）的问题。</p>
+<p>对于存在优先约束的任务，EDF *算法确定可行的时间表。</p>
+<p>通过修改可以保证，如果根本存在有效的时间表，则</p>
+<ul>
+<li>任务的<strong>开始执行</strong>不得早于其<strong>释放时间</strong>且不得早于其<strong>前继的完成时间</strong>（任务不能抢占任何前任的任务）</li>
+<li>所有任务均在期限内完成执行</li>
+</ul>
+<p>修改截止日期：</p>
+<ul>
+<li>任务必须在其最后期限内完成执行时间 s</li>
+<li>任务的执行不得晚于<strong>其后继任务的最大开始时间</strong></li>
+<li>解决方案：任务 j 取决于任务 i</li>
+</ul>
+<p>$$
+d'_i = \min(d_i, d'_j - C_j)
+$$</p>
+<p>修改释放时间：</p>
+<ul>
+<li>任务必须在释放时间之前开始执行。</li>
+<li>任务的执行时间不得早于其前任的最短完成时间。</li>
+<li>解决方案：任务 j 取决于任务 i</li>
+</ul>
+<p>$$
+r'_j = \max(r_i, r_i + C_i)
+$$</p>
+<h4 id="具有优先级的-EDF">具有优先级的 EDF</h4>
+<ol>
+<li>使用抢占式调度程序，可以修改 EDF 以考虑优先级并允许任务在任意时间到达。只需根据优先级调整截止日期和到达时间。</li>
+</ol>
+<p><img src="/24134/36.png" alt></p>
+<ol start="2">
+<li>（修正释放时间）给定 n 个具有优先级和释放时间 ri 的任务，如果任务 i 紧接任务 j，则修改释放时间，如下所示：</li>
+</ol>
+<p><img src="/24134/37.png" alt></p>
+<ol start="3">
+<li>（修正截止时间）给定 n 个具有优先级和最后期限 di 的任务，如果任务 i 紧接在任务 j 之前，则按以下方式修改最后期限：</li>
+</ol>
+<p><img src="/24134/38.png" alt></p>
+<ol start="4">
+<li>在最大程度地减少最大延迟方面，具有优先级的 EDF 是最佳的。</li>
+</ol>
+<h4 id="How">How</h4>
+<p>如果进程组不可调度，又需要保证在截至时限前完成</p>
+<ol>
+<li>使用更快的 cpu。不改变周期就可以减少执行时间。但 cpu 利用率更低。</li>
+<li>新设计进程以减少执行时间。需要了解代码。</li>
+<li>写规格说明以改变截至时限。</li>
+</ol>
+<h3 id="调度异常">调度异常</h3>
+<p>互斥：</p>
+<ul>
+<li>优先级倒置</li>
+<li>优先继承</li>
+<li>优先上限</li>
+</ul>
+<p>多处理器调度：理查德（Richard）的异常情况在最大程度地减少最大延迟方面是最佳的。</p>
+<h4 id="互斥访问">互斥访问</h4>
+<ol>
+<li>线程访问共享资源时，它们需要使用互斥对象以确保数据完整性。</li>
+<li>互斥体也可能使调度复杂化。</li>
+</ol>
+<h4 id="多个进程中的锁机制">多个进程中的锁机制</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span> pthreads</span><br><span class="hljs-comment">// ...</span><br><span class="hljs-type">pthread_mutex_t</span> lock;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">addListener</span><span class="hljs-params">(notify listener)</span> </span>&#123;<br>	<span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);<br>	<span class="hljs-comment">// ...</span><br>	<span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">update</span><span class="hljs-params">(<span class="hljs-type">int</span> newValue)</span> </span>&#123;<br>	<span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock);<br>	value = newValue;<br>	elementType* element = head;<br>	<span class="hljs-keyword">while</span> (element != <span class="hljs-number">0</span>) &#123;<br>		(*(element-&gt;listener))(newValue);<br>		element = element-&gt;next;<br>	&#125;<br>	<span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock);<br>&#125;<br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> </span>&#123;<br>	<span class="hljs-built_in">pthread_mutex_init</span>(&amp;lock, <span class="hljs-literal">NULL</span>);<br>	<span class="hljs-comment">// ...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>每当跨线程共享数据结构时，对数据结构的访问通常必须是原子的。这是使用互斥锁或互斥锁强制执行的。持有锁时执行的代码称为<strong>临界区</strong>。</p>
+</blockquote>
+<h4 id="优先级反转：互斥的危害">优先级反转：互斥的危害</h4>
+<p>任务 1 的优先级最高，任务 3 的优先级最低。任务 3 获取一个共享对象上的锁，进入关键部分。它被任务 1 抢占，然后任务 1 尝试获取锁和块，失败后被阻塞。任务 2 在时间 4 抢占了任务 3（不需要锁和块），使较高优先级的任务 1 被阻止了无限制的时间。实际上，任务 1 和 2 的优先级颠倒了，因为任务 2 可以使任务 1 任意等待较长时间。</p>
+<p><img src="/24134/image-20221028210016916.png" alt></p>
+<ul>
+<li>不是正常的：任务二先于任务一执行完了</li>
+</ul>
+<h3 id="示例：火星探路者问题">示例：火星探路者问题</h3>
+<p>但是在执行任务的几天后，即“探路者”开始收集气象数据后不久，该航天器就开始经历整个系统的重置，每次重置都会导致数据丢失。</p>
+<ul>
+<li>
+<p>优先级反转导致的结果</p>
+</li>
+<li>
+<p>VxWorks 提供了抢占式线程优先级调度。“探路者”飞船上的任务是作为线程执行的，其优先级以通常的方式分配，反映了这些任务的相对紧迫性。</p>
+<ul>
+<li>VxWorks：比较贵</li>
+<li>VxWorks：最好的实时操作系统</li>
+</ul>
+</li>
+<li>
+<p>探路者包含“信息总线”，您可以将其视为用于在航天器不同组件之间传递信息的共享存储区域。</p>
+</li>
+</ul>
+<h4 id="火星探路者的任务安排">火星探路者的任务安排</h4>
+<ol>
+<li>总线管理任务经常以高优先级运行，以将某些类型的数据移入和移出信息总线。对总线的访问已与互斥锁（互斥锁）同步。</li>
+<li>气象数据收集任务作为不经常发生的低优先级线程运行...发布其数据时，它将获取一个互斥锁，对总线进行写操作并释放该互斥锁。</li>
+<li>该航天器还包含以中等优先级运行的通信任务。</li>
+</ol>
+<h4 id="火星探路者的优先级安排">火星探路者的优先级安排</h4>
+<ol>
+<li>高优先级：从共享内存中检索数据</li>
+<li>中优先级：沟通任务</li>
+<li>低优先级：线程收集气象数据</li>
+</ol>
+<h4 id="问题产生">问题产生</h4>
+<p>在大多数情况下，这种组合效果很好。但是，很少会发生中断，导致（中优先级）通信任务在较短的时间间隔内被调度，而（高优先级）信息却线程被阻塞，等待（低优先级）气象数据线程。在这种情况下，优先级高于气象任务的长期运行的通信任务将阻止其运行，从而阻止阻塞的信息总线任务运行。经过一段时间后，看门狗定时器将关闭，注意到数据总线任务已经有一段时间没有执行了，得出的结论是发生了严重错误，并启动了系统总体复位。这种情况是优先级反转的典型案例。</p>
+<h5 id="火星探路者的优先反转">火星探路者的优先反转</h5>
+<p>优先级继承还解决了火星探路者问题：路径查找器中使用的 VxWorks 操作系统为调用互斥体基元实现了一个标志。该标志允许将优先级继承设置为 on。软件出厂时，将其设置为关闭</p>
+<p>火星上的问题已通过使用 VxWorks 的调试工具将标志更改为 on 而得到纠正，而探路者已经在火星上<code>[Jones，1997]</code>。</p>
+<h3 id="Priority-Inheritance-Protocol（PIP）优先级继承协议">Priority Inheritance Protocol（PIP）优先级继承协议</h3>
+<ul>
+<li>
+<p>假设：通过 m 个共享资源进行合作的 n 个任务；固定优先级后，资源上的所有关键部分都以$wait(S_i)$开始，并以$signal(S_i)$操作结束。</p>
+</li>
+<li>
+<p>基本思想：当任务$J_i$阻止一个或多个优先级更高的任务时，它会临时（继承）被阻止任务的最高优先级。</p>
+</li>
+<li>
+<p>协议：我们区分固定的名义优先级 Pi 和活动的优先级$p_i$</p>
+<p>大于或等于$P_i$。相对于名义优先级对作业$J_1$，... $J_n$进行排序，其中 J1 具有最高优先级。乔布斯不会暂停工作。</p>
+</li>
+</ul>
+<h4 id="PIP-算法">PIP 算法</h4>
+<ul>
+<li>作业是根据其活动优先级安排的。具有相同优先级的作业在 FCFS 执行线中执行。</li>
+<li>当作业$J_i$试图进入关键部分并且资源被优先级较低的作业阻塞时，作业$J_i$就会被阻塞。否则，它将进入关键部分。</li>
+<li>当作业$J_i$被阻止时，它将其活动优先级发送给持有信号量的作业$J_k$。$J_k$以优先级$p_k$ = $p_i$恢复并执行其关键部分的其余部分（它继承了被其阻止作业的最高优先级的优先级）。</li>
+<li>$J_k$退出关键部分时，它将解锁信号量，并且唤醒该信号量上阻塞的最高优先级作业。如果没有其他作业被$J_k$阻止，则将$p_k$设置为$P_k$，否则将其设置为被$J_k$阻止的作业的最高优先级。</li>
+<li>优先级继承是可传递的，即，如果 1 被 2 阻止，而 2 被 3 阻止，则 3 通过 2 继承优先级 1。</li>
+</ul>
+<h4 id="PIP-算法示例">PIP 算法示例</h4>
+<ul>
+<li>任务 1 的优先级最高，任务 3 的优先级最低。任务 3 获取一个共享对象上的锁，进入关键部分。它被任务 1 抢占，然后任务 1 尝试获取锁和块。任务 3 继承了任务 1 的优先级，从而防止了任务 2 的抢占。</li>
+</ul>
+<p><img src="/24134/image-20221028210206007.png" alt></p>
+<h4 id="死锁">死锁</h4>
+<ul>
+<li>较低优先级的任务首先启动并获取锁 a，然后被较高优先级的任务抢占，后者获取锁 b，然后阻止尝试获取锁 a 的任务。然后，较低优先级的任务将阻止尝试获取锁 b，并且无法进一步进行。</li>
+</ul>
+<p><img src="/24134/image-20221028210209106.png" alt></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span></span><br>...<br><span class="hljs-type">pthread_mutex_t</span> lock_a, lock_b;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">thread_1_function</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>&#123;<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_b);<br>   ...<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">thread_2_function</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>&#123;<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_a);<br>   ...<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="Priority-Ceiling-Protocol（PCP）（Sha，-Rajkumar，Lehoczky，-1990）优先天花板协议">Priority Ceiling Protocol（PCP）（Sha， Rajkumar，Lehoczky， 1990）优先天花板协议</h3>
+<ul>
+<li>每个锁定或信号量都被分配一个优先级上限，该上限等于可以锁定它的最高优先级任务的优先级：是否可以自动计算优先级上限？</li>
+<li>仅当任务的优先级<strong>严格高于</strong>其他任务当前持有的所有锁的优先级上限时，任务 T 才能获得锁：任何任务都不持有的锁不会影响任务</li>
+<li><strong>这样可以防止死锁</strong></li>
+<li>有一些扩展支持动态优先级和动态创建锁（堆栈资源策略）</li>
+</ul>
+<h4 id="OCPP-and-ICPP">OCPP and ICPP</h4>
+<p>在 OCPP 中</p>
+<ul>
+<li>当更高优先级的任务 Y 尝试获取 X 锁定的资源时，任务 X 的优先级会提高。</li>
+<li>将任务的优先级提高到资源的优先级上限，以确保任务 X 快速完成其关键部分，从而解锁资源。</li>
+<li>仅当任务的动态优先级高于其他任务锁定的所有资源的优先级上限时，才允许该任务锁定资源。否则，任务将被阻塞，等待资源。</li>
+</ul>
+<p>在 ICPP 中</p>
+<ol>
+<li>任务锁定资源时会立即提高其优先级</li>
+<li>任务的优先级设置为资源的优先级上限，因此，可能锁定资源的任务无法调度。</li>
+<li>这样可以确保 OCPP 属性“任务只有在其动态优先级高于其他任务锁定的所有资源的优先级上限时才能锁定资源”。</li>
+</ol>
+<h4 id="ICPP-与-OCPP">ICPP 与 OCPP</h4>
+<ul>
+<li>从调度角度来看，两个最高限额方案的最坏情况行为是相同的。但是，有一些区别：
+<ul>
+<li>ICPP 比 OCPP 更易于实施，因为不需要监视阻塞关系</li>
+<li>ICPP 导致较少的上下文切换，因为阻塞是在第一次执行之前</li>
+<li>ICPP 需要更多的优先级移动，因为这会随着所有资源的使用而发生</li>
+<li>仅当发生实际阻止时，OCPP 才更改优先级</li>
+</ul>
+</li>
+</ul>
+<h4 id="优先天花板协议">优先天花板协议</h4>
+<ul>
+<li>在这种情况下，锁 a 和锁 b 的优先级和任务 1 的优先级相同。在时间 3，任务 1 尝试获取锁 b，但是由于任务 2 当前持有当前优先级上限等于任务 1 的锁 a，导致任务 1 无法获取锁 b</li>
+</ul>
+<p><img src="/24134/image-20221028210222115.png" alt></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;pthread.h&gt;</span></span><br>...<br><span class="hljs-type">pthread_mutex_t</span> lock_a, lock_b;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">thread_1_function</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>&#123;<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_b);<br>   ...<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span>* <span class="hljs-title">thread_2_function</span><span class="hljs-params">(<span class="hljs-type">void</span>* arg)</span> </span>&#123;<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_a);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_lock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_b);<br>   ...<br>   <span class="hljs-built_in">pthread_mutex_unlock</span>(&amp;lock_a);<br>   ...<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="脆性">脆性</h3>
+<ul>
+<li>通常，所有线程调度算法都很脆弱：小的更改可能会带来巨大的意外后果。</li>
+<li>我将用多处理器（或多核）时间表进行说明。</li>
+<li>定理（Richard Graham，1976 年）：如果根据固定数量的处理器上的优先级安排了具有固定优先级，执行时间和优先级约束的任务集，则增加处理器数量，减少执行时间或削弱优先级约束可以增加时间表的长度。</li>
+</ul>
+<h3 id="Richard-异常">Richard 异常</h3>
+<ul>
+<li>具有优先级和显示的执行时间的 9 个任务，其中编号较低的任务比编号较高的任务具有更高的优先级。基于优先级的 3 个处理器时间表：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/image-20221028210227540.png" alt></th>
+<th><img src="/24134/image-20221028210229830.png" alt></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>如果我们将处理器增加到 4 个又会发生什么呢？使用四个处理器的运行时间更慢：图中数字为优先级</li>
+</ul>
+<p><img src="/24134/image-20221028210236677.png" alt></p>
+<ul>
+<li>贪婪调度：基于优先级的调度是“贪婪”。对于此示例，更智能的调度程序可以推迟调度 5、6 或 7，从而使处理器空闲一个时间单位。</li>
+<li>贪恋调度可能是最实际的选择：如果任务仅在任务的前任完成后才“到达”（对于计划程序是已知的），则贪婪的计划可能是唯一可行的选择。</li>
+<li>如果将所有计算时间减少 1 会怎样？</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/image-20221028210304227.png" alt></th>
+<th><img src="/24134/image-20221028210249125.png" alt></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>如果删除优先约束（4，8）和（4，7），会发生什么？</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/24134/image-20221028210312798.png" alt></th>
+<th><img src="/24134/image-20221028210317875.png" alt></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>弱化限制：优先顺序约束减弱也可能导致调度时间更长。</li>
+<li>假设任务 2 和 4 在互斥模式下共享相同的资源，并且任务被静态分配给处理器。然后，如果减少任务 1 的执行时间，则调度长度会增加：</li>
+</ul>
+<p><img src="/24134/image-20221028210336101.png" alt></p>
+<h3 id="结论">结论</h3>
+<p>在所有已知任务调度策略下的计时行为都很脆弱。微小的变化可能会带来巨大的（和意外的）后果。</p>
+<p>不幸的是，由于执行时间很难预测，因此这种脆弱性可能导致意外的系统故障。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/47916/" rel="prev" title="嵌入式系统概论-07-实时内核">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-07-实时内核
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/34422/" rel="next" title="嵌入式系统概论-05-基于主线的计算系统">
+      嵌入式系统概论-05-基于主线的计算系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">嵌入式软件概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E8%B7%AF%E7%BA%BF%E5%9B%BE"><span class="nav-number">1.1.</span> <span class="nav-text">嵌入式软件开发路线图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E4%B8%8E%E6%A1%8C%E9%9D%A2%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">1.2.</span> <span class="nav-text">嵌入式软件与桌面软件的对比</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98"><span class="nav-number">1.2.1.</span> <span class="nav-text">内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU-%E5%A4%84%E7%90%86%E8%83%BD%E5%8A%9B"><span class="nav-number">1.2.2.</span> <span class="nav-text">CPU 处理能力</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.2.3.</span> <span class="nav-text">操作系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E6%80%A7"><span class="nav-number">1.2.4.</span> <span class="nav-text">实时性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.5.</span> <span class="nav-text">开发流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.6.</span> <span class="nav-text">执行流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%AE%BE%E5%A4%87%E9%83%BD%E6%98%AF%E4%B8%8D%E5%90%8C%E7%9A%84"><span class="nav-number">1.2.7.</span> <span class="nav-text">每一个嵌入式设备都是不同的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E5%85%B7%E5%92%8C%E7%BB%84%E4%BB%B6"><span class="nav-number">1.2.8.</span> <span class="nav-text">嵌入式软件工具和组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7"><span class="nav-number">1.2.9.</span> <span class="nav-text">开发工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E7%BB%84%E4%BB%B6"><span class="nav-number">1.2.10.</span> <span class="nav-text">软件组件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%A6%82%E4%BD%95%E5%BD%B1%E5%93%8D%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">软件如何影响硬件设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%81%E8%AE%BE%E8%AE%A1%E7%A1%AC%E4%BB%B6%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">谁设计硬件？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6-%E7%A1%AC%E4%BB%B6%E7%9A%84%E6%9D%83%E8%A1%A1"><span class="nav-number">2.2.</span> <span class="nav-text">软件&#x2F;硬件的权衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E7%A1%AC%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">调试硬件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E6%A3%80%E6%94%AF%E6%8C%81"><span class="nav-number">2.4.</span> <span class="nav-text">自检支持</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">嵌入式系统软件架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%88%86%E5%B1%82"><span class="nav-number">3.1.</span> <span class="nav-text">软件分层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BD%95%E8%A6%81%E4%B8%BA%E5%AE%9E%E6%97%B6%E7%B3%BB%E7%BB%9F%E5%BB%BA%E7%AB%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.</span> <span class="nav-text">为何要为实时系统建立模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E9%97%B4%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">3.3.</span> <span class="nav-text">模型间的差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96%E7%A8%8B%E5%BA%8F%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.4.</span> <span class="nav-text">嵌入式系统的可视化程序模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%A8%8B%E5%BA%8F%E6%A8%A1%E5%9E%8B%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.4.1.</span> <span class="nav-text">单线程程序模型优缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%A8%8B%E5%BA%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.4.2.</span> <span class="nav-text">多线程程序模型的优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%A6%82%E8%BF%B0"><span class="nav-number">3.5.</span> <span class="nav-text">嵌入式软件体系结构概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2"><span class="nav-number">3.5.1.</span> <span class="nav-text">轮询</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Arduino-%E6%8C%89%E4%B8%8B%E6%8C%89%E9%92%AE%E6%97%B6%E6%89%93%E5%BC%80-LED"><span class="nav-number">3.5.1.1.</span> <span class="nav-text">Arduino - 按下按钮时打开 LED</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Arduino-Watchdog"><span class="nav-number">3.5.1.2.</span> <span class="nav-text">Arduino - Watchdog</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">3.5.2.</span> <span class="nav-text">有限状态机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%A6%E6%9C%89%E4%B8%AD%E6%96%AD%E7%9A%84%E8%BD%AE%E8%AF%A2"><span class="nav-number">3.5.3.</span> <span class="nav-text">带有中断的轮询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%85%E6%9C%89%E4%B8%AD%E6%96%AD"><span class="nav-number">3.5.4.</span> <span class="nav-text">仅有中断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E9%98%9F%E5%88%97%E8%B0%83%E5%BA%A6"><span class="nav-number">3.5.5.</span> <span class="nav-text">函数队列调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E9%98%9F%E5%88%97%E4%BC%98%E5%8C%96"><span class="nav-number">3.5.5.1.</span> <span class="nav-text">函数队列优化</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%A2%E5%8D%A0%E5%BC%8F%E5%A4%9A%E4%BB%BB%E5%8A%A1%E6%88%96%E5%A4%9A%E7%BA%BF%E7%A8%8B"><span class="nav-number">3.5.6.</span> <span class="nav-text">抢占式多任务或多线程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E5%88%86%E7%B1%BB"><span class="nav-number">3.6.</span> <span class="nav-text">内核分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E5%86%85%E6%A0%B8"><span class="nav-number">3.6.1.</span> <span class="nav-text">实时内核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%AE%E5%86%85%E6%A0%B8"><span class="nav-number">3.6.2.</span> <span class="nav-text">微内核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E5%86%85%E6%A0%B8"><span class="nav-number">3.6.3.</span> <span class="nav-text">单内核</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-RTOS"><span class="nav-number">4.</span> <span class="nav-text">实时操作系统 RTOS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%A8%A1%E5%9E%8B%EF%BC%88%E5%92%8C-Linux-%E7%9B%B8%E4%BC%BC%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">通用操作系统模型（和 Linux 相似）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-2"><span class="nav-number">4.2.</span> <span class="nav-text">操作系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTOS-%E5%92%8C%E9%80%9A%E7%94%A8%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%88GPOS%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">RTOS 和通用操作系统（GPOS）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTOS-%E4%BB%8E-GPOS-%E4%B8%AD%E5%88%86%E7%A6%BB%E5%87%BA%E6%9D%A5%E7%9A%84%E4%B8%8D%E5%90%8C%E5%8A%9F%E8%83%BD"><span class="nav-number">4.4.</span> <span class="nav-text">RTOS 从 GPOS 中分离出来的不同功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RTOS-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">4.5.</span> <span class="nav-text">RTOS 的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.6.</span> <span class="nav-text">实时操作系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">4.6.1.</span> <span class="nav-text">术语</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%91%A8%E6%9C%9F"><span class="nav-number">4.7.</span> <span class="nav-text">任务的周期</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8D%95%E4%BD%8D"><span class="nav-number">4.7.1.</span> <span class="nav-text">基本单位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E7%A8%8B%E5%BA%8F"><span class="nav-number">4.7.2.</span> <span class="nav-text">调度程序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.8.</span> <span class="nav-text">时序约束</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E6%97%B6%E5%BA%8F%E7%9A%84%E8%A7%84%E8%8C%83"><span class="nav-number">4.8.1.</span> <span class="nav-text">进程时序的规范</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8A%E6%94%BE%E6%97%B6%E9%97%B4%E5%92%8C%E6%88%AA%E6%AD%A2%E6%97%B6%E9%97%B4"><span class="nav-number">4.8.2.</span> <span class="nav-text">释放时间和截止时间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%9F%E7%8E%87%E8%A6%81%E6%B1%82"><span class="nav-number">4.9.</span> <span class="nav-text">进程速率要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%86%B2%E7%AA%81"><span class="nav-number">4.10.</span> <span class="nav-text">时间冲突</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E8%88%AA%E5%A4%A9%E9%A3%9E%E6%9C%BA%E8%BD%AF%E4%BB%B6%E9%94%99%E8%AF%AF"><span class="nav-number">4.11.</span> <span class="nav-text">示例：航天飞机软件错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E6%89%A7%E8%A1%8C%E7%89%B9%E5%BE%81"><span class="nav-number">4.12.</span> <span class="nav-text">进程执行特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">4.13.</span> <span class="nav-text">利用率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81"><span class="nav-number">4.14.</span> <span class="nav-text">进程状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E9%97%AE%E9%A2%98"><span class="nav-number">4.15.</span> <span class="nav-text">调度问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E4%B8%8E%E9%80%9A%E7%94%A8%E8%B0%83%E5%BA%A6"><span class="nav-number">4.15.1.</span> <span class="nav-text">嵌入式与通用调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OS-%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86"><span class="nav-number">4.15.2.</span> <span class="nav-text">OS 进程管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E9%81%93%E7%A8%8B%E5%BA%8F%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.15.3.</span> <span class="nav-text">多道程序操作系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%9A%84%E8%BF%9B%E7%A8%8B-%E4%BB%BB%E5%8A%A1%E6%BF%80%E6%B4%BB%E8%AE%B0%E5%BD%95%EF%BC%88%E4%BB%BB%E5%8A%A1%E6%8E%A7%E5%88%B6%E5%9D%97%EF%BC%89"><span class="nav-number">4.15.4.</span> <span class="nav-text">典型的进程&#x2F;任务激活记录（任务控制块）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%8F%AF%E4%BB%A5%E5%88%86%E6%B4%BE%E6%96%B0%E7%BA%BF%E7%A8%8B%EF%BC%9F"><span class="nav-number">4.15.5.</span> <span class="nav-text">什么时候可以分派新线程？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E7%9A%84%E7%84%A6%E7%82%B9%EF%BC%9A%E5%A6%82%E4%BD%95%E5%86%B3%E5%AE%9A%E8%A6%81%E5%AE%89%E6%8E%92%E5%93%AA%E4%B8%AA%E7%BA%BF%E7%A8%8B%EF%BC%9F"><span class="nav-number">4.15.6.</span> <span class="nav-text">当前的焦点：如何决定要安排哪个线程？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%87%E6%A0%87"><span class="nav-number">4.15.7.</span> <span class="nav-text">指标</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%A2%E5%8D%A0%E5%BC%8F%E8%B0%83%E5%BA%A6"><span class="nav-number">4.16.</span> <span class="nav-text">抢占式调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9F%E7%8E%87%E5%8D%95%E8%B0%83%E8%B0%83%E5%BA%A6-RMS"><span class="nav-number">4.17.</span> <span class="nav-text">速率单调调度 RMS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RMS-%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7-Feasibility"><span class="nav-number">4.17.1.</span> <span class="nav-text">RMS 的可行性 Feasibility</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA-RMS-%E7%9A%84%E4%BC%98%E8%B6%8A%E6%80%A7%EF%BC%9A%E8%80%83%E8%99%91%E4%B8%A4%E4%B8%AA%E4%B8%8D%E5%90%8C%E5%91%A8%E6%9C%9F%E7%9A%84%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.17.2.</span> <span class="nav-text">显示 RMS 的优越性：考虑两个不同周期的任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA-RMS-%E7%9A%84%E4%BC%98%E8%B6%8A%E6%80%A7%EF%BC%9A%E4%BB%BB%E5%8A%A1%E8%B0%83%E6%95%B4"><span class="nav-number">4.17.3.</span> <span class="nav-text">显示 RMS 的优越性：任务调整</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA-RMS-%E7%9A%84%E4%BC%98%E8%B6%8A%EF%BC%9A%E7%94%A8%E4%BA%8E%E4%B8%A4%E4%B8%AA%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.17.4.</span> <span class="nav-text">显示 RMS 的优越：用于两个任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.17.5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RMS-%E7%9A%84%E5%8F%AF%E8%A1%8C%E6%80%A7%E8%B0%83%E5%BA%A6%E5%88%86%E6%9E%90"><span class="nav-number">4.17.6.</span> <span class="nav-text">RMS 的可行性调度分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDL-%E9%A9%B1%E5%8A%A8%E8%B0%83%E5%BA%A6"><span class="nav-number">4.18.</span> <span class="nav-text">DDL 驱动调度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Jackson-s-Algorithm%EF%BC%9AEDD%EF%BC%8CEarliest-Due-Date%EF%BC%881955%EF%BC%89"><span class="nav-number">4.18.1.</span> <span class="nav-text">Jackson&#39;s Algorithm：EDD，Earliest Due Date（1955）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%80%83%E8%99%91%E4%B8%80%E4%B8%AA%E9%9D%9E-EDD-%E8%B0%83%E5%BA%A6-S"><span class="nav-number">4.18.1.1.</span> <span class="nav-text">考虑一个非 EDD 调度 S</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Horn-%E7%9A%84%E7%AE%97%E6%B3%95%EF%BC%9AEDF%EF%BC%8CEarliest-deadline-first%EF%BC%881974%EF%BC%89"><span class="nav-number">4.18.2.</span> <span class="nav-text">Horn 的算法：EDF，Earliest deadline first（1974）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-EDF-%E6%89%A7%E8%A1%8C%E5%AE%9A%E6%9C%9F%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.18.2.1.</span> <span class="nav-text">使用 EDF 执行定期任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RMS-%E5%92%8C-EDF-%E5%93%AA%E4%B8%AA%E5%A5%BD"><span class="nav-number">4.18.2.2.</span> <span class="nav-text">RMS 和 EDF 哪个好</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.18.2.3.</span> <span class="nav-text">优先级约束</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E6%96%B0%E6%88%AA%E6%AD%A2%E6%97%A5%E6%9C%9F%E4%BC%98%E5%85%88%EF%BC%8CLatest-Deadline-First%EF%BC%8CLDF"><span class="nav-number">4.18.3.</span> <span class="nav-text">最新截止日期优先，Latest Deadline First，LDF</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EDF"><span class="nav-number">4.18.4.</span> <span class="nav-text">EDF*</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B7%E6%9C%89%E4%BC%98%E5%85%88%E7%BA%A7%E7%9A%84-EDF"><span class="nav-number">4.18.5.</span> <span class="nav-text">具有优先级的 EDF</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#How"><span class="nav-number">4.18.6.</span> <span class="nav-text">How</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E5%BC%82%E5%B8%B8"><span class="nav-number">4.19.</span> <span class="nav-text">调度异常</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E8%AE%BF%E9%97%AE"><span class="nav-number">4.19.1.</span> <span class="nav-text">互斥访问</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E4%B8%AA%E8%BF%9B%E7%A8%8B%E4%B8%AD%E7%9A%84%E9%94%81%E6%9C%BA%E5%88%B6"><span class="nav-number">4.19.2.</span> <span class="nav-text">多个进程中的锁机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC%EF%BC%9A%E4%BA%92%E6%96%A5%E7%9A%84%E5%8D%B1%E5%AE%B3"><span class="nav-number">4.19.3.</span> <span class="nav-text">优先级反转：互斥的危害</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E7%81%AB%E6%98%9F%E6%8E%A2%E8%B7%AF%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">4.20.</span> <span class="nav-text">示例：火星探路者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%81%AB%E6%98%9F%E6%8E%A2%E8%B7%AF%E8%80%85%E7%9A%84%E4%BB%BB%E5%8A%A1%E5%AE%89%E6%8E%92"><span class="nav-number">4.20.1.</span> <span class="nav-text">火星探路者的任务安排</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%81%AB%E6%98%9F%E6%8E%A2%E8%B7%AF%E8%80%85%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7%E5%AE%89%E6%8E%92"><span class="nav-number">4.20.2.</span> <span class="nav-text">火星探路者的优先级安排</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E4%BA%A7%E7%94%9F"><span class="nav-number">4.20.3.</span> <span class="nav-text">问题产生</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%81%AB%E6%98%9F%E6%8E%A2%E8%B7%AF%E8%80%85%E7%9A%84%E4%BC%98%E5%85%88%E5%8F%8D%E8%BD%AC"><span class="nav-number">4.20.3.1.</span> <span class="nav-text">火星探路者的优先反转</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Priority-Inheritance-Protocol%EF%BC%88PIP%EF%BC%89%E4%BC%98%E5%85%88%E7%BA%A7%E7%BB%A7%E6%89%BF%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.21.</span> <span class="nav-text">Priority Inheritance Protocol（PIP）优先级继承协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PIP-%E7%AE%97%E6%B3%95"><span class="nav-number">4.21.1.</span> <span class="nav-text">PIP 算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PIP-%E7%AE%97%E6%B3%95%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.21.2.</span> <span class="nav-text">PIP 算法示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%BB%E9%94%81"><span class="nav-number">4.21.3.</span> <span class="nav-text">死锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Priority-Ceiling-Protocol%EF%BC%88PCP%EF%BC%89%EF%BC%88Sha%EF%BC%8C-Rajkumar%EF%BC%8CLehoczky%EF%BC%8C-1990%EF%BC%89%E4%BC%98%E5%85%88%E5%A4%A9%E8%8A%B1%E6%9D%BF%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.22.</span> <span class="nav-text">Priority Ceiling Protocol（PCP）（Sha， Rajkumar，Lehoczky， 1990）优先天花板协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OCPP-and-ICPP"><span class="nav-number">4.22.1.</span> <span class="nav-text">OCPP and ICPP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ICPP-%E4%B8%8E-OCPP"><span class="nav-number">4.22.2.</span> <span class="nav-text">ICPP 与 OCPP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E5%A4%A9%E8%8A%B1%E6%9D%BF%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.22.3.</span> <span class="nav-text">优先天花板协议</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%84%86%E6%80%A7"><span class="nav-number">4.23.</span> <span class="nav-text">脆性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Richard-%E5%BC%82%E5%B8%B8"><span class="nav-number">4.24.</span> <span class="nav-text">Richard 异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">4.25.</span> <span class="nav-text">结论</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

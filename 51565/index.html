@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="迭代完成后添加模块完成对策略的修改满不满足开闭原则  确定设计模式的目的：需要修改或增加策略的时候  修改策略：不符合开闭原则，如果已经迭代了很多个版本则选择增加模块来替代原来的部分。 增加策略：符合开闭原则。   当我们修改后我们需要 new 这个对象，search 一下，也可以使用反射机制，但是我们在需要用到这个方法的时候都用一段重复的代码来 new 这个对象   因此我们希望以后新建一个对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件详细设计-03-工厂模式">
+<meta property="og:url" content="https://eaglebear2002.github.io/51565/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="迭代完成后添加模块完成对策略的修改满不满足开闭原则  确定设计模式的目的：需要修改或增加策略的时候  修改策略：不符合开闭原则，如果已经迭代了很多个版本则选择增加模块来替代原来的部分。 增加策略：符合开闭原则。   当我们修改后我们需要 new 这个对象，search 一下，也可以使用反射机制，但是我们在需要用到这个方法的时候都用一段重复的代码来 new 这个对象   因此我们希望以后新建一个对">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101341949.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101511804.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101517724.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101521376.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760140623-4.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760162017-6.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101614337.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760270307-16.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760257111-14.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760285100-18.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760312858-23.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/51565/image-20230314101845156.png">
+<meta property="article:published_time" content="2023-03-02T06:10:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.695Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/51565/image-20230314101341949.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/51565/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件详细设计-03-工厂模式 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/51565/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件详细设计-03-工厂模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-02 14:10:00" itemprop="dateCreated datePublished" datetime="2023-03-02T14:10:00+08:00">2023-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>10k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <ol>
+<li>迭代完成后添加模块完成对策略的修改满不满足开闭原则
+<ol>
+<li>确定设计模式的目的：需要修改或增加策略的时候
+<ol>
+<li>修改策略：不符合开闭原则，如果已经迭代了很多个版本则选择增加模块来替代原来的部分。</li>
+<li>增加策略：符合开闭原则。</li>
+</ol>
+</li>
+<li>当我们修改后我们需要 new 这个对象，search 一下，也可以使用反射机制，但是我们在需要用到这个方法的时候都用一段重复的代码来 new 这个对象</li>
+</ol>
+</li>
+<li>因此我们希望以后新建一个对象的时候可以只修改一个方法来完成创建，这就引出了工厂模式。</li>
+<li>设计模式分类
+<ol>
+<li>模式本身
+<ol>
+<li>创建型</li>
+<li>结构型</li>
+<li>行为型</li>
+</ol>
+</li>
+<li>模式实现
+<ol>
+<li>类模式：以集成为主要方式实现</li>
+<li>对象模式：以合成为主要方式实现</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="简单工厂模式">简单工厂模式</h2>
+<h3 id="模式动机">模式动机</h3>
+<p>设计背景：考虑一个简单的软件应用场景，一个软件系统可以提供多个外观不同的按钮（如圆形按钮、矩形按钮、菱形按钮等），这些按钮都源自同一个基类，不过在继承基类后不同的子类修改了部分属性从而使得它们可以呈现不同的外观，如果我们希望在使用这些按钮时，不需要知道这些具体按钮类的名字，只需要知道表示该按钮类的一个参数，并提供一个调用方便的方法，把该参数传入方法即可返回一个相应的按钮对象，此时，就可以使用简单工厂模式。</p>
+<h3 id="模式定义">模式定义</h3>
+<ol>
+<li>简单工厂模式（Simple Factory Pattern）：又称为静态工厂方法（Static Factory Method）模式，它属于类创建型模式。</li>
+<li>在简单工厂模式中，可以根据参数的不同返回不同类的实例。</li>
+<li>简单工厂模式专门定义一个类来负责创建其他类的实例，被创建的实例通常都具有共同的父类。</li>
+<li>工厂角色提供静态工厂方法来创建其他类的实例，这样子满足了原则：
+<ol>
+<li>单一职责原则（封装变化）将对象的创建和使用分离（创建本质上和使用上强耦合），将复杂度降低，并将变化的部分和不变的部分分离开。</li>
+<li>但是对开闭原则的支持不太好</li>
+</ol>
+</li>
+<li>Java 一般会提供一个 <code>static</code> 的方法，这样就不必实例化工厂对象。</li>
+</ol>
+<h3 id="模式结构">模式结构</h3>
+<p><img src="/51565/image-20230314101341949.png" alt></p>
+<p>简单工厂模式包含如下角色：</p>
+<ol>
+<li>Factory：工厂角色</li>
+<li>Product：抽象产品角色</li>
+<li>ConcreteProduct：具体产品角色</li>
+</ol>
+<h3 id="模式分析">模式分析</h3>
+<p>分析如下代码：可以使用策略模式进行修改</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">pay</span><span class="hljs-params">(String type)</span> &#123;<br>    <span class="hljs-keyword">if</span> (type.equalsIgnoreCase(<span class="hljs-string">&quot;cash&quot;</span>)) &#123;<br>        <span class="hljs-comment">//现金支付处理代码</span><br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (type.equalsIgnoreCase(<span class="hljs-string">&quot;creditcard&quot;</span>)) &#123;<br>        <span class="hljs-comment">//信用卡支付处理代码</span><br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (type.equalsIgnoreCase(<span class="hljs-string">&quot;voucher&quot;</span>)) &#123;<br>        <span class="hljs-comment">//代金券支付处理代码</span><br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>重构后的代码：抽象和具体成为了工厂的产品，没有办法开闭原则，如果工厂进行修改则会导致大规模的修改</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 抽象支付类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AbstractPay</span> &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">pay</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-comment">// 具体支付类</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CashPay</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AbstractPay</span> &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">pay</span><span class="hljs-params">()</span> &#123;<br>		<span class="hljs-comment">//现金支付处理代码</span><br>	&#125;<br>&#125;<br><br><span class="hljs-comment">// 支付工厂</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PayMethodFactory</span> &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> AbstractPay <span class="hljs-title function_">getPayMethod</span><span class="hljs-params">(String type)</span> &#123;<br>		<span class="hljs-keyword">if</span> (type.equalsIgnoreCase(<span class="hljs-string">&quot;cash&quot;</span>)) &#123;<br>			<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CashPay</span>(); <span class="hljs-comment">//根据参数创建具体产品</span><br>		&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (type.equalsIgnoreCase(<span class="hljs-string">&quot;creditcard&quot;</span>)) &#123;<br>			<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CreditcardPay</span>(); <span class="hljs-comment">//根据参数创建具体产品</span><br>		&#125;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="3">
+<li>将对象的创建和对象本身业务处理分离可以降低系统的耦合度，使得两者修改起来都相对容易。</li>
+<li>在调用工厂类的工厂方法时，由于工厂方法是静态方法，使用起来很方便，可通过类名直接调用，而且只需要传入一个简单的参数即可，在实际开发中，还可以在调用时将所传入的参数保存在 XML 等格式的配置文件中，修改参数时无须修改任何 Java 源代码。</li>
+<li>简单工厂模式最大的问题在于工厂类的职责相对过重，增加新的产品需要修改工厂类的判断逻辑，这一点与开闭原则是相违背的。</li>
+<li>简单工厂模式的要点在于：当你需要什么，只需要传入一个正确的参数，就可以获取你所需要的对象，而无须知道其创建细节。</li>
+</ol>
+<h3 id="模式实例与解析">模式实例与解析</h3>
+<p>实例：权限管理</p>
+<ol>
+<li>在某 OA 系统中，系统根据对比用户在登录时输入的账号和密码以及在数据库中存储的账号和密码是否一致来进行身份验证，如果验证通过，则取出存储在数据库中的用户权限等级（以整数形式存储），根据不同的权限等级创建不同等级的用户对象，不同等级的用户对象拥有不同的操作权限。现使用简单工厂模式来设计该权限管理模块。</li>
+<li>相同权限的怎么处理，不同权限的怎么处理等等问题</li>
+</ol>
+<p><img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F.jpg" alt></p>
+<h3 id="模式优缺点">模式优缺点</h3>
+<h4 id="简单工厂模式的优点">简单工厂模式的优点</h4>
+<ol>
+<li>工厂类含有必要的判断逻辑，可以决定在什么时候创建哪一个产品类的实例，客户端可以免除直接创建产品对象的责任，而仅仅“消费”产品；简单工厂模式通过这种做法实现了对责任的分割，它提供了专门的工厂类用于创建对象。</li>
+<li>客户端无须知道所创建的具体产品类的类名，只需要知道具体产品类所对应的参数即可，对于一些复杂的类名，通过简单工厂模式可以减少使用者的记忆量。</li>
+<li>通过引入配置文件，可以在不修改任何客户端代码的情况下更换和增加新的具体产品类，在一定程度上提高了系统的灵活性。</li>
+</ol>
+<h4 id="简单工厂模式的缺点">简单工厂模式的缺点</h4>
+<ol>
+<li>由于工厂类集中了所有产品创建逻辑，一旦不能正常工作，整个系统都要受到影响。</li>
+<li>使用简单工厂模式将会增加系统中类的个数，在一定程序上增加了系统的复杂度和理解难度。</li>
+<li>系统扩展困难，一旦添加新产品就不得不修改工厂逻辑，在产品类型较多时，有可能造成工厂逻辑过于复杂，不利于系统的扩展和维护。只是把分散在系统各个地方的变化汇总到了一起。</li>
+<li>简单工厂模式由于使用了静态工厂方法，造成工厂角色无法形成基于继承的等级结构。</li>
+</ol>
+<h3 id="模式适用环境">模式适用环境</h3>
+<p>在以下情况下可以使用简单工厂模式：</p>
+<ol>
+<li>工厂类负责创建的对象比较少：由于创建的对象较少，不会造成工厂方法中的业务逻辑太过复杂（如果扩展使比较少的）</li>
+<li>客户端只知道传入工厂类的参数，对于如何创建对象不关心：客户端既不需要关心创建细节，甚至连类名都不需要记住，只需要知道类型所对应的参数（比如只知道名称参数）</li>
+</ol>
+<h3 id="模式应用">模式应用</h3>
+<ol>
+<li>在 JDK 类库中广泛使用了简单工厂模式，如工具类 <code>java.text.DateFormat</code>，它用于格式化一个本地日期或者时间。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">static</span> DateFormat <span class="hljs-title function_">getDateInstance</span><span class="hljs-params">()</span>;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">static</span> DateFormat <span class="hljs-title function_">getDateInstance</span><span class="hljs-params">(<span class="hljs-type">int</span> style)</span>;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">static</span> DateFormat <span class="hljs-title function_">getDateInstance</span><span class="hljs-params">(<span class="hljs-type">int</span> style, Locale locale)</span>;<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>Java 加密技术：对称加密和非对称加密，但是变化比较少</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//获取不同加密算法的密钥生成器</span><br><span class="hljs-type">KeyGenerator</span> <span class="hljs-variable">keyGen</span> <span class="hljs-operator">=</span> KeyGenerator.getInstance(<span class="hljs-string">&quot;DESede&quot;</span>);<br><span class="hljs-comment">//创建密码器</span><br><span class="hljs-type">Cipher</span> <span class="hljs-variable">cp</span> <span class="hljs-operator">=</span> Cipher.getInstance(<span class="hljs-string">&quot;DESede&quot;</span>);<br></code></pre></td></tr></table></figure>
+<h3 id="模式扩展">模式扩展</h3>
+<ol>
+<li>简单工厂模式的简化：在有些情况下工厂类可以由抽象产品角色扮演，一个抽象产品类同时也是子类的工厂，也就是说把静态工厂方法写到抽象产品类中。</li>
+<li>有些情况下，产品本身只提供一两个方法，此时抽象产品可以和简单工厂进行角色合并。</li>
+</ol>
+<p><img src="/51565/image-20230314101511804.png" alt></p>
+<h2 id="工厂方法模式">工厂方法模式</h2>
+<h3 id="简单工厂模式的不足">简单工厂模式的不足</h3>
+<ol>
+<li>在简单工厂模式中，只提供了一个工厂类，该工厂类处于对产品类进行实例化的中心位置，它知道每一个产品对象的创建细节，并决定何时实例化哪一个产品类。简单工厂模式最大的缺点是当有新产品要加入到系统中时，必须修改工厂类，加入必要的处理逻辑，这违背了“开闭原则”。</li>
+<li>在简单工厂模式中，所有的产品都是由同一个工厂创建，工厂类职责较重，业务逻辑较为复杂，具体产品与工厂类之间的耦合度高，严重影响了系统的灵活性和扩展性，而工厂方法模式则可以很好地解决这一问题。</li>
+</ol>
+<h3 id="模式动机-2">模式动机</h3>
+<ol>
+<li>考虑这样一个系统，按钮工厂类可以返回一个具体的按钮实例，如圆形按钮、矩形按钮、菱形按钮等。在这个系统中，如果需要增加一种新类型的按钮，如椭圆形按钮，那么除了增加一个新的具体产品类之外，还需要修改工厂类的代码，这就使得整个设计在一定程度上违反了“开闭原则”。</li>
+</ol>
+<p><img src="/51565/image-20230314101517724.png" alt></p>
+<ol start="2">
+<li>现在对该系统进行修改，不再设计一个按钮工厂类来统一负责所有产品的创建，而是将具体按钮的创建过程交给专门的工厂子类去完成，我们先定义一个抽象的按钮工厂类，再定义具体的工厂类来生成圆形按钮、矩形按钮、菱形按钮等，它们实现在抽象按钮工厂类中定义的方法。这种抽象化的结果使这种结构可以在不修改具体工厂类的情况下引进新的产品，如果出现新的按钮类型，只需要为这种新类型的按钮创建一个具体的工厂类就可以获得该新按钮的实例，这一特点无疑使得工厂方法模式具有超越简单工厂模式的优越性，更加符合“开闭原则”。</li>
+<li>使用工厂方法模式设计的按钮工厂</li>
+</ol>
+<p><img src="/51565/image-20230314101521376.png" alt></p>
+<h3 id="模式定义-2">模式定义</h3>
+<ol>
+<li>工厂方法模式（Factory Method Pattern）又称为工厂模式，也叫虚拟构造器（Virtual Constructor）模式或者多态工厂（Polymorphic Factory）模式，它属于类创建型模式。</li>
+<li>在工厂方法模式中，工厂父类负责定义创建产品对象的公共接口，而工厂子类则负责生成具体的产品对象，这样做的目的是将产品类的实例化操作延迟到工厂子类中完成，即通过工厂子类来确定究竟应该实例化哪一个具体产品类。</li>
+<li>工厂方法是以继承方法为主，工厂子类是继承工厂父类的。</li>
+<li>按钮只有被创建时才需要确定类型（任意对象使用要尽可能在设计时延迟，延迟到必须要进行实例化的时候），在抽象工厂，我们使用的是抽象产品，而不是具体的某个对象</li>
+<li>工厂方法：
+<ol>
+<li>变化的部分：变化的是产品的服务</li>
+<li>不变的部分：对象的使用是不变的</li>
+</ol>
+</li>
+</ol>
+<h3 id="模式结构-2">模式结构</h3>
+<img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760140623-4.jpg" style="zoom:50%;">
+<h3 id="模式分析-2">模式分析</h3>
+<ol>
+<li>工厂方法模式是简单工厂模式的进一步抽象和推广。由于使用了面向对象的多态性，工厂方法模式保持了简单工厂模式的优点，而且克服了它的缺点。在工厂方法模式中，核心的工厂类不再负责所有产品的创建，而是将具体创建工作交给子类去做。这个核心类仅仅负责给出具体工厂必须实现的接口，而不负责哪一个产品类被实例化这种细节，这使得工厂方法模式可以允许系统在不修改工厂角色的情况下引进新产品。</li>
+<li>当系统扩展需要添加新的产品对象时，仅仅需要添加一个具体产品对象以及一个具体工厂对象，原有工厂对象不需要进行任何修改，也不需要修改客户端，很好地符合了“开闭原则”。而简单工厂模式在添加新产品对象后不得不修改工厂方法，扩展性不好。工厂方法模式退化（抽象工厂和具体工厂合并）后可以演变成简单工厂模式。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 抽象工厂类代码</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PayMethodFactory</span> &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractPay <span class="hljs-title function_">getPayMethod</span><span class="hljs-params">()</span>;<br>&#125;<br><br><span class="hljs-comment">// 具体工厂类代码</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CashPayFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">PayMethodFactory</span> &#123;<br>	<span class="hljs-keyword">public</span> AbstractPay <span class="hljs-title function_">getPayMethod</span><span class="hljs-params">()</span> &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CashPay</span>();<br>	&#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Main</span> &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>		<span class="hljs-comment">// 客户类代码片段</span><br>		PayMethodFactory factory;<br>		AbstractPay payMethod;<br>		factory = <span class="hljs-keyword">new</span> <span class="hljs-title class_">CashPayFactory</span>();<br>		payMethod = factory.getPayMethod();<br>		payMethod.pay();<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>为了提高系统的可扩展性和灵活性，在定义工厂和产品时都必须使用抽象层，如果需要更换产品类，只需要更换对应的工厂即可，其他代码不需要进行任何修改。</li>
+<li>工厂方法生成的产品都是一类产品</li>
+<li>配置文件代码：在实际的应用开发中，一般将具体工厂类的实例化过程进行改进，不直接使用 new 关键字来创建对象，而是将具体类的类名写入配置文件中，再通过 Java 的反射机制，读取 XML 格式的配置文件，根据存储在 XML 文件中的类名字符串生成对象。</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">config</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">className</span>&gt;</span>CashPayFactory<span class="hljs-tag">&lt;/<span class="hljs-name">className</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">config</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<ol start="8">
+<li>Java 反射（Java Reflection)：是指在程序运行时获取已知名称的类或已有对象的相关信息的一种机制，包括类的方法、属性、超类等信息，还包括实例的创建和实例类型的判断等。可通过 Class 类的 <code>forName()</code> 方法返回与带有给定字符串名的类或接口相关联的 Class 对象，再通过 <code>newInstance()</code> 方法创建此对象所表示的类的一个新实例，即通过一个类名字符串得到类的实例。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 创建一个字符串类型的对象</span><br><span class="hljs-type">Class</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> Class.forName(<span class="hljs-string">&quot;String&quot;</span>);<br><span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> c.newInstance();<br><span class="hljs-keyword">return</span> obj;<br></code></pre></td></tr></table></figure>
+<ol start="9">
+<li>工具类 <code>XMLUtil</code> 代码片段：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 创建 DOM 文档对象</span><br><span class="hljs-type">DocumentBuilderFactory</span> <span class="hljs-variable">dFactory</span> <span class="hljs-operator">=</span> DocumentBuilderFactory.newInstance();<br><span class="hljs-type">DocumentBuilder</span> <span class="hljs-variable">builder</span> <span class="hljs-operator">=</span> dFactory.newDocumentBuilder();<br>Document doc;<br>doc = builder.parse(<span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(<span class="hljs-string">&quot;config.xml&quot;</span>));<br><span class="hljs-comment">// 获取包含类名的文本节点</span><br><span class="hljs-type">NodeList</span> <span class="hljs-variable">nl</span> <span class="hljs-operator">=</span> doc.getElementsByTagName(<span class="hljs-string">&quot;className&quot;</span>);<br><span class="hljs-type">Node</span> <span class="hljs-variable">classNode</span> <span class="hljs-operator">=</span> nl.item(<span class="hljs-number">0</span>).getFirstChild();<br><span class="hljs-type">String</span> <span class="hljs-variable">cName</span> <span class="hljs-operator">=</span> classNode.getNodeValue();<br><span class="hljs-comment">// 通过类名生成实例对象并将其返回</span><br><span class="hljs-type">Class</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> Class.forName(cName);<br><span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> c.newInstance();<br><span class="hljs-keyword">return</span> obj;<br></code></pre></td></tr></table></figure>
+<ol start="10">
+<li>修改后的客户类代码片段</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java">PayMethodFactory factory;<br>AbstractPay payMethod;<br>factory = (PayMethodFactory)XMLUtil.getBean(); <span class="hljs-comment">// getBean(）的返回类型为Object，此处需要进行强制类型转换</span><br>payMethod = factory.getPayMethod();<br>payMethod.pay();<br></code></pre></td></tr></table></figure>
+<h3 id="模式实例与解析-2">模式实例与解析</h3>
+<ol>
+<li>实例：日志记录器</li>
+<li>某系统日志记录器要求支持多种日志记录方式，如文件记录、数据库记录等，且用户可以根据要求动态选择日志记录方式，现使用工厂方法模式设计该系统。</li>
+</ol>
+<p><img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760162017-6.jpg" alt></p>
+<h3 id="模式优缺点-2">模式优缺点</h3>
+<h4 id="工厂方法模式的优点">工厂方法模式的优点</h4>
+<ol>
+<li>在工厂方法模式中，工厂方法用来创建客户所需要的产品，同时还向客户隐藏了哪种具体产品类将被实例化这一细节，用户只需要关心所需产品对应的工厂，无须关心创建细节，甚至无须知道具体产品类的类名。</li>
+<li>基于工厂角色和产品角色的多态性设计是工厂方法模式的关键。它能够使工厂可以自主确定创建何种产品对象，而如何创建这个对象的细节则完全封装在具体工厂内部。工厂方法模式之所以又被称为多态工厂模式，是因为所有的具体工厂类都具有同一抽象父类。</li>
+<li>使用工厂方法模式的另一个优点是在系统中加入新产品时，无须修改抽象工厂和抽象产品提供的接口，无须修改客户端，也无须修改其他的具体工厂和具体产品，而只要添加一个具体工厂和具体产品就可以了。这样，系统的可扩展性也就变得非常好，完全符合“开闭原则”。</li>
+</ol>
+<h4 id="工厂方法模式的缺点">工厂方法模式的缺点</h4>
+<ol>
+<li>在添加新产品时，需要编写新的具体产品类，而且还要提供与之对应的具体工厂类，系统中类的个数将成对增加，在一定程度上增加了系统的复杂度，有更多的类需要编译和运行，会给系统带来一些额外的开销。</li>
+<li>由于考虑到系统的可扩展性，需要引入抽象层，在客户端代码中均使用抽象层进行定义，增加了系统的抽象性和理解难度，且在实现时可能需要用到 DOM、反射等技术，增加了系统的实现难度。</li>
+</ol>
+<h3 id="模式适用环境-2">模式适用环境</h3>
+<p>在以下情况下可以使用工厂方法模式：</p>
+<ol>
+<li>一个类不知道它所需要的对象的类：在工厂方法模式中，客户端不需要知道具体产品类的类名，只需要知道所对应的工厂即可，具体的产品对象由具体工厂类创建；客户端需要知道创建具体产品的工厂类。</li>
+<li>一个类通过其子类来指定创建哪个对象：在工厂方法模式中，对于抽象工厂类只需要提供一个创建产品的接口，而由其子类来确定具体要创建的对象，利用面向对象的多态性和里氏代换原则，在程序运行时，子类对象将覆盖父类对象，从而使得系统更容易扩展。</li>
+<li>将创建对象的任务委托给多个工厂子类中的某一个，客户端在使用时可以无须关心是哪一个工厂子类创建产品子类，需要时再动态指定，可将具体工厂类的类名存储在配置文件或数据库中。</li>
+<li>希望能够推迟创建的时候</li>
+</ol>
+<h2 id="抽象工厂模式">抽象工厂模式</h2>
+<ol>
+<li>在工厂方法模式中具体工厂负责生产具体的产品，每一个具体工厂对应一种具体产品，工厂方法也具有唯一性，一般情况下，一个具体工厂中只有一个工厂方法或者一组重载的工厂方法。但是有时候我们需要一个工厂可以提供多个产品对象，而不是单一的产品对象。</li>
+<li>为了更清晰地理解工厂方法模式，需要先引入两个概念：
+<ol>
+<li>产品等级结构：产品等级结构即产品的继承结构，如一个抽象类是电视机，其子类有海尔电视机、海信电视机、TCL 电视机，则抽象电视机与具体品牌的电视机之间构成了一个产品等级结构，抽象电视机是父类，而具体品牌的电视机是其子类。</li>
+<li>产品族：在抽象工厂模式中，产品族是指由同一个工厂生产的，位于不同产品等级结构中的一组产品，如海尔电器工厂生产的海尔电视机、海尔电冰箱，海尔电视机位于电视机产品等级结构中，海尔电冰箱位于电冰箱产品等级结构中。</li>
+</ol>
+</li>
+<li>当系统所提供的工厂所需生产的具体产品并不是一个简单的对象，而是多个位于不同产品等级结构中属于不同类型的具体产品时需要使用抽象工厂模式。抽象工厂模式是所有形式的工厂模式中最为抽象和最具一般性的一种形态。</li>
+<li>抽象工厂模式与工厂方法模式最大的区别在于，工厂方法模式针对的是一个产品等级结构，而抽象工厂模式则需要面对多个产品等级结构，一个工厂等级结构可以负责多个不同产品等级结构中的产品对象的创建。当一个工厂等级结构可以创建出分属于不同产品等级结构的一个产品族中的所有对象时，抽象工厂模式比工厂方法模式更为简单、有效率。</li>
+<li>抽象工厂模式（Abstract Factory Pattern）：提供一个创建一系列相关或相互依赖对象的接口，而无须指定它们具体的类。抽象工厂模式又称为 Kit 模式，属于对象创建型模式。
+<ol>
+<li>调用 kit 很可能是抽象工厂模式。</li>
+<li>判断是类模式还是对象模式：重点是类和对象哪个更为重要</li>
+</ol>
+</li>
+<li>Abstract Factory Pattern: Provide an interface for creating families of related or dependent objects without specifying their concrete classes.</li>
+<li>Frequency of use: high</li>
+</ol>
+<h3 id="模式结构-3">模式结构</h3>
+<img src="/51565/image-20230314101614337.png" style="zoom: 67%;">
+<ol>
+<li>抽象工厂模式包含如下角色：
+<ol>
+<li><code>AbstractFactory</code>：抽象工厂</li>
+<li><code>ConcreteFactory</code>：具体工厂</li>
+<li><code>AbstractProduct</code>：抽象产品</li>
+<li><code>Product</code>：具体产品</li>
+</ol>
+</li>
+</ol>
+<h3 id="产品族">产品族</h3>
+<img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760270307-16.jpg" style="zoom:50%;">
+<img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760257111-14.jpg" style="zoom:50%;">
+<img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760285100-18.jpg" style="zoom: 67%;">
+<h3 id="模式分析-3">模式分析</h3>
+<p>抽象工厂类的典型代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AbstractFactory</span>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractProductA <span class="hljs-title function_">createProductA</span><span class="hljs-params">()</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> AbstractProductB <span class="hljs-title function_">createProductB</span><span class="hljs-params">()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>具体工厂类的典型代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConcreteFactory1</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AbstractFactory</span>&#123;<br>    <span class="hljs-keyword">public</span> AbstractProductA <span class="hljs-title function_">createProductA</span><span class="hljs-params">()</span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcreteProductA1</span>();<br>    &#125;<br>    <span class="hljs-keyword">public</span> AbstractProductB <span class="hljs-title function_">createProductB</span><span class="hljs-params">()</span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcreteProductB1</span>();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="模式示例与解析">模式示例与解析</h3>
+<h4 id="实例一：电器工厂">实例一：电器工厂</h4>
+<p>一个电器工厂可以产生多种类型的电器，如海尔工厂可以生产海尔电视机、海尔空调等，TCL 工厂可以生产 TCL 电视机、TCL 空调等，相同品牌的电器构成一个产品族，而相同类型的电器构成了一个产品等级结构，现使用抽象工厂模式模拟该场景。</p>
+<p><img src="/51565/03%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F-1678760312858-23.jpg" alt></p>
+<h4 id="实例二：数据库操作工厂">实例二：数据库操作工厂</h4>
+<p>某系统为了改进数据库操作的性能，自定义数据库连接对象 Connection 和语句对象 Statement，可针对不同类型的数据库提供不同的连接对象和语句对象，如提供 Oracle 或 SQL Server 专用连接类和语句类，而且用户可以通过配置文件等方式根据实际需要动态更换系统数据库。使用抽象工厂模式设计该系统。</p>
+<p><img src="/51565/image-20230314101845156.png" alt></p>
+<h3 id="抽象工厂模式的优点">抽象工厂模式的优点</h3>
+<ol>
+<li>抽象工厂模式隔离了具体类的生成，使得客户并不需要知道什么被创建。由于这种隔离，更换一个具体工厂就变得相对容易。所有的具体工厂都实现了抽象工厂中定义的那些公共接口，因此只需改变具体工厂的实例，就可以在某种程度上改变整个软件系统的行为。另外，应用抽象工厂模式可以实现高内聚低耦合的设计目的，因此抽象工厂模式得到了广泛的应用。</li>
+<li>当一个产品族中的多个对象被设计成一起工作时，它能够保证客户端始终只使用同一个产品族中的对象。这对一些需要根据当前环境来决定其行为的软件系统来说，是一种非常实用的设计模式。</li>
+<li>增加新的具体工厂和产品族很方便，无须修改已有系统，符合“开闭原则”。
+<ol>
+<li>增加新的产品族符合开闭原则</li>
+<li>增加新的产品等级结构麻烦</li>
+</ol>
+</li>
+<li>实现开闭原则最重要的原则：依赖倒转</li>
+<li>保证依赖倒转能够实现的原则：里氏替代原则</li>
+<li>类中存在具体耦合是很难实现开闭原则的</li>
+</ol>
+<h3 id="抽象工厂模式的缺点">抽象工厂模式的缺点</h3>
+<p>在添加新的产品对象时，难以扩展抽象工厂来生产新种类的产品，这是因为在抽象工厂角色中规定了所有可能被创建的产品集合，要支持新种类的产品就意味着要对该接口进行扩展，而这将涉及到对抽象工厂角色及其所有子类的修改，显然会带来较大的不便。开闭原则的倾斜性（增加新的工厂和产品族容易，增加新的产品等级结构麻烦）</p>
+<h3 id="在以下情况下可以使用抽象工厂模式">在以下情况下可以使用抽象工厂模式</h3>
+<ol>
+<li>一个系统不应当依赖于产品类实例如何被创建、组合和表达的细节，这对于所有类型的工厂模式都是重要的。</li>
+<li>系统中有多于一个的产品族，而每次只使用其中某一产品族。</li>
+<li>属于同一个产品族的产品将在一起使用，这一约束必须在系统的设计中体现出来。</li>
+<li>系统提供一个产品类的库，所有的产品以同样的接口出现，从而使客户端不依赖于具体实现。</li>
+</ol>
+<h2 id="模式扩展-2">模式扩展</h2>
+<h3 id="“开闭原则”的倾斜性">“开闭原则”的倾斜性</h3>
+<ol>
+<li>“开闭原则”要求系统对扩展开放，对修改封闭，通过扩展达到增强其功能的目的。对于涉及到多个产品族与多个产品等级结构的系统，其功能增强包括两方面：
+<ol>
+<li>增加产品族：对于增加新的产品族，工厂方法模式很好的支持了“开闭原则”，对于新增加的产品族，只需要对应增加一个新的具体工厂即可，对已有代码无须做任何修改。</li>
+<li>增加新的产品等级结构：对于增加新的产品等级结构，需要修改所有的工厂角色，包括抽象工厂类，在所有的工厂类中都需要增加生产新产品的方法，不能很好地支持“开闭原则”。</li>
+</ol>
+</li>
+<li>抽象工厂模式的这种性质称为“开闭原则”的倾斜性，抽象工厂模式以一种倾斜的方式支持增加新的产品，它为新产品族的增加提供方便，但不能为新的产品等级结构的增加提供这样的方便。</li>
+</ol>
+<h3 id="工厂模式的退化">工厂模式的退化</h3>
+<p>当抽象工厂模式中每一个具体工厂类只创建一个产品对象，也就是只存在一个产品等级结构时，抽象工厂模式退化成工厂方法模式；当工厂方法模式中抽象工厂与具体工厂合并，提供一个统一的工厂来创建产品对象，并将创建对象的工厂方法设计为静态方法时，工厂方法模式退化成简单工厂模式。</p>
+<h2 id="三种工厂模式的对比">三种工厂模式的对比</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">工厂模式类型</th>
+<th style="text-align:center">简单工厂模式</th>
+<th style="text-align:center">工厂方法模式</th>
+<th style="text-align:center">抽象工厂模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">抽象工厂数目</td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">一个</td>
+<td style="text-align:center">一个</td>
+</tr>
+<tr>
+<td style="text-align:center">具体工厂数目</td>
+<td style="text-align:center">一个</td>
+<td style="text-align:center">多个</td>
+<td style="text-align:center">多个，每个生产多种产品</td>
+</tr>
+<tr>
+<td style="text-align:center">抽象产品数目</td>
+<td style="text-align:center">一种</td>
+<td style="text-align:center">一种</td>
+<td style="text-align:center">多种</td>
+</tr>
+<tr>
+<td style="text-align:center">具体产品数目</td>
+<td style="text-align:center">多种</td>
+<td style="text-align:center">多种</td>
+<td style="text-align:center">多种 $\times$ 多种（体现产品等级）</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/64031/" rel="prev" title="软件详细设计-02-策略模式">
+      <i class="fa fa-chevron-left"></i> 软件详细设计-02-策略模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/54499/" rel="next" title="SentiStrength Manual">
+      SentiStrength Manual <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">简单工厂模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%9C%BA"><span class="nav-number">1.1.</span> <span class="nav-text">模式动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">模式结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90"><span class="nav-number">1.4.</span> <span class="nav-text">模式分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9E%E4%BE%8B%E4%B8%8E%E8%A7%A3%E6%9E%90"><span class="nav-number">1.5.</span> <span class="nav-text">模式实例与解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">1.6.</span> <span class="nav-text">模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">1.6.1.</span> <span class="nav-text">简单工厂模式的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.6.2.</span> <span class="nav-text">简单工厂模式的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E9%80%82%E7%94%A8%E7%8E%AF%E5%A2%83"><span class="nav-number">1.7.</span> <span class="nav-text">模式适用环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8"><span class="nav-number">1.8.</span> <span class="nav-text">模式应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E6%89%A9%E5%B1%95"><span class="nav-number">1.9.</span> <span class="nav-text">模式扩展</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">工厂方法模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%8D%E8%B6%B3"><span class="nav-number">2.1.</span> <span class="nav-text">简单工厂模式的不足</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%8A%A8%E6%9C%BA-2"><span class="nav-number">2.2.</span> <span class="nav-text">模式动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89-2"><span class="nav-number">2.3.</span> <span class="nav-text">模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84-2"><span class="nav-number">2.4.</span> <span class="nav-text">模式结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90-2"><span class="nav-number">2.5.</span> <span class="nav-text">模式分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%AE%9E%E4%BE%8B%E4%B8%8E%E8%A7%A3%E6%9E%90-2"><span class="nav-number">2.6.</span> <span class="nav-text">模式实例与解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9-2"><span class="nav-number">2.7.</span> <span class="nav-text">模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">2.7.1.</span> <span class="nav-text">工厂方法模式的优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">2.7.2.</span> <span class="nav-text">工厂方法模式的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E9%80%82%E7%94%A8%E7%8E%AF%E5%A2%83-2"><span class="nav-number">2.8.</span> <span class="nav-text">模式适用环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">抽象工厂模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84-3"><span class="nav-number">3.1.</span> <span class="nav-text">模式结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A7%E5%93%81%E6%97%8F"><span class="nav-number">3.2.</span> <span class="nav-text">产品族</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90-3"><span class="nav-number">3.3.</span> <span class="nav-text">模式分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E7%A4%BA%E4%BE%8B%E4%B8%8E%E8%A7%A3%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">模式示例与解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%B8%80%EF%BC%9A%E7%94%B5%E5%99%A8%E5%B7%A5%E5%8E%82"><span class="nav-number">3.4.1.</span> <span class="nav-text">实例一：电器工厂</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BA%8C%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E5%B7%A5%E5%8E%82"><span class="nav-number">3.4.2.</span> <span class="nav-text">实例二：数据库操作工厂</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">3.5.</span> <span class="nav-text">抽象工厂模式的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">3.6.</span> <span class="nav-text">抽象工厂模式的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E4%BB%A5%E4%B8%8B%E6%83%85%E5%86%B5%E4%B8%8B%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.7.</span> <span class="nav-text">在以下情况下可以使用抽象工厂模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%BC%8F%E6%89%A9%E5%B1%95-2"><span class="nav-number">4.</span> <span class="nav-text">模式扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9C%E5%BC%80%E9%97%AD%E5%8E%9F%E5%88%99%E2%80%9D%E7%9A%84%E5%80%BE%E6%96%9C%E6%80%A7"><span class="nav-number">4.1.</span> <span class="nav-text">“开闭原则”的倾斜性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E9%80%80%E5%8C%96"><span class="nav-number">4.2.</span> <span class="nav-text">工厂模式的退化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">5.</span> <span class="nav-text">三种工厂模式的对比</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

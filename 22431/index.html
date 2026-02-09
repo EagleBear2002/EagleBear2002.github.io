@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 计算机发展阶段   从长远来看，PC 机和计算机工作站将衰落，计算机将要小型化，并且变得无处不在 —— “无处不在的计算机”  嵌入式系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式系统概论-01-嵌入式系统概述">
+<meta property="og:url" content="https://eaglebear2002.github.io/22431/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 计算机发展阶段   从长远来看，PC 机和计算机工作站将衰落，计算机将要小型化，并且变得无处不在 —— “无处不在的计算机”  嵌入式系统">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/1-1676530839431-1024.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/01-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025113434800.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025114447130.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025142538835.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025142754510.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025143426659.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22431/image-20221025143433649.png">
+<meta property="article:published_time" content="2022-09-26T08:20:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.544Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/22431/1-1676530839431-1024.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/22431/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>嵌入式系统概论-01-嵌入式系统概述 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/22431/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式系统概论-01-嵌入式系统概述
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-26 16:20:00" itemprop="dateCreated datePublished" datetime="2022-09-26T16:20:00+08:00">2022-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%AE%BA/" itemprop="url" rel="index"><span itemprop="name">2022Fall-嵌入式系统概论</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="计算机发展阶段">计算机发展阶段</h2>
+<p><img src="/22431/1-1676530839431-1024.png" alt></p>
+<blockquote>
+<p>从长远来看，PC 机和计算机工作站将衰落，计算机将要小型化，并且变得无处不在 —— “无处不在的计算机”</p>
+</blockquote>
+<h2 id="嵌入式系统">嵌入式系统</h2>
+<p>随着计算机技术、网络技术和微电子技术的快速发展，人们进入了后 PC 时代，后 PC 时代是一个嵌入式系统（Embedded System）的网络时代，嵌入式技术将主宰后 PC 时代。</p>
+<p>“嵌入式系统”实际上是“嵌入式计算机系统”的简称。</p>
+<p>以下是对嵌入式系统的不同定义</p>
+<h3 id="IEEE-的定义">IEEE 的定义</h3>
+<blockquote>
+<p>Devices used to control, monitor, or assist the operation of equipment, machinery or plants.</p>
+<p>嵌入式系统是用于控制、监视或者辅助操作机器和设备的装置。</p>
+</blockquote>
+<p>此定义时从应用上考虑的，嵌入式系统是软件和硬件的综合体，还可以涵盖机电等附属装置。</p>
+<h3 id="国内的定义">国内的定义</h3>
+<blockquote>
+<p>嵌入式系统是<strong>以应用为中心，以计算机技术为基础，软硬件可裁减，适用于应用系统对功能、可靠性、成本、体积、功耗有严格要求的专用计算机系统</strong>。</p>
+</blockquote>
+<p>嵌入式设备是用于特定的设备</p>
+<p>计算机技术为基础，必须要有计算</p>
+<p>软硬件可裁剪：印证了专用设备的特点，将不需要的设备裁剪掉</p>
+<blockquote>
+<p>嵌入式系统就是一个具有特定功能或用途的隐藏在某种设备中的计算机软硬件集合体，没有固定的特征形状。</p>
+</blockquote>
+<p>嵌入的可以不是设备，而是生产流程，这样的系统也是嵌入式系统</p>
+<h3 id="嵌入式系统三要素">嵌入式系统三要素</h3>
+<ol>
+<li>嵌入性：嵌入到对象体系中，有对象环境要求</li>
+<li>专用型：软、硬件按对象要求设计、裁剪</li>
+<li>计算机：实现对象的智能化功能</li>
+</ol>
+<h3 id="其他的定义">其他的定义</h3>
+<blockquote>
+<p>嵌入封闭产品中的信息处理系统。</p>
+</blockquote>
+<blockquote>
+<p>看不见的计算机，一般不能被用户编程, 它有一些专用的 I/O 设备, 对用户的接口是应用专用的。</p>
+</blockquote>
+<blockquote>
+<p>An embedded system is a computer system contained within some larger device or product with the intent purpose of providing monitoring and control services to that device.</p>
+<p>嵌入式系统是包含在某些较大的设备或产品中的计算机系统，其目的是为该设备提供<strong>监视和控制</strong>服务。</p>
+</blockquote>
+<blockquote>
+<p>Any sort of device which includes a programmable computer but itself is not intended to be a general-purpose computer.</p>
+<p>包括可编程计算机在内但本身<strong>不打算用作通用计算机</strong>的任何设备。</p>
+</blockquote>
+<blockquote>
+<p>包含有计算机，但又不是通用计算机的计算机应用系统。</p>
+</blockquote>
+<h3 id="嵌入式系统示例">嵌入式系统示例</h3>
+<h4 id="无线感知网络-Wireless-sensor-network">无线感知网络 Wireless sensor network</h4>
+<p>无线感知网络，是由许多在空间中分布的自动装置组成的一种无线通信计算机网络。</p>
+<p>这些装置使用传感器器协作地监控不同位置的物理或环境状况（比如温度、声音、振动、压力、运动或污染物）。</p>
+<p>无线传感器网络的发展最初起源于战场监测等军事应用。而现今无线传感器网络被应用于很多民用领域，如环境与生态监测、健康监护、家居自动化以及交通控制等。</p>
+<p>特点：低功耗、低成本</p>
+<p><img src="/22431/01-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0.jpg" alt="绿色的是（数据）汇聚节点，相当于网关，有一定的算力和存储。"></p>
+<h4 id="网络物理系统-CPS">网络物理系统 CPS</h4>
+<blockquote>
+<p>A cyber-physical system (CPS) is a mechanism controlled or monitored by computer-based algorithms, tightly integrated with the internet and its users.</p>
+<p>网络物理系统（CPS，Cyber-physical System）是一种基于计算机的算法控制或监视的机制，与互联网及其用户紧密集成。</p>
+</blockquote>
+<ul>
+<li>计算进程与物理进程的集成
+<ul>
+<li>更多地强调嵌入式系统与物理学的深度结合</li>
+<li>CPS=ES+Physics</li>
+</ul>
+</li>
+<li>人机物融合系统</li>
+<li>深度融合了各类信息技术：传感器、嵌入式计算、云计算、网络通信、软件，使得各种信息化能力（3C：计算-Computer、通信-Communication 和控制-Control）高度协同和自治，实现生产应用系统自主、智能、动态、系统化地监视并改变物理世界的性状。</li>
+</ul>
+<h4 id="物联网-IOT">物联网 IOT</h4>
+<blockquote>
+<p>物联网 IoT 是物理设备，车辆（也称为“连接设备”和“智能设备”），建筑物以及其他嵌入电子设备，软件，传感器，执行器和网络的物品的互连网络连接性，使这些对象能够收集和交换数据。</p>
+</blockquote>
+<ul>
+<li>互联、协同</li>
+<li>RFID，工业标签：用来识别和标识物体</li>
+</ul>
+<p><img src="/22431/image-20221025113434800.png" alt="物联网"></p>
+<h4 id="传感器">传感器 *</h4>
+<ol>
+<li>传感器：将非电信号转换为电信号，用来感知和度量外部世界，并将其转换为计算机可度量的电信号。比如温湿度、酸碱度传感器等。</li>
+<li>传感器内部有计算单元，类似电脑的 CPU</li>
+<li>一定要有电源管理，包含软件和硬件两种方式，不然设备工作时间会比较短。</li>
+</ol>
+<h3 id="嵌入式系统的组成">嵌入式系统的组成</h3>
+<ul>
+<li>嵌入式系统一般由嵌入式硬件和软件组成</li>
+<li>硬件以微处理器为核心集成存储器和系统专用的输入/输出设备</li>
+<li>软件包括：初始化代码及驱动、嵌入式操作系统和应用程序等，这些软件有机地结合在一起，形成系统特定的一体化软件。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/22431/7.png" style="zoom:67%;"></th>
+<th><img src="/22431/image-20221025114447130.png" alt="典型的构件" style="zoom:150%;"></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>中间件：ROS</li>
+<li>执行器：电动机、马达</li>
+</ul>
+<h2 id="通用计算机：看得见的计算机">通用计算机：看得见的计算机</h2>
+<table>
+<thead>
+<tr>
+<th><img src="/22431/3.png" alt></th>
+<th><img src="/22431/4.png" alt></th>
+</tr>
+</thead>
+</table>
+<p><img src="/22431/5.png" alt></p>
+<h2 id="嵌入式系统无处不在">嵌入式系统无处不在</h2>
+<ol>
+<li>工控设备</li>
+<li>军用电子设备</li>
+<li>航天/航空</li>
+<li>汽车电子</li>
+<li>信息家电</li>
+<li>通信</li>
+<li>智能玩具</li>
+<li>可穿戴</li>
+<li>更多的场景，见 PPT-lecture1</li>
+</ol>
+<h2 id="嵌入式系统的发展历程">嵌入式系统的发展历程</h2>
+<ul>
+<li>1960-1970：嵌入式系统的出现和兴起</li>
+<li>1971-1989：嵌入式系统开始走向繁荣，软件和英舰日臻完善</li>
+<li>1990-：嵌入式系统应用走向纵深</li>
+</ul>
+<h2 id="嵌入式系统的特点">嵌入式系统的特点</h2>
+<ol>
+<li>嵌入式系统通常是<strong>形式多样、面向特定应用</strong>的</li>
+<li>嵌入式系统得到<strong>多种类型的处理器和处理器体系结构</strong>的支持</li>
+<li>嵌入式系统通常极其关注<strong>成本</strong></li>
+<li>嵌入式系统有<strong>实时性和可靠性</strong>的要求</li>
+<li>嵌入式系统使用的操作系统一般是<strong>适应多种处理器、可剪裁、轻量型、实时可靠、可固化</strong>的嵌入式操作系统</li>
+<li>嵌入式系统开发需要<strong>专门工具和特殊方法</strong></li>
+</ol>
+<h3 id="形式多样、面向特定应用">形式多样、面向特定应用</h3>
+<ol>
+<li>一般用于特定的任务，其硬件和软件都必须高效率地设计，量体裁衣、去除冗余，而通用计算机则是一个通用的计算平台。</li>
+<li>它通常都具有<strong>低能耗、体积小、集成度高</strong>等特点，能够把通用微处理器中许多由板卡完成的任务集成在芯片内部。</li>
+<li>嵌入式软件是应用程序和操作系统两种软件的一体化程序。</li>
+</ol>
+<h3 id="处理器和处理器体系结构类型多">处理器和处理器体系结构类型多</h3>
+<ol>
+<li>通用计算机采用少数的处理器类型和体系结构，而且主要掌握在少数大公司手里。</li>
+<li>嵌入式系统可采用多种类型的处理器和处理器体系结构，有上千种的嵌入式微处理器和几十种嵌入式微处理器体系结构可以选择。</li>
+<li>在嵌入式微处理器产业链上，IP 设计、面向应用的特定嵌入式微处理器的设计、芯片的制造已形成巨大的产业。分工协作，形成多赢模式。</li>
+</ol>
+<h3 id="关注成本">关注成本</h3>
+<p>嵌入式系统通常需要注意的成本是系统成本，特别是量大的消费类数字化产品，其成本是产品竞争的关键因素之一。</p>
+<p>嵌入式的系统成本包括：</p>
+<ol>
+<li>一次性的开发成本：NRE（Non-Recurring Engineering）成本</li>
+<li>产品成本：硬件 BOM、外壳包装和软件版税等</li>
+<li>批量产品的总体成本 = NRE 成本 + 每个产品成本 * 产品总量</li>
+<li>每个产品的最后成本 = 总体成本 / 产品总量 = NRE 成本 / 产品总量 + 每个产品成本</li>
+</ol>
+<h3 id="实时性和可靠性的要求">实时性和可靠性的要求</h3>
+<p>一方面大多数实时系统都是嵌入式系统。</p>
+<p>另一方面嵌入式系统多数有<strong>实时性</strong>的要求，软件一般是固化运行或直接加载到内存中运行，具有快速启动的功能。</p>
+<p>嵌入式系统一般要求具有出错处理和自动复位功能，特别是对于一些在极端环境下运行的嵌入式系统而言，其<strong>可靠性设计</strong>尤其重要。</p>
+<p>在大多数嵌入式系统的软件中一般都包括一些机制，比如硬件的看门狗定时器，软件的内存保护和重启动机制。</p>
+<h3 id="适应多种处理器、可剪裁、轻量型、实时可靠、可固化的嵌入式操作系统">适应多种处理器、可剪裁、轻量型、实时可靠、可固化的嵌入式操作系统</h3>
+<ol>
+<li>由于嵌入式系统应用的特点，像嵌入式微处理器一样，嵌入式操作系统也是多姿多彩的。</li>
+<li>大多数商业嵌入式操作系统可同时支持不同种类的嵌入式微处理器。可根据应用的情况进行剪裁、配置。</li>
+<li>嵌入式操作系统规模小，所需的资源有限如内核规模在几十 KB，能与应用软件一样固化运行。</li>
+<li>一般包括一个实时内核，其调度算法一般采用基于优先级的可抢占的调度算法。</li>
+<li>高可靠嵌入式操作系统：时、空、数据隔离。</li>
+</ol>
+<h3 id="开发需要专门工具和特殊方法">开发需要专门工具和特殊方法</h3>
+<p>由于嵌入式系统资源有限，一般不具备自主开发能力，产品发布后用户通常也不能对其中的软件进行修改，必须有一套专门的开发环境。</p>
+<p>该开发环境包括专门的开发工具（包括设计、编译、调试、测试等工具），采用交叉开发的方式进行。</p>
+<p><img src="/22431/image-20221025142538835.png" alt="交叉开发环境"></p>
+<h2 id="嵌入式系统的分类">嵌入式系统的分类</h2>
+<ol>
+<li>按嵌入式处理器的位数来分类</li>
+<li>按应用来分类</li>
+<li>按速度分类</li>
+<li>按确定性来分类</li>
+<li>按嵌入式系统软件复杂程度来分类</li>
+</ol>
+<h3 id="按嵌入式处理器的位数来分类">按嵌入式处理器的位数来分类</h3>
+<ol>
+<li>4 位嵌入式系统：大量应用</li>
+<li>8 位嵌入式系统：大量应用</li>
+<li>16 位嵌入式系统：大量应用</li>
+<li>32 位嵌入式系统：正成为主流发展趋势</li>
+<li>64 位嵌入式系统：高度复杂的、高速的嵌入式系统已经开始采用</li>
+</ol>
+<h3 id="按应用来分类">按应用来分类</h3>
+<p><img src="/22431/image-20221025142754510.png" alt></p>
+<h3 id="按速度分类">按速度分类</h3>
+<ol>
+<li>强实时系统，其系统响应时间在毫秒或微秒级。</li>
+<li>一般实时系统，其系统响应时间在几秒的数量级上，其实时性的要求比强实时系统要差一些。</li>
+<li>弱实时系统，其系统响应时间约为数十秒或更长。这种系统的响应时间可能随系统负载的轻重而变化</li>
+</ol>
+<h3 id="按确定性来分类">按确定性来分类</h3>
+<p>根据确定性的强弱，可将嵌入式系统分为硬实时、软实时系统：</p>
+<ol>
+<li>硬实时：系统对系统响应时间有严格的要求，如果系统响应时间不能满足，就要引起系统崩溃或致命的错误。</li>
+<li>软实时：系统对系统响应时间有要求，但是如果系统响应时间不能满足，不会导致系统出现致命的错误或崩溃。</li>
+</ol>
+<h3 id="按嵌入式系统软件复杂程度来分类">按嵌入式系统软件复杂程度来分类</h3>
+<ol>
+<li>循环轮询系统</li>
+<li>有限状态机系统</li>
+<li>前后台系统</li>
+<li>单处理器多任务系统</li>
+<li>多处理器多任务系统</li>
+</ol>
+<h3 id="最近的发展趋势">最近的发展趋势</h3>
+<ol>
+<li>嵌入式人工智能</li>
+<li>安全</li>
+<li>持续提高的计算需求和复杂度要求：机顶盒中的多媒体处理，HDTV，多核，深度学习</li>
+<li>持续的网络</li>
+<li>对于灵活性需求的不断提高：不断变化的标准下的上市时间</li>
+<li>HW-SW 共同设计</li>
+<li>更高的集成度：同一芯片上有更多块</li>
+<li>IP 重用，基于平台的设计，NoC 与总线：用于 ASIC 或 FPGA 中的预先设计好的电路功能模块</li>
+<li>设计方法的多样性，依赖平台，缺乏标准</li>
+<li>云计算，边缘计算（edge computing）</li>
+<li>TTM：跳票</li>
+</ol>
+<h3 id="嵌入式人工智能">嵌入式人工智能</h3>
+<ol>
+<li>嵌入式人工智能于各行业垂直领域应用具有巨大的潜力</li>
+<li>嵌入式人工智能取代屏幕成为新 UI / UX 接口</li>
+<li>嵌入式人工智能芯片</li>
+<li>嵌入式人工智能自主学习是终极目标</li>
+</ol>
+<h3 id="嵌入式系统安全">嵌入式系统安全</h3>
+<ol>
+<li>数据存储不安全</li>
+<li>服务端控制措施部署不当</li>
+<li>传输过程中没有加密</li>
+<li>身份认证措施不当</li>
+<li>密钥保护措施不当</li>
+<li>会话处理不当</li>
+<li>敏感数据泄漏</li>
+</ol>
+<h3 id="片上系统-System-on-Chip（SoC）">片上系统 System-on-Chip（SoC）</h3>
+<ol>
+<li>SoC 指将电子系统的所有组件集成到单个芯片中（促使这种集成的动机是什么）：
+<ol>
+<li>微处理器，微控制器，DSP</li>
+<li>ASIC's，FPGA's</li>
+<li>内存，IO 设备，A / D 和 D / C 转换器</li>
+<li>模拟，混合信号，RF 模块，稳压器</li>
+</ol>
+</li>
+<li>通信基础设施：基于总线的片上网络（NoC）。</li>
+<li>系统级设计（自动化）以及同时优化众多设计指标是关键挑战。</li>
+<li>SoC 是一个复杂的嵌入式系统。</li>
+</ol>
+<p><img src="/22431/image-20221025143426659.png" alt="复杂嵌入式系统"></p>
+<p><img src="/22431/image-20221025143433649.png" alt="单片机"></p>
+<h2 id="互联的价值">互联的价值</h2>
+<ol>
+<li>嵌入式设备的互联性可提高对各种服务、内容和信息的访问能力</li>
+<li>为动态修改嵌入式软件提供了可能，如：
+<ol>
+<li>修改系统代码或“固件”</li>
+<li>增添新的应用软件模块</li>
+</ol>
+</li>
+<li>增强了系统和设备的可管理性</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/14533/" rel="prev" title="嵌入式系统概论-02-嵌入式系统设计方法">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-02-嵌入式系统设计方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/14745/" rel="next" title="需求与商业模式创新-04-商业模式画布-客户关系与收入来源">
+      需求与商业模式创新-04-商业模式画布-客户关系与收入来源 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8F%91%E5%B1%95%E9%98%B6%E6%AE%B5"><span class="nav-number">1.</span> <span class="nav-text">计算机发展阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.</span> <span class="nav-text">嵌入式系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IEEE-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">IEEE 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BD%E5%86%85%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.2.</span> <span class="nav-text">国内的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E4%B8%89%E8%A6%81%E7%B4%A0"><span class="nav-number">2.3.</span> <span class="nav-text">嵌入式系统三要素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.4.</span> <span class="nav-text">其他的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.5.</span> <span class="nav-text">嵌入式系统示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E6%84%9F%E7%9F%A5%E7%BD%91%E7%BB%9C-Wireless-sensor-network"><span class="nav-number">2.5.1.</span> <span class="nav-text">无线感知网络 Wireless sensor network</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%89%A9%E7%90%86%E7%B3%BB%E7%BB%9F-CPS"><span class="nav-number">2.5.2.</span> <span class="nav-text">网络物理系统 CPS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%A9%E8%81%94%E7%BD%91-IOT"><span class="nav-number">2.5.3.</span> <span class="nav-text">物联网 IOT</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E6%84%9F%E5%99%A8"><span class="nav-number">2.5.4.</span> <span class="nav-text">传感器 *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.6.</span> <span class="nav-text">嵌入式系统的组成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E8%AE%A1%E7%AE%97%E6%9C%BA%EF%BC%9A%E7%9C%8B%E5%BE%97%E8%A7%81%E7%9A%84%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="nav-number">3.</span> <span class="nav-text">通用计算机：看得见的计算机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%97%A0%E5%A4%84%E4%B8%8D%E5%9C%A8"><span class="nav-number">4.</span> <span class="nav-text">嵌入式系统无处不在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">嵌入式系统的发展历程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">嵌入式系统的特点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%A2%E5%BC%8F%E5%A4%9A%E6%A0%B7%E3%80%81%E9%9D%A2%E5%90%91%E7%89%B9%E5%AE%9A%E5%BA%94%E7%94%A8"><span class="nav-number">6.1.</span> <span class="nav-text">形式多样、面向特定应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E5%99%A8%E5%92%8C%E5%A4%84%E7%90%86%E5%99%A8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%B1%BB%E5%9E%8B%E5%A4%9A"><span class="nav-number">6.2.</span> <span class="nav-text">处理器和处理器体系结构类型多</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E6%B3%A8%E6%88%90%E6%9C%AC"><span class="nav-number">6.3.</span> <span class="nav-text">关注成本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E6%80%A7%E5%92%8C%E5%8F%AF%E9%9D%A0%E6%80%A7%E7%9A%84%E8%A6%81%E6%B1%82"><span class="nav-number">6.4.</span> <span class="nav-text">实时性和可靠性的要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E5%BA%94%E5%A4%9A%E7%A7%8D%E5%A4%84%E7%90%86%E5%99%A8%E3%80%81%E5%8F%AF%E5%89%AA%E8%A3%81%E3%80%81%E8%BD%BB%E9%87%8F%E5%9E%8B%E3%80%81%E5%AE%9E%E6%97%B6%E5%8F%AF%E9%9D%A0%E3%80%81%E5%8F%AF%E5%9B%BA%E5%8C%96%E7%9A%84%E5%B5%8C%E5%85%A5%E5%BC%8F%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">6.5.</span> <span class="nav-text">适应多种处理器、可剪裁、轻量型、实时可靠、可固化的嵌入式操作系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E9%9C%80%E8%A6%81%E4%B8%93%E9%97%A8%E5%B7%A5%E5%85%B7%E5%92%8C%E7%89%B9%E6%AE%8A%E6%96%B9%E6%B3%95"><span class="nav-number">6.6.</span> <span class="nav-text">开发需要专门工具和特殊方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">7.</span> <span class="nav-text">嵌入式系统的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E5%B5%8C%E5%85%A5%E5%BC%8F%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%BD%8D%E6%95%B0%E6%9D%A5%E5%88%86%E7%B1%BB"><span class="nav-number">7.1.</span> <span class="nav-text">按嵌入式处理器的位数来分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E5%BA%94%E7%94%A8%E6%9D%A5%E5%88%86%E7%B1%BB"><span class="nav-number">7.2.</span> <span class="nav-text">按应用来分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E9%80%9F%E5%BA%A6%E5%88%86%E7%B1%BB"><span class="nav-number">7.3.</span> <span class="nav-text">按速度分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%A1%AE%E5%AE%9A%E6%80%A7%E6%9D%A5%E5%88%86%E7%B1%BB"><span class="nav-number">7.4.</span> <span class="nav-text">按确定性来分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E5%A4%8D%E6%9D%82%E7%A8%8B%E5%BA%A6%E6%9D%A5%E5%88%86%E7%B1%BB"><span class="nav-number">7.5.</span> <span class="nav-text">按嵌入式系统软件复杂程度来分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E8%BF%91%E7%9A%84%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF"><span class="nav-number">7.6.</span> <span class="nav-text">最近的发展趋势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD"><span class="nav-number">7.7.</span> <span class="nav-text">嵌入式人工智能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8"><span class="nav-number">7.8.</span> <span class="nav-text">嵌入式系统安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%87%E4%B8%8A%E7%B3%BB%E7%BB%9F-System-on-Chip%EF%BC%88SoC%EF%BC%89"><span class="nav-number">7.9.</span> <span class="nav-text">片上系统 System-on-Chip（SoC）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%92%E8%81%94%E7%9A%84%E4%BB%B7%E5%80%BC"><span class="nav-number">8.</span> <span class="nav-text">互联的价值</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

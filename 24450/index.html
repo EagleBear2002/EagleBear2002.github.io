@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="基本概念 虚拟化是云计算的核心技术，但不是其专用技术。 本质：虚拟化的本质就是通过添加一个虚拟化层将原先的物理设备进行逻辑化，转化成一个文件夹或文件，实现软硬件的解耦。 20 世纪 60 年代，IBM 公司推出虚拟化技术，主要用于当时的 IBM 大型机的服务器虚拟化。 云计算中服务器的虚拟化：核心思想是利用软件或固件管理程序构成虚拟化层，把物理资源映射为虚拟资源。在虚拟资源上可以安装和部署多个虚拟">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云计算-04-虚拟化技术">
+<meta property="og:url" content="https://eaglebear2002.github.io/24450/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="基本概念 虚拟化是云计算的核心技术，但不是其专用技术。 本质：虚拟化的本质就是通过添加一个虚拟化层将原先的物理设备进行逻辑化，转化成一个文件夹或文件，实现软硬件的解耦。 20 世纪 60 年代，IBM 公司推出虚拟化技术，主要用于当时的 IBM 大型机的服务器虚拟化。 云计算中服务器的虚拟化：核心思想是利用软件或固件管理程序构成虚拟化层，把物理资源映射为虚拟资源。在虚拟资源上可以安装和部署多个虚拟">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/4-%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026210102847.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026210220635.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026210739907.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026210814657.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026212446601.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026212523819.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221026212828732.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221027093001812.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/24450/image-20221027093024888.png">
+<meta property="article:published_time" content="2022-10-26T12:31:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.517Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/24450/4-%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF.jpg">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/24450/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>云计算-04-虚拟化技术 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/24450/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          云计算-04-虚拟化技术
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-26 20:31:00" itemprop="dateCreated datePublished" datetime="2022-10-26T20:31:00+08:00">2022-10-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E4%BA%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Fall-云计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="基本概念">基本概念</h2>
+<p>虚拟化是云计算的核心技术，但不是其专用技术。</p>
+<p>本质：虚拟化的本质就是通过添加一个虚拟化层将原先的物理设备进行逻辑化，转化成一个文件夹或文件，实现软硬件的解耦。</p>
+<p>20 世纪 60 年代，IBM 公司推出虚拟化技术，主要用于当时的 IBM 大型机的服务器虚拟化。</p>
+<p>云计算中服务器的虚拟化：核心思想是利用软件或固件管理程序构成虚拟化层，把物理资源映射为虚拟资源。在虚拟资源上可以安装和部署多个虚拟机，实现多用户共享物理资源。</p>
+<p>“虚拟化技术”的两种理解方式：抽象 vs. 拆分</p>
+<p><img src="/24450/4-%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF.jpg" alt></p>
+<h3 id="计算机系统的虚拟化">计算机系统的虚拟化</h3>
+<p>由位于下层的软件模块，通过向上一层软件模块提供一个与它原先所期待的运行环境完全一致的接口的方法，抽象出一个虚拟的软件或硬件接口，使得上层软件可以直接运行在虚拟的环境上。</p>
+<h2 id="服务器的虚拟化层级">服务器的虚拟化层级</h2>
+<ul>
+<li>ISA 级别：通过物理主机的 ISA 模拟一个给定的 ISA，基本方式：代码解释</li>
+<li>硬件级：虚拟化层用于虚拟化基础设施：CPU，内存，存储，I/O，网络</li>
+<li>操作系统级：在操作系统中插入一个虚拟化层，一个操作系统内核运行多个虚拟机</li>
+</ul>
+<p><img src="/24450/image-20221026210102847.png" alt></p>
+<h3 id="服务器虚拟化技术的发展及代表产品">服务器虚拟化技术的发展及代表产品</h3>
+<p><img src="/24450/image-20221026210220635.png" alt></p>
+<h3 id="硬件级虚拟化">硬件级虚拟化</h3>
+<h4 id="系统虚拟化">系统虚拟化</h4>
+<p>添加一个称为虚拟化层的软件，管理客户操作系统，使其能够独立于主机操作系统同时运行在同一个硬件上。</p>
+<ul>
+<li>Hypervisor</li>
+<li>Virtual Machine Monitor（VMM，虚拟机监视器）</li>
+</ul>
+<p><img src="/24450/image-20221026210739907.png" alt></p>
+<p><img src="/24450/image-20221026210814657.png" alt></p>
+<ul>
+<li>硬件仿真（裸机虚拟化）：高性能服务器上使用 vSphere 管理虚拟机</li>
+<li>寄居虚拟化：个人笔记本使用 VirtualBox 管理虚拟机</li>
+</ul>
+<h4 id="优势">优势</h4>
+<p>封装性：</p>
+<ul>
+<li>以虚拟机为粒度的封装使得虚拟机运行环境的保存非常便捷
+<ul>
+<li>虚拟机快照（某个时间点的状态抓取下来并保存）</li>
+<li>虚拟机克隆（从一个虚拟机的执行环境复制出一个或多个相同的虚拟机）</li>
+<li>虚拟机挂起和恢复（暂停一个运行中的虚拟机，将其运行环境保存在磁盘上；将保存在磁盘上的虚拟机运行环境恢复到内存中）</li>
+</ul>
+</li>
+<li>使得保存、部署更加方便，从而使得软件开发、测试和调试更加便捷；降低 IT 管理和维护成本</li>
+</ul>
+<p>多实例：</p>
+<ul>
+<li>提高计算机性能利用率，降低计算机资源消耗：不同的服务器有不同的繁忙和空闲时段，将多个物理服务器合并到少数服务器上以虚拟机运行，使用更少的服务器获得同样的整体性能，通过虚拟机的忙闲交错大大提高资源利用率；节约物理资源、人力资源、软件资源成本。</li>
+</ul>
+<p>隔离：</p>
+<ul>
+<li>虚拟机中的应用程序可以在自己的操作系统中独立地运行，不影响其他工作负载。提高安全性：适用于测试场景；适合作为安全软件公司的蜜罐</li>
+</ul>
+<p>硬件无关性：</p>
+<ul>
+<li>屏蔽硬件差异，无缝跨硬件迁移；云计算环境中虚拟机迁移是非常重要的；【复现老旧硬件接口】</li>
+</ul>
+<p>特权功能：</p>
+<ul>
+<li>在虚拟化层添加特权功能的优点：不能被客户机绕过、更容易实现</li>
+<li>事件记录和回放——入侵检测、病毒检测等</li>
+</ul>
+<h4 id="可与不可">可与不可</h4>
+<p>可虚拟化架构 VS 不可虚拟化架构：是否能够虚拟化出满足“同质、高效、资源受控”的虚拟机。</p>
+<p>两个或两个以上的特权级：分隔应用软件与系统软件</p>
+<p>特权指令：管理和操作关键系统资源的指令，只有在最高特权级才能执行</p>
+<p>敏感指令：操作特权资源的指令、</p>
+<ol>
+<li>修改虚拟机运行模式或者物理机状态</li>
+<li>读写敏感的寄存器或内存，如时钟或中断寄存器</li>
+<li>访问存储保护系统、内存系统或地址重定位系统</li>
+</ol>
+<p>客户机操作系统的敏感指令都是特权指令才能够实现高效的虚拟化——陷入 VMM</p>
+<p>其实都可以！用不同的解决方案</p>
+<h3 id="硬件上的虚拟化">硬件上的虚拟化</h3>
+<p>虚拟化的硬件对象：CPU，内存，I/O 设备（硬盘、网卡、鼠标、键盘等）</p>
+<p>CPU 虚拟化：</p>
+<ul>
+<li>任意时刻一个物理 CPU 只能运行一个虚拟 CPU</li>
+<li>每个客户操作系统可以使用一个或多个虚拟 CPU</li>
+<li>各个操作系统之间虚拟 CPU 运行相互隔离，互不影响</li>
+</ul>
+<p>调度：调度问题指 VMM 决定当前哪个虚拟 CPU 在物理 CPU 上运行，保证隔离、公平和性能。</p>
+<p>执行：虚拟 CPU 正确运行是保证虚拟机指令正确运行，实现技术包括模拟执行和监控执行。</p>
+<p><img src="/24450/image-20221026212446601.png" alt></p>
+<p><img src="/24450/image-20221026212523819.png" alt></p>
+<p>TODO</p>
+<h3 id="操作系统级虚拟化">操作系统级虚拟化</h3>
+<p>TODO</p>
+<h3 id="不同层级虚拟化技术对比">不同层级虚拟化技术对比</h3>
+<p><img src="/24450/image-20221026212828732.png" alt="不同层级虚拟化技术对比"></p>
+<h2 id="云数据中心的虚拟化">云数据中心的虚拟化</h2>
+<h3 id="服务器虚拟化">服务器虚拟化</h3>
+<p>虚拟机和容器共存，容器的地位不断提升，目前与虚拟机相当。</p>
+<p>高效率的 unikernel 技术：</p>
+<ul>
+<li>unikernel 是使用库操作系统（LibOS）构建的专用的、单一地址空间机器镜像。</li>
+<li>LibOS 库操作系统：在应用程序层中实施访问控制和隔离，用户应用无需在用户模式和内核模式间切换，直接访问硬件；然而多个应用程序同时运行时隔离性不好。</li>
+<li>可使用操作系统虚拟化（虚拟机监控器 VMM）克服硬件资源隔离缺陷：LibOS 通过 VMM 驱动物理硬件，像虚拟机一样运行。</li>
+</ul>
+<h3 id="存储虚拟化">存储虚拟化</h3>
+<p>概念：存储虚拟化将系统中分散且异构的存储资源整合起来，形成一个统一的连续编址的逻辑存储空间</p>
+<p>示例：VMware 的 vSphere 提出了虚拟文件系统 VMFS，允许来自多个不同主机服务器的并发访问，即允许多个物理主机同时读写同一个存储器。</p>
+<h3 id="网络虚拟化">网络虚拟化</h3>
+<p>由于云计算技术的使用，云数据中心的业务集中度、服务的客户数量远远超过传统数据中心，对网络的高带宽、低拥塞的要求更高。</p>
+<ul>
+<li>传统数据中心问题 1：L2 层网络拥塞、丢包严重，需要 L3 层协议保证重传，效率低；</li>
+<li>传统数据中心问题 2：二层以太网络采用生成树协议保证数据包在互连交换机回路传递，产生大量冗余。</li>
+</ul>
+<p>云数据中心对网络的需求：</p>
+<ul>
+<li>提高数据传输效率：应对数据同步、备份、虚拟机迁移等的大流量</li>
+<li>提高管理效率：采用统一的交换网络减少布线、维护和扩容的成本</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/24450/image-20221027093001812.png" alt></th>
+<th><img src="/24450/image-20221027093024888.png" alt></th>
+</tr>
+</thead>
+</table>
+<h2 id="虚拟机迁移">虚拟机迁移</h2>
+<h3 id="云计算环境中虚拟机迁移的需求">云计算环境中虚拟机迁移的需求</h3>
+<ol>
+<li>云计算中心物理服务器负载处于动态变化中，当无法提供额外物理资源而为了负载平衡，可将占用热门物理资源的虚拟机迁移到其他物理服务器</li>
+<li>物理服务器定期升级的需要，升级前将虚拟机迁移到其他物理服务器，等升级完成再迁移回来</li>
+</ol>
+<h3 id="分类">分类</h3>
+<ul>
+<li>物理机到虚拟机 P2V</li>
+<li>虚拟机到虚拟机 V2V</li>
+<li>虚拟机到物理机 V2P</li>
+</ul>
+<p>云计算中关注的重点：实时迁移（Live Migration），即保持虚拟机运行的同时，将其从一个计算机迁移到另一个计算机，并在目的计算机恢复运行。</p>
+<ul>
+<li>步骤 1：预迁移</li>
+<li>步骤 2：预定资源</li>
+<li>步骤 3：预复制</li>
+<li>步骤 4：停机复制</li>
+<li>步骤 5：提交</li>
+<li>步骤 6：启动</li>
+</ul>
+<h3 id="虚拟机迁移的具体内容">虚拟机迁移的具体内容</h3>
+<h4 id="内存迁移——最困难的地方">内存迁移——最困难的地方</h4>
+<p>第一阶段：Push；第二阶段：Stop-and-Copy；第三阶段：Pull</p>
+<table>
+<thead>
+<tr>
+<th>迁移方案</th>
+<th>具体描述（从 A 迁移到 B）</th>
+<th>优势与劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stop-and-Copy</td>
+<td>A 停机，将对应内存全部复制到 B，启动 B</td>
+<td>方法比较简单；总迁移时间也最短；<br>停机时间无法接受</td>
+</tr>
+<tr>
+<td>Stop-and-Copy 和 Pull 阶段结合</td>
+<td>A 停机，将部分内存复制到 B，启动 B，B 运行中遇到缺失内存，再到 A 内存中复制</td>
+<td>停机时间很短；总迁移时间很长；<br>Pull 阶段复制造成的性能下降，用户体验差</td>
+</tr>
+<tr>
+<td>Push 和 Stop-andCopy 阶段结合</td>
+<td>A 不停机，保持对外服务，将变化地内存迭代地复制到 B，直到最后剩余很少要复制的再停止 A，复制最后变动到 B，启动 B</td>
+<td>平衡了停机时间和总迁移时间之间的矛盾；<br>需要有一种算法能够测定工作集，以避免反复重传；可能会占用大量的网络带宽，对其他服务造成影响</td>
+</tr>
+</tbody>
+</table>
+<h4 id="网络迁移">网络迁移</h4>
+<p>虚拟机所有网络设备，包括协议状态（如 TCP 连接状态）以及 IP 地址都要随之一起迁移；通过发送并修改相关配置实现</p>
+<h4 id="存储设备迁移">存储设备迁移</h4>
+<p>迁移数据存储需要占用大量时间和网络带宽，通常的解决办法是以共享的方式共享数据和文件系统，而非真正迁移</p>
+<p>目前大多数集群使用 NAS（Network Attached Storage，网络连接存储）作为存储设备共享数据</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/19419/" rel="prev" title="嵌入式系统概论-00-嵌入式系统概论导言">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-00-嵌入式系统概论导言
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/30331/" rel="next" title="云计算-05-OpenStack">
+      云计算-05-OpenStack <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">1.1.</span> <span class="nav-text">计算机系统的虚拟化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96%E5%B1%82%E7%BA%A7"><span class="nav-number">2.</span> <span class="nav-text">服务器的虚拟化层级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E7%9A%84%E5%8F%91%E5%B1%95%E5%8F%8A%E4%BB%A3%E8%A1%A8%E4%BA%A7%E5%93%81"><span class="nav-number">2.1.</span> <span class="nav-text">服务器虚拟化技术的发展及代表产品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E7%BA%A7%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">硬件级虚拟化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">2.2.1.</span> <span class="nav-text">系统虚拟化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8A%BF"><span class="nav-number">2.2.2.</span> <span class="nav-text">优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E4%B8%8E%E4%B8%8D%E5%8F%AF"><span class="nav-number">2.2.3.</span> <span class="nav-text">可与不可</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E4%B8%8A%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">硬件上的虚拟化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%BA%A7%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">2.4.</span> <span class="nav-text">操作系统级虚拟化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%B1%82%E7%BA%A7%E8%99%9A%E6%8B%9F%E5%8C%96%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94"><span class="nav-number">2.5.</span> <span class="nav-text">不同层级虚拟化技术对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%91%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%83%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">云数据中心的虚拟化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">3.1.</span> <span class="nav-text">服务器虚拟化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">存储虚拟化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E8%99%9A%E6%8B%9F%E5%8C%96"><span class="nav-number">3.3.</span> <span class="nav-text">网络虚拟化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%81%E7%A7%BB"><span class="nav-number">4.</span> <span class="nav-text">虚拟机迁移</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E8%AE%A1%E7%AE%97%E7%8E%AF%E5%A2%83%E4%B8%AD%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%81%E7%A7%BB%E7%9A%84%E9%9C%80%E6%B1%82"><span class="nav-number">4.1.</span> <span class="nav-text">云计算环境中虚拟机迁移的需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">4.2.</span> <span class="nav-text">分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%81%E7%A7%BB%E7%9A%84%E5%85%B7%E4%BD%93%E5%86%85%E5%AE%B9"><span class="nav-number">4.3.</span> <span class="nav-text">虚拟机迁移的具体内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E8%BF%81%E7%A7%BB%E2%80%94%E2%80%94%E6%9C%80%E5%9B%B0%E9%9A%BE%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="nav-number">4.3.1.</span> <span class="nav-text">内存迁移——最困难的地方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E8%BF%81%E7%A7%BB"><span class="nav-number">4.3.2.</span> <span class="nav-text">网络迁移</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%AE%BE%E5%A4%87%E8%BF%81%E7%A7%BB"><span class="nav-number">4.3.3.</span> <span class="nav-text">存储设备迁移</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,2806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="引入：推荐系统的例子  京东推荐系统 推荐产品和食物 两个客户：  客户 X：购买了 CD1 和 CD2 客户 Y：搜索了 CD1，那么推荐系统将会根据从客户 X 处收集到的信息推荐给客户 CD2    推荐与推荐系统 用户执行物品搜索，推荐系统根据情况返回推荐结果">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-08-推荐系统">
+<meta property="og:url" content="https://eaglebear2002.github.io/28280/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="引入：推荐系统的例子  京东推荐系统 推荐产品和食物 两个客户：  客户 X：购买了 CD1 和 CD2 客户 Y：搜索了 CD1，那么推荐系统将会根据从客户 X 处收集到的信息推荐给客户 CD2    推荐与推荐系统 用户执行物品搜索，推荐系统根据情况返回推荐结果">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/1-1676530608658-445.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103090030747.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/3-1676530608659-446.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/4-1676530608659-447.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/21-1676530608659-448.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103090829720.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103090848071.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/008-%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103091039739.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103091043470.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/9-1676530608659-449.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/10-1676530608659-450.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/11-1676530608659-451.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/12-1676530608659-452.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/13-1676530608660-453.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/14-1676530608660-454.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/35-1676530608660-455.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/5-1676530608660-456.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/image-20221103091444761.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/33-1676530608660-457.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/43-1676530608660-458.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/44-1676530608661-459.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/45-1676530608661-460.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/57-1676530608661-461.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/46-1676530608661-462.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/56-1676530608661-463.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/41-1676530608661-464.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/42-1676530608661-465.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/47-1676530608661-466.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/58-1676530608661-467.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/59-1676530608661-468.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/60-1676530608662-469.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/48-1676530608662-470.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/61-1676530608662-471.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/49.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/50.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/51-1676530608662-472.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/62-1676530608662-473.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/63-1676530608662-474.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/52-1676530608662-475.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/53-1676530608662-476.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/64.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/54-1676530608662-477.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/65-1667436480025-386.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/15-1676530608662-478.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/16-1676530608662-479.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/17-1676530608663-480.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/18-1676530608663-481.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/19-1676530608663-482.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/23-1676530608663-483.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/24-1676530608663-484.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/25-1676530608663-485.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/26-1676530608663-486.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/27-1676530608663-487.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/28-1676530608663-488.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/29-1676530608663-489.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/30-1676530608663-490.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/31-1676530608663-491.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/32-1676530608663-492.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/33-1667436537870-418.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/34-1676530608663-493.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/35-1676530608660-455.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/36-1676530608663-494.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/37-1676530608663-495.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/38-1676530608664-496.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/39-1676530608664-497.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28280/40-1676530608664-498.png">
+<meta property="article:published_time" content="2022-11-03T00:46:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.541Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/28280/1-1676530608658-445.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/28280/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-08-推荐系统 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/28280/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-08-推荐系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-03 08:46:00" itemprop="dateCreated datePublished" datetime="2022-11-03T08:46:00+08:00">2022-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>21k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>19 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="引入：推荐系统的例子">引入：推荐系统的例子</h2>
+<ol>
+<li>京东推荐系统</li>
+<li>推荐产品和食物</li>
+<li>两个客户：
+<ol>
+<li>客户 X：购买了 CD1 和 CD2</li>
+<li>客户 Y：搜索了 CD1，那么推荐系统将会根据从客户 X 处收集到的信息推荐给客户 CD2</li>
+</ol>
+</li>
+</ol>
+<h2 id="推荐与推荐系统">推荐与推荐系统</h2>
+<p>用户执行物品搜索，推荐系统根据情况返回推荐结果</p>
+<p><img src="/28280/1-1676530608658-445.png" alt></p>
+<h3 id="什么是推荐系统">什么是推荐系统</h3>
+<p>推荐系统是提供推荐给用户的系统：</p>
+<ol>
+<li>过多的信息（信息过载）</li>
+<li>用户有太多的选择</li>
+</ol>
+<p>根据用户的口味，来推荐用户不同的商品：</p>
+<ol>
+<li>协助用户发现信息</li>
+<li>减少搜索和导航的时间</li>
+</ol>
+<h3 id="从稀缺到丰富">从稀缺到丰富</h3>
+<ol>
+<li>货架空间是稀缺的传统商品零售商，同样的还有电视网络、电影院</li>
+<li>Web 使有关产品信息的成本接近零传播：从稀缺到丰富</li>
+<li>更多选择需要更好的过滤器：推荐引擎</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>长尾模式</th>
+<th>实体和线上</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/28280/image-20221103090030747.png" alt></td>
+<td><img src="/28280/3-1676530608659-446.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="推荐分类">推荐分类</h3>
+<p>编辑和策划：</p>
+<ol>
+<li>收藏夹列表</li>
+<li>“基本”项目清单</li>
+</ol>
+<p>简单的集合：前 10 名，最受欢迎，最近上传</p>
+<p>针对个人用户：亚马逊，Netflix 等…</p>
+<h3 id="推荐系统的一般模型">推荐系统的一般模型</h3>
+<ol>
+<li>$X$ 是消费者集合</li>
+<li>$S$ 是物品集合</li>
+<li>使用函数：$u: X * S \to R$
+<ol>
+<li>$R$是评分集合</li>
+<li>$R$是一套完全有序的集合</li>
+<li>比如，0-5 星，0-1 分</li>
+</ol>
+</li>
+<li>Utility Matrix</li>
+</ol>
+<p><img src="/28280/4-1676530608659-447.png" alt></p>
+<h3 id="用户和物品的对比">用户和物品的对比</h3>
+<p><img src="/28280/21-1676530608659-448.png" alt></p>
+<h3 id="个性化">个性化</h3>
+<p>个性化：用户匹配系统</p>
+<p>交互式基于用户个人数据情况而个性化展开的</p>
+<ol>
+<li>个性化网页</li>
+<li>个性化指导</li>
+<li>个性化推荐</li>
+</ol>
+<h3 id="和-BDA-的联系">和 BDA 的联系</h3>
+<p>环境智能 = 普适计算 + 智能接口（比如个性化）</p>
+<h3 id="用户信息">用户信息</h3>
+<blockquote>
+<p>从简单到复杂</p>
+</blockquote>
+<ol>
+<li>人口统计学信息：年龄、性别、低于</li>
+<li>兴趣、偏好、专业级别</li>
+<li>购买记录、观察行为</li>
+<li>打分</li>
+<li>...</li>
+<li>计算生活日志</li>
+</ol>
+<h4 id="用户信息的来源">用户信息的来源</h4>
+<ol>
+<li>用户直接的输入（如调查问卷）</li>
+<li>通过系统非显式收集到：
+<ol>
+<li>观察/记录用户行为</li>
+<li>学习/推理用户的兴趣/偏好/级别</li>
+</ol>
+</li>
+<li>集合使用所有的方法</li>
+<li>其他的维度：公有/私有</li>
+</ol>
+<h4 id="用户信息的获取">用户信息的获取</h4>
+<p>格式：</p>
+<ol>
+<li>原数据</li>
+<li>概括（发现模式 &amp; 生成）
+<ol>
+<li>统计性机器学习方法</li>
+<li>基于 ML 方法的知识</li>
+</ol>
+</li>
+<li>保持以上两种的方式（在时间上去重新学习或者适应），保持原数据的有效时间</li>
+</ol>
+<p>其他人介入过程可能会导致信息的<strong>误收集</strong>，比如虽然你很喜欢，但是别人阻止了你，导致你只是很多次浏览，最终没有形成最后的购买行为。</p>
+<h3 id="推荐过程中的关键问题">推荐过程中的关键问题</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>详细描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>收集矩阵的“已知”评分</td>
+<td>如何收集 Utility Matrix 中的数据</td>
+</tr>
+<tr>
+<td>从已知评级中推断未知评级</td>
+<td>主要对高未知等级感兴趣，我们对了解自己不喜欢的东西并不感兴趣</td>
+</tr>
+<tr>
+<td>评估外推方法</td>
+<td>如何衡量推荐方法的成功/绩效</td>
+</tr>
+<tr>
+<td>冷启动问题</td>
+<td>对于长时间的系统没有影响，但是对于短时间（刚开始）的系统有着比较重要的预测作用</td>
+</tr>
+<tr>
+<td>完成模型转换</td>
+<td>用户往往没有直接的输入，不会直接表达兴趣</td>
+</tr>
+<tr>
+<td>模糊的信息</td>
+<td>比明确的资料要糟糕，有很多的用户、网页，并且用户的资料信息比较短</td>
+</tr>
+<tr>
+<td>隐藏的网页</td>
+<td>在互联网部分很多的网页是通过数据库查询而获取的，其重要性很难通过日志显示出来，不能无差别的推荐物品</td>
+</tr>
+</tbody>
+</table>
+<h4 id="用户评分的收集">用户评分的收集</h4>
+<h5 id="显式收集">显式收集</h5>
+<p>最精确的评分：用户直接打分，通常使用 1 到 5 或者 1 到 7 的李克特反应量表</p>
+<p>相关研究：</p>
+<ol>
+<li>最佳粒度：表示 10 分制在电影中被更好地接受了。</li>
+<li>在讨论的笑话推荐器中选择了更细粒度的制式</li>
+<li>Gold Berg 等使用了连续刻度（从 -10 到 +10）和图形输入栏
+<ol>
+<li>离散化不会造成精度损失</li>
+<li>可以更精细地捕获用户首选项</li>
+<li>用户实际上“喜欢”图形交互方法</li>
+</ol>
+</li>
+<li>多维等级（每部电影的多重等级，例如演员和声音的等级）</li>
+</ol>
+<p>主要问题：</p>
+<ol>
+<li><strong>用户并不总是愿意为许多项目评分</strong>：可用评分的数量可能太少<code>-&gt;</code>评分矩阵稀疏<code>-&gt;</code>推荐质量较差</li>
+<li>如何刺激用户给更多物品评分？</li>
+</ol>
+<h5 id="非显式收集">非显式收集</h5>
+<ol>
+<li>从用户行为中学习到评分：
+<ol>
+<li>通常是通过嵌入了推荐系统的网上商店或应用程序收集</li>
+<li>比如<strong>客户购买行为</strong>，许多推荐系统会解释为高评级（好评）</li>
+</ol>
+</li>
+<li><strong>评价指标</strong>：点击次数、浏览量、在某些页面上花费的时间、下载量</li>
+<li>隐式评价可以不断收集，不需要用户方面的额外做什么</li>
+<li>主要问题：
+<ol>
+<li>不能确定用户行为是否被正确解释</li>
+<li>例如，用户可能不喜欢他或她购买的所有书籍；用户也可能已经为别人买了一本书</li>
+</ol>
+</li>
+<li>除了显式的评价外，还可以使用隐式评价，但是往往是出于经验结论。</li>
+</ol>
+<h4 id="从已知评级中推断未知评级">从已知评级中推断未知评级</h4>
+<p>核心问题：Utility Matrix 是稀疏的</p>
+<ol>
+<li>大多数用户不会给大多数物品打分，导致了很多的缺项</li>
+<li>冷启动：新物品没有评分、新用户没有足迹</li>
+</ol>
+<p>实现推荐系统的三个方法</p>
+<ol>
+<li>基于内容的推荐系统（多）</li>
+<li>基于协同的推荐系统（多）</li>
+<li>基于潜在因子的推荐系统</li>
+</ol>
+<h3 id="网络个性化过程">网络个性化过程</h3>
+<ol>
+<li>生成用户模型：
+<ol>
+<li>使用的不是一个用户而是一个集群的用户</li>
+<li>是一个离线过程</li>
+<li>步骤：
+<ol>
+<li>聚类用户交易行为等</li>
+<li>聚类物品或页面浏览路径</li>
+<li>关联挖掘规则</li>
+<li>序列化发现模式</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>提供推荐服务：
+<ol>
+<li>在线过程</li>
+<li>结合用户的动态进程，提供动态内容</li>
+</ol>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>off-line</th>
+<th>on-line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/28280/image-20221103090829720.png" alt></td>
+<td><img src="/28280/image-20221103090848071.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户建模">用户建模</h3>
+<ol>
+<li>根据用户的应用和使用来划分用户模型：跨应用程序可重用</li>
+<li>大多数还是理论的，并不实际</li>
+<li>最新状态：每一个应用有他自己的用户模型来完成其特定的任务</li>
+</ol>
+<h2 id="基于协同的推荐系统">基于协同的推荐系统</h2>
+<p>协同过滤：利用其他用户的数据来为用户完成推荐</p>
+<h3 id="协同过滤过程">协同过滤过程</h3>
+<ol>
+<li>我们考虑用户 X</li>
+<li>查找评级与用户 X 评级“相似”的 N 个其他用户的集合</li>
+<li>根据 N 个用户的评分来估算 X 的评分，并决定是否推荐给用户 X</li>
+</ol>
+<p><img src="/28280/008-%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F.jpg" alt></p>
+<h3 id="协同过滤（Collaborative-Filtering-CF）">协同过滤（Collaborative Filtering, CF）</h3>
+<p>协同过滤是推荐的最杰出方法：</p>
+<ol>
+<li>由大型商业电子商务网站使用</li>
+<li>很好理解，存在各种算法和变体</li>
+<li>适用于许多领域（书籍，电影，DVD 等）</li>
+</ol>
+<p>方法：使用“人群的智慧”推荐物品基本假设和想法</p>
+<p>假设：在用户通过隐式或显式的方式完成对目录项进行评分，并且过去口味相似的客户在未来也有大可能口味相似</p>
+<h3 id="基于用户的最近邻协同过滤">基于用户的最近邻协同过滤</h3>
+<p>基本技巧：给定活跃用户 X 和用户 X 尚未看到的商品 i</p>
+<ol>
+<li>找到一组过去喜欢与 X 相同的商品并且对商品 i 进行了评分的用户 Y（同龄人/最近的邻居）</li>
+<li>使用推荐系统进行预测，例如预测用户 X 给商品 i 的评分会是多少</li>
+<li>对用户 X 没看过的所有商品执行此操作，并给用户 X 推荐评分最高的商品</li>
+</ol>
+<p>基本假设和想法：如果用户过去具有相似的口味，将来他们也会具有相似的口味。用户偏好会随着时间的推移保持稳定和一致</p>
+<h4 id="寻找相似的用户">寻找相似的用户</h4>
+<ol>
+<li>我们让$r_x$作为用户 x 的评分向量</li>
+<li>Jaccard 相似度：
+<ol>
+<li>$J(A,B) = \frac{|A\cap B|}{|A \cup B|}$</li>
+<li>问题是忽略了评分的价值</li>
+<li>我们把$r_x$和$r_y$作为集合
+<ol>
+<li>$r_x = \set{1, 4, 5}$</li>
+<li>$r_y = \set{1, 3, 4}$</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>余弦相似度：问题是把没有评分的部分作为负面情况
+<ol>
+<li>$sim(x,y) = \cos(r_x, r_y) = \frac{r_x * r_y}{||r_x||*||r_y||}$</li>
+<li>我们把$r_x$和$r_y$作为点
+<ol>
+<li>$r_x = \set{1, 0, 0, 1, 3}$</li>
+<li>$r_y = \set{1, 0, 2, 2, 0}$</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>皮尔逊相关系数，$S_{xy}$指的是物品和用户 x、y 的相似性：$\overline{r_x}$和$\overline{r_y}$是 x 和 y 的均值评分</li>
+</ol>
+<p>$$
+sim(x,y) = \frac{\sum\limits_{s \in S_{xy}}(r_{xs} - \overline{r_x})(r_{ys} - \overline{r_y})}{\sqrt{\sum\limits_{s \in S_{xy}}(r_{xs} - \overline{r_x})^2 }\sqrt{\sum\limits_{s \in S_{xy}}(r_{ys} - \overline{r_y})^2}}
+$$</p>
+<h4 id="相似矩阵例子">相似矩阵例子</h4>
+<p><img src="/28280/image-20221103091039739.png" alt></p>
+<blockquote>
+<p>直观地我们想要说明：$Sim(A, B) &gt; Sim(A, C)$</p>
+</blockquote>
+<ol>
+<li>Jaccard 相似度：$Sim(A, B) = \frac{1}{5} &lt; Sim(A, C) = \frac{2}{4}$</li>
+<li>余弦相似度：$Sim(A, B) = 0.380 &gt; Sim(A, C) = 0.322$
+<ol>
+<li>认为缺失的评分为 0，问题：默认是负面评论
+<ol>
+<li>A = {4, 0, 0, 5, 1, 0, 0}</li>
+<li>B = {5, 5, 4, 0, 0, 0, 0}</li>
+<li>C = {0, 0, 0, 2 ,4 ,5, 0}</li>
+<li>$Sim(A, B) = 0.380 &gt; Sim(A, C) = 0.322$</li>
+</ol>
+</li>
+<li>解决默认负面评论：减去（行）平均值，$Sim(A, B) =  0.092 &gt; Sim(A, C) = -0.559$</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/image-20221103091043470.png" alt></p>
+<h3 id="评分预测">评分预测</h3>
+<p>从相似性指标到推荐：</p>
+<ol>
+<li>设$r_x$为用户 x 评分的向量</li>
+<li>设 N 为与 x 最相似的，对项目 i 评分的 k 个用户的集合</li>
+<li>对用户 x 的项目 s 的预测：（$S_{xy}$是$sim(x,y)$的缩写）</li>
+</ol>
+<p>以下为几种分数预测策略：</p>
+<p>$$
+\begin{array}{l}
+r_{xi} = \frac{1}{k}\sum\limits_{y\in N} r_{yi} \
+\ \
+r_{xi} = \frac{\sum\limits_{y\in N}s_{xy} * r_{yi}}{\sum\limits_{y\in N} s_{xy}}
+\end{array}
+$$</p>
+<h3 id="物品-物品协同过滤">物品-物品协同过滤</h3>
+<ol>
+<li>到目前为止：我们完成了用户-用户的协作过滤</li>
+<li>但是我们还有另一种角度：物品
+<ol>
+<li>对于物品 i，找到其他类似的物品</li>
+<li>根据类似物品的评级估算物品 i 的评级</li>
+<li>可以使用与用户-用户模型相同的相似性指标和预测功能</li>
+</ol>
+</li>
+</ol>
+<p>$$
+r_{xi} = \frac{\sum\limits_{j \in N(i; x)} s_{ij} * r_{xj}}{\sum\limits_{y \in N(i; x)}S_{ij}}
+$$</p>
+<ol>
+<li>$s_{ij}$是物品 i 和 j 之间的相似度</li>
+<li>$r_{xj}$是用户 x 对物品 j 的评分</li>
+<li>$N(i;x)$是设置由用户 x 评分与 i 相似的项目</li>
+</ol>
+<h4 id="物品-物品协同过滤的例子">物品-物品协同过滤的例子</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/9-1676530608659-449.png" alt></th>
+<th><img src="/28280/10-1676530608659-450.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/28280/11-1676530608659-451.png" alt></td>
+<td><img src="/28280/12-1676530608659-452.png" alt></td>
+</tr>
+<tr>
+<td><img src="/28280/13-1676530608660-453.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="更加普遍的协同过滤">更加普遍的协同过滤</h4>
+<ul>
+<li>我们定义项$i$和$j$的相似度为$s_{ij}$</li>
+<li>选择 k 个最近的邻居$N(i; x)$：与用户$x$最相似的项目，由用户$x$评分</li>
+<li>将等级$r_{xi}$估计为加权平均值：</li>
+</ul>
+<p>$$
+\begin{array}{l}
+Before:r_{xi} = \frac{\sum\limits_{y\in N}s_{xy} * r_{yi}}{\sum\limits_{y\in N} s_{xy}} \
+\ \
+After: r_{xi} = b_{xi} + \frac{\sum\limits_{j \in N(i; x)} s_{ij} * (r_{xj} - b_{xj})}{\sum\limits_{j \in N(i; x)}s_{ij}} \
+\ \
+b_{xi} = \mu + b_x + b_i
+\end{array}
+$$</p>
+<ul>
+<li>$\mu$：电影整体平均收视率</li>
+<li>$b_x$：用户 x 的评分偏差 =（用户 x 的平均评分）- $\mu$</li>
+<li>$b_i$：电影 i 的评分偏差</li>
+</ul>
+<h3 id="对于物品-物品的协同过滤和用户-用户的协同过滤">对于物品-物品的协同过滤和用户-用户的协同过滤</h3>
+<blockquote>
+<p>在实际生活中，我们可以观察到物品-物品通常比用户-用户更好地工作。因为物品更简单，而用户有很多的口味。</p>
+</blockquote>
+<p><img src="/28280/14-1676530608660-454.png" alt></p>
+<h3 id="数据稀疏性问题">数据稀疏性问题</h3>
+<ol>
+<li>冷启动问题：如何推荐新商品？向新用户推荐什么？</li>
+<li>直接的方法：
+<ol>
+<li>要求/强迫用户对一组项目进行评分</li>
+<li>在初始阶段使用另一种方法（例如，基于内容的，人口统计学的或只是非个性化的）</li>
+<li>默认投票：为只有两个要比较的用户之一进行评分的项目分配默认值（Breese 等，1998）</li>
+</ol>
+</li>
+<li>备择方案：
+<ol>
+<li>使用更好的算法（超越最近的邻域方法）</li>
+<li>例：
+<ol>
+<li>在最近邻居方法中，足够相似的邻居的集合可能太小而无法做出好的预测</li>
+<li>假设邻居的“传递性”</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="协同过滤的优点">协同过滤的优点</h3>
+<p>适用于任何种类的物品：无需选择功能</p>
+<ol>
+<li>隐式收集：不需要明确的用户打分和用户交互</li>
+<li>大量数据：使用不同的数据来保护用户隐私</li>
+<li>如果我们大规模地使用户数据，那么协同过滤更加有效。</li>
+<li>基于内容、知识的推荐方法是很难使用在网络数据上</li>
+</ol>
+<h3 id="协同过滤的缺点">协同过滤的缺点</h3>
+<ol>
+<li>冷启动：系统中需要足够的用户才能找到匹配项</li>
+<li>稀疏度：
+<ol>
+<li>用户/评分矩阵稀疏</li>
+<li>很难找到评分相同的用户</li>
+</ol>
+</li>
+<li>最初评分：
+<ol>
+<li>无法推荐以前未评级的项目</li>
+<li>新项目，神秘项目</li>
+</ol>
+</li>
+<li>人气偏见：
+<ol>
+<li>无法向有独特品味的人推荐产品</li>
+<li>倾向于推荐热门商品</li>
+</ol>
+</li>
+</ol>
+<h2 id="基于内容的推荐系统">基于内容的推荐系统</h2>
+<p>核心思想：向用户推荐他自己之前高度评价相似的商品</p>
+<p>例子：</p>
+<ol>
+<li>电影推荐：推荐由相同演员、导演和主演的电影</li>
+<li>网络、博客和新闻：推荐由相似内容的其它网站</li>
+</ol>
+<h3 id="基于内容的推荐系统概述">基于内容的推荐系统概述</h3>
+<p>协同过滤方法不需要有关项目的任何信息：</p>
+<ol>
+<li>利用此类信息可能是合理的</li>
+<li>向过去喜欢幻想小说的人推荐幻想小说</li>
+</ol>
+<p>我们需要什么：</p>
+<ol>
+<li>有关可用项目的一些信息，例如类型（“内容”）</li>
+<li>描述用户喜欢的某种用户配置文件（首选项）</li>
+</ol>
+<p>任务：</p>
+<ol>
+<li>了解用户偏好</li>
+<li>查找/推荐与用户首选项“相似”的项目</li>
+</ol>
+<p><img src="/28280/35-1676530608660-455.png" alt></p>
+<h3 id="推荐过程">推荐过程</h3>
+<p>对于文本信息提取的时候会使用到 TF-IDF 算法</p>
+<p><img src="/28280/5-1676530608660-456.png" alt></p>
+<h3 id="物品资料">物品资料</h3>
+<p>为每个物品创建一个物品资料</p>
+<p>物品资料是一组特征（向量）：</p>
+<ol>
+<li>电影：作者，标题，演员，导演，…</li>
+<li>文本：文档中的一组“重要”词</li>
+</ol>
+<p>如何选择重要功能？以文本挖掘为例，我们通常使用启发式方法为 TF-IDF 算法</p>
+<ol>
+<li>词：功能</li>
+<li>文档：项目</li>
+</ol>
+<h3 id="用户资料">用户资料</h3>
+<p>用户资料的可能形式：</p>
+<ol>
+<li>特定物品资料的加权平均值</li>
+<li>差异：权重与平均评分的差异</li>
+</ol>
+<p>预测启发式：给定用户资料 x 和项目资料 i，估算余弦相似度为$u(x,i) = cos(x,i) = \frac{x*i}{||x|| * ||i||}$</p>
+<h3 id="基于内容方法的优点">基于内容方法的优点</h3>
+<ol>
+<li>无需其他用户的数据：无冷启动或稀疏问题</li>
+<li><strong>可以向口味独特的用户推荐</strong></li>
+<li><strong>可以推荐不受欢迎的新商品</strong></li>
+<li>能够提供解释：可以通过列出导致推荐项目的内容功能来提供推荐项目的说明</li>
+<li>需要设置衰减机制来模拟喜好的变更</li>
+</ol>
+<h3 id="基于内容方法的缺点">基于内容方法的缺点</h3>
+<ol>
+<li>很难找到合适的功能：例如图像，电影，音乐</li>
+<li>对新用户的建议：如何建立用户档案？</li>
+<li>过度专业化：
+<ol>
+<li>绝不推荐用户资料之外的项目</li>
+<li>人们可能有多种兴趣</li>
+<li>无法利用其他用户的质量判断</li>
+</ol>
+</li>
+</ol>
+<h3 id="讨论和总结">讨论和总结</h3>
+<ol>
+<li>与基于协同过滤的推荐方法相反，基于内容的推荐方法不需要用户数据即可工作</li>
+<li>提出的方法旨在基于<strong>显式或隐式反馈</strong>来学习用户兴趣偏好的模型：从用户行为中获取隐式反馈可能会出现问题</li>
+<li>评估表明，借助机器学习技术可以实现良好的推荐准确性：这些技术不需要用户社区</li>
+<li>存在推荐列表包含太多相似物品的危险
+<ol>
+<li>所有学习技术都需要一定数量的训练数据</li>
+<li>一些学习方法倾向于过度拟合训练数据</li>
+</ol>
+</li>
+<li>在商业环境中很少发现基于纯内容的系统</li>
+</ol>
+<h2 id="基于知识的推荐系统">基于知识的推荐系统</h2>
+<p>往往是基于情景或者限制条件</p>
+<h3 id="基本的-I-O-关系">基本的 I/O 关系</h3>
+<p>基于知识的推荐系统：会告诉用户为什么会推荐给你这个</p>
+<p><img src="/28280/image-20221103091444761.png" alt></p>
+<h3 id="为什么我们需要基于知识的推荐系统">为什么我们需要基于知识的推荐系统</h3>
+<ol>
+<li>可用评分较低的产品：也就是可能其他用户都不喜欢，但是你可能会喜欢。</li>
+<li><strong>时间跨度</strong>起着重要作用：时间变化会影响用户的口味</li>
+<li>五年的计算机评级</li>
+<li>用户生活方式或家庭情况的变化</li>
+<li>客户想要明确定义他们的需求：“汽车的颜色应该是黑色的”</li>
+</ol>
+<h3 id="基于知识的推荐系统的分类">基于知识的推荐系统的分类</h3>
+<p>基于约束：</p>
+<ol>
+<li>基于明确定义的推荐规则</li>
+<li>履行推荐规则</li>
+</ol>
+<p>基于案例：</p>
+<ol>
+<li>基于不同类型的相似性度量</li>
+<li>检索与指定要求相似的物品</li>
+</ol>
+<p>两种方法的推荐过程相似：</p>
+<ol>
+<li>用户指定要求</li>
+<li>系统尝试确定解决方案</li>
+<li>如果找不到解决方案，则需要用户自行更改要求</li>
+</ol>
+<h3 id="基于约束的推荐系统">基于约束的推荐系统</h3>
+<p>基于知识：</p>
+<ol>
+<li>通常在用户模型和物品属性之间进行折中</li>
+<li>变量：用户模型功能（需求），物品功能（目录）</li>
+<li>约束集
+<ol>
+<li>逻辑含义（如果用户要求 A，那么建议的物品应具有特征 B）</li>
+<li>硬约束和软约束/加权约束</li>
+<li>解决方案偏好</li>
+</ol>
+</li>
+</ol>
+<p>得出一组推荐项：</p>
+<ol>
+<li>满足一系列适用约束</li>
+<li>约束的适用性取决于当前的用户模型</li>
+<li>概要-推理的透明线</li>
+</ol>
+<h4 id="基于约束的推荐任务">基于约束的推荐任务</h4>
+<ol>
+<li>查找一组用户要求，以使一部分物品满足所有约束：询问用户应该放宽/修改哪些要求，以使某些物品不违反任何约束条件</li>
+<li>查找满足加权约束最大集的物品子集：
+<ol>
+<li>类似于查找最大后继子查询（XSS）</li>
+<li>所有推荐的物品都必须满足相同的约束条件</li>
+<li>根据预定的权重计算缓冲区</li>
+</ol>
+</li>
+<li>根据满足的软约束权重对项目进行排名
+<ol>
+<li>根据满足的比率对项目进行排序</li>
+<li>不需要额外的排名方案</li>
+</ol>
+</li>
+</ol>
+<h4 id="基于约束的推荐系统问题">基于约束的推荐系统问题</h4>
+<p>从一个分类中选择出符合用户要求的一个产品</p>
+<p><img src="/28280/33-1676530608660-457.png" alt></p>
+<p>用户的要求一般会用自然语言进行描述，例子如下：</p>
+<ol>
+<li>价格应该比 300 块钱低</li>
+<li>相机应该能够适用于运动摄影</li>
+</ol>
+<p>核心是我们如何将自然语言转化为几个关键词</p>
+<h4 id="满足约束的问题">满足约束的问题</h4>
+<ol>
+<li>具有陈述性知识表示的基于知识的 RS，$CSP(X_1 \cup X_U,D,SRS \cup KB \cup I)$</li>
+<li>定义：
+<ol>
+<li>$X_j, X_U$：描述具有域 D 的产品和用户模型的变量</li>
+<li>KB：具有域限制的知识库</li>
+<li>SRS：用户的特定要求</li>
+<li>l：产品目录</li>
+</ol>
+</li>
+<li>解决方案：满足您的要求$\theta\ \forall x \in X_1 (x = v) \in \theta \cap \in dom(x)\ s.t.\ SRS \cup KB \cup I \cup \theta$（令人满意）</li>
+</ol>
+<h4 id="连接查询">连接查询</h4>
+<ol>
+<li>与约束求解器不同：它不是为 CSP 找到有效的实例</li>
+<li>连接查询在物品目录中执行。
+<ol>
+<li>联合数据库查询</li>
+<li>一组连接在一起的选择标准</li>
+</ol>
+</li>
+<li>$O[criteria] P$
+<ol>
+<li>P：产品分类</li>
+<li>例如：$\delta<a href="P">mpix210，pic30-0</a>= {p4，p7}$</li>
+</ol>
+</li>
+</ol>
+<h4 id="和基于约束的推荐者进行交互">和基于约束的推荐者进行交互</h4>
+<p>用户明确了他或她最初的偏好：</p>
+<ol>
+<li>一次全部指出</li>
+<li>以向导的方式完成</li>
+<li>对话交互</li>
+</ol>
+<p>一组符合的物品被展示给用户：一般会有为什么会推荐这个物品给用户的解释</p>
+<p>用户可能会修改他或她的需求：</p>
+<ol>
+<li>查看可替代的解决方案</li>
+<li>缩小满足条件的物品的数量</li>
+</ol>
+<h4 id="默认值">默认值</h4>
+<p>支持用户选择有合理的替代方案：</p>
+<ol>
+<li>支持客户选择合理的替代方案。 不确定选择哪个选项</li>
+<li>根本不知道技术细节</li>
+</ol>
+<p>默认类型：</p>
+<ol>
+<li>静态默认值</li>
+<li>依赖默认值</li>
+<li>派生的默认值</li>
+</ol>
+<p>选择下一个问题：</p>
+<ol>
+<li>大多数用户对指定所有属性的值不感兴趣</li>
+<li>识别用户可能感兴趣的属性</li>
+</ol>
+<h4 id="找不到满足要求的结果">找不到满足要求的结果</h4>
+<ol>
+<li>找不到解决方案</li>
+<li>放松约束条件：
+<ol>
+<li>目的是确定对原始约束的放宽</li>
+<li>放宽推荐问题的约束，直到找到相应的解决方案</li>
+</ol>
+</li>
+<li>用户也可能对替换建议感兴趣：推荐者可以通过适应提意见的要求来计算解决方案</li>
+</ol>
+<h4 id="处理不满足的要求">处理不满足的要求</h4>
+<ul>
+<li>计算并诊断不满足的要求</li>
+</ul>
+<p><img src="/28280/43-1676530608660-458.png" alt></p>
+<ul>
+<li>诊断从冲突集合中派生出来：${CS, CS, CS}$是{d：{r, r}, d：{r, r}, d：{r, r}}</li>
+</ul>
+<h3 id="基于案例的推荐系统">基于案例的推荐系统</h3>
+<ol>
+<li>使用相似性度量检索项。</li>
+<li>距离相似性</li>
+</ol>
+<p>$$
+similarity(P, REQ) = \frac{\sum\limits_{r \in REQ} w_i * sim(p, r)}{\sum\limits_{r \in REQ w_r}}
+$$</p>
+<ol start="3">
+<li>定义：
+<ol>
+<li><code>sim(p，REQ)</code>表示每个商品属性值$\phi(p)$与客户需求的距离$r \in REQ$</li>
+<li>w 是要求 r 的重要性权重</li>
+</ol>
+</li>
+<li>在现实世界中，客户希望：
+<ol>
+<li>最大限度地利用某些属性。例如，越多越好（MIB）</li>
+<li>最小化某些属性。例如相机的价格，少即好（Lib）</li>
+</ol>
+</li>
+</ol>
+<h4 id="与基于案例的推荐者进行交互">与基于案例的推荐者进行交互</h4>
+<ol>
+<li>客户可能不知道他们在寻找什么</li>
+<li>标记（收藏）是支持此类导航的有效方法</li>
+<li>客户指定其当前物品（输入物品）无法满足的更改请求（价格或 mpix）</li>
+</ol>
+<p><img src="/28280/44-1676530608661-459.png" alt></p>
+<h4 id="多标记（收藏）">多标记（收藏）</h4>
+<ul>
+<li>操作多个属性可以提高推荐对话框的效率</li>
+</ul>
+<p><img src="/28280/45-1676530608661-460.png" alt></p>
+<h3 id="动态标记">动态标记</h3>
+<ol>
+<li>关联规则挖掘</li>
+<li>动态标记的基本步骤：
+<ol>
+<li>$q$：最初的一组要求</li>
+<li>$CI$：所有可用项目</li>
+<li>$K$：复合评论的最大数量</li>
+<li>$\sigma_{min}$：计算的关联规则的最小支持值。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/57-1676530608661-461.png" alt></p>
+<h4 id="示例：销售对话金融服务">示例：销售对话金融服务</h4>
+<ol>
+<li>在金融服务领域：
+<ol>
+<li>销售代表不知道应该推荐哪些服务</li>
+<li>提高销售代表的整体生产力</li>
+</ol>
+</li>
+<li>类似于呼叫中心脚本：
+<ol>
+<li>最佳实践销售对话</li>
+<li>状态，谓词的过渡</li>
+</ol>
+</li>
+<li>研究成果：支持 KA 和验证，节点属性（可达，可扩展，确定性）</li>
+</ol>
+<p><img src="/28280/46-1676530608661-462.png" alt></p>
+<h4 id="示例：标记">示例：标记</h4>
+<ol>
+<li>项目空间中基于相似度的导航</li>
+<li>复合标记：
+<ol>
+<li>比单元批判更有效的导航</li>
+<li>频繁模式的挖掘</li>
+</ol>
+</li>
+<li>动态标记：仅提出适用的复合标记</li>
+<li>渐进标记：考虑历史</li>
+<li>适应性建议：建议可以最优化用户偏好模型的项目</li>
+</ol>
+<p><img src="/28280/56-1676530608661-463.png" alt></p>
+<h3 id="总结">总结</h3>
+<p>基于知识的推荐系统可以分为以下两部分：</p>
+<ol>
+<li>基于约束的推荐系统</li>
+<li>基于案例的推荐系统</li>
+</ol>
+<p>约束：</p>
+<ol>
+<li>知识获取的代价
+<ol>
+<li>从领域专家获取</li>
+<li>从用户获取</li>
+<li>从网络资源获取</li>
+</ol>
+</li>
+<li>推荐模型的准确性
+<ol>
+<li>非常精细的偏好模型需要交互多次</li>
+<li>协同过滤模型隐式偏好</li>
+</ol>
+</li>
+</ol>
+<p>独立性假设可能会受到挑战：偏好并不总是彼此独立的</p>
+<h2 id="混合推荐系统">混合推荐系统</h2>
+<h3 id="混合推荐系统引入">混合推荐系统引入</h3>
+<ol>
+<li>实施两个或更多不同的推荐人并结合预测：也许使用线性模型</li>
+<li>将基于内容的方法添加到协作过滤中：
+<ol>
+<li>新物品问题的物品资料</li>
+<li>应对新用户问题的人口统计数据</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/41-1676530608661-464.png" alt></p>
+<h3 id="混合推荐系统概述">混合推荐系统概述</h3>
+<ol>
+<li>混合推荐系统：混合了多种输入或者结合不同的机制
+<ol>
+<li>协同过滤：告诉我在我的相似同类中他们喜欢的是什么</li>
+<li>基于内容：展示给我还会继续喜欢的一类东西</li>
+<li>基于知识：告诉我什么满足我现在的需求</li>
+</ol>
+</li>
+<li>所有三个基本技术均由优秀的销售助理（销售行为的不同阶段）完美地合并在一起，但有其缺点，例如冷启动问题</li>
+<li>跨越两个（或多个）类型/实现的想法
+<ol>
+<li>hybrida[lat.]：表示通过组合两个不同元素制成的对象</li>
+<li>避免某些缺点</li>
+<li>达到亲本个体不存在（或仅不一致）的理想特性</li>
+</ol>
+</li>
+<li>不同的混合设计
+<ol>
+<li>并行使用多个系统</li>
+<li>整体开发的不同功能</li>
+<li>管道调用不同的系统：输入作为输出</li>
+</ol>
+</li>
+</ol>
+<h4 id="单一混合设计">单一混合设计</h4>
+<ol>
+<li>只有一个简单的推荐组件</li>
+</ol>
+<p><img src="/28280/42-1676530608661-465.png" alt></p>
+<ol start="2">
+<li>混合是虚拟的，因为不同范式的特征/知识源已组合在一起</li>
+</ol>
+<h5 id="单一混合设计：特征合并">单一混合设计：特征合并</h5>
+<ol>
+<li>多种知识来源的合并：比如评分、人口统计学信息或明确描述的需求，并且需要被应用到相似度计算上去</li>
+<li>混合内容特征
+<ol>
+<li>社交特征：被用户喜欢的电影</li>
+<li>内容特征：被用户喜欢的戏剧，被用户喜欢的喜剧</li>
+<li>混合特征：用户喜欢很多喜剧电影</li>
+</ol>
+</li>
+<li>结合知识工程的努力，其中涉及发明良好的功能以实现成功的学习</li>
+</ol>
+<h5 id="单一混合设计：特征扩充">单一混合设计：特征扩充</h5>
+<ol>
+<li>内容驱动的协同过滤：
+<ol>
+<li>例如，爱丽丝喜欢物品 1 和 3（单维度评级）
+<ol>
+<li>物品 7 与 1 和 3 相似度为 0.75</li>
+<li>爱丽丝喜欢物品 7 的可能为 0.75</li>
+</ol>
+</li>
+<li>物品矩阵变得稀疏</li>
+<li>重要性加权和调整因子：
+<ol>
+<li>同等物品的同行更重要</li>
+<li>如果自己的评分更高，则对基于内容的预测的置信度更高。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>对研究论文的推荐，引用被解释为协同推荐</li>
+</ol>
+<h4 id="并行混合设计">并行混合设计</h4>
+<ol>
+<li>输出是几种已经存在的实现的合并</li>
+<li>最低侵入性设计</li>
+<li>有些是权重或者投票的模型
+<ol>
+<li>权重会被动态学习到</li>
+<li>动态加权的极端情况正在改变</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/47-1676530608661-466.png" alt></p>
+<h5 id="并行混合设计：加权">并行混合设计：加权</h5>
+<ol>
+<li>根据权重计算和：$rec_{weighted}(u, i) = \sum\limits_{k=1}\limits^n\beta_k * rec_k(u, i)$</li>
+</ol>
+<p><img src="/28280/58-1676530608661-467.png" alt></p>
+<ol start="2">
+<li>我们如何生成权重
+<ol>
+<li>经验引导
+<ol>
+<li>需要历史数据</li>
+<li>计算不同的权重</li>
+<li>确定哪一个人是最好的</li>
+</ol>
+</li>
+<li>动态调整权重
+<ol>
+<li>从均匀分布的权重开始</li>
+<li>对每个用户，调整权重以最大化地减少预测误差</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>假设爱丽丝实际上购买/点击了项目 1 和 4：确定最小化平均绝对误差（MAE）的权重</li>
+<li>随着 rec2 的权重增加，MAE 会提高</li>
+</ol>
+<p>$$
+MAE = \frac{\sum\limits_{r_i \in R }\sum\limits_{k = 1}\limits^n \beta_k * |rec_k(u, i) - r_i|}{|R|}
+$$</p>
+<blockquote>
+<p>下图中左侧红色框是权重，右侧红色框是 MAE</p>
+</blockquote>
+<p><img src="/28280/59-1676530608661-468.png" alt></p>
+<ul>
+<li>但是：res1 是不是实际上将物品 1 和 4 的排名提高了？</li>
+<li>加权时要小心！
+<ul>
+<li>推荐者需要为所有用户和项目分配可比分数</li>
+<li>可能需要对分数进行转换</li>
+</ul>
+</li>
+<li>稳定的权重需要多个用户评价，而不是一个或者两个</li>
+</ul>
+<p><img src="/28280/60-1676530608662-469.png" alt></p>
+<h5 id="并行混合设计：转换">并行混合设计：转换</h5>
+<ul>
+<li>需要一个决定推荐人的决定</li>
+</ul>
+<p>$$
+\exists_1 k:1...n\ rec_{switching}(u, i) = rec_k(u, i)
+$$</p>
+<ul>
+<li>动态权重的特殊情况（除了一个 Beta 为 0 以外，所有其他值）</li>
+<li>例如：
+<ul>
+<li>根据一些质量标准订购推荐产品并进行转换，例如：如果系统中的评分太少，则使用基于知识的评分，否则进行协作</li>
+<li>基于上下文参数的更复杂条件，应用分类技术</li>
+</ul>
+</li>
+</ul>
+<h5 id="并行混合设计：混合">并行混合设计：混合</h5>
+<ol>
+<li>根据用户接口的级别混合不同推荐系统的结果</li>
+<li>不同技术的结果被一并表示</li>
+<li>用户 u 和物品 i 的推荐结果是为其 n 个构成推荐者的每个元组<code>&lt;score, k&gt;</code>的集合</li>
+</ol>
+<p>$$
+rec*{mixed} =\bigcup*{k = 1}^n&lt;rec_k(u, i), k&gt;
+$$</p>
+<h4 id="管道混合设计">管道混合设计</h4>
+<ol>
+<li>一个推荐系统预处理一些输入在子过程中完成
+<ol>
+<li>级联：重定义推荐名单，逐步求精</li>
+<li>元数据：学习模型</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/48-1676530608662-470.png" alt></p>
+<h5 id="管道混合设计：级联级别">管道混合设计：级联级别</h5>
+<ol>
+<li>成功的推荐会被预处理其限制</li>
+</ol>
+<p>$$
+rec_{cascade}(u, i) = rec_u(u, i)
+$$</p>
+<ol start="2">
+<li>对于所有的 k &gt; 1</li>
+</ol>
+<p>$$
+rec<em>k(u,i) = \begin{cases}
+rec</em>{u, i}: rec_{k - 1} \neq 0\
+0: otherwise \
+\end{cases}
+$$</p>
+<ol start="3">
+<li>后续推荐者可能不会引入其他项目，从而产生非常精确的结果</li>
+<li>推荐清单不断减少第一推荐人排除项目：删除绝对不可行的项目（例如基于知识的项目）</li>
+<li>第二推荐者分配分数：排序和完善（例如协作）</li>
+</ol>
+<p><img src="/28280/61-1676530608662-471.png" alt></p>
+<h5 id="管道混合设计：元数据级别">管道混合设计：元数据级别</h5>
+<ol>
+<li>成功的推荐会被预处理其限制</li>
+</ol>
+<p>$$
+rec*{meta-level}(u, i) = rec*{n}(u, i, \triangle*{rec*{n-1}})
+$$</p>
+<ul>
+<li>例子：Fab：
+<ul>
+<li>在线新闻领域</li>
+<li>CB 推荐器基于加权术语向量构建用户模型</li>
+<li>协同过滤根据这些用户模型识别相似的对等方，但根据评分提出建议</li>
+</ul>
+</li>
+<li>基于协作约束的元级推荐系统
+<ul>
+<li>协同过滤学习约束基础</li>
+<li>基于知识的推荐系统计算建议</li>
+</ul>
+</li>
+</ul>
+<h3 id="混合策略的限制">混合策略的限制</h3>
+<ul>
+<li>从元视角比较策略的推荐系统寥寥无几
+<ul>
+<li>大多数数据集不允许比较不同的推荐范例</li>
+<li>即仅在单个数据集中很少提供的评分、要求、项目功能、领域知识、评论</li>
+<li>因此，很少有经验结论支持的结论
+<ul>
+<li>整体式：以一些预处理工作为代价以换取更多知识</li>
+<li>并行式：需要仔细匹配来自不同预测变量的得分</li>
+<li>流水线：适用于两种对立的方法</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Netflix 竞赛：“堆叠”推荐系统
+<ul>
+<li>基于&gt;100 个预测变量的加权设计：推荐功能</li>
+<li>基于用户模型，上下文和元功能的权重自适应切换</li>
+</ul>
+</li>
+</ul>
+<h2 id="可解释性">可解释性</h2>
+<h3 id="推荐系统的解释动机">推荐系统的解释动机</h3>
+<ol>
+<li>数码相机对您来说是必买的，因为...</li>
+<li>推荐系统为什么要完全处理解释？
+<ol>
+<li>答案与提供和接收建议的两方有关</li>
+<li>卖方可能对促销特定产品感兴趣&quot;买方担心做出正确的购买决定</li>
+</ol>
+</li>
+</ol>
+<h3 id="推荐系统的解释分类">推荐系统的解释分类</h3>
+<ol>
+<li><strong>功能性</strong>：Rising-Sun 品牌的 Jumbo-Family-Vvan 汽车类型非常适合您的家庭，因为您有四个孩子，汽车有七个座位。</li>
+<li><strong>因果上</strong>：灯泡亮是因为您打开了它。</li>
+<li><strong>固定的</strong>：我洗碗是因为我哥哥上次洗碗了、你必须做功课，因为你父亲这么说。</li>
+<li><strong>科学的解释</strong>：表达了在各个科学领域制定的概念之间的关系，并且通常基于可辩驳的理论</li>
+</ol>
+<h3 id="什么是推荐系统的解释？">什么是推荐系统的解释？</h3>
+<ul>
+<li>解释一些目标后系统输出的其他信息</li>
+</ul>
+<p><img src="/28280/49.png" alt></p>
+<h3 id="提供解释的目的">提供解释的目的</h3>
+<ol>
+<li>前述产生解释的目的可以相互关联</li>
+<li>说服力+<code>-&gt;</code>信任-</li>
+<li>有效性+<code>-&gt;</code>信任+</li>
+</ol>
+<h4 id="透明度">透明度</h4>
+<ol>
+<li>提供信息，以便用户理解</li>
+<li>提供关于为何一项优先于另一项的说明</li>
+</ol>
+<h4 id="可靠性">可靠性</h4>
+<ol>
+<li>给用户检查推荐的可靠性</li>
+<li>不一定与透明度有关。例如，神经网络（NN）决定产品符合要求。 透明地公开 NN 的计算将无济于事，但是通过比较所需功能和提供的产品功能，客户可以判断建议的质量</li>
+</ol>
+<h4 id="诚信度">诚信度</h4>
+<ol>
+<li>建立信任可以被视为减少不确定情况下人类决策复杂性的一种机制</li>
+<li>减少建议质量的不确定性</li>
+</ol>
+<h4 id="说服力">说服力</h4>
+<ol>
+<li>对建议的有说服力的解释旨在改变用户的购买行为</li>
+<li>例如，推荐人可能故意关注产品的正面方面，并对各种负面方面保持沉默</li>
+</ol>
+<h4 id="有效期">有效期</h4>
+<ol>
+<li>用户获得的高质量决策支持</li>
+<li>帮助客户发现他或她的喜好</li>
+<li>帮助用户做出更好的决定</li>
+</ol>
+<h4 id="效率">效率</h4>
+<ol>
+<li>减少决策工作量</li>
+<li>减少决策所需的时间</li>
+<li>另一个措施也可能是认知努力</li>
+</ol>
+<h4 id="满意">满意</h4>
+<p>通过使用推荐系统提高总体满意度</p>
+<h4 id="相关性">相关性</h4>
+<ol>
+<li>对话推荐者可能需要其他信息</li>
+<li>可以提供解释以说明为什么需要用户提供其他信息的理由</li>
+</ol>
+<h4 id="可理解性">可理解性</h4>
+<ol>
+<li>推荐人永远无法确定其用户的知识</li>
+<li>通过将用户的已知概念与推荐者采用的概念相关联来支持用户</li>
+</ol>
+<h4 id="教育性">教育性</h4>
+<ol>
+<li>教育用户以帮助他们更好地了解产品领域</li>
+<li>对领域的深入了解可帮助客户重新考虑自己的偏好，并评估不同解决方案的利弊</li>
+<li>最终，随着客户的了解越来越多，他们能够做出更明智的购买决定</li>
+</ol>
+<h3 id="总体解释">总体解释</h3>
+<ul>
+<li>如何、为什么？使用专家系统解释</li>
+<li>归纳整理的形式
+<ul>
+<li>给定$KB \rightarrow_{RS} i$，表示物品 i 被推荐系统 RS 使用方法推荐了</li>
+<li>找到$KB' \subseteq KB s.t. KB' \models_{RS} i$</li>
+</ul>
+</li>
+<li>简洁的原理：对于<strong>最小</strong>集合$KB' \subseteq KB s.t. KB' \not\models_{RS} i$</li>
+<li>但是添加过滤：与扣除有关的某些部分对于人类可能是显而易见的</li>
+</ul>
+<p><img src="/28280/50.png" alt></p>
+<h3 id="用于在推荐系统中生成解释的分类法">用于在推荐系统中生成解释的分类法</h3>
+<blockquote>
+<p>当前解释组件的主要设计维度</p>
+</blockquote>
+<ol>
+<li>生成的推理模型的类别
+<ol>
+<li>白盒</li>
+<li>黑盒</li>
+</ol>
+</li>
+<li>推荐系统用于生成解释的范例：决定容易丢失的语义</li>
+<li>信息类别</li>
+</ol>
+<p><img src="/28280/51-1676530608662-472.png" alt></p>
+<h3 id="KB-的原型">KB 的原型</h3>
+<ol>
+<li>对象类别
+<ol>
+<li>用户</li>
+<li>项目</li>
+<li>属性</li>
+</ol>
+</li>
+<li>他们之间的 N 元关系</li>
+<li>协同过滤
+<ol>
+<li>基于邻域的 CF（a）</li>
+<li>矩阵分解（b）：引入其他因素代理来确定相似性</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/62-1676530608662-473.png" alt></p>
+<h3 id="示例">示例</h3>
+<ol>
+<li>项目之间的相似性</li>
+<li>用户之间的相似性</li>
+<li>标签
+<ol>
+<li>标签相关性（针对项目）</li>
+<li>（用户的）标签首选项</li>
+</ol>
+</li>
+</ol>
+<h3 id="基于协同过滤的推荐系统的解释">基于协同过滤的推荐系统的解释</h3>
+<ol>
+<li>没有明确的推荐知识</li>
+<li>基于协同过滤的推荐无法提供关于为何产品适合客户或者为什么产品不符合客户要求的解释</li>
+<li>协同过滤的基本思想是模仿人类口碑推荐过程</li>
+<li>因此，请全面了解此口碑传播方法的工作原理：
+<ol>
+<li>客户评价产品</li>
+<li>将具有相似等级（即口味）的顾客称为邻居</li>
+<li>未通过客户评级的产品通过结合客户邻居的评级来评级</li>
+</ol>
+</li>
+</ol>
+<h3 id="评估说明接口">评估说明接口</h3>
+<ol>
+<li>Herlocker 等检查了 MovieLens 系统域中解释接口的各种实现方式</li>
+<li>评估了 21 个辩题</li>
+<li>顾客以 1 到 7 的比例被问及，通过二十一种不同的解释方法之一介绍并解释了这部电影的推荐后，他们去看推荐电影的可能性有多大</li>
+<li>他们还包括没有提供其他解释数据的基本案例。</li>
+<li>除基本情况外，还设计了一个解释界面，该界面仅输出推荐系统的过往性能：例如，在过去的 80% 的时间内，MovieLens 为您提供了精确的报价</li>
+</ol>
+<h3 id="Herlocker-的研究结果">Herlocker 的研究结果</h3>
+<ul>
+<li>最佳解释界面基于邻居的等级</li>
+<li>在这些情况下，相似的邻居喜欢推荐的影片，并且这部影片的介绍很深刻。直方图的表现优于表格</li>
+</ul>
+<p><img src="/28280/63-1676530608662-474.png" alt></p>
+<ul>
+<li>推荐人使用有关 MovieLens 过去表现的简单陈述获得第二好的表现</li>
+<li>与内容相关的论点提到与其他高评价电影或喜欢的男演员或女明星的相似性，是表现最佳的演员</li>
+<li>即使与基本案例相比，不良的解释界面设计也降低了客户遵循建议的意愿</li>
+<li>信息过多会产生负面影响；通过将直方图中显示的数据与有关邻居的邻近性的信息进行混合来实现较差的性能</li>
+<li>有趣的是，由电影评论家等领域权威机构提供评级的推荐建议并没有增加接受度</li>
+</ul>
+<h3 id="基于案例的推荐系统的解释">基于案例的推荐系统的解释</h3>
+<ol>
+<li>通过确定最适合客户查询的产品来实现基于案例的建议中解决方案的生成</li>
+<li>产品数据库的每个物品对应一个案例</li>
+<li>客户查询限制了物品的属性，例如，客户只对价格低于一定金额的数码相机感兴趣</li>
+</ol>
+<h3 id="基于约束的推荐系统的解释">基于约束的推荐系统的解释</h3>
+<ol>
+<li>回答客户可能提出的两个典型问题（Buchanan 和 Shortliffe 1984）</li>
+<li>为什么解释？如果推荐过程需要客户的输入，则客户可以问为什么需要此信息</li>
+<li>解释？当推荐人提出一套解决方案（例如产品）时，客户可能会要求解释为什么提出的解决方案对他或她有利</li>
+<li>接下来，我们通过利用基于约束的系统的推理方法来研究回答这两种类型问题的方法</li>
+</ol>
+<h3 id="汽车领域的例子">汽车领域的例子</h3>
+<ol>
+<li>两种不同的包装可供汽车使用
+<ol>
+<li>商务套餐</li>
+<li>娱乐套餐</li>
+</ol>
+</li>
+<li>客户基于以下功能表达要求：轻松停车，拖曳和免提移动通信</li>
+<li>客户可以决定是否要使用其中一个，两个或两个都不包装</li>
+<li>休闲套餐
+<ol>
+<li>包括用于拖曳拖车的连接装置和位于汽车后部的摄像机，使驾驶员能够确定到汽车后面障碍物的距离</li>
+<li>本相机支持以客户为导向的产品功能，易于停车</li>
+</ol>
+</li>
+<li>商务套餐
+<ol>
+<li>包括带有 GSM 电话的收音机（GSM 收音机），支持免提移动通信</li>
+<li>在后保险杠中包括一个传感器系统，该系统还支持轻松停车</li>
+<li>但是，由于技术原因，传感器系统与娱乐套件不兼容</li>
+<li>从客户的角度来看，摄像机和传感器系统提供相同的功能。因此，如果客户订购商务套票和休闲套票，则该汽车包括摄像机，该摄像机实现了便捷的停车功能</li>
+<li>在这种配置中，不仅禁止使用传感器（因为它们与耦合设备不兼容），而且还可以免除</li>
+</ol>
+</li>
+</ol>
+<h3 id="推荐系统解释性总结">推荐系统解释性总结</h3>
+<ol>
+<li>解释可以有多种类型，并且可以实现各种目标</li>
+<li>可以产生哪种类型的解释很大程度上取决于所采用的推荐方法</li>
+<li>解释可以用来塑造顾客的愿望和愿望，但它是一把双刃剑。
+<ol>
+<li>一方面，解释可以帮助顾客做出明智的购买决定</li>
+<li>另一方面，可以滥用解释将客户推向仅对卖方有利的方向</li>
+</ol>
+</li>
+<li>因此，对说明的深入理解和他们对客户的关注引起了极大的兴趣。</li>
+</ol>
+<h2 id="度量与评估">度量与评估</h2>
+<h3 id="评估推荐系统">评估推荐系统</h3>
+<ol>
+<li>评估推荐系统
+<ol>
+<li>已经提出了无数种技术，但是在给定的应用程序域中哪一个最好？</li>
+<li>不同技术的成功因素是什么？基于最优准则的比较分析？</li>
+</ol>
+</li>
+<li>研究问题是：
+<ol>
+<li>相对于特定标准（例如准确性，用户满意度，响应时间，偶然性，在线转换，加速工作等），Isa RS 效率很高。</li>
+<li>顾客喜欢/购买推荐商品吗？</li>
+<li>客户是否会购买原本不会购买的商品？</li>
+<li>购买后是否满意推荐？</li>
+</ol>
+</li>
+</ol>
+<h3 id="实证研究">实证研究</h3>
+<blockquote>
+<p>表征尺寸：</p>
+</blockquote>
+<ol>
+<li>谁是研究的重点对象？</li>
+<li>采用了哪些研究方法？</li>
+<li>研究在哪个背景下进行？</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>学科</th>
+<th>在线客户，学生，基于足迹的在线进程、计算机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>研究方法</td>
+<td>实验，准实验，非实验研究</td>
+</tr>
+<tr>
+<td>设置</td>
+<td>实验室，真实场景</td>
+</tr>
+</tbody>
+</table>
+<h3 id="评估设置">评估设置</h3>
+<ol>
+<li>实验室研究
+<ol>
+<li>专为研究目的而创建</li>
+<li>通过选择研究参与者，可以更轻松地控制外部变量，但是对于金钱或奖品激励的参与者可能存在疑问</li>
+<li>参与者的行为应与现实环境中的行为一样</li>
+</ol>
+</li>
+<li>实地研究
+<ol>
+<li>在预先存在的真实环境中进行</li>
+<li>激发用户使用系统的内在动力</li>
+</ol>
+</li>
+</ol>
+<h3 id="研究方法：实验与非实验（观测）研究方法">研究方法：实验与非实验（观测）研究方法</h3>
+<ol>
+<li>实验（测试，试验）：
+<ol>
+<li>一项实验是对至少一个变量进行操作并将单位随机分配给不同级别或类别的受控变量的研究。</li>
+<li>单位：用户，历史数据</li>
+<li>控制变量：推荐系统类型、推荐一组物品、解释策略</li>
+</ol>
+</li>
+<li>控制变量类别：基于内容的推荐系统，基于协同过滤的推荐系统</li>
+</ol>
+<h3 id="实验设计">实验设计</h3>
+<p><img src="/28280/52-1676530608662-475.png" alt></p>
+<h3 id="信息检索（IR）中的评估">信息检索（IR）中的评估</h3>
+<ol>
+<li>克兰菲尔德历史藏品（1950 年代末）
+<ol>
+<li>1,398 篇期刊摘要</li>
+<li>225 个查询</li>
+<li>详尽的相关性判断（超过 30 万）</li>
+</ol>
+</li>
+<li>人类领域专家建立的地面真理</li>
+</ol>
+<p><img src="/28280/53-1676530608662-476.png" alt></p>
+<h3 id="指标：准确率和回归率">指标：准确率和回归率</h3>
+<ol>
+<li>推荐被视为信息检索任务：检索（推荐）所有预计为“良好”的物品。</li>
+<li>精度：精确度的度量，确定所检索到的相关项目在所有检索到的项目中所占的比例：例如，推荐的电影中实际上很不错的比例</li>
+</ol>
+<p>$$
+Precision = \frac{tp}{tp + fp} = \frac{|被推荐的好电影|}{|所有被推荐的|}
+$$</p>
+<p>召回：完整性的度量，确定所有相关项目中相关项目的分数：例如，所有推荐的好电影的推荐</p>
+<p>$$
+Recall = \frac{tp}{tp + fn} = \frac{|被推荐的好电影|}{|所有好电影|}
+$$</p>
+<ul>
+<li>通常，当调整推荐系统以提高准确性时，召回率因此降低（反之亦然）</li>
+</ul>
+<p><img src="/28280/64.png" alt></p>
+<h3 id="F-1-度量">$F_1$度量</h3>
+<ol>
+<li>$F_1$指标尝试将 Precision 和 Recall 合并为一个值以进行比较：可用于获得更平衡的性能视图</li>
+</ol>
+<p>$$
+F*1 = 2 * \frac{precision _ recall}{precision + recall}
+$$</p>
+<ol start="2">
+<li>$F_1$指标对精度和召回率给予同等的重视：其他$F_\beta$指标的权重召回系数为$\beta$。</li>
+</ol>
+<h3 id="指标：排名很重要">指标：排名很重要</h3>
+<p><img src="/28280/54-1676530608662-477.png" alt></p>
+<blockquote>
+<p>排名指标可提高召回率和准确性，以考虑排名列表中正确项目的位置</p>
+</blockquote>
+<ol>
+<li>相关项物品在推荐列表中较早出现时会更有用</li>
+<li>在推荐系统中尤为重要，因为排名较低的物品可能会被用户忽略</li>
+</ol>
+<h3 id="推荐系统中的评估">推荐系统中的评估</h3>
+<ol>
+<li>带有用户评分项目的数据集：
+<ol>
+<li>MovieLens 数据集 100K 10M 评级</li>
+<li>Netflix 100M 评级</li>
+</ol>
+</li>
+<li>历史用户评级构成了基本事实</li>
+<li>指标衡量错误率
+<ol>
+<li>平均绝对误差（MAE）计算预测等级与实际等级之间的偏差</li>
+<li>均方根误差（RMSE）与 MAE 相似，但更着重于较大的偏差</li>
+</ol>
+</li>
+</ol>
+<p>$$
+\begin{array}{l}
+MAE = \frac{1}{n}\sum\limits*{i=1}\limits^n|p_i - r_i| \
+\ \
+RASE = \sqrt{\frac{1}{n}\sum\limits*{i=1}\limits^n(p_i - r_i)^2}
+\end{array}
+$$</p>
+<h3 id="建立基本事实的困境">建立基本事实的困境</h3>
+<ul>
+<li>IR 度量经常被使用</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>离线实验</th>
+<th>在线实验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>评级，交易</td>
+<td>评分，反馈</td>
+</tr>
+<tr>
+<td>历史数据，并非所有的推荐物品都是被评级的</td>
+<td>在线数据，所有的推荐物品都是被评级了的</td>
+</tr>
+<tr>
+<td>未评级的商品的未知，但是会被解释为坏的（默认假设是用户只会购买评分高的商品）</td>
+<td>未推荐的物品的好坏是未知的</td>
+</tr>
+<tr>
+<td>如果默认假设不成立，真正性可能很小，真负性可能很小</td>
+<td>假负性和真负性不能被确定</td>
+</tr>
+<tr>
+<td>准确率偏高，召回率可能有多种情况</td>
+<td>准确率尚可，召回率存疑</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>结果表明，对在线用户的行为缺乏准确性。</p>
+</blockquote>
+<h3 id="离线实验">离线实验</h3>
+<ol>
+<li>Netflix 竞争
+<ol>
+<li>基于网络的电影租赁</li>
+<li>和目前已有的电影</li>
+</ol>
+</li>
+<li>历史数据集
+<ol>
+<li>约 480K 用户</li>
+<li>约 18K 影片，被在 1-5 之间评分</li>
+<li>约 100M 的评分</li>
+<li>最后 9 个评分/未显示用户
+<ol>
+<li>训练集（概率集）-用于评估的团队</li>
+<li>测验集-评估团队提交的排行榜</li>
+<li>测试集-Netflix 用于确定获胜者</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="方法论">方法论</h4>
+<ol>
+<li><strong>设置以确保内部有效性</strong>：
+<ol>
+<li>随机选择一部分已知等级（训练集）作为输入来训练算法和建立模型</li>
+<li>通过模型，系统可以在运行时计算建议。</li>
+<li>评估模型质量所需的保留评级（测试集）的剩余份额</li>
+<li>为了确保测量的可靠性，随机拆分，模型建立和评估步骤重复了几次</li>
+</ol>
+</li>
+<li><strong>N 折交叉验证是分层随机选择程序</strong>
+<ol>
+<li>确定大小相等（$\frac{1}{5}$）的 N 个已知等级的分离分数</li>
+<li>N 次重复的模型构建和评估步骤，其中每个分数仅一次用作测试集，而其他分数则用于训练</li>
+<li>将 N 设置为 5 或 10 很受欢迎</li>
+</ol>
+</li>
+</ol>
+<h4 id="结果分析">结果分析</h4>
+<ol>
+<li>观察到的差异在统计上有意义还是由于偶然？
+<ol>
+<li>测试两个偏离度量标准的统计显着性的标准程序是方差成对分析（ANOVA）</li>
+<li>零假设 H0：观察到的差异是由于偶然</li>
+<li>如果测试统计结果拒绝 H0，则可以报告发现的重要性</li>
+</ol>
+</li>
+<li>差异的实际重要性？
+<ol>
+<li>影响的大小及其实际影响</li>
+<li>所观察到的影响的外部有效性或普遍性</li>
+</ol>
+</li>
+</ol>
+<h3 id="在线实验">在线实验</h3>
+<ol>
+<li>不同算法推荐手机游戏的效果</li>
+<li>在商业移动互联网门户网站上吸引了 15 万用户</li>
+<li>推荐方法比较</li>
+<li>随机分配用户给具体方法...</li>
+</ol>
+<h3 id="实验设计-2">实验设计</h3>
+<ol>
+<li>在评估期间，从访问者那里提取了代表性的样本 155,000 个客户
+<ol>
+<li>这些被分为 6 组，大约有 22,300 个客户</li>
+<li>注意确保客户档案中包含所有变体的足够信息（评级）以提出建议</li>
+<li>选择组来代表相似的客户群</li>
+</ol>
+</li>
+<li>提供了 1,000 种游戏的目录</li>
+<li>使用范围从-2 到+2 的五点评分量表对项目进行评分：由于明确等级的数量少，因此将游戏的“详细信息”链接单击为隐式&quot; 0&quot;等级，将购买解释为&quot; 1&quot;等级</li>
+<li>个性化推荐与非个性化推荐技术的假设及其在
+<ol>
+<li>提高转化率（即成为购买者的用户份额）</li>
+<li>刺激额外购买（即增加平均购物篮大小）</li>
+</ol>
+</li>
+</ol>
+<h3 id="无实验研究">无实验研究</h3>
+<ol>
+<li>准实验：缺乏随机分配给不同的单位</li>
+<li>非实验/观察研究
+<ol>
+<li>调查/问卷</li>
+<li>纵向研究
+<ol>
+<li>长时间观察</li>
+<li>例如客户终生价值，回头客</li>
+</ol>
+</li>
+<li>实例探究
+<ol>
+<li>专注于回答有关如何以及为什么的研究问题</li>
+<li>例如回答类似的问题：如何推荐技术为 <a target="_blank" rel="noopener" href="http://Amazon.com">Amazon.com</a> 做出了贡献，成为了全球最大的图书零售商？</li>
+</ol>
+</li>
+<li>焦点小组
+<ol>
+<li>面试</li>
+<li>考虑 aloud 协议</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="准实验">准实验</h4>
+<ol>
+<li>Ski- <a target="_blank" rel="noopener" href="http://Europe.com">Europe.com</a> 推出的 SkiMatcher Resort Finder，可根据用户的喜好向用户提供建议</li>
+<li>会话型 RS
+<ol>
+<li>问答对话框</li>
+<li>用户偏好与知识库的匹配</li>
+</ol>
+</li>
+<li>2001 年，德尔加多和戴维森（Delgado and Davidson）在 4 个月的时间内评估了推荐人的有效性：被归类为准实验，因为用户自行决定是否要使用推荐器</li>
+</ol>
+<p><img src="/28280/65-1667436480025-386.png" alt></p>
+<h4 id="解释结果">解释结果</h4>
+<ol>
+<li>此研究设计的性质意味着无法回答因果关系问题（缺少随机分配），例如
+<ol>
+<li>推荐系统的用户更有可能转化吗？</li>
+<li>推荐系统本身是否会引起用户转换？ 一些隐藏的外生变量可能会影响使用 RS 的选择以及转换。</li>
+</ol>
+</li>
+<li>但是，在使用推荐系统和提出建议之间存在重大关联</li>
+<li>影响范围已在其他领域复制
+<ol>
+<li>旅游</li>
+<li>电子消费产品</li>
+</ol>
+</li>
+</ol>
+<h4 id="什么是受欢迎的">什么是受欢迎的</h4>
+<ol>
+<li>对历史数据集测量准确性的评估</li>
+<li>最受欢迎的数据集
+<ol>
+<li>电影（MovieLens，EveryMovie，Netflix）</li>
+<li>Web 2.0 平台（标签，音乐，论文等）</li>
+</ol>
+</li>
+<li>最受欢迎的准确性度量
+<ol>
+<li>精度/召回率：项目分为好或坏</li>
+<li>MAE（平均绝对误差），RMSE（均方根误差）：物品按给定的等级进行评分</li>
+</ol>
+</li>
+<li>数据的可用性严重影响了所做的工作
+<ol>
+<li>在 RecSys 会议上进行男高音，以促进现场实验</li>
+<li>支持 A / B 测试的公共基础架构</li>
+</ol>
+</li>
+<li>文献中的定量调查
+<ol>
+<li>有关 IS 和 IR 的高级期刊</li>
+<li>信息系统 ACM 交易</li>
+</ol>
+</li>
+<li>评估设计 ACM TOIS 2004-2010
+<ol>
+<li>总共有 15 条关于 RS 的文章</li>
+<li>近 50% 的电影领域</li>
+<li>80% 的离线实验</li>
+<li>在实验室条件下的 2 个用户实验</li>
+<li>1 个定性研究</li>
+</ol>
+</li>
+</ol>
+<h2 id="讨论和总结-2">讨论和总结</h2>
+<ol>
+<li>介绍了经验研究的一般原理以及评价推荐技术的实践现状</li>
+<li>专注于如何对历史数据集进行经验评估</li>
+<li>讨论用于衡量建议准确性或覆盖范围的不同方法和度量标准。</li>
+<li>在实践中通常会使用哪些研究设计的概述。</li>
+<li>从技术角度来看，测量预测的准确性是公认的评估目标：但是其他可能会严重影响推荐系统总体效果的其他方面在很大程度上尚不完善</li>
+</ol>
+<h2 id="重要并且实际的建议">重要并且实际的建议</h2>
+<h3 id="评估">评估</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/15-1676530608662-478.png" alt></th>
+<th><img src="/28280/16-1676530608662-479.png" alt></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>将预测与已知评级进行比较
+<ul>
+<li>均方根误差（RMSE）：$\sqrt{\sum\limits_{xi}(r_{xi} - r_{xi}^*)^2}$，其中$r_{xi}$为预测值，$r_{xi}^* $是 x 在 i 上的真实评级</li>
+<li>预测前 10 位</li>
+<li>排序相关性：Spearman 相关性在系统和用户完整排名之间</li>
+</ul>
+</li>
+<li>另一种方法：0/1 模型
+<ul>
+<li>承保范围：系统可以预测的项目/用户数</li>
+<li>精度：预测的准确性</li>
+<li>接收器工作特性（ROC）：误报与误报之间的折衷曲线</li>
+</ul>
+</li>
+</ul>
+<h3 id="错误矩阵">错误矩阵</h3>
+<ol>
+<li>仅仅关注准确率有时候会丢失重点
+<ol>
+<li>预测多样性</li>
+<li>预测上下文</li>
+<li>预测顺序</li>
+</ol>
+</li>
+<li>RMSE 可能会惩罚一种对高评级有效而对其他不利的方法</li>
+</ol>
+<h3 id="复杂度和速度">复杂度和速度</h3>
+<ul>
+<li>昂贵的步骤是找到 k 个最相似的客户：$O(|X|)$</li>
+<li>在运行时执行成本太高：可以预先计算</li>
+<li>朴素的预计算需要时间$O(k * |X|)$：X：客户群</li>
+<li>我们已经知道该怎么做！
+<ul>
+<li>高维（LSH）的近邻搜索</li>
+<li>聚类</li>
+<li>降维</li>
+</ul>
+</li>
+</ul>
+<h3 id="添加数据">添加数据</h3>
+<ol>
+<li>利用所有数据
+<ol>
+<li>请勿尝试减少数据大小以使精美算法发挥作用</li>
+<li>处理大数据的简单方法最有效</li>
+</ol>
+</li>
+<li>添加更多数据例如，在流派上添加 IMDB 数据</li>
+</ol>
+<h2 id="Netflix-比赛（没讲）">Netflix 比赛（没讲）</h2>
+<ol>
+<li>训练集：
+<ol>
+<li>1 亿评分，480,000 用户，17,770 电影</li>
+<li>使用了六年的数据：2000-2005</li>
+</ol>
+</li>
+<li>测试集
+<ol>
+<li>最后 2,800,000 用户的评分信息</li>
+<li>评估效果：RMSE（Root Mean Square Error）：$=\frac{1}{|R|}\sqrt{\sum\limits_{(i, x)\in R}(\hat{r_{xi}} - r_{xi})^2}$</li>
+<li>Netflix 系统 RMSE：0.9514</li>
+</ol>
+</li>
+<li>比赛：
+<ol>
+<li>2,700+团队</li>
+<li>1,000,000 奖励给为 Netfix 达到 10% 提升的团队</li>
+</ol>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/17-1676530608663-480.png" alt></th>
+<th><img src="/28280/18-1676530608663-481.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="BellKor-推荐系统">BellKor 推荐系统</h3>
+<ol>
+<li>Netfix 挑战的获胜者</li>
+<li>数据的多尺度建模：将数据的顶级“区域”建模与精致的本地视图结合起来：
+<ol>
+<li>全球：用户/电影的总体偏差</li>
+<li>因式分解：解决“区域性”影响</li>
+<li>协同过滤：提取局部模式</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28280/19-1676530608663-482.png" alt></p>
+<h4 id="局部建模和全局提升">局部建模和全局提升</h4>
+<ol>
+<li>全局上
+<ol>
+<li>平均影片评分为 3.7 星</li>
+<li>电影第六感比平均分要高 0.5 星</li>
+<li>Joe 打分比平均分低 0.2 星</li>
+<li>可以推断出来：Joe 给电影第六感打分 4 星</li>
+</ol>
+</li>
+<li>局部邻居（CF/NN）：Joe 不喜欢相关的电影 Signs，最终推断出来 Joe 会给电影第六感打分 3.8 分</li>
+</ol>
+<h4 id="CF：协同过滤">CF：协同过滤</h4>
+<ul>
+<li>最早和最受欢迎的协作过滤方法</li>
+<li>从“相似”电影（项目-项目变体）中获得未知的评级</li>
+<li>定义项目 i 和 j 的相似性度量$s_{ij}$</li>
+<li>选择 k 个最近的邻居，计算等级：$N(i; x)$：与 x 评级最相似的项</li>
+</ul>
+<p>$$
+\hat{r*{xi}} = \frac{\sum\limits*{j \in N(i; x)}s*{ij} * r*{xj}}{\sum\limits*{j \in N(i; x)} s*{ij}}
+$$</p>
+<ol>
+<li>$s_{ij}$：项目 i 和 j 的相似性</li>
+<li>$r_{xj}$：用户 x 对项目 j 的评级</li>
+<li>$N(i; x)$：与 x 评分的与项目 i 相似的项目集</li>
+<li>实际上，如果我们能得到更好的估计
+模型偏差：</li>
+</ol>
+<p>$$
+\begin{array}{l}
+\hat{r*{xi}} = b*{xi} + \frac{\sum\limits*{j \in N(i; x)} s*{ij} * (r*{xj} - b*{xj})}{\sum\limits*{j \in N(i; x)}s*{ij}} \
+b_{xi} = \mu + b_x + b_i \
+\end{array}
+$$</p>
+<ul>
+<li>问题/问题：
+<ul>
+<li>相似性度量是“任意的”</li>
+<li>成对相似性忽略了用户之间的相互依赖性</li>
+<li>取加权平均值可能是限制</li>
+</ul>
+</li>
+<li>解决方案：代替$s_{ij}$，使用我们直接根据数据估算的$w_{ij}$</li>
+</ul>
+<h4 id="想法：使用权重-w-ij-来修正">想法：使用权重$w_{ij}$来修正</h4>
+<ol>
+<li>使用权重和而不是权重均值</li>
+</ol>
+<p>$$
+\hat{r*{xi}} = b*{xi} + \sum\limits*{j \in N(i;x)} w*{ij}(r_{xj} - b{xj})
+$$</p>
+<ol start="2">
+<li>注意点
+<ol>
+<li>$N(i; x)$：用户 x 评分与电影 i 类似的电影的集合</li>
+<li>$w_{ij}$是插值权重（一些实数），我们允许$\sum\limits_{j \in N(i;x)} w_{ij} \neq 1$</li>
+<li>$w_{ij}$模拟电影对之间的对应（不取决于用户 x）</li>
+</ol>
+</li>
+<li>如何设置$w_{ij}$</li>
+<li>误差矩阵：
+<ol>
+<li>$\frac{1}{|R|}\sqrt{\sum\limits_{(i, x)\in R}(\hat{r_{xi}} - r_{xi})^2}$</li>
+<li>或者等效 SSE：$\sum\limits_{(i, x)\in R}(\hat{r_{xi}} - r_{xi})^2$</li>
+</ol>
+</li>
+<li>找到$w_{ij}$在训练集上最小化 SSE</li>
+<li>$w_{ij}$可以根据 x 和其他所有对 i 进行评级的用户来学习/估算</li>
+</ol>
+<h3 id="优化推荐问题">优化推荐问题</h3>
+<ol>
+<li>目标：完成好的推荐
+<ol>
+<li>使用 RMSE 量化优势：</li>
+<li>降低 RMSE =&gt; 更好的建议</li>
+</ol>
+</li>
+<li>希望对用户尚未看到的项目提出好的建议。实际做不到！</li>
+<li>假设建立一个可以在已知（用户，物品）评分上正常运行的系统，并希望该系统也能很好地预测未知评分</li>
+<li>想法：让我们设置值 w，使其在已知（用户，商品）评分上正常运行</li>
+<li>如何找到这样的值 w？</li>
+<li>想法：定义目标函数并解决优化问题</li>
+<li>找到可将训练数据上的 SSE 降至最低的$w_{ij}$！</li>
+</ol>
+<p>$J(W) = \sum\limits_{x, i}([b_{xi} + \sum\limits_{j \in N(i; x)} w_{ij}(r_{xj} - b_{xj})]-r_{xi})^2$</p>
+<h3 id="差值权重">差值权重</h3>
+<ol>
+<li>我们有一个优化问题，如何解决呢？梯度下降法
+<ol>
+<li>迭代直到收敛：$w\leftarrow w - \eta \triangledown_w j$</li>
+<li>收敛是指：$|w_{new} = w_{old}| \leq \epsilon$</li>
+<li>$\triangledown_w j$是梯度</li>
+</ol>
+</li>
+</ol>
+<p>$$
+\begin{array}{l}
+\triangledown<em>w j = [\frac{\delta J(w)}{\delta w</em>{ij}}] = 2\sum\limits*{x, i}([b*{xi} + \sum\limits*{j \in N(i; x)} w*{ij}(r*{xj} - b*{xj})]-r*{xi})(r*{xi} - b*{xj}) \
+for\ j \in \set{N(i;x),\forall i, \forall x} \
+else\ \frac{\delta J(w)}{\delta w*{ij}} = 0 \
+\end{array}
+$$</p>
+<ul>
+<li>
+<p>我们为每一个电影 i，计算到$r_{xi}$,对于每一个电影$j \in N(i;x)$，我们计算梯度</p>
+</li>
+<li>
+<p>到目前为止，$\widehat{r_{xi}} = b_{xi} + \sum\limits_{j \in N(i;x)} w_{ij}(r_{xj} - b_{xj})$\</p>
+<ul>
+<li>权重$w_{ij}$是来自其作用的，不使用任意相似性度量（$w_{ij} \neq s_{ij}$）</li>
+<li>明确说明相邻电影之间的相互关系</li>
+</ul>
+</li>
+<li>
+<p>之后：明确考虑潜在因子模型之间的相互关系，提取邻近电影的“区域”相关性</p>
+</li>
+</ul>
+<p><img src="/28280/23-1676530608663-483.png" alt></p>
+<h2 id="不同方法的表现">不同方法的表现</h2>
+<p><img src="/28280/24-1676530608663-484.png" alt></p>
+<h2 id="潜在因素模型（比如-SVD）">潜在因素模型（比如 SVD）</h2>
+<p><img src="/28280/25-1676530608663-485.png" alt></p>
+<ul>
+<li>&quot;SVD&quot; on Netflix data： $R \approxeq Q*P^T$</li>
+</ul>
+<p><img src="/28280/26-1676530608663-486.png" alt></p>
+<ul>
+<li>现在，假设我们可以将评分矩阵 R 近似为“薄” $Q*P^T$的乘积：R 缺少条目，但现在暂时忽略吧！基本上，我们希望重建误差在已知等级上要小一些，而我们不在乎缺失值上的值</li>
+</ul>
+<h3 id="找到潜在因素">找到潜在因素</h3>
+<h4 id="潜在因素模型">潜在因素模型</h4>
+<ol>
+<li>我们的布标是找到 P 和 Q 满足：$\min\limits_{P, Q}\sum_{(i, x) \in R}(r_{xi} - q_i * p_x)^2$</li>
+</ol>
+<p><img src="/28280/27-1676530608663-487.png" alt></p>
+<h4 id="回到最初的问题">回到最初的问题</h4>
+<ol>
+<li>目标：我们想要在位置的测试集上最小化 SSE</li>
+<li>想法：最小化培训数据上的 SSE
+<ol>
+<li>想要大 k（因子数）来捕获所有信号</li>
+<li>但是，当 k&gt; 2 时，测试数据的 SSE 开始上升</li>
+</ol>
+</li>
+<li>这是过度拟合的经典示例：
+<ol>
+<li>自由度太大（自由参数太多），模型开始拟合噪声：这太适合培训数据，因此不能很好地推广到看不见的测试数据</li>
+</ol>
+</li>
+</ol>
+<h4 id="处理缺失值">处理缺失值</h4>
+<ol>
+<li>为了解决过度拟合问题，我们引入了正则化：
+<ol>
+<li>在有足够数据的情况下允许丰富模型</li>
+<li>在缺乏数据的地方大幅度缩水</li>
+</ol>
+</li>
+</ol>
+<p>$$
+\min\limits*{P, Q} \sum\limits*{training}(r*{xi} - q_ip_x)^2 + [\lambda_1\sum*{x}||p<em>x||^2 +\lambda_2\sum\limits</em>{i}||q_i||^2]
+$$</p>
+<ol start="2">
+<li>$\lambda_1,\lambda_2$是用户设置的正则化参数</li>
+<li>我们不在乎目标函数的“原始”值，但我们关注的是达到目标最小值的 P，Q</li>
+</ol>
+<h4 id="正则化的作用">正则化的作用</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/28-1676530608663-488.png" alt></th>
+<th><img src="/28280/29-1676530608663-489.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/28280/30-1676530608663-490.png" alt></td>
+<td><img src="/28280/31-1676530608663-491.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h4 id="随机梯度下降">随机梯度下降</h4>
+<ol>
+<li>我们想要找到这样子的矩阵 P 和 Q 满足：</li>
+</ol>
+<p>$$
+\min\limits*{P,Q}\sum\limits*{traing}(r*{xi} - q*{i}p*{x})^2 + [\lambda*{1}\sum\limits*{x}||p_x||^2 + \lambda_2\sum\limits*{i}||q_i||^2]
+$$</p>
+<ol start="2">
+<li>梯度下降算法
+<ol>
+<li>初始化矩阵 P 和 Q（使用 SVD，假设缺失的评分是 0）</li>
+<li>进行梯度下降
+<ol>
+<li>$P \leftarrow P - \eta \triangledown P$</li>
+<li>$Q \leftarrow Q - \eta \triangledown Q$</li>
+<li>$\triangledown Q$是矩阵 Q 的梯度/倒数
+<ol>
+<li>$\triangledown D = [\triangledown q_{if}]$ 并且 $q_{if}=\sum_{x, i} - 2(r_{xi} - q_ip_x)p_{xf} + 2\lambda_2q_{if}$</li>
+<li>$q_{if}$是矩阵 Q 的 qi 行的条目 f</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>我们可以发现计算梯度是慢的</li>
+</ol>
+</li>
+<li>梯度下降与随机梯度下降
+<ol>
+<li>观察到：$\triangledown Q = [\triangledown q_{if}] where \triangledown q_{if} = \sum\limits_{x, i} - 2(r_{xi} - q_{if}p_{xf}p_{xf} + 2\lambda q_{if} = \sum\limits_{x,i}\triangledown Q(r_{xi})$，$q_{if}$是矩阵 Q 的 qi 行的条目 f</li>
+<li>$Q = Q - \eta \triangledown Q = Q - \eta[\sum\limits_{x,i} \triangledown Q(x_{xi})]$</li>
+<li>而不是评估所有等级的梯度，而是针对每个单独的等级对其进行评估，并迈出一步</li>
+</ol>
+</li>
+<li>GD：$Q = Q - \eta[\sum\limits_{x,i} \triangledown Q(x_{xi})]$</li>
+<li>SGD：$Q = Q - \mu\triangledown Q(r_{xi})$，收敛更快！需要更多步骤，但每个步骤的计算速度都更快</li>
+<li>GD 在每一步都提高了目标函数的值。 SGD 以“嘈杂”的方式提高了价值。GD 收敛所需的步骤更少，但计算所需的时间更长。 实际上，SGD 快得多！</li>
+</ol>
+<p><img src="/28280/32-1676530608663-492.png" alt></p>
+<ul>
+<li>随机梯度下降法步骤：
+<ul>
+<li>使用 SVD，假设缺失值为空，初始化 P 和 Q</li>
+<li>然后遍历等级（如有必要，多次）并更新系数：</li>
+<li>对于每一个$r_{xi}$
+<ul>
+<li>计算代价：$\epsilon_{xi} = 2(r_{xi} - q_i * p_x)$</li>
+<li>更新：$q_i \leftarrow q_i + \mu_1(\epsilon_{xi} p_x - \lambda_2 q_i$</li>
+<li>更新：$p_x \leftarrow p_x + \mu_2(\epsilon_{xi} q_i - \lambda_1 p_x$</li>
+<li>$\mu$为学习率</li>
+</ul>
+</li>
+<li>对于每一个$r_{xi}$执行，直到收敛</li>
+</ul>
+</li>
+</ul>
+<h3 id="扩展潜在因子模型以包括偏差">扩展潜在因子模型以包括偏差</h3>
+<h4 id="建模偏差和相互作用">建模偏差和相互作用</h4>
+<p><img src="/28280/33-1667436537870-418.png" alt></p>
+<ul>
+<li>$\mu$：整体平均打分</li>
+<li>$b_x$：用户 x 的偏差</li>
+<li>$b_i$：电影 i 的偏差</li>
+</ul>
+<h4 id="基线预测器">基线预测器</h4>
+<ul>
+<li>基线预测我们期望用户 x 对电影 i 的评分，即使没有估计 x 对 ior 等电影的态度</li>
+</ul>
+<p><img src="/28280/34-1676530608663-493.png" alt></p>
+<h4 id="将所有的数据放在一起">将所有的数据放在一起</h4>
+<p>$r_{xi} = \mu(Overall\ mean\ rating) + b_x(Bias\ for\ user\ x$ + $b_i(Bias\ for\ movie\ i) + q_i * p_x(User-Movie\ Interaction)$</p>
+<ul>
+<li>例：
+<ul>
+<li>平均评级：μ= 3.7</li>
+<li>您是一位重要的评论者：您的评分比平均值低 1 星：bx = -1</li>
+<li>《星球大战》的平均评级比普通电影高 0.5：bi = + 0.5</li>
+<li>对《星球大战》的预测评分：= 3.7-1 + 0.5 = 3.2</li>
+</ul>
+</li>
+</ul>
+<h4 id="适配新模型">适配新模型</h4>
+<ol>
+<li>解决问题：</li>
+</ol>
+<p>$$
+\min*{Q,P}\sum*{(x, i)\in R}(r*{xi} - (\mu + b_x + b_i + q_i * p_x))^2 + (\lambda_1\sum\limits*{i}||q<em>i||^2 + \lambda_2\sum\limits</em>{x}||p_x||^2 + \lambda_3\sum\limits_x||b_x||^2 + \lambda_4\sum\limits_i||b_i||^2)
+$$</p>
+<ul>
+<li>随机梯度下降以查找参数</li>
+<li>注意：两个偏差$b_x$，$b_i$以及相互作用$q_i$，$p_x$均被视为参数（我们对其进行估算）</li>
+</ul>
+<h3 id="不同方法的性能比较">不同方法的性能比较</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/35-1676530608660-455.png" alt></th>
+<th><img src="/28280/36-1676530608663-494.png" alt></th>
+</tr>
+</thead>
+</table>
+<h2 id="The-Netflix-Chanllenge：2006-09">The Netflix Chanllenge：2006-09</h2>
+<h3 id="用户的时间偏向">用户的时间偏向</h3>
+<ul>
+<li>电影平均收视率突然上升（2004 年初）</li>
+<li>Netflix 的改进
+<ul>
+<li>GUI 改进</li>
+<li>评级的含义已更改</li>
+</ul>
+</li>
+<li>电影时代</li>
+<li>用户无缘无故喜欢新电影
+<ul>
+<li>老电影天生就比新电影好</li>
+</ul>
+</li>
+</ul>
+<p><img src="/28280/37-1676530608663-495.png" alt></p>
+<h3 id="用户时间偏向和影响">用户时间偏向和影响</h3>
+<ol>
+<li>最初的模型：$r_{xi} = \mu + b_x + b_i + q_i*p_x$</li>
+<li>为模型添加时间依赖：$r_{xi} = \mu + b_x(t) + b_i(t) + q_i*p_x$
+<ol>
+<li>使得参数$b_x, b_i$依赖于时间</li>
+<li>通过线性趋势参数化时间依赖性</li>
+<li>每个 Bin 对应连续 10 周（b<em>i(t) = b_i + b</em>{i, Bin(t)}）</li>
+</ol>
+</li>
+<li>添加时间以来到因素上去：$p_x(t)$用户根据时间 t 相关的喜欢变量</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/28280/38-1676530608664-496.png" alt></th>
+<th><img src="/28280/39-1676530608664-497.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/28280/40-1676530608664-498.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="最新-30-天">最新 30 天</h3>
+<ul>
+<li>Ensemble 团队成立</li>
+<li>排行榜上的其他团队组成一个新团队
+<ul>
+<li>依靠结合他们的模型</li>
+<li>快速获得合格分数超过 10%</li>
+</ul>
+</li>
+<li>贝尔（BellKor）</li>
+<li>继续在分数上取得小进步
+<ul>
+<li>意识到他们与 Ensemble 有直接竞争关系</li>
+</ul>
+</li>
+<li>策略</li>
+<li>两支球队都认真监控排行榜
+<ul>
+<li>唯一确定改进的方法是提交一组预测</li>
+<li>这会提醒另一支球队您的最新分数</li>
+</ul>
+</li>
+</ul>
+<h3 id="DDL-前-24-个小时">DDL 前 24 个小时</h3>
+<ul>
+<li>每天最多提交 1 次：在过去 24 小时内只能提交 1 份最终作品</li>
+<li>在截止日期前 24 小时：奥地利 BellKor 小组成员注意到（偶然），Ensemble 的得分略高于 BellKor 的得分</li>
+<li>两支球队最后 24 小时疯狂</li>
+<li>最终优化需要大量的计算机时间
+<ul>
+<li>经过仔细校准，在截止日期前约一个小时结束</li>
+</ul>
+</li>
+<li>最终提交</li>
+<li>BellKor 故意提前 40 分钟提交
+<ul>
+<li>The Ensemble 在 20 分钟后提交最终作品,每个人都在等待
+$$</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/12678/" rel="prev" title="大数据分析-07-聚类">
+      <i class="fa fa-chevron-left"></i> 大数据分析-07-聚类
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/24603/" rel="next" title="FAT12 文件系统">
+      FAT12 文件系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%EF%BC%9A%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">1.</span> <span class="nav-text">引入：推荐系统的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E4%B8%8E%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.</span> <span class="nav-text">推荐与推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.1.</span> <span class="nav-text">什么是推荐系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%A8%80%E7%BC%BA%E5%88%B0%E4%B8%B0%E5%AF%8C"><span class="nav-number">2.2.</span> <span class="nav-text">从稀缺到丰富</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E5%88%86%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">推荐分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%B8%80%E8%88%AC%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.4.</span> <span class="nav-text">推荐系统的一般模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%89%A9%E5%93%81%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">2.5.</span> <span class="nav-text">用户和物品的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AA%E6%80%A7%E5%8C%96"><span class="nav-number">2.6.</span> <span class="nav-text">个性化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%92%8C-BDA-%E7%9A%84%E8%81%94%E7%B3%BB"><span class="nav-number">2.7.</span> <span class="nav-text">和 BDA 的联系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF"><span class="nav-number">2.8.</span> <span class="nav-text">用户信息</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="nav-number">2.8.1.</span> <span class="nav-text">用户信息的来源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF%E7%9A%84%E8%8E%B7%E5%8F%96"><span class="nav-number">2.8.2.</span> <span class="nav-text">用户信息的获取</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E5%85%B3%E9%94%AE%E9%97%AE%E9%A2%98"><span class="nav-number">2.9.</span> <span class="nav-text">推荐过程中的关键问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%AF%84%E5%88%86%E7%9A%84%E6%94%B6%E9%9B%86"><span class="nav-number">2.9.1.</span> <span class="nav-text">用户评分的收集</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%98%BE%E5%BC%8F%E6%94%B6%E9%9B%86"><span class="nav-number">2.9.1.1.</span> <span class="nav-text">显式收集</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E6%98%BE%E5%BC%8F%E6%94%B6%E9%9B%86"><span class="nav-number">2.9.1.2.</span> <span class="nav-text">非显式收集</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%B7%B2%E7%9F%A5%E8%AF%84%E7%BA%A7%E4%B8%AD%E6%8E%A8%E6%96%AD%E6%9C%AA%E7%9F%A5%E8%AF%84%E7%BA%A7"><span class="nav-number">2.9.2.</span> <span class="nav-text">从已知评级中推断未知评级</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E4%B8%AA%E6%80%A7%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">2.10.</span> <span class="nav-text">网络个性化过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%BB%BA%E6%A8%A1"><span class="nav-number">2.11.</span> <span class="nav-text">用户建模</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%8D%8F%E5%90%8C%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">基于协同的推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E8%BF%87%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">协同过滤过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%EF%BC%88Collaborative-Filtering-CF%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">协同过滤（Collaborative Filtering, CF）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%94%A8%E6%88%B7%E7%9A%84%E6%9C%80%E8%BF%91%E9%82%BB%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">基于用户的最近邻协同过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BB%E6%89%BE%E7%9B%B8%E4%BC%BC%E7%9A%84%E7%94%A8%E6%88%B7"><span class="nav-number">3.3.1.</span> <span class="nav-text">寻找相似的用户</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E4%BC%BC%E7%9F%A9%E9%98%B5%E4%BE%8B%E5%AD%90"><span class="nav-number">3.3.2.</span> <span class="nav-text">相似矩阵例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E5%88%86%E9%A2%84%E6%B5%8B"><span class="nav-number">3.4.</span> <span class="nav-text">评分预测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E5%93%81-%E7%89%A9%E5%93%81%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">3.5.</span> <span class="nav-text">物品-物品协同过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%A9%E5%93%81-%E7%89%A9%E5%93%81%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">3.5.1.</span> <span class="nav-text">物品-物品协同过滤的例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E5%8A%A0%E6%99%AE%E9%81%8D%E7%9A%84%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">3.5.2.</span> <span class="nav-text">更加普遍的协同过滤</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E7%89%A9%E5%93%81-%E7%89%A9%E5%93%81%E7%9A%84%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E5%92%8C%E7%94%A8%E6%88%B7-%E7%94%A8%E6%88%B7%E7%9A%84%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">3.6.</span> <span class="nav-text">对于物品-物品的协同过滤和用户-用户的协同过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%A8%80%E7%96%8F%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">3.7.</span> <span class="nav-text">数据稀疏性问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">3.8.</span> <span class="nav-text">协同过滤的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">3.9.</span> <span class="nav-text">协同过滤的缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%86%85%E5%AE%B9%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">4.</span> <span class="nav-text">基于内容的推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%86%85%E5%AE%B9%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="nav-number">4.1.</span> <span class="nav-text">基于内容的推荐系统概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E8%BF%87%E7%A8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">推荐过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-number">4.3.</span> <span class="nav-text">物品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%B5%84%E6%96%99"><span class="nav-number">4.4.</span> <span class="nav-text">用户资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%86%85%E5%AE%B9%E6%96%B9%E6%B3%95%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">4.5.</span> <span class="nav-text">基于内容方法的优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%86%85%E5%AE%B9%E6%96%B9%E6%B3%95%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">4.6.</span> <span class="nav-text">基于内容方法的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A8%E8%AE%BA%E5%92%8C%E6%80%BB%E7%BB%93"><span class="nav-number">4.7.</span> <span class="nav-text">讨论和总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">基于知识的推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84-I-O-%E5%85%B3%E7%B3%BB"><span class="nav-number">5.1.</span> <span class="nav-text">基本的 I&#x2F;O 关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.2.</span> <span class="nav-text">为什么我们需要基于知识的推荐系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">5.3.</span> <span class="nav-text">基于知识的推荐系统的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.4.</span> <span class="nav-text">基于约束的推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%8E%A8%E8%8D%90%E4%BB%BB%E5%8A%A1"><span class="nav-number">5.4.1.</span> <span class="nav-text">基于约束的推荐任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E9%97%AE%E9%A2%98"><span class="nav-number">5.4.2.</span> <span class="nav-text">基于约束的推荐系统问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BB%A1%E8%B6%B3%E7%BA%A6%E6%9D%9F%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">5.4.3.</span> <span class="nav-text">满足约束的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E6%9F%A5%E8%AF%A2"><span class="nav-number">5.4.4.</span> <span class="nav-text">连接查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%92%8C%E5%9F%BA%E4%BA%8E%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%8E%A8%E8%8D%90%E8%80%85%E8%BF%9B%E8%A1%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">5.4.5.</span> <span class="nav-text">和基于约束的推荐者进行交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%80%BC"><span class="nav-number">5.4.6.</span> <span class="nav-text">默认值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%BE%E4%B8%8D%E5%88%B0%E6%BB%A1%E8%B6%B3%E8%A6%81%E6%B1%82%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="nav-number">5.4.7.</span> <span class="nav-text">找不到满足要求的结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E4%B8%8D%E6%BB%A1%E8%B6%B3%E7%9A%84%E8%A6%81%E6%B1%82"><span class="nav-number">5.4.8.</span> <span class="nav-text">处理不满足的要求</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%A1%88%E4%BE%8B%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.5.</span> <span class="nav-text">基于案例的推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8E%E5%9F%BA%E4%BA%8E%E6%A1%88%E4%BE%8B%E7%9A%84%E6%8E%A8%E8%8D%90%E8%80%85%E8%BF%9B%E8%A1%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">5.5.1.</span> <span class="nav-text">与基于案例的推荐者进行交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E6%A0%87%E8%AE%B0%EF%BC%88%E6%94%B6%E8%97%8F%EF%BC%89"><span class="nav-number">5.5.2.</span> <span class="nav-text">多标记（收藏）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E6%A0%87%E8%AE%B0"><span class="nav-number">5.6.</span> <span class="nav-text">动态标记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E9%94%80%E5%94%AE%E5%AF%B9%E8%AF%9D%E9%87%91%E8%9E%8D%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.6.1.</span> <span class="nav-text">示例：销售对话金融服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E6%A0%87%E8%AE%B0"><span class="nav-number">5.6.2.</span> <span class="nav-text">示例：标记</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.7.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">6.</span> <span class="nav-text">混合推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E5%BC%95%E5%85%A5"><span class="nav-number">6.1.</span> <span class="nav-text">混合推荐系统引入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="nav-number">6.2.</span> <span class="nav-text">混合推荐系统概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E4%B8%80%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.2.1.</span> <span class="nav-text">单一混合设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%95%E4%B8%80%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E7%89%B9%E5%BE%81%E5%90%88%E5%B9%B6"><span class="nav-number">6.2.1.1.</span> <span class="nav-text">单一混合设计：特征合并</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%95%E4%B8%80%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E7%89%B9%E5%BE%81%E6%89%A9%E5%85%85"><span class="nav-number">6.2.1.2.</span> <span class="nav-text">单一混合设计：特征扩充</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.2.2.</span> <span class="nav-text">并行混合设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%8A%A0%E6%9D%83"><span class="nav-number">6.2.2.1.</span> <span class="nav-text">并行混合设计：加权</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E8%BD%AC%E6%8D%A2"><span class="nav-number">6.2.2.2.</span> <span class="nav-text">并行混合设计：转换</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E6%B7%B7%E5%90%88"><span class="nav-number">6.2.2.3.</span> <span class="nav-text">并行混合设计：混合</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%A1%E9%81%93%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.2.3.</span> <span class="nav-text">管道混合设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%A1%E9%81%93%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E7%BA%A7%E8%81%94%E7%BA%A7%E5%88%AB"><span class="nav-number">6.2.3.1.</span> <span class="nav-text">管道混合设计：级联级别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%A1%E9%81%93%E6%B7%B7%E5%90%88%E8%AE%BE%E8%AE%A1%EF%BC%9A%E5%85%83%E6%95%B0%E6%8D%AE%E7%BA%A7%E5%88%AB"><span class="nav-number">6.2.3.2.</span> <span class="nav-text">管道混合设计：元数据级别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E7%AD%96%E7%95%A5%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-number">6.3.</span> <span class="nav-text">混合策略的限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E8%A7%A3%E9%87%8A%E6%80%A7"><span class="nav-number">7.</span> <span class="nav-text">可解释性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A%E5%8A%A8%E6%9C%BA"><span class="nav-number">7.1.</span> <span class="nav-text">推荐系统的解释动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A%E5%88%86%E7%B1%BB"><span class="nav-number">7.2.</span> <span class="nav-text">推荐系统的解释分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A%EF%BC%9F"><span class="nav-number">7.3.</span> <span class="nav-text">什么是推荐系统的解释？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E4%BE%9B%E8%A7%A3%E9%87%8A%E7%9A%84%E7%9B%AE%E7%9A%84"><span class="nav-number">7.4.</span> <span class="nav-text">提供解释的目的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%8F%E6%98%8E%E5%BA%A6"><span class="nav-number">7.4.1.</span> <span class="nav-text">透明度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E9%9D%A0%E6%80%A7"><span class="nav-number">7.4.2.</span> <span class="nav-text">可靠性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%9A%E4%BF%A1%E5%BA%A6"><span class="nav-number">7.4.3.</span> <span class="nav-text">诚信度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%B4%E6%9C%8D%E5%8A%9B"><span class="nav-number">7.4.4.</span> <span class="nav-text">说服力</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%89%E6%95%88%E6%9C%9F"><span class="nav-number">7.4.5.</span> <span class="nav-text">有效期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%88%E7%8E%87"><span class="nav-number">7.4.6.</span> <span class="nav-text">效率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BB%A1%E6%84%8F"><span class="nav-number">7.4.7.</span> <span class="nav-text">满意</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%80%A7"><span class="nav-number">7.4.8.</span> <span class="nav-text">相关性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E7%90%86%E8%A7%A3%E6%80%A7"><span class="nav-number">7.4.9.</span> <span class="nav-text">可理解性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%99%E8%82%B2%E6%80%A7"><span class="nav-number">7.4.10.</span> <span class="nav-text">教育性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E4%BD%93%E8%A7%A3%E9%87%8A"><span class="nav-number">7.5.</span> <span class="nav-text">总体解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BA%8E%E5%9C%A8%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%94%9F%E6%88%90%E8%A7%A3%E9%87%8A%E7%9A%84%E5%88%86%E7%B1%BB%E6%B3%95"><span class="nav-number">7.6.</span> <span class="nav-text">用于在推荐系统中生成解释的分类法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KB-%E7%9A%84%E5%8E%9F%E5%9E%8B"><span class="nav-number">7.7.</span> <span class="nav-text">KB 的原型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">7.8.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-number">7.9.</span> <span class="nav-text">基于协同过滤的推荐系统的解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E8%AF%B4%E6%98%8E%E6%8E%A5%E5%8F%A3"><span class="nav-number">7.10.</span> <span class="nav-text">评估说明接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Herlocker-%E7%9A%84%E7%A0%94%E7%A9%B6%E7%BB%93%E6%9E%9C"><span class="nav-number">7.11.</span> <span class="nav-text">Herlocker 的研究结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%A1%88%E4%BE%8B%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-number">7.12.</span> <span class="nav-text">基于案例的推荐系统的解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-number">7.13.</span> <span class="nav-text">基于约束的推荐系统的解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%BD%E8%BD%A6%E9%A2%86%E5%9F%9F%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">7.14.</span> <span class="nav-text">汽车领域的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E8%A7%A3%E9%87%8A%E6%80%A7%E6%80%BB%E7%BB%93"><span class="nav-number">7.15.</span> <span class="nav-text">推荐系统解释性总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E4%B8%8E%E8%AF%84%E4%BC%B0"><span class="nav-number">8.</span> <span class="nav-text">度量与评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">8.1.</span> <span class="nav-text">评估推荐系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%AF%81%E7%A0%94%E7%A9%B6"><span class="nav-number">8.2.</span> <span class="nav-text">实证研究</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E8%AE%BE%E7%BD%AE"><span class="nav-number">8.3.</span> <span class="nav-text">评估设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95%EF%BC%9A%E5%AE%9E%E9%AA%8C%E4%B8%8E%E9%9D%9E%E5%AE%9E%E9%AA%8C%EF%BC%88%E8%A7%82%E6%B5%8B%EF%BC%89%E7%A0%94%E7%A9%B6%E6%96%B9%E6%B3%95"><span class="nav-number">8.4.</span> <span class="nav-text">研究方法：实验与非实验（观测）研究方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1"><span class="nav-number">8.5.</span> <span class="nav-text">实验设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E6%A3%80%E7%B4%A2%EF%BC%88IR%EF%BC%89%E4%B8%AD%E7%9A%84%E8%AF%84%E4%BC%B0"><span class="nav-number">8.6.</span> <span class="nav-text">信息检索（IR）中的评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%A0%87%EF%BC%9A%E5%87%86%E7%A1%AE%E7%8E%87%E5%92%8C%E5%9B%9E%E5%BD%92%E7%8E%87"><span class="nav-number">8.7.</span> <span class="nav-text">指标：准确率和回归率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#F-1-%E5%BA%A6%E9%87%8F"><span class="nav-number">8.8.</span> <span class="nav-text">$F_1$度量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%A0%87%EF%BC%9A%E6%8E%92%E5%90%8D%E5%BE%88%E9%87%8D%E8%A6%81"><span class="nav-number">8.9.</span> <span class="nav-text">指标：排名很重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%AF%84%E4%BC%B0"><span class="nav-number">8.10.</span> <span class="nav-text">推荐系统中的评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%9F%BA%E6%9C%AC%E4%BA%8B%E5%AE%9E%E7%9A%84%E5%9B%B0%E5%A2%83"><span class="nav-number">8.11.</span> <span class="nav-text">建立基本事实的困境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E7%BA%BF%E5%AE%9E%E9%AA%8C"><span class="nav-number">8.12.</span> <span class="nav-text">离线实验</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E8%AE%BA"><span class="nav-number">8.12.1.</span> <span class="nav-text">方法论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E5%88%86%E6%9E%90"><span class="nav-number">8.12.2.</span> <span class="nav-text">结果分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BA%BF%E5%AE%9E%E9%AA%8C"><span class="nav-number">8.13.</span> <span class="nav-text">在线实验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1-2"><span class="nav-number">8.14.</span> <span class="nav-text">实验设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E5%AE%9E%E9%AA%8C%E7%A0%94%E7%A9%B6"><span class="nav-number">8.15.</span> <span class="nav-text">无实验研究</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%86%E5%AE%9E%E9%AA%8C"><span class="nav-number">8.15.1.</span> <span class="nav-text">准实验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A%E7%BB%93%E6%9E%9C"><span class="nav-number">8.15.2.</span> <span class="nav-text">解释结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%97%E6%AC%A2%E8%BF%8E%E7%9A%84"><span class="nav-number">8.15.3.</span> <span class="nav-text">什么是受欢迎的</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A8%E8%AE%BA%E5%92%8C%E6%80%BB%E7%BB%93-2"><span class="nav-number">9.</span> <span class="nav-text">讨论和总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%B9%B6%E4%B8%94%E5%AE%9E%E9%99%85%E7%9A%84%E5%BB%BA%E8%AE%AE"><span class="nav-number">10.</span> <span class="nav-text">重要并且实际的建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0"><span class="nav-number">10.1.</span> <span class="nav-text">评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E7%9F%A9%E9%98%B5"><span class="nav-number">10.2.</span> <span class="nav-text">错误矩阵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%92%8C%E9%80%9F%E5%BA%A6"><span class="nav-number">10.3.</span> <span class="nav-text">复杂度和速度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="nav-number">10.4.</span> <span class="nav-text">添加数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Netflix-%E6%AF%94%E8%B5%9B%EF%BC%88%E6%B2%A1%E8%AE%B2%EF%BC%89"><span class="nav-number">11.</span> <span class="nav-text">Netflix 比赛（没讲）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BellKor-%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">11.1.</span> <span class="nav-text">BellKor 推荐系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E5%BB%BA%E6%A8%A1%E5%92%8C%E5%85%A8%E5%B1%80%E6%8F%90%E5%8D%87"><span class="nav-number">11.1.1.</span> <span class="nav-text">局部建模和全局提升</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CF%EF%BC%9A%E5%8D%8F%E5%90%8C%E8%BF%87%E6%BB%A4"><span class="nav-number">11.1.2.</span> <span class="nav-text">CF：协同过滤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%83%B3%E6%B3%95%EF%BC%9A%E4%BD%BF%E7%94%A8%E6%9D%83%E9%87%8D-w-ij-%E6%9D%A5%E4%BF%AE%E6%AD%A3"><span class="nav-number">11.1.3.</span> <span class="nav-text">想法：使用权重$w_{ij}$来修正</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%8E%A8%E8%8D%90%E9%97%AE%E9%A2%98"><span class="nav-number">11.2.</span> <span class="nav-text">优化推荐问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%AE%E5%80%BC%E6%9D%83%E9%87%8D"><span class="nav-number">11.3.</span> <span class="nav-text">差值权重</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E6%96%B9%E6%B3%95%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="nav-number">12.</span> <span class="nav-text">不同方法的表现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BD%9C%E5%9C%A8%E5%9B%A0%E7%B4%A0%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%AF%94%E5%A6%82-SVD%EF%BC%89"><span class="nav-number">13.</span> <span class="nav-text">潜在因素模型（比如 SVD）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%BE%E5%88%B0%E6%BD%9C%E5%9C%A8%E5%9B%A0%E7%B4%A0"><span class="nav-number">13.1.</span> <span class="nav-text">找到潜在因素</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BD%9C%E5%9C%A8%E5%9B%A0%E7%B4%A0%E6%A8%A1%E5%9E%8B"><span class="nav-number">13.1.1.</span> <span class="nav-text">潜在因素模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E6%9C%80%E5%88%9D%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">13.1.2.</span> <span class="nav-text">回到最初的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E7%BC%BA%E5%A4%B1%E5%80%BC"><span class="nav-number">13.1.3.</span> <span class="nav-text">处理缺失值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%8C%96%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">13.1.4.</span> <span class="nav-text">正则化的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><span class="nav-number">13.1.5.</span> <span class="nav-text">随机梯度下降</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E6%BD%9C%E5%9C%A8%E5%9B%A0%E5%AD%90%E6%A8%A1%E5%9E%8B%E4%BB%A5%E5%8C%85%E6%8B%AC%E5%81%8F%E5%B7%AE"><span class="nav-number">13.2.</span> <span class="nav-text">扩展潜在因子模型以包括偏差</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E5%81%8F%E5%B7%AE%E5%92%8C%E7%9B%B8%E4%BA%92%E4%BD%9C%E7%94%A8"><span class="nav-number">13.2.1.</span> <span class="nav-text">建模偏差和相互作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%BA%BF%E9%A2%84%E6%B5%8B%E5%99%A8"><span class="nav-number">13.2.2.</span> <span class="nav-text">基线预测器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E6%89%80%E6%9C%89%E7%9A%84%E6%95%B0%E6%8D%AE%E6%94%BE%E5%9C%A8%E4%B8%80%E8%B5%B7"><span class="nav-number">13.2.3.</span> <span class="nav-text">将所有的数据放在一起</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E6%96%B0%E6%A8%A1%E5%9E%8B"><span class="nav-number">13.2.4.</span> <span class="nav-text">适配新模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E6%96%B9%E6%B3%95%E7%9A%84%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="nav-number">13.3.</span> <span class="nav-text">不同方法的性能比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Netflix-Chanllenge%EF%BC%9A2006-09"><span class="nav-number">14.</span> <span class="nav-text">The Netflix Chanllenge：2006-09</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%9A%84%E6%97%B6%E9%97%B4%E5%81%8F%E5%90%91"><span class="nav-number">14.1.</span> <span class="nav-text">用户的时间偏向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%97%B6%E9%97%B4%E5%81%8F%E5%90%91%E5%92%8C%E5%BD%B1%E5%93%8D"><span class="nav-number">14.2.</span> <span class="nav-text">用户时间偏向和影响</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E6%96%B0-30-%E5%A4%A9"><span class="nav-number">14.3.</span> <span class="nav-text">最新 30 天</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDL-%E5%89%8D-24-%E4%B8%AA%E5%B0%8F%E6%97%B6"><span class="nav-number">14.4.</span> <span class="nav-text">DDL 前 24 个小时</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

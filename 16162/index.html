@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 用例文档的格式情况  需求分析基础 为什么要需求分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-06-需求分析方法">
+<meta property="og:url" content="https://eaglebear2002.github.io/16162/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 用例文档的格式情况  需求分析基础 为什么要需求分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706143925529.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706143931918.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706143937229.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706143941661.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144919069.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/41.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/42.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/43.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/44.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/45.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144947113.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626207473-10.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626232886-14.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626282150-16.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145139276.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/60.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145148853.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/38.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626332229-18.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144003687.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144020465.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144026429.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144038957.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144049395.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688625736513-4.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/12-1676528992924-1055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144401410.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144412266.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144442733.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144452640.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144530141.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144538206.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144545400.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144550934.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/20.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144604739.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/22.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144612601.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144626271.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626002118-6.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626017231-8.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144704624.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144810187.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144816246.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144834235.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144842978.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706144903367.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/01-1676528992928-1061.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145234525.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145238402.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145242591.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145250189.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145255966.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145300731.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145304625.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145310926.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145317357.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/16162/image-20230706145329170.png">
+<meta property="article:published_time" content="2022-05-31T06:48:14.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.623Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/16162/image-20230706143925529.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/16162/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-06-需求分析方法 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/16162/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-06-需求分析方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 14:48:14" itemprop="dateCreated datePublished" datetime="2022-05-31T14:48:14+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="用例文档的格式情况">用例文档的格式情况</h2>
+<p><img src="/16162/image-20230706143925529.png" alt></p>
+<h2 id="需求分析基础">需求分析基础</h2>
+<h3 id="为什么要需求分析">为什么要需求分析</h3>
+<p><img src="/16162/image-20230706143931918.png" alt></p>
+<ol>
+<li>需求不是属于用户的，是应该是需求人员提出来的</li>
+</ol>
+<h3 id="需求分析的任务">需求分析的任务</h3>
+<ol>
+<li>建立<strong>分析模型</strong>，达成开发者和用户对需求信息的共同理解:分析将复杂的系统分解为简单的部分以及它们之间的联系，确定本质特征，抛弃次要特征。</li>
+<li>依据共同的理解，<strong>发挥创造性</strong>，创建软件系统解决方案:分析可以将一个问题分解为独立的、更简单的和易于管理的子问题来帮助寻找解决方案</li>
+</ol>
+<h3 id="需求分析的模型与建模">需求分析的模型与建模</h3>
+<h4 id="模型">模型</h4>
+<ol>
+<li>&quot;模型是对事物的抽象，帮助人们在创建一个事物之前可以有更好的理解&quot;[Blaha2005]</li>
+<li>为了更好地理解需求获取所得到的复杂信息，需要集中关注问题的计算特性（数据、功能、规则等），建立相关的软件模型</li>
+</ol>
+<h4 id="建模">建模</h4>
+<ol>
+<li>建立模型的过程被称为建模。&quot;它是对系统进行思考和推理的一种方式。建模的目标是建立系统的一个表示，这个表示以精确一致的方式描述系统，使得系统的使用更加容易&quot;[Fishwick1994]。</li>
+<li>UML 的规范，每一个细节，含义也需要遵从规范的，箭头，实线虚线。</li>
+<li>抽象（Abstraction）分解（Decomposition / Partitioning）建模最为常用的两种手段</li>
+</ol>
+<h4 id="需求分析模型的特点及常见的需求分析模型">需求分析模型的特点及常见的需求分析模型</h4>
+<ul>
+<li>需求分析模型是专门用来描述软件解决方案的模型技术。因为软件解决方案介于用户描述与软件内部构造之间，所以需求分析模型也是介于用户概念和软件内部实体之间的模型形式。</li>
+</ul>
+<p><img src="/16162/image-20230706143937229.png" alt></p>
+<ul>
+<li>常见的需求分析模型</li>
+</ul>
+<p><img src="/16162/image-20230706143941661.png" alt></p>
+<h2 id="结构化分析">结构化分析</h2>
+<h3 id="结构化方法的历史">结构化方法的历史</h3>
+<ol>
+<li>结构化方法是针对 1960’s 到 1980’s 软件开发界所面临的问题提出一系列分析、设计和编码的技术方法。那个时代：
+<ul>
+<li>大多数商业编程都在 Cobol 和 Fortran 中完成，然后在 C 和 BASIC 中完成</li>
+<li>关于“好的”设计和编程技术的指导很少</li>
+<li>没有记录需求和设计的标准技术</li>
+</ul>
+</li>
+<li>关键是软件的复杂度的急剧上升</li>
+</ol>
+<h3 id="Multiple-Structured-Methods-emerged-多种结构化分析方法的出现">Multiple Structured Methods emerged 多种结构化分析方法的出现</h3>
+<ol>
+<li>结构化编程：in circa 1967 with Edsger W.Dijkstra</li>
+<li>结构化设计：around 1975 with Larry Constantine and Ed Yourdon</li>
+<li>结构化分析：in circa 1978 with Tom DeMarco, Yourdon, Gane &amp; Sarson, McMenamin &amp; Palmer</li>
+<li>信息专家：in circa 1990 with James Martin</li>
+</ol>
+<h3 id="结构化分析思想">结构化分析思想</h3>
+<ol>
+<li>自顶向下分解</li>
+<li>各种图
+<ul>
+<li>数据流图</li>
+<li>实体关系图</li>
+<li>状态转移图</li>
+</ul>
+</li>
+</ol>
+<p><img src="/16162/image-20230706144919069.png" alt></p>
+<h3 id="数据流图-Flow-Oriented-Model">数据流图 (Flow Oriented Model)</h3>
+<ol>
+<li>数据流图将系统看做是过程的集合，其中一些由人来执行，另一些由软件系统来执行。</li>
+<li>过程的执行就是对数据的处理：它接收输入，进行数据转换，输出结果。</li>
+<li>数据流图主要是展示了数据在通过系统如何进行了变化。</li>
+<li>可能需要和软件系统外的实体尤其是<strong>人</strong>进行交互</li>
+<li>数据的变化包括：
+<ul>
+<li>被转换、被存储、或者被分布</li>
+</ul>
+</li>
+</ol>
+<h4 id="Flow-Modeling-Notation（数据流图基本元素）">Flow Modeling Notation（数据流图基本元素）</h4>
+<p><img src="/16162/41.png" alt></p>
+<h5 id="外部实体">外部实体</h5>
+<ol>
+<li>数据的产生或者消耗者
+<ul>
+<li>示例：一个人，一个设备，一个传感器</li>
+<li>另一个例子：基于计算机的系统</li>
+</ul>
+</li>
+<li>数据必须是从一个地方来到另一个地方去</li>
+<li>外部实体是待构建软件系统之外的人、组织、设备或者其他软件系统，它们不受系统控制，开发者不能以任何方式操纵它们。</li>
+</ol>
+<h5 id="过程-Process">过程 Process</h5>
+<ol>
+<li>将数据从输入转换到输出：示例：计算税金，确定面积，格式报告，显示图形必须始终以某种方式处理数据以实现系统功能</li>
+<li>过程是指施加于数据的动作或者行为，它使得数据发生变化，包括被转换、被存储或者被分布。</li>
+</ol>
+<h5 id="数据流-Data-Flow">数据流 Data Flow</h5>
+<ol>
+<li>数据在整个系统流动，从输入流动到输出</li>
+<li>数据流是数据的运动，它是系统与其环境之间或者系统内两个过程之间的通信形式。</li>
+</ol>
+<p><img src="/16162/42.png" alt></p>
+<h5 id="数据存储-Data-Stores">数据存储 Data Stores</h5>
+<ol>
+<li>数据经常被存储起来等之后使用</li>
+<li>数据存储是软件系统需要在内部手机、保存，以供日后使用的数据集合。</li>
+</ol>
+<p><img src="/16162/43.png" alt></p>
+<h4 id="数据流图的语法规则">数据流图的语法规则</h4>
+<ol>
+<li>过程是对数据的处理，必须有输入，也必须有输出，输入数据集应该和输出数据集存在差异</li>
+</ol>
+<p><img src="/16162/44.png" alt></p>
+<ol start="2">
+<li>数据流是必须和过程产生关联的，它要么是过程的数据输入，要么是过程的数据输出</li>
+</ol>
+<p><img src="/16162/45.png" alt></p>
+<ol start="3">
+<li>所有的对象都应该有一个可以唯一标识自己的名称。过程使用<strong>动词</strong>，外部实体、数据流、数据存储使用<strong>名词</strong></li>
+</ol>
+<h4 id="数据流图的分层结构">数据流图的分层结构</h4>
+<p><img src="/16162/image-20230706144947113.png" alt></p>
+<ol>
+<li>数据流图分为如上三种图:上下文图、0 层图和 N 层图</li>
+</ol>
+<h5 id="上下文图">上下文图</h5>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626207473-10.jpg" alt></p>
+<ol>
+<li>上下文图是 DFD 的最高层次的图，是系统功能的最高抽象。上下文将整个系统看做一个过程，这个过程实现系统的所有功能。</li>
+<li>因此，上下文图往往也脱离 DFD 的层次结构单独使用，用来描述系统的上下文环境和定义系统边界。</li>
+</ol>
+<h5 id="0-层图">0 层图</h5>
+<ol>
+<li>回顾描述并使用语法分析来确定“操作”</li>
+<li>确定外部实体（数据的生产者和消费者）</li>
+<li>0 层图通常被用作整个系统的功能概图。
+<ol>
+<li>为了概述整个系统的功能，建立 0 层图时需要分析需求获取的信息，归纳出系统的主要功能</li>
+<li>将系统的主要功能描述为几个比较高层的抽象过程，并在 0 层图中加以标书</li>
+<li>有部分重要的数据存储会在 0 层图中得到表述</li>
+</ol>
+</li>
+<li>0 层图示例</li>
+</ol>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626232886-14.jpg" alt></p>
+<h5 id="1-层图">1 层图</h5>
+<ol>
+<li>写一篇叙述性文章来描述这个转变（数据的转变）</li>
+<li>分析以确定下一级转换</li>
+<li>“平衡”流量以保持数据流量的连续性</li>
+<li>1 层图实例</li>
+</ol>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626282150-16.jpg" alt></p>
+<h5 id="N-层图">N 层图</h5>
+<ol>
+<li>父过程:被分解的过程</li>
+<li>子图:分解后产生的揭示更多细节的图</li>
+<li>原始 DFD 图:所有过程无法再次分解的图。</li>
+<li>子图的接口流:父过程的输入输出，往往从空白的区域引出。</li>
+<li>子图中过程的编号需要用父过程中的编号作为前缀。</li>
+<li>注意:低于 0 层图的子图上通常不显示外部实体</li>
+</ol>
+<h4 id="数据流图的分层">数据流图的分层</h4>
+<ol>
+<li>输入、处理、输出</li>
+<li>分层将细节逐步细化</li>
+</ol>
+<p><img src="/16162/image-20230706145139276.png" alt></p>
+<h4 id="过程分解的平衡原则">过程分解的平衡原则</h4>
+<p><img src="/16162/60.png" alt></p>
+<h3 id="实体关系图（ERD-数据的建模">实体关系图（ERD) - 数据的建模</h3>
+<ol>
+<li>独立于处理检查数据对象</li>
+<li>关注数据域（数据说明）</li>
+<li>指示数据对象如何相互关联</li>
+<li>能够弥补过程建模在数据说明方面的缺陷，是描述数据的定义、结构和关系等特性的技术。</li>
+</ol>
+<h4 id="实体关系图的组成元素">实体关系图的组成元素</h4>
+<h5 id="传统实体（Typical-Objects">传统实体（Typical Objects)</h5>
+<blockquote>
+<p>实体是需要在系统中收集和存储的现实世界事物的类别描述。</p>
+</blockquote>
+<ol>
+<li>实体并不是孤立存在的，相互交互相互影响</li>
+<li>参与关系的每个实体都针对关系拥有最大基数和最小基数</li>
+<li>最大基数:对关系中任意的其他实体实例，该实体可能参与关系的最大数量。最大基数为 1，表示为 One，否则为 Many</li>
+<li>最小基数:对关系中任意的其他实体实例，该实体可能参与关系的最小数量。实体在关系中的最小基数被标记为 Optional,最小基数为 1 时，实体在关系中的最小基数被标记为 mandatory</li>
+<li>实体的例子
+<ol>
+<li>external entities:printer, user, sensor</li>
+<li>things:reports, displays, signals</li>
+<li>occurrences or events:interrupt, alarm</li>
+<li>roles:manager, engineer, salesperson</li>
+<li>organizational units:devision, team</li>
+<li>places:manufacturing floor</li>
+<li>structures:employee record</li>
+</ol>
+</li>
+</ol>
+<h4 id="Data-Objects-and-Attributes-属性">Data Objects and Attributes 属性</h4>
+<ol>
+<li>数据对象包含一组作为对象的方面、质量、特征或描述符的属性</li>
+<li>属性可以对尸体进行描述的特征。</li>
+</ol>
+<h4 id="Relationship-关系">Relationship 关系</h4>
+<ol>
+<li>连通性
+<ul>
+<li>系统必须记住的事实，不能或不能计算或推导出来</li>
+<li>关系的几个实例可以存在</li>
+<li>实体可以以多种方式关联</li>
+</ul>
+</li>
+</ol>
+<p><img src="/16162/image-20230706145148853.png" alt></p>
+<h4 id="建立实体关系图的步骤">建立实体关系图的步骤</h4>
+<ol>
+<li>第 1 级-对所有数据对象（实体）及其相互之间的“连接”建模</li>
+<li>第 2 级-对所有实体和关系建模</li>
+<li>第 3 级-对所有实体、关系和属性建模，以提供进一步的深度</li>
+</ol>
+<h5 id="ERD-的图形表示">ERD 的图形表示</h5>
+<p><img src="/16162/38.png" alt></p>
+<h5 id="键（Key">键（Key)</h5>
+<ol>
+<li>实体的一个或者多个属性能够唯一确定和标示每个实例，这些属性或者属性组合就被称为实体的标示符，或者键（Key)</li>
+</ol>
+<h4 id="实体关系图实例">实体关系图实例</h4>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626332229-18.jpg" alt></p>
+<h2 id="面向对象分析">面向对象分析</h2>
+<h3 id="面向对象分析的简单过程">面向对象分析的简单过程</h3>
+<p><img src="/16162/image-20230706144003687.png" alt></p>
+<h3 id="需求与用例">需求与用例</h3>
+<ol>
+<li>传统上，这些要求是在客户和开发人员之间的合同文件中规定的：很难满足所有的需求。</li>
+<li>1992 年，Jacobson 提出了用例方法：它们来自于传统的开发方法，并适应 OOAD。</li>
+</ol>
+<h3 id="用例（重要）">用例（重要）</h3>
+<ol>
+<li>用例最初由[Jacobson1992] 在 Objectory 方法中提出的,它将用例定义为&quot;在系统（或者子系统或者类）和外部对象的<strong>交互</strong>当中所执行的行为序列的描述,包括<strong>各种不同的序列和错误的序列</strong>,它们能够联合提供一种<strong>有价值的服务</strong>&quot;[Rumbaugh2004]。</li>
+<li>[Cockburn2001]认为用例描述了在不同条件下系统对某一用户的<strong>请求的响应</strong>。根据用户的请求和请求时的系统条件,系统将执行<strong>不同的行为序列</strong>, 每一个行为序列被称为一个<strong>场景</strong>。一个用例是多个场景的集合。</li>
+</ol>
+<h4 id="目标、交互与行为序列">目标、交互与行为序列</h4>
+<p><img src="/16162/image-20230706144020465.png" alt></p>
+<h4 id="案例">案例</h4>
+<ol>
+<li>连锁超市管理系统的收银员为了完成一次销售任务,会使用软件系统处理销售过程,那么就可以建立一个用例“销售处理”。考虑实际销售时的不同条件,会发生不同的行为:
+<ul>
+<li>在一切顺利时是一种正常行为流程;</li>
+<li>购买多个同样商品时可以逐一输入每个商品,也可以分别输入商品号与数量;</li>
+<li>销售过程中可能会发现某个商品无法识别;</li>
+<li>有可能一个商品被纳入销售清单后用户又提出退回......</li>
+</ul>
+</li>
+<li>上述的每一个行为都是一个场景。所有的行为联合起来就构成了场景的集合——用例,它的目标与价值是完成销售任务。</li>
+<li>除了上述基本操作以外，还应该考虑用户大量的操作。</li>
+<li>用例是需求的一种组织，一种表达。</li>
+</ol>
+<h3 id="用例图">用例图</h3>
+<ol>
+<li>用例:椭圆</li>
+<li>参与者:小人</li>
+<li>关系:简单的就是一条直线</li>
+<li>系统边界:是一个框</li>
+</ol>
+<h4 id="用例图组成成分">用例图组成成分</h4>
+<h5 id="参与者">参与者</h5>
+<p><img src="/16162/image-20230706144026429.png" alt></p>
+<ol>
+<li>参与者是用户或其他系统对要开发的系统所扮演的角色。</li>
+<li>用例图中的单个参与者可以表示多个用户（或系统）。</li>
+<li>单个用户（或系统）也可以扮演多个角色。</li>
+<li>参与者不需要是人，例如，需要来自当前系统的某些信息的外部系统也是参与者。</li>
+</ol>
+<h5 id="用例（需要语境）">用例（需要语境）</h5>
+<ol>
+<li>以用例的形式表达需求。</li>
+<li>用例表示有助于构建、关联和理解基本需求的典型场景集。</li>
+<li>场景是对系统在实践中如何使用的描述：用户与计算机系统之间的典型交互</li>
+<li>一般会用动宾短语，加上 actor 作为主语就是句子了。</li>
+</ol>
+<h5 id="系统边界">系统边界</h5>
+<img src="/16162/image-20230706144038957.png" style="zoom: 25%;">
+<ol>
+<li>强调重点是什么是要详细的，什么不是。</li>
+<li>系统边界隐式存在于没有显式表示的系统边界的图中</li>
+<li>参与者总是在边界之外，用例总是在边界之内。</li>
+<li>系统边界是指一个系统所包含的系统成分与系统外事务的分界线。</li>
+</ol>
+<h5 id="关系">关系</h5>
+<p><img src="/16162/image-20230706144049395.png" alt></p>
+<ol>
+<li>有关</li>
+<li>泛化关系，指向的是被泛化的。</li>
+<li>包含关系</li>
+<li>继承关系</li>
+<li>如果能清晰 include 和 extends 可以画，不明白可以直接连线和不画。</li>
+<li>multiplicity：多样性。</li>
+</ol>
+<h4 id="用例图的建立的步骤">用例图的建立的步骤</h4>
+<ol>
+<li>目标分析与解决方向的确定</li>
+<li>寻找参与者</li>
+<li>寻找用例</li>
+<li>细化用例</li>
+</ol>
+<h5 id="目标分析">目标分析</h5>
+<ol>
+<li>问题目标的解决方案</li>
+<li>*** 连锁商店是一家刚刚发展起来的小型连锁商店，其前身是一家独立的小百货门面店。
+<ul>
+<li>首先是随着商店规模的扩大，顾客量大幅增长，手工作业销售迟缓，顾客购物排队现象严重，导致流失客源。</li>
+<li>其次是商店的商品品种增多，无法准确掌握库存，商品积压、缺货和报废的现象上升明显。</li>
+<li>再次是商店面临的竞争比以前更大，希望在降低成本，吸引顾客，增强竞争力的同时，保持盈利水平。</li>
+</ul>
+</li>
+<li>业务需求
+<ol>
+<li>BR1：在系统使用 6 个月后，商品积压、缺货和报废的现象要减少 50%</li>
+<li>BR2：在系统使用 3 个月后，销售人员工作效率提高 50%</li>
+<li>BR3：在系统使用 6 个月后，运营成本要降低 15%
+<ul>
+<li>范围：人力成本和库存成本</li>
+<li>度量：检查平均员工数量和平均每 10,000 元销售额的库存成本</li>
+</ul>
+</li>
+<li>BR4：在系统使用 6 个月后，销售额度要提高 20%
+<ul>
+<li>最好情况：40%</li>
+<li>最可能情况：20%</li>
+<li>最坏情况：10%</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>系统功能
+<ol>
+<li>SF1：分析商品库存，发现可能的商品积压、缺货和报废现象</li>
+<li>SF2：根据市场变化调整销售的商品</li>
+<li>SF3：制定促销手段，处理积压商品</li>
+<li>SF4：与生产厂家联合进行商品促销</li>
+<li>SF5：制定促销手段进行销售竞争</li>
+<li>SF6：掌握员工变动和授权情况</li>
+<li>SF7：处理商品入库与出库</li>
+<li>SF8：发展会员，提高顾客回头率</li>
+<li>SF9：允许积分兑换商品和赠送吸引会员的礼品，提高会员满意度</li>
+<li>SF10：帮助收银员处理销售与退货任务</li>
+</ol>
+</li>
+</ol>
+<h5 id="寻找参与者与用例">寻找参与者与用例</h5>
+<ol>
+<li>每个用户的任务（目标）都是一个独立用例</li>
+<li>案例中的参与者的目标
+<ol>
+<li>总经理的目标有：
+<ul>
+<li>产品调整（增删改产品信息）</li>
+<li>特价策略制定（增删改特价策略）</li>
+<li>赠送策略制定（增删改赠送策略）</li>
+<li>库存分析；（分析可能的商品积压）</li>
+</ul>
+</li>
+<li>客户经理的目标有：
+<ul>
+<li>会员管理；（会员发展、礼品赠送）</li>
+<li>库存管理；（商品入库、出库和库存分析）</li>
+</ul>
+</li>
+<li>收银员的目标有：
+<ul>
+<li>销售处理（销售）</li>
+<li>退货；（退货）</li>
+</ul>
+</li>
+<li>管理员的目标有：
+<ul>
+<li>用户管理（增删改用户信息）</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95.jpg" alt></p>
+<h5 id="细化用例">细化用例</h5>
+<ol>
+<li>如果用例的粒度不合适就需要进行细化和调整。
+<ul>
+<li>判断标准是：用例描述了为应对<strong>一个业务事件</strong>，由<strong>一个用户</strong>发起，并在<strong>一个连续时间段</strong>内完成，可以<strong>增加业务价值</strong>的任务。</li>
+</ul>
+</li>
+<li>产品具体的细化
+<ol>
+<li>特价策略制定、赠送策略制定两个用例的业务目的、发起源和过程基本相同，仅仅是业务数据不同，所以可以合并为一个用例销售策略制定。</li>
+<li>会员管理用例有两个明显不同的业务事件，可以被细化为发展会员和礼品赠送 2 个更细粒度的用例。</li>
+<li>客户经理的库存管理用例也有三个不同的业务目标：出库、入库和库存分析，所以也应该细化为三个用例商品出库、商品入库和库存分析，其中库存分析用例与总经理的库存分析用例相同。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688625736513-4.jpg" alt></p>
+<p><img src="/16162/12-1676528992924-1055.png" alt></p>
+<h5 id="常见错误">常见错误</h5>
+<ol>
+<li>不要将用例细化为没有独立业务价值的单个操作
+<ul>
+<li>例如,不要将用户管理细化为增加、修改和删除三个更小的用例,因为它们要联合起来才能体现出业务价值。</li>
+</ul>
+</li>
+<li>不要将同一个业务目标细化为不同用例
+<ul>
+<li>例如<strong>特价策略制定和赠送策略制定</strong>。</li>
+</ul>
+</li>
+<li>不要将没有业务价值（而是技术实现需要）的内容作为用例
+<ul>
+<li>常见的错误有<strong>登录</strong>（应该描述为安全性质量需求）、&quot;数据验证/输入/输出数据检查&quot;（应该描述为数据需求或者业务规则）、“连接数据库”（属性软件内部实现而不是需求）、网络传输等。</li>
+</ul>
+</li>
+<li>不要将单个步骤细化为用例</li>
+<li>不要将片面的一个方面细化为用例</li>
+</ol>
+<h5 id="完整实例">完整实例</h5>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[实例一]<br>\*\*\*连锁商店是一家刚刚发展起来的小型连锁商店，其前身是一家独立的小百货门面店。<br>首先是随着商店规模的扩大，顾客量大幅增长，手工作业销售迟缓，顾客购物排队现象严重，导致流失客源。其次是商店的商品品种增多，无法准确掌握库存，商品积压、缺货和报废的现象上升明显。再次是商店面临的竞争比以前更大，希望在降低成本，吸引顾客，增强竞争力的同时，保持盈利水平。<br><br>BR1：在系统使用 6 个月后，商品积压、缺货和报废的现象要减少 50%<br>BR2：在系统使用 3 个月后，销售人员工作效率提高 50%<br>BR3：在系统使用 6 个月后，运营成本要降低 15%<br>范围：人力成本和库存成本，度量：检查平均员工数量和平均每 10,000 元销售额的库存成本<br>BR4：在系统使用 6 个月后，销售额度要提高 20%，最好情况：40%，最可能情况：20%，最坏情况：10%<br><br>SF1：分析商品库存，发现可能的商品积压、缺货和报废现象<br>SF2：根据市场变化调整销售的商品<br>SF3：制定促销手段，处理积压商品<br>SF4：与生产厂家联合进行商品促销<br>SF5：制定促销手段进行销售竞争<br>SF6：掌握员工变动和授权情况<br>SF7：处理商品入库与出库<br>SF8：发展会员，提高顾客回头率<br>SF9：允许积分兑换商品和赠送吸引会员的礼品，提高会员满意度<br>SF10：帮助收银员处理销售与退货任务<br><br>从上述特性可以发现涉及的用户类别：总经理，客户经理，收银员，管理员<br>总经理的目标有：<br>    1. 产品调整（增删改产品信息）<br>    2. 特价策略制定（增删改特价策略）<br>    3. 赠送策略制定（增删改赠送策略）<br>    4. 库存分析；（分析可能的商品积压）<br>客户经理的目标有：<br>    1. 会员管理；（会员发展、礼品赠送）<br>    2. 库存管理；（商品入库、出库和库存分析）<br>收银员的目标有：销售处理（销售），退货；（退货）<br>管理员的目标有：用户管理（增删改用户信息）<br></code></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">【示例 2】<br>网上书店系统（OBS）一个基于 web 的应用程序，允许用户浏览和购买网上产品。该应用程序支持网上购物车的概念，类似于其他网上零售商，如 Amazon.com,。该系统的结账功能将集成信用卡交易处理以及内部计费系统。该系统还提供管理员视图，允许授权的员工查看和管理产品、用户和订单。<br>用户：购买、浏览<br>员工：查看用户、订单、产品管理<br>管理员：授权<br>信用卡：结账<br>内部计费：结账<br>注意：内部计费指的是单位内部，而不是系统内部<br></code></pre></td></tr></table></figure>
+<h4 id="用例文档模板">用例文档模板</h4>
+<p><img src="/16162/image-20230706144401410.png" alt></p>
+<ol>
+<li>用例标识:至少在本文档中标识应当是唯一，最好是在整个项目中的文档标识是唯一的</li>
+<li>触发事件:</li>
+<li>前置条件:系统应该满足的条件，但是不是达到这个条件就除法</li>
+<li>后置条件:用例处理完的状态</li>
+<li>扩展流程:不按照我们预估的顺序走，不是错误的。
+<ul>
+<li>也包含一些异常说明</li>
+</ul>
+</li>
+</ol>
+<h4 id="用例模板实例">用例模板实例</h4>
+<p><img src="/16162/image-20230706144412266.png" alt></p>
+<ol>
+<li>UC1 是 ID，前置条件是应该被完成的</li>
+</ol>
+<p><img src="/16162/image-20230706144442733.png" alt></p>
+<ol start="2">
+<li>流程是被标识数字，并且数字应该是唯一的。</li>
+<li>上面的 8 和 9 合并（无和系统的交互）</li>
+</ol>
+<p><img src="/16162/image-20230706144452640.png" alt></p>
+<ol start="2">
+<li>2a:非法输入一定要明确的提示（a 标识扩展，然后之后写出扩展流程的具体流程）</li>
+</ol>
+<p><img src="/16162/image-20230706144530141.png" alt></p>
+<ol>
+<li>特殊需求应当保证确定有需求才写，符合规格要求</li>
+</ol>
+<h4 id="用例文档的部分问题">用例文档的部分问题</h4>
+<ol>
+<li>顾客为什么不是参与者:顾客没有直接和我们交互，因为是通过收银员进行交互</li>
+<li>上传下载为什么不是用例:是系统之间的交互，并不是<strong>系统和系统外的交互</strong></li>
+<li>系统可不可以分为服务器和客户端两个系统:
+<ol>
+<li>表达用例的时候还是在表达需求，这时是没有服务器端和客户端的概念的，这时我们的实现细节</li>
+</ol>
+</li>
+</ol>
+<h4 id="UML-中用例图的作用">UML 中用例图的作用</h4>
+<p><img src="/16162/image-20230706144538206.png" alt></p>
+<ol>
+<li>用例图在整个 UML 中是有很重要的作用，是其他用例的基础</li>
+</ol>
+<h3 id="概念类图（Conceptual-Class-Diagram">概念类图（Conceptual Class Diagram)</h3>
+<ol>
+<li>概念类图又被称为“领域模型”(Domain Model)</li>
+<li>类图是面向对象分析方法的核心:类图描述类（对象）和这些类（对象）之间的关系</li>
+<li>概念类图和<strong>设计类图</strong>的不同点:关注系统与外界的交互，而不是软件系统的内部构造机制</li>
+<li><strong>类型、方法、可见性等复杂的软件构造细节不会在概念类图中</strong></li>
+<li>类图只有类和类名，没有包含方法。</li>
+<li>用例不是概念类，同一个用例可能产生多个概念类</li>
+</ol>
+<h4 id="概念类图的注意事项">概念类图的注意事项</h4>
+<ol>
+<li>注意：与设计类图有所不同，分析类图关注现实世界问题域，而不是软件系统的内部构造机制；</li>
+<li>类型、方法、可见性等复杂的软件构造细节不会在概念类图中，不允许出现与现实无关的内容</li>
+</ol>
+<h4 id="概念类图基本元素">概念类图基本元素</h4>
+<ol>
+<li>对象
+<ul>
+<li>标识符:对象自治、对象请求写作</li>
+<li>状态:存储数据，如密码、名称</li>
+<li>行为:利用数据做什么</li>
+</ul>
+</li>
+<li>类:对象集合的抽象</li>
+<li>链接（link)(dependency)
+<ul>
+<li>对象之间的互相协作的关系</li>
+<li>描述了对象之间的物理或业务联系</li>
+</ul>
+</li>
+<li>关联
+<ul>
+<li>对象之间链接的抽象</li>
+<li>聚合与组合</li>
+</ul>
+</li>
+<li>继承:泛化关系</li>
+</ol>
+<h4 id="关联与依赖">关联与依赖</h4>
+<ol>
+<li>两个分析类通常以某种方式相互关联
+<ul>
+<li>在 UML 中，这些关系称为<strong>关联</strong></li>
+<li>关联可以通过指示多样性来重新定义（数据建模中使用术语基数）</li>
+</ul>
+</li>
+<li>如果类之间存在关联，则类的实例之间存在链接（依赖项）</li>
+</ol>
+<p><img src="/16162/image-20230706144545400.png" alt></p>
+<ol start="3">
+<li>上图中注意基数和箭头的形状</li>
+<li>会使用到的四种关系线:
+<ol>
+<li>聚合关系不必可以使用，但是组合关系要适当的使用</li>
+<li>继承关系、组合关系、聚合关系、普通关联</li>
+</ol>
+</li>
+</ol>
+<h4 id="继承">继承</h4>
+<ol>
+<li>将域对象类组织到层次结构中</li>
+<li>层次结构顶部的类反映了所有类的公共特性</li>
+<li>对象类从一个或多个超级类继承其属性和服务。必要时可将其专门化</li>
+</ol>
+<p><img src="/16162/image-20230706144550934.png" alt></p>
+<ol start="4">
+<li>使用空心箭头</li>
+</ol>
+<h4 id="建立概念类图的步骤（重要）">建立概念类图的步骤（重要）</h4>
+<ol>
+<li>对每个用例文本描述，尤其是场景描述，建立<strong>局部</strong>的概念类图
+<ul>
+<li>根据用例的文本描述，<strong>识别候选类</strong></li>
+<li><strong>筛选候选类</strong>，确定概念类</li>
+<li><strong>识别关联</strong></li>
+<li><strong>识别重要属性</strong></li>
+</ul>
+</li>
+<li>将所有用例产生的局部概念类图进行合并，建立软件系统的整体概念类图</li>
+<li>自己注:先画关联关系，再添加类的属性</li>
+</ol>
+<h4 id="候选类识别">候选类识别</h4>
+<ol>
+<li>发现软件系统与外界交互时可能涉及的对象与类，它们就是候选类。</li>
+<li>行为分析、名词分析、CRC 等很多种方法都可以用来分析用例文本描述</li>
+<li>名词分析:提取出用例描述中的名词作为候选类</li>
+</ol>
+<p><img src="/16162/20.png" alt></p>
+<h4 id="筛选候选类，确定概念类">筛选候选类，确定概念类</h4>
+<ol>
+<li>确定概念类的准则：该对象的状态与行为是否全部必要
+<ol>
+<li>依据系统的需求</li>
+<li>该类的对象实例的状态与行为是否完全必要</li>
+<li>如果是只允许打印两次，则要为何打印的状态。</li>
+</ol>
+</li>
+<li>候选类向概念类的转换：如果候选类的对象实例
+<ol>
+<li>（状态+行为）既需要维持一定的状态，又需要依据状态表现一定的行为
+<ul>
+<li>确定为一个概念类</li>
+</ul>
+</li>
+<li>（仅状态）如只需要维护状态，不需要表现行为
+<ul>
+<li>确定是不是其他概念类的属性</li>
+</ul>
+</li>
+<li>（仅行为）不需要维护状态，却需要表现行为
+<ul>
+<li>首先要重新审视需求是否有遗漏，因为没有状态支持的对象无法表现行为</li>
+<li>如果确定没有需求的遗漏，就需要剔除该候选类，并将行为转交给具备状态支持能力的其他概念类</li>
+</ul>
+</li>
+<li>（无状态行为）既不需要维护状态，又不需要表现行为:废弃</li>
+</ol>
+</li>
+</ol>
+<p><img src="/16162/image-20230706144604739.png" alt></p>
+<h4 id="识别关联">识别关联</h4>
+<ol>
+<li>分析用例文本描述，发现概念类之间的<strong>协作</strong>，需要协作的类之间需要建立关联。</li>
+</ol>
+<p><img src="/16162/22.png" alt></p>
+<ol start="2">
+<li>分析和补充<strong>问题域</strong>内的关系，例如概念类之间的整体部分关系和明显的语义联系：对问题域关系的补充要适可而止，不要把关系搞得过度复杂化。</li>
+<li><strong>去除冗余关联和导出关联</strong>。</li>
+</ol>
+<p><img src="/16162/image-20230706144612601.png" alt></p>
+<h4 id="识别重要属性">识别重要属性</h4>
+<ol>
+<li>这些属性往往是实现类协作时<strong>必要的信息</strong>，是协作的条件、输入、结果或者过程记录。</li>
+<li>通过分析用例的描述，并与用户交流，补充问题域信息，可以发现重要的属性信息。</li>
+<li>在分析每个单独的用例（场景）描述时，为各个概念类发现的重要属性可能不多，甚至有些概念类没有任何重要属性。但是，系统通常有多个用例和很多场景，会建立多个<strong>局部</strong>的概念类图，只有在合并所有局部概念类图之后， 各个概念类的重要属性才能得到全面的体现。</li>
+</ol>
+<p><img src="/16162/24.png" alt></p>
+<h4 id="概念类图生成的步骤（总结）">概念类图生成的步骤（总结）</h4>
+<ol>
+<li>识别候选类（名词分析法）</li>
+<li><strong>确定概念类</strong>（看是否满足既有状态又有行为）
+<ol>
+<li>既需要维持一定的状态，又需要依据状态表现一定的行为：确定为一个概念类</li>
+<li>如只需要维护状态，不需要表现行为：其他概念类的属性</li>
+<li>不需要维护状态，却需要表现行为：首先重新审视需求是否有遗漏，因为没有状态支持的对象无法表现行为；如果确定没有需求的遗漏，就需要剔除该候选类，并将行为转交给具备状态支持能力的其他概念类</li>
+<li>既不需要维护状态，又不需要表现行为：应该被完全剔除</li>
+</ol>
+</li>
+<li>识别关联（文本中提取出&quot;名词+动词+名词&quot;的结构）：第一标准是满足需求的要求，第二标准是现实状况</li>
+<li>识别重要属性：协作的必要信息，通过分析用例的描述，补充问题域信息发现。</li>
+</ol>
+<h4 id="实例">实例</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">【示例 1】<br>1、如果是会员，收银员输入客户编号（属性、无行为）<br>2、系统显示会员信息（就是会员），包括姓名（属性、无行为）与积分（属性、无行为）<br>3、收银员输入商品标识（商品属性、无行为）<br>4、系统记录并显示商品信息（有状态、有行为），商品信息包括商品标识、描述、数量、价格、特价（如果有商品特价策略的话）和本项商品总价（商品属性）<br>5、系统显示已购入的商品清单（有状态、有行为），商品清单包括商品标识、描述、数量、价格、特价、各项商品总价和所有品总价（商品属性）<br>收银员重复 3-5 步，直到完成所有商品的输入<br>6、收银员结束输入，系统计算并显示总价（存储在账单中，有行为），计算根据总额特价策略（有状态、有行为）进行<br>7、系统根据商品赠送策略和总额赠送策略计算并显示赠品清单（要），赠品清单包括各项赠品的标识、描述与数量（不要）<br>8、收银员请顾客（就是会员）支付账单（有状态、有行为）<br>9、顾客支付，收银员输入收取的现金数额（有属性、无行为、不要）<br>10、系统给出应找的余额（有属性、无行为、不要），收银员找零<br>11、收银员结束销售，系统记录销售信息（有状态、有行为）、商品清单、赠品清单和账单信息，并更新库存（有状态、有行为）<br>12、系统打印收据（根据需求，如果是一次性就无状态无行为，如果是丢了还可以打印就有状态有行为）<br>注意：一切看需求。<br><br>(1)商品 ID 必须符合标准，则 ID 有状态、有行为<br>(2)商品数量单位不同，则单位换算的职责交给数量，有状态、有行为<br>(3)商品价格按照国际汇率有不同定位，则价格有状态、有行为<br><br>【示例 2】<br>ATM 系统通过显示屏，输入键盘（有数字和特殊输入按键），银行卡读卡器，存款插槽，收据打印机等与用户交互。客户使用 ATM 机存款，取款，余额查询，对账户的更新交由账户系统的一个接口来处理。安全系统将为每个客户分配一个 PIN 码和安全级别。每次事物执行之前都需要验证 PIN 码。将来，银行计划使用 ATM 机支持一些常规操作，例如使用地址和电话号码修改。<br><br>分析：显示器、按键、读卡器、存款插槽、收据打印机不属于现实世界<br>客户：属性：PIN、地址、电话号码、安全级别<br>账户：余额<br>交易<br><br>【示例 3】<br>1. 顾客向系统提起查询请求<br>2. 系统根据请求为顾客提供一个 CD 的推荐列表<br>3.顾客在推荐列表中选定一个 CD，然后要求查看更详细的信息<br>4. 系统为顾客提供选定 CD 的详细信息<br>5. 顾客购买选定 CD.<br>6. 顾客离开<br><br>分析：<br>查询请求：有状态、有行为<br>顾客和 CD：看戏球，不确定是否存储详细信息<br>推荐列表：有状态、有行为（增删改）<br></code></pre></td></tr></table></figure>
+<h3 id="用例模型和对象模型之间的鸿沟">用例模型和对象模型之间的鸿沟</h3>
+<p><img src="/16162/image-20230706144626271.png" alt></p>
+<ol>
+<li>用例模型和对象模型之间是存在比较大的差距的。</li>
+</ol>
+<h3 id="顺序图（交互图）">顺序图（交互图）</h3>
+<ol>
+<li>行为模型显示了对象之间的交互，以产生一些特定的系统行为，这些行为被指定为一个用例</li>
+<li>UML 中的序列图（或协作图）用于建模对象之间的交互</li>
+<li>分析阶段，主要是利用<strong>系统顺序图</strong>，表达系统和外部参与者之间的交互行为：务必要严格谨慎的界定系统</li>
+</ol>
+<h4 id="顺序图的图例">顺序图的图例</h4>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626002118-6.jpg" alt></p>
+<ol>
+<li>下划线表示对象，没有下划线表示类（上图中的名字）</li>
+</ol>
+<p><img src="/16162/07-%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95-1688626017231-8.jpg" alt></p>
+<ol start="2">
+<li>区分不同的箭头： 箭头们无论是从系统到外部还是从外部到系统都是一样的</li>
+</ol>
+<h4 id="系统顺序图">系统顺序图</h4>
+<ul>
+<li>同步消息是实线，三角箭头。</li>
+<li>返回消息应该是虚线</li>
+<li>Opt 是可选项</li>
+<li>loop 是循环</li>
+<li>alt 多选一</li>
+</ul>
+<img src="/16162/image-20230706144704624.png" style="zoom:67%;">
+<p><img src="/16162/image-20230706144810187.png" alt></p>
+<ol>
+<li>画外部和内部之间的交互应当仔细辨别系统和系统（也就是系统边界）</li>
+<li>不同框的含义:
+<ol>
+<li>alt 一定要选（多选一）:<strong>注意，每一种可选分支之间要用虚线分割，而且在表示执行态的圆柱上面要写监护条件，放在[]里面。</strong></li>
+<li>opt 一定要选（选择 0 或者 1）</li>
+<li>loop:表示循环，在旁边使用[]书写循环条件</li>
+</ol>
+</li>
+<li>步骤:
+<ol>
+<li>确定上下文环境</li>
+<li>根据用例描述找到交互对象</li>
+<li>按照用例描述中的流程顺序逐步添加消息</li>
+</ol>
+</li>
+</ol>
+<h3 id="状态图">状态图</h3>
+<p>The behavioral model indicates how software will respond to external events or stimuli.</p>
+<p><img src="/16162/image-20230706144816246.png" alt></p>
+<h4 id="状态图的基本概念">状态图的基本概念</h4>
+<ol>
+<li>状态：一组可观察的情况，描述了一个系统在给定时间的行为</li>
+<li>状态转换：从一个状态到另一个状态的转换</li>
+<li>事件：使系统表现出某种可预测的行为形式的事件</li>
+<li>行为：由于过渡而发生的过程</li>
+</ol>
+<h4 id="状态图的示例">状态图的示例</h4>
+<p><img src="/16162/31.png" alt></p>
+<ul>
+<li>上图非常重要，请务必认真确定</li>
+</ul>
+<p><img src="/16162/image-20230706144834235.png" alt></p>
+<p><img src="/16162/image-20230706144842978.png" alt></p>
+<h4 id="创建状态图的步骤">创建状态图的步骤</h4>
+<ol>
+<li>确定上下文环境
+<ul>
+<li>状态图是立足于状态快照进行行为描述的，因此建立状态图时首先要搞清楚<strong>状态的主体</strong>，确定状态的上下文环境。常见的状态主体有：类、用例、多个用例和整个系统。</li>
+<li>状态应该是相对较多，比较复杂的。</li>
+</ul>
+</li>
+<li>识别<strong>状态</strong>
+<ul>
+<li>状态主体会表现出一些稳定的状态，它们需要被识别出来，并且标记出其中的初始状态和结束状态集。在有些情况下，可能会不存在确定的初始状态和结束状态。</li>
+</ul>
+</li>
+<li>建立<strong>状态转换</strong>
+<ul>
+<li>根据需求所描述的系统行为，建立各个稳定状态之间可能存在的转换。</li>
+</ul>
+</li>
+<li>补充<strong>详细信息</strong>，完善状态图
+<ul>
+<li>添加转换的触发事件、转换行为和监护条件等详细信息。</li>
+</ul>
+</li>
+</ol>
+<h4 id="示例-销售处理用例状态图">示例:销售处理用例状态图</h4>
+<ol>
+<li>明确状态图的主体：用例 UC1 销售处理。</li>
+<li>识别用例 UC1 销售处理可能存在的稳定状态：
+<ul>
+<li>空闲状态（开始状态）：收银员已经登录和获得授权，但并没有请求开始销售工作的状态；</li>
+<li>销售开始状态：开始一个新销售事务，系统开始执行一个销售任务的状态；</li>
+<li>VIP 顾客信息显示状态：输入了客户编号，系统显示该 VIP 顾客信息的状态；</li>
+<li>商品信息显示状态：刚刚输入了一个物品项，显示该物品（和赠品）描述信息的状态；</li>
+<li>列表显示状态：以列表方式显示所有已输入物品项（和赠品）信息的状态；</li>
+<li>错误提示状态：输入信息错误的状态；</li>
+<li>账单处理状态：输入结束，系统显示账单信息，收银员进行结帐处理的状态。</li>
+<li>销售结束状态：更新信息，打印收据的状态。</li>
+</ul>
+</li>
+</ol>
+<h4 id="状态转换表（辅助完成状态图绘制）">状态转换表（辅助完成状态图绘制）</h4>
+<p><img src="/16162/image-20230706144903367.png" alt></p>
+<ol>
+<li>用来分析状态之间的关系</li>
+</ol>
+<h3 id="例题">例题</h3>
+<p><img src="/16162/01-1676528992928-1061.png" alt></p>
+<h2 id="使用需求方法细化和明确需求">使用需求方法细化和明确需求</h2>
+<ol>
+<li>为什么要细化
+<ul>
+<li>用户需求的描述的模糊性和系统设计所需要的严谨性之间的矛盾</li>
+</ul>
+</li>
+<li>如何细化
+<ul>
+<li>需求分析建模</li>
+<li>发现其中的遗漏、冲突、冗余和错误</li>
+<li>迭代（获取、分析、获取、分析。。。）</li>
+</ul>
+</li>
+</ol>
+<h3 id="系统顺序图有助于发现交互性的缺失">系统顺序图有助于发现交互性的缺失</h3>
+<h3 id="概念类图有助于发现">概念类图有助于发现</h3>
+<ol>
+<li>部分信息的使用不准确
+<ul>
+<li>例如步骤 2 中输入的是商品标识,而不是商品,第 5 步显示的已输入商品列表信息和总价。</li>
+</ul>
+</li>
+<li>部分信息不明确
+<ul>
+<li>例如会员信息、商品信息、商品列表信息、赠品信息、更新的数据、收据等等各自的详细内容并没有描述。</li>
+</ul>
+</li>
+<li>遗漏了重要内容
+<ul>
+<li>例如总价的计算需要使用商品特价策略和总额特价策略,赠品的计算需要使用商品赠送策略和总额赠送策略。</li>
+</ul>
+</li>
+</ol>
+<p><img src="/16162/image-20230706145234525.png" alt></p>
+<h3 id="状态图有助于发现页面的跳转">状态图有助于发现页面的跳转</h3>
+<p><img src="/16162/image-20230706145238402.png" alt></p>
+<p><img src="/16162/image-20230706145242591.png" alt></p>
+<h3 id="建立系统需求">建立系统需求</h3>
+<ol>
+<li>8 种规格说明</li>
+<li>不同的分析方法适合不同的规格说明</li>
+</ol>
+<h4 id="by-mode-功能需求分类">by mode 功能需求分类</h4>
+<p><img src="/16162/image-20230706145250189.png" alt></p>
+<h4 id="by-user-class">by user class</h4>
+<p><img src="/16162/image-20230706145255966.png" alt></p>
+<h4 id="by-object">by object</h4>
+<p><img src="/16162/image-20230706145300731.png" alt></p>
+<h4 id="by-feature">by feature</h4>
+<p><img src="/16162/image-20230706145304625.png" alt></p>
+<h4 id="by-stimulus">by stimulus</h4>
+<p><img src="/16162/image-20230706145310926.png" alt></p>
+<ol>
+<li>根据刺激和不同的相应</li>
+</ol>
+<h4 id="by-functional-hierarchy">by functional hierarchy</h4>
+<p><img src="/16162/image-20230706145317357.png" alt></p>
+<h4 id="multiple-organization">multiple organization</h4>
+<p><img src="/16162/image-20230706145329170.png" alt></p>
+<h2 id="其他注意">其他注意</h2>
+<ol>
+<li>alt 是多选一，必选，将两个部分划分开。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/13814/" rel="prev" title="软件工程与计算II-05-需求基础">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-05-需求基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/18275/" rel="next" title="软件工程与计算II-07-需求文档化与验证">
+      软件工程与计算II-07-需求文档化与验证 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%96%87%E6%A1%A3%E7%9A%84%E6%A0%BC%E5%BC%8F%E6%83%85%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">用例文档的格式情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">需求分析基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90"><span class="nav-number">2.1.</span> <span class="nav-text">为什么要需求分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E7%9A%84%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">需求分析的任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E7%9A%84%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%BB%BA%E6%A8%A1"><span class="nav-number">2.3.</span> <span class="nav-text">需求分析的模型与建模</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.3.1.</span> <span class="nav-text">模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1"><span class="nav-number">2.3.2.</span> <span class="nav-text">建模</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%89%B9%E7%82%B9%E5%8F%8A%E5%B8%B8%E8%A7%81%E7%9A%84%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.3.3.</span> <span class="nav-text">需求分析模型的特点及常见的需求分析模型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">结构化分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E6%96%B9%E6%B3%95%E7%9A%84%E5%8E%86%E5%8F%B2"><span class="nav-number">3.1.</span> <span class="nav-text">结构化方法的历史</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiple-Structured-Methods-emerged-%E5%A4%9A%E7%A7%8D%E7%BB%93%E6%9E%84%E5%8C%96%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95%E7%9A%84%E5%87%BA%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">Multiple Structured Methods emerged 多种结构化分析方法的出现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E5%88%86%E6%9E%90%E6%80%9D%E6%83%B3"><span class="nav-number">3.3.</span> <span class="nav-text">结构化分析思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE-Flow-Oriented-Model"><span class="nav-number">3.4.</span> <span class="nav-text">数据流图 (Flow Oriented Model)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Flow-Modeling-Notation%EF%BC%88%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0%EF%BC%89"><span class="nav-number">3.4.1.</span> <span class="nav-text">Flow Modeling Notation（数据流图基本元素）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%96%E9%83%A8%E5%AE%9E%E4%BD%93"><span class="nav-number">3.4.1.1.</span> <span class="nav-text">外部实体</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B-Process"><span class="nav-number">3.4.1.2.</span> <span class="nav-text">过程 Process</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81-Data-Flow"><span class="nav-number">3.4.1.3.</span> <span class="nav-text">数据流 Data Flow</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8-Data-Stores"><span class="nav-number">3.4.1.4.</span> <span class="nav-text">数据存储 Data Stores</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE%E7%9A%84%E8%AF%AD%E6%B3%95%E8%A7%84%E5%88%99"><span class="nav-number">3.4.2.</span> <span class="nav-text">数据流图的语法规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE%E7%9A%84%E5%88%86%E5%B1%82%E7%BB%93%E6%9E%84"><span class="nav-number">3.4.3.</span> <span class="nav-text">数据流图的分层结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E5%9B%BE"><span class="nav-number">3.4.3.1.</span> <span class="nav-text">上下文图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#0-%E5%B1%82%E5%9B%BE"><span class="nav-number">3.4.3.2.</span> <span class="nav-text">0 层图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E5%B1%82%E5%9B%BE"><span class="nav-number">3.4.3.3.</span> <span class="nav-text">1 层图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#N-%E5%B1%82%E5%9B%BE"><span class="nav-number">3.4.3.4.</span> <span class="nav-text">N 层图</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE%E7%9A%84%E5%88%86%E5%B1%82"><span class="nav-number">3.4.4.</span> <span class="nav-text">数据流图的分层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%88%86%E8%A7%A3%E7%9A%84%E5%B9%B3%E8%A1%A1%E5%8E%9F%E5%88%99"><span class="nav-number">3.4.5.</span> <span class="nav-text">过程分解的平衡原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%9B%BE%EF%BC%88ERD-%E6%95%B0%E6%8D%AE%E7%9A%84%E5%BB%BA%E6%A8%A1"><span class="nav-number">3.5.</span> <span class="nav-text">实体关系图（ERD) - 数据的建模</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%9B%BE%E7%9A%84%E7%BB%84%E6%88%90%E5%85%83%E7%B4%A0"><span class="nav-number">3.5.1.</span> <span class="nav-text">实体关系图的组成元素</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E5%AE%9E%E4%BD%93%EF%BC%88Typical-Objects"><span class="nav-number">3.5.1.1.</span> <span class="nav-text">传统实体（Typical Objects)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-Objects-and-Attributes-%E5%B1%9E%E6%80%A7"><span class="nav-number">3.5.2.</span> <span class="nav-text">Data Objects and Attributes 属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Relationship-%E5%85%B3%E7%B3%BB"><span class="nav-number">3.5.3.</span> <span class="nav-text">Relationship 关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%9B%BE%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.5.4.</span> <span class="nav-text">建立实体关系图的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ERD-%E7%9A%84%E5%9B%BE%E5%BD%A2%E8%A1%A8%E7%A4%BA"><span class="nav-number">3.5.4.1.</span> <span class="nav-text">ERD 的图形表示</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%94%AE%EF%BC%88Key"><span class="nav-number">3.5.4.2.</span> <span class="nav-text">键（Key)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%9B%BE%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.5.5.</span> <span class="nav-text">实体关系图实例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">面向对象分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%88%86%E6%9E%90%E7%9A%84%E7%AE%80%E5%8D%95%E8%BF%87%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">面向对象分析的简单过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E4%B8%8E%E7%94%A8%E4%BE%8B"><span class="nav-number">4.2.</span> <span class="nav-text">需求与用例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">用例（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E3%80%81%E4%BA%A4%E4%BA%92%E4%B8%8E%E8%A1%8C%E4%B8%BA%E5%BA%8F%E5%88%97"><span class="nav-number">4.3.1.</span> <span class="nav-text">目标、交互与行为序列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">4.3.2.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E5%9B%BE"><span class="nav-number">4.4.</span> <span class="nav-text">用例图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E5%9B%BE%E7%BB%84%E6%88%90%E6%88%90%E5%88%86"><span class="nav-number">4.4.1.</span> <span class="nav-text">用例图组成成分</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%82%E4%B8%8E%E8%80%85"><span class="nav-number">4.4.1.1.</span> <span class="nav-text">参与者</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%EF%BC%88%E9%9C%80%E8%A6%81%E8%AF%AD%E5%A2%83%EF%BC%89"><span class="nav-number">4.4.1.2.</span> <span class="nav-text">用例（需要语境）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%BE%B9%E7%95%8C"><span class="nav-number">4.4.1.3.</span> <span class="nav-text">系统边界</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB"><span class="nav-number">4.4.1.4.</span> <span class="nav-text">关系</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E5%9B%BE%E7%9A%84%E5%BB%BA%E7%AB%8B%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">4.4.2.</span> <span class="nav-text">用例图的建立的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E5%88%86%E6%9E%90"><span class="nav-number">4.4.2.1.</span> <span class="nav-text">目标分析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%BB%E6%89%BE%E5%8F%82%E4%B8%8E%E8%80%85%E4%B8%8E%E7%94%A8%E4%BE%8B"><span class="nav-number">4.4.2.2.</span> <span class="nav-text">寻找参与者与用例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%86%E5%8C%96%E7%94%A8%E4%BE%8B"><span class="nav-number">4.4.2.3.</span> <span class="nav-text">细化用例</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF"><span class="nav-number">4.4.2.4.</span> <span class="nav-text">常见错误</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.4.2.5.</span> <span class="nav-text">完整实例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%96%87%E6%A1%A3%E6%A8%A1%E6%9D%BF"><span class="nav-number">4.4.3.</span> <span class="nav-text">用例文档模板</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%A8%A1%E6%9D%BF%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.4.4.</span> <span class="nav-text">用例模板实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%96%87%E6%A1%A3%E7%9A%84%E9%83%A8%E5%88%86%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.5.</span> <span class="nav-text">用例文档的部分问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UML-%E4%B8%AD%E7%94%A8%E4%BE%8B%E5%9B%BE%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">4.4.6.</span> <span class="nav-text">UML 中用例图的作用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%EF%BC%88Conceptual-Class-Diagram"><span class="nav-number">4.5.</span> <span class="nav-text">概念类图（Conceptual Class Diagram)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">4.5.1.</span> <span class="nav-text">概念类图的注意事项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0"><span class="nav-number">4.5.2.</span> <span class="nav-text">概念类图基本元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E4%B8%8E%E4%BE%9D%E8%B5%96"><span class="nav-number">4.5.3.</span> <span class="nav-text">关联与依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF"><span class="nav-number">4.5.4.</span> <span class="nav-text">继承</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">4.5.5.</span> <span class="nav-text">建立概念类图的步骤（重要）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%80%99%E9%80%89%E7%B1%BB%E8%AF%86%E5%88%AB"><span class="nav-number">4.5.6.</span> <span class="nav-text">候选类识别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AD%9B%E9%80%89%E5%80%99%E9%80%89%E7%B1%BB%EF%BC%8C%E7%A1%AE%E5%AE%9A%E6%A6%82%E5%BF%B5%E7%B1%BB"><span class="nav-number">4.5.7.</span> <span class="nav-text">筛选候选类，确定概念类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E5%85%B3%E8%81%94"><span class="nav-number">4.5.8.</span> <span class="nav-text">识别关联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E9%87%8D%E8%A6%81%E5%B1%9E%E6%80%A7"><span class="nav-number">4.5.9.</span> <span class="nav-text">识别重要属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%E7%94%9F%E6%88%90%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><span class="nav-number">4.5.10.</span> <span class="nav-text">概念类图生成的步骤（总结）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.5.11.</span> <span class="nav-text">实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E4%BE%8B%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E9%B8%BF%E6%B2%9F"><span class="nav-number">4.6.</span> <span class="nav-text">用例模型和对象模型之间的鸿沟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E5%9B%BE%EF%BC%88%E4%BA%A4%E4%BA%92%E5%9B%BE%EF%BC%89"><span class="nav-number">4.7.</span> <span class="nav-text">顺序图（交互图）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E5%9B%BE%E7%9A%84%E5%9B%BE%E4%BE%8B"><span class="nav-number">4.7.1.</span> <span class="nav-text">顺序图的图例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E9%A1%BA%E5%BA%8F%E5%9B%BE"><span class="nav-number">4.7.2.</span> <span class="nav-text">系统顺序图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%9B%BE"><span class="nav-number">4.8.</span> <span class="nav-text">状态图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%9B%BE%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">4.8.1.</span> <span class="nav-text">状态图的基本概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%9B%BE%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.8.2.</span> <span class="nav-text">状态图的示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%8A%B6%E6%80%81%E5%9B%BE%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">4.8.3.</span> <span class="nav-text">创建状态图的步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B-%E9%94%80%E5%94%AE%E5%A4%84%E7%90%86%E7%94%A8%E4%BE%8B%E7%8A%B6%E6%80%81%E5%9B%BE"><span class="nav-number">4.8.4.</span> <span class="nav-text">示例:销售处理用例状态图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E8%A1%A8%EF%BC%88%E8%BE%85%E5%8A%A9%E5%AE%8C%E6%88%90%E7%8A%B6%E6%80%81%E5%9B%BE%E7%BB%98%E5%88%B6%EF%BC%89"><span class="nav-number">4.8.5.</span> <span class="nav-text">状态转换表（辅助完成状态图绘制）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98"><span class="nav-number">4.9.</span> <span class="nav-text">例题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%9C%80%E6%B1%82%E6%96%B9%E6%B3%95%E7%BB%86%E5%8C%96%E5%92%8C%E6%98%8E%E7%A1%AE%E9%9C%80%E6%B1%82"><span class="nav-number">5.</span> <span class="nav-text">使用需求方法细化和明确需求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E9%A1%BA%E5%BA%8F%E5%9B%BE%E6%9C%89%E5%8A%A9%E4%BA%8E%E5%8F%91%E7%8E%B0%E4%BA%A4%E4%BA%92%E6%80%A7%E7%9A%84%E7%BC%BA%E5%A4%B1"><span class="nav-number">5.1.</span> <span class="nav-text">系统顺序图有助于发现交互性的缺失</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%B1%BB%E5%9B%BE%E6%9C%89%E5%8A%A9%E4%BA%8E%E5%8F%91%E7%8E%B0"><span class="nav-number">5.2.</span> <span class="nav-text">概念类图有助于发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%9B%BE%E6%9C%89%E5%8A%A9%E4%BA%8E%E5%8F%91%E7%8E%B0%E9%A1%B5%E9%9D%A2%E7%9A%84%E8%B7%B3%E8%BD%AC"><span class="nav-number">5.3.</span> <span class="nav-text">状态图有助于发现页面的跳转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%B3%BB%E7%BB%9F%E9%9C%80%E6%B1%82"><span class="nav-number">5.4.</span> <span class="nav-text">建立系统需求</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#by-mode-%E5%8A%9F%E8%83%BD%E9%9C%80%E6%B1%82%E5%88%86%E7%B1%BB"><span class="nav-number">5.4.1.</span> <span class="nav-text">by mode 功能需求分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#by-user-class"><span class="nav-number">5.4.2.</span> <span class="nav-text">by user class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#by-object"><span class="nav-number">5.4.3.</span> <span class="nav-text">by object</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#by-feature"><span class="nav-number">5.4.4.</span> <span class="nav-text">by feature</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#by-stimulus"><span class="nav-number">5.4.5.</span> <span class="nav-text">by stimulus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#by-functional-hierarchy"><span class="nav-number">5.4.6.</span> <span class="nav-text">by functional hierarchy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#multiple-organization"><span class="nav-number">5.4.7.</span> <span class="nav-text">multiple organization</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%B3%A8%E6%84%8F"><span class="nav-number">6.</span> <span class="nav-text">其他注意</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 设备管理概述 I&#x2F;O 系统、设备与操作 I&#x2F;O 系统是 I&#x2F;O 设备及其接口线路、控制部件、通道和管理软件的统称。 I&#x2F;O 设备又称为外围设备或外部设备，简称外设">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机与操作系统-04-设备管理">
+<meta property="og:url" content="https://eaglebear2002.github.io/6323/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 设备管理概述 I&#x2F;O 系统、设备与操作 I&#x2F;O 系统是 I&#x2F;O 设备及其接口线路、控制部件、通道和管理软件的统称。 I&#x2F;O 设备又称为外围设备或外部设备，简称外设">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/13.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/14.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/15.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/16.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/17.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/18.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/22.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/21.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/23.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/38.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/28.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/19.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/20.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/37.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/29.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/30.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/32.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/33.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/34.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/35.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/6323/36.png">
+<meta property="article:published_time" content="2022-12-14T10:47:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.576Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/6323/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/6323/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机与操作系统-04-设备管理 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/6323/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机与操作系统-04-设备管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-14 18:47:00" itemprop="dateCreated datePublished" datetime="2022-12-14T18:47:00+08:00">2022-12-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">2022Fall-计算机与操作系统</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="设备管理概述">设备管理概述</h2>
+<h3 id="I-O-系统、设备与操作">I/O 系统、设备与操作</h3>
+<p>I/O 系统是 I/O 设备及其接口线路、控制部件、通道和管理软件的统称。</p>
+<p>I/O 设备又称为外围设备或外部设备，简称外设</p>
+<ol>
+<li>用于计算机系统与外部世界（如用户、其他计算机或设备）的信息交换或存储</li>
+<li>把外界信息输入计算机，把计算结果从计算机中输出，完成计算机之间的通信或人机交互。</li>
+</ol>
+<p>I/O 操作：内存和设备介质之间的信息传送操作</p>
+<ol>
+<li>影响计算机的通用性和可扩充性</li>
+<li>计算机系统综合处理能力及性价比的重要因素</li>
+</ol>
+<h3 id="I-O-设备的分类">I/O 设备的分类</h3>
+<h4 id="按信息传输方向（I-O-操作特性）划分">按信息传输方向（I/O 操作特性）划分</h4>
+<ol>
+<li>输入设备：将外界信息输入计算机，例如：键盘，鼠标，扫描仪等</li>
+<li>输出设备：将计算结果输出，例如：显示器，打印机等</li>
+<li>输入输出设备：既可以输入信息，也可以输出信息，例如：磁盘驱动器，网卡等</li>
+</ol>
+<h4 id="按交互功能划分">按交互功能划分</h4>
+<ol>
+<li>人机交互设备：用于用户与计算机之间的交互通信，例如：鼠标，键盘，显示器等</li>
+<li>存储设备：持久性地存储大量信息并快速检索，例如：磁盘驱动器，光盘驱动器等</li>
+<li>机机通信设备：用于计算机和计算机之间的通信，例如：网卡，调制解调器等</li>
+</ol>
+<h4 id="按设备管理（I-O-信息交换单位）划分">按设备管理（I/O 信息交换单位）划分</h4>
+<ol>
+<li>字符设备：
+<ol>
+<li>以<strong>字符</strong>为单位进行信息交换，发送或接收一个字符流。</li>
+<li>严格依赖新消息的物理位置进行定位和读写。</li>
+<li>输入输出设备、人机交互设备大多是字符设备，例如鼠标、显示器等。</li>
+</ol>
+</li>
+<li>块设备：
+<ol>
+<li>以固定大小的数据块（块是存储介质上连续信息组成的一个区域）进行信息交换。</li>
+<li>存取任何一个物理块所需的时间几乎不依赖于此信息所处的位置。</li>
+<li>存储设备通常为块设备，例如磁盘驱动器等。</li>
+</ol>
+</li>
+<li>网络设备：用于与远程设备通信的设备
+<ol>
+<li>机机通信设备为<strong>网络设备</strong>，例如网卡等</li>
+<li>网络设备可以抽象为传送字符流的特殊<strong>字符设备</strong>，也可以抽象为传送连续小块数据的<strong>块设备</strong></li>
+</ol>
+</li>
+</ol>
+<h3 id="设备管理的目标">设备管理的目标</h3>
+<ol>
+<li>解决设备和 CPU 速度的不匹配，使主机和设备并行工作，提高设备使用效率</li>
+</ol>
+<img src="/6323/1.png" style="zoom: 50%;">
+<ol start="2">
+<li>对设备进行抽象，屏蔽设备的<strong>物理细节和操作过程</strong>，配置驱动程序，提供统一界面，供用户或高层软件使用
+<ol>
+<li>抽象为<strong>裸设备</strong>：不被操作系统直接管理，由应用程序读写，I/O 效率更高</li>
+<li>抽象为<strong>设备文件</strong>：文件系统中的节点，统一管理。文件系统：按名存储、提高文件的标准化操作，设备管理转换为文件管理。</li>
+</ol>
+</li>
+</ol>
+<h3 id="设备管理的功能">设备管理的功能</h3>
+<ol>
+<li>设备中断处理：中断最初来源于设备</li>
+<li>缓冲区管理</li>
+<li>设备的分配和去配：合适给进程<strong>分配进程以及回收</strong></li>
+<li>设备驱动调度</li>
+<li>实现虚拟设备</li>
+</ol>
+<h3 id="设备管理的层次">设备管理的层次</h3>
+<ul>
+<li>I/O 硬件：
+<ol>
+<li>I/O 设备及其接口线路</li>
+<li>控制部件</li>
+<li>通道</li>
+</ol>
+</li>
+<li>I/O 软件：
+<ol>
+<li>系统 I/O 软件</li>
+<li>用户空间 I/O 软件</li>
+</ol>
+</li>
+</ul>
+<h2 id="I-O-控制方式">I/O 控制方式</h2>
+<h3 id="设备控制器（偏向硬件部分）">设备控制器（偏向硬件部分）</h3>
+<p>为达到模块化和通用性的设计目标，通常将 I/O 设备中的<strong>机械部件和电子部件</strong>分开处理：</p>
+<ol>
+<li>机械部件是指设备本身</li>
+<li>电子部件称为<strong>设备控制器或适配器</strong></li>
+</ol>
+<p>设备控制器又称为设备适配器、I/O 控制器、I/O 控制接口，简称 I/O 模块或 I/O 接口。</p>
+<p>操作系统与<strong>控制器</strong>交互，而非与设备交互：</p>
+<ol>
+<li>多数微型和小型计算机系统通过单总线模式来交互</li>
+<li>大中型计算机采用多总线结构和多通道方式来交互。</li>
+</ol>
+<p>设备控制器具体控制设备进行 I/O，将串行的位流装配成字节，存入控制器内部的缓冲区形成字节块，在校验和确认无错后，这块数据将被复制进入内存。</p>
+<h4 id="设备控制器的功能">设备控制器的功能</h4>
+<p>设备控制器是 CPU 与设备之间的接口：</p>
+<ol>
+<li>接收和识别 CPU 或通道发来的命令，例如磁盘控制器可以接受读写等操作</li>
+<li>实现数据交换：包括设备和控制器之间的数据传输，且通过数据总线或通道，控制器和内存之间传输数据。</li>
+<li>发现和记录设备及自身的状态信息，供 CPU 处理使用</li>
+<li>识别设备地址，当连接多台设备时</li>
+</ol>
+<h4 id="设备控制器的组成部分（例）">设备控制器的组成部分（例）</h4>
+<ol>
+<li>状态/控制寄存器</li>
+<li>数据缓冲寄存器</li>
+<li>地址译码器和 I/O 控制逻辑</li>
+<li>外设接口控制逻辑</li>
+</ol>
+<img src="/6323/2.png" style="zoom:33%;">
+<h3 id="轮询方式（程序直接控制方式）">轮询方式（程序直接控制方式）</h3>
+<h4 id="流程">流程</h4>
+<ol>
+<li>处理器向控制器发送一个 I/O 命令</li>
+<li>如果设备未就绪，则<strong>重复测试过程</strong>，直至设备就绪</li>
+<li>执行数据交换：CPU 从 I/O 接口（数据寄存器）读取一个字，然后用存储指令保存到内存。</li>
+<li>等待 I/O 操作完成后，才可以继续其它操作</li>
+</ol>
+<img src="/6323/3.png" style="zoom:33%;">
+<h4 id="涉及指令">涉及指令</h4>
+<ol>
+<li>查询指令：查询是否就绪</li>
+<li>读写指令：就绪执行数据交换</li>
+<li>转移指令：未就绪转向查询</li>
+</ol>
+<h4 id="特点和评价">特点和评价</h4>
+<ol>
+<li>处理 I/O 请求会<strong>终止</strong>原程序的执行，浪费时间</li>
+<li>CPU 需要等待 I/O 设备就绪</li>
+<li>CPU 需要参与数据传送</li>
+<li>总而言之，CPU 和设备只能串行工作，效率低下</li>
+</ol>
+<h3 id="中断方式">中断方式</h3>
+<h4 id="流程-2">流程</h4>
+<ol>
+<li>处理器向控制器发出一个 I/O 命令，然后<strong>继续执行后续指令</strong>
+<ol>
+<li>如果该进程不需要等待 I/O 完成，后续指令可以仍是该进程中的指令。</li>
+<li>否则，该进程在这个中断上挂起，处理器执行其他工作</li>
+</ol>
+</li>
+<li>控制器检查设备状态，按照 I/O 命令要求完成相应 I/O 操作，就绪后发起中断</li>
+<li>CPU 响应中断，转向中断处理程序</li>
+<li>中断处理程序，执行数据读写操作</li>
+<li>退出中断处理程序，返回发生中断前的执行状态。</li>
+</ol>
+<img src="/6323/4.png" style="zoom:33%;">
+<h4 id="特点和评价-2">特点和评价</h4>
+<ol>
+<li>响应中断后会终止原程序的执行</li>
+<li>CPU 不需要等待 I/O 设备就绪</li>
+<li>CPU 需要参与数据传送，但是缓冲区满就要发起中断，会消耗较多 CPU 时间，如果有过多的设备可能会导致 CPU 来不及响应或数据丢失的情况。</li>
+<li>总而言之，CPU 和设备部分并行操作，效率有所提高</li>
+</ol>
+<h3 id="直接存储器访问（DMA）方式">直接存储器访问（DMA）方式</h3>
+<h4 id="DMA-模块">DMA 模块</h4>
+<p>DMA 模块：模仿处理器来控制主存和设备控制器之间的数据交换。</p>
+<p>DMA 方式中，内存和设备之间有一条数据通路成块地传送数据，无需 CPU 参与。</p>
+<p>DMA 模块完成如上描述的数据传输任务。</p>
+<p>组成结构：</p>
+<ol>
+<li>内存地址寄存器：存放内存中需要交换数据的地址，DMA 传送之前由程序送入首地址；DMA 传送过程中，每次交换数据都把地址寄存器的内容加 1</li>
+<li>字计数器：记录传送数据的总字数，每次传送一个字就把字计数器减 1。</li>
+<li>数据缓冲寄存器或数据缓冲区：暂存每次传送的数据。</li>
+<li>设备地址寄存器：存放 I/O 信息的地址，如磁盘的柱面号、磁头号、扇区号。</li>
+<li>中断机制和控制逻辑： 用于向 CPU 提出 I/O 中断请求及保存 CPU 发来的 I/O 命令，管理 DMA 的传送过程。DMA 与内存之间采用字传送，DMA 与设备之间可能是字位或字节传送，所以 DMA 中要设置数据移位寄存器、字节计数器等硬件逻辑。</li>
+</ol>
+<img src="/6323/5.png" style="zoom: 50%;">
+<blockquote>
+<p><strong>为什么控制器从设备读取数据后不立即送进内存，而是使用内部缓冲区？</strong></p>
+<p>一旦磁盘开始读数据，其读出速度是恒定的，无论控制器怎样就要接收数据，如果控制器立即送进内存，则需要系统总线的控制权，但是可能会等待，因此需要内部缓冲区，使得 DMA 操作启动前不需要总线。</p>
+</blockquote>
+<h4 id="流程-3">流程</h4>
+<ol>
+<li>处理器向 DMA 模块发出 I/O 命令</li>
+<li>处理器继续执行其它工作，DMA 模块负责传送全部数据</li>
+<li>数据传送结束后，DMA 中断处理器</li>
+</ol>
+<img src="/6323/6.png" style="zoom:33%;">
+<h4 id="特点和评价-3">特点和评价</h4>
+<ol>
+<li>CPU 不会终止原程序的执行，不需要发生中断，提高 CPU 资源利用率。</li>
+<li>CPU 只在数据传送的开始和结束时参与。
+<ol>
+<li>开始时，CPU 需要对 DMA 模块进行初始化。</li>
+<li>结束时，CPU 响应中断，但不必保存现场。</li>
+</ol>
+</li>
+<li>优点：线路简单、价格低廉，适用于小型和微型计算机的快速设备。</li>
+<li>缺点：DMA 窃取时钟周期，功能不够强不能满足复杂的 I/O 操作要求。</li>
+</ol>
+<h4 id="DMA-方式中的周期窃取">DMA 方式中的周期窃取</h4>
+<p>当 DMA 和 CPU 同时经总线访问内存时，CPU <strong>总是</strong>将总线的占有权让给 DMA 一个或几个主存周期，一般是 1 个存取周期，让设备和内存之间交换数据。</p>
+<p>周期窃取对延迟 CPU 与主存的数据交换影响不大：</p>
+<ol>
+<li>数据传送过程是不连续的和不规则的</li>
+<li>CPU 大部分情况下与 Cache 进行数据交换，直接访问内存较少</li>
+</ol>
+<img src="/6323/7.png" style="zoom:33%;">
+<h3 id="小结：I-O-控制方式的演化">小结：I/O 控制方式的演化</h3>
+<ol>
+<li>采用轮询方式的设备控制器：CPU 需要等待设备就绪，且参与数据传送</li>
+<li>采用中断方式的设备控制器：CPU 无需等待设备就绪，但响应中断后参与数据传送：通过 DMA 直接控制存储器</li>
+<li>CPU 在数据传送开始和结束时：参与，与主存进行数据交换时不参与</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>CPU 作用</th>
+<th>等待设备</th>
+<th>数据传送</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>轮询方式</td>
+<td>需要</td>
+<td>参与</td>
+</tr>
+<tr>
+<td>中断方式</td>
+<td>不需要</td>
+<td>参与</td>
+</tr>
+<tr>
+<td>DMA 方式</td>
+<td>不需要</td>
+<td>不参与</td>
+</tr>
+</tbody>
+</table>
+<h3 id="I-O-通道（第四种，更高级）">I/O 通道（第四种，更高级）</h3>
+<h4 id="I-O-通道描述">I/O 通道描述</h4>
+<p>I/O 通道又称为通道控制器、I/O 处理器，用于完成逻辑上独立的 I/O 任务，适用于中大型计算机系统，用于实现**内存与外设（而不是 CPU 与外设）**之间的信息传输。</p>
+<p>设备控制器包含自身专用的<strong>处理器和通道程序（由一系列通道指令组成）</strong>，自成体系，使得 CPU 与通道高度并行，实现通道和 CPU 并行操作，通道之间并行操作，设备之间并行操作。</p>
+<ol>
+<li>I/O 指令不再由处理器执行，而是存在主存中，由 I/O 通道所包含的<strong>处理器</strong>执行</li>
+<li>采用主存，通道，控制器，设备的四级连接，实施三级控制，可控制多台同类或不同类的设备
+<ol>
+<li>一个 CPU 通常连接多个通道，通过 I/O 指令控制</li>
+<li>一个通道可以连接若干控制器，通过执行通道命令控制</li>
+<li>一个控制器可以连接若干设备，通过动作序列控制</li>
+</ol>
+</li>
+</ol>
+<p>DMA 和 I/O 通道不同点：DMA 中，每一个 I/O 指令只能读写一个数据块，而通道可以一次面向不同的多个数据块。</p>
+<h4 id="I-O-通道的工作流程">I/O 通道的工作流程</h4>
+<ol>
+<li>CPU 在执行主程序时遇到 I/O 任务，启动指定通道（通过通道程序地址字 CAW）上选址的设备。</li>
+<li>启动成功，通道开始控制设备进行操作，此时 CPU 继续执行其他任务，直到 I/O 操作完成。</li>
+<li>通道发出 I/O 操作结束中断，处理器相应并停止当前工作，转向处理 I/O 操作结束事件。</li>
+</ol>
+<p>CPU 与通道并行工作。</p>
+<h4 id="带有局部存储器的-I-O-通道">带有局部存储器的 I/O 通道</h4>
+<ol>
+<li>相当于一台自治的计算机：I/O 指令存储在控制器自带的局部存储器中，并由 I/O 通道所包含的处理器执行</li>
+<li>可以控制大量的 I/O 设备，同时最小化 CPU 的干涉</li>
+<li>常用于交互式终端通信，负责包括控制终端在内的大部分任务</li>
+</ol>
+<h3 id="I-O-发展对总线的影响">I/O 发展对总线的影响</h3>
+<h4 id="单总线">单总线</h4>
+<p>将 CPU、主存和 I/O 模块连接到同一组总线上</p>
+<p>优点：<strong>结构简单，易于扩充</strong></p>
+<p>缺点：</p>
+<ol>
+<li>主存需要和 I/O 模块<strong>共用总线</strong></li>
+<li>设备增多会造成总线变长，进而增加传输时延</li>
+<li><strong>无法适用于大量高速设备</strong></li>
+</ol>
+<img src="/6323/9.png" style="zoom:33%;">
+<h4 id="传统的三级总线（例）">传统的三级总线（例）</h4>
+<ol>
+<li>主存和 Cache 通过<strong>主存总线</strong>传送数据，CPU 和 Cache 之间存在局部总线；</li>
+<li>主存总线和扩展总线上的 I/O 设备之间传送数据通过<strong>扩展总线接口</strong>缓冲</li>
+<li>优点：主存与 I/O 之间的数据传送与处理器的活动分离；可以支持更多的 I/O 设备</li>
+<li>缺点：不适用于 I/O 设备数据速率相差太大的情形</li>
+</ol>
+<img src="/6323/10.png" style="zoom:33%;">
+<h4 id="采用南北桥的多级总线（例）">采用南北桥的多级总线（例）</h4>
+<ol>
+<li>通过存储总线、PCI 总线、E(ISA) 总线分别连接主存、高速 I/O 设备和低速 I/O 设备，距离 CPU 比较近的北桥控制器</li>
+<li>优点：可以支持不同数据速率的 I/O 设备</li>
+</ol>
+<img src="/6323/11.png" style="zoom:33%;">
+<h4 id="采用-I-O-通道的多级总线（例）">采用 I/O 通道的多级总线（例）</h4>
+<ol>
+<li>支持 CPU、主存和多个 I/O 通道之间的数据传送</li>
+<li>支持 I/O 通道和 I/O 控制器，以及 I/O 控制器和设备之间的数据传送</li>
+</ol>
+<img src="/6323/12.png" style="zoom:33%;">
+<h2 id="I-O-软件的实现">I/O 软件的实现</h2>
+<h3 id="I-O-软件">I/O 软件</h3>
+<p>设计目标：</p>
+<ol>
+<li>高效率：改善设备效率，尤其是磁盘 I/O 操作的效率，有很大的影响</li>
+<li>通用性：用统一的标准来管理所有设备</li>
+</ol>
+<p>设计思路：把软件组织成层次结构，低层软件用来屏蔽<strong>硬件细节</strong>，高层软件向用户提供简洁、友善的界面。</p>
+<p>主要考虑的问题：</p>
+<ol>
+<li>设备无关性：编写访问文件的程序与物理设备无关</li>
+<li>出错处理：低层软件能处理的错误不让高层软件感知</li>
+<li>同步/异步传输：支持<strong>阻塞和中断驱动</strong>两种工作方式
+<ol>
+<li>同步：如果要同步就需要做等待，增加延迟</li>
+<li>异步：可以不等待，提供并行度（不等是有前提的，运行进程的后续操作不可以依赖 I/O 操作的结果）</li>
+</ol>
+</li>
+<li>缓冲技术：建立数据缓冲区，匹配数据的到达率与离去率，提高吞吐率</li>
+</ol>
+<h3 id="I-O-软件的层次结构">I/O 软件的层次结构</h3>
+<img src="/6323/13.png" style="zoom:33%;">
+<blockquote>
+<p>为了解决 I/O 软件主要考虑的问题，我们将其划分为如上四个层次结构</p>
+</blockquote>
+<h3 id="I-O-中断处理程序">I/O 中断处理程序</h3>
+<ol>
+<li>I/O 中断处理程序位于操作系统底层，与硬件设备密切相关，与系统其余部分尽可能少地发生联系</li>
+<li>进程请求 I/O 操作时，通常被挂起，直到数据传输结束后并产生 I/O 中断时，操作系统接管 CPU 后转向中断处理程序</li>
+<li>当设备向 CPU 提出中断请求时，CPU 响应请求并转入中断处理程序</li>
+</ol>
+<h3 id="I-O-中断处理程序的功能">I/O 中断处理程序的功能</h3>
+<p>检查设备状态寄存器内容，判断<strong>产生中断的原因</strong>，根据 I/O 操作的完成情况进行相应的处理：</p>
+<ol>
+<li>如果数据传输有错，向<strong>上层软件</strong>报告设备的<strong>出错信息</strong>，实施<strong>重新执行</strong></li>
+<li>如果正常结束，唤醒等待传输的进程，使其转换为<strong>就绪态</strong></li>
+<li>如果有等待传输的 I/O 命令，通知相关软件启动下一个 I/O 请求</li>
+</ol>
+<h3 id="设备驱动程序">设备驱动程序</h3>
+<ol>
+<li>I/O 设备驱动程序包括与设备密切相关的所有代码</li>
+<li>I/O 设备的功能是从独立于设备的软件中接收并执行 I/O 请求：
+<ol>
+<li>把用户提交的<strong>逻辑 I/O 请求</strong>转化为<strong>物理 I/O 操作</strong>的启动和执行，如设备名转换为端口等</li>
+<li>监督设备是否正确执行，管理<strong>数据缓冲区</strong>，进行必要的纠错处理</li>
+</ol>
+</li>
+<li>某些控制器一次只能接受一条命令（DMA），有些控制器可以接受一串命令后执行（通道）</li>
+</ol>
+<h4 id="设备驱动程序的功能">设备驱动程序的功能</h4>
+<ol>
+<li>设备初始化：在系统<strong>初次启动或设备传输数据</strong>时，预置设备和控制器以及通道状态</li>
+<li>执行设备驱动例程：
+<ol>
+<li>负责启动设备，进行数据传输</li>
+<li>对于具有通道方式，还负责生成<strong>通道指令和通道程序</strong>，启动通道工作</li>
+</ol>
+</li>
+<li>调用和执行中断处理程序：负责处理设备和控制器及通道所发出的各种中断</li>
+</ol>
+<h4 id="设备驱动程序的处理方式">设备驱动程序的处理方式 *</h4>
+<ol>
+<li><strong>阻塞自己</strong>：命令开始执行时，进程阻塞自己，直到昨晚才解除阻塞。</li>
+<li><strong>无须阻塞</strong>：很快就可以完成，比如滚屏。</li>
+<li>无论哪种，操作完成后都需要记性数据传输正确性校验，如果有错则报告。</li>
+</ol>
+<h4 id="设备驱动程序的层次">设备驱动程序的层次</h4>
+<p>每个设备驱动程序只处理一种设备，或者一类紧密相关的设备</p>
+<p>设备驱动程序分为<strong>整体驱动程序和分层驱动程序</strong>：</p>
+<ol>
+<li>整体驱动程序直接向操作系统提供接口和控制硬件。适用于功能简单的驱动程序，效率较高，但较难迁移</li>
+<li>分层驱动程序将驱动程序分成多层，放在栈中，系统接到 I/O 请求时先调用栈顶的驱动程序，栈顶的驱动程序可以直接处理请求或向下调用更低层的驱动程序，直至请求被处理。适用于功能复杂、重用性要求较高的驱动程序，结构清晰且便于移植，但会增加一部分系统开销</li>
+</ol>
+<h3 id="独立于设备的-I-O-软件">独立于设备的 I/O 软件</h3>
+<p>执行适用于所有设备的常用 I/O 功能，并向<strong>用户层软件</strong>提供一致性接口</p>
+<h4 id="设备命名">设备命名</h4>
+<p>通过路径名寻址设备</p>
+<h4 id="设备保护">设备保护</h4>
+<ol>
+<li>检查用户是否有权访问所申请设备</li>
+<li>多数大中型计算机系统中，用户进程对 I/O 设备的直接访问是绝对禁止的，I/O 指令被定义为特权指令，使用系统调用方式访问。</li>
+<li>设备文件依赖于 inode 实现，文件目录并不能区分文件名是代表磁盘文件还是设备文件，但是 inode 号是不同的。
+<ol>
+<li>磁盘 inode 包含指向数据块的指针。</li>
+<li>设备文件 inode 包含指向内核设备驱动程序的指针。</li>
+</ol>
+</li>
+</ol>
+<h4 id="提供与设备无关的数据单位">提供与设备无关的数据单位</h4>
+<ol>
+<li>操作系统会为磁盘分配记录空闲块的表或位示图。</li>
+<li>不同磁盘的扇区大小可能不同，独立于设备的 I/O 设备软件屏蔽这个事实，向高层软件提供统一的数据尺寸：通过将若干扇区合并成逻辑块——簇，簇大小相同。</li>
+<li>使得字符设备可以对一个字符操作，也可以对更大单位的数据操作。</li>
+</ol>
+<h4 id="缓冲技术">缓冲技术</h4>
+<p>通过缓冲消除填满速率和清空速率的影响：</p>
+<ol>
+<li>网络上数据需要分析检查才知道去哪里。</li>
+<li>有些设备有严格时间约束，比如数字音频设备。</li>
+</ol>
+<p>块设备和字符设备都需要缓冲技术：</p>
+<ol>
+<li>块设备：磁盘读写以块为单位，应用程序以任意大小单元处理设备，如果应用程序读写长度和位置不是完整扇区，则需要使用缓冲区来缓冲。</li>
+<li>字符设备：字符设备提供数据速度快于或慢于应用程序消耗数据的速度。</li>
+</ol>
+<p>缓冲设计大量复制操作，对 I/O 性能有较大开销。</p>
+<h4 id="设备分配和状态跟踪">设备分配和状态跟踪</h4>
+<p>根据设备物理特性，操作系统制订分配策略：</p>
+<ol>
+<li>静态分配</li>
+<li>动态分配</li>
+<li>虚拟分配</li>
+</ol>
+<h4 id="错误处理和报告">错误处理和报告</h4>
+<ol>
+<li>错误应该在尽可能接近硬件的地方处理，想办法纠正和解决。</li>
+<li>未能解决，交给驱动程序处理，比如是磁盘块受损无法读写。</li>
+<li>驱动程序无法处理的错误，交给独立于设备的 I/O 软件报错。</li>
+</ol>
+<h3 id="用户空间的-I-O-软件">用户空间的 I/O 软件</h3>
+<p>库函数：</p>
+<ol>
+<li>一小部分 I/O 软件<strong>不在</strong>操作系统中，是与<strong>应用程序链接在一起的库函数</strong>，甚至完全由运行于<strong>用户态</strong>的程序组成</li>
+<li><strong>系统调用通常由库函数封装后供用户使用</strong>，封装函数只是将系统调用所用的参数放在合适位置，然后执行<strong>访管指令</strong>来陷入内核，再由内核函数实现真正的 I/O 操作</li>
+</ol>
+<p>SPOOLing 软件：</p>
+<p>在<strong>内核外运行</strong>的<strong>系统</strong>I/O 软件，采用<strong>预输入、缓输出和井管理</strong>技术，是多道程序设计系统中处理<strong>独占型设备</strong>的一种方法，通过创建守护进程和特殊目录解决<strong>独占型设备</strong>的<strong>空占</strong>问题</p>
+<h3 id="I-O-操作应执行的步骤，以读操作为例">I/O 操作应执行的步骤，以读操作为例 *</h3>
+<ol>
+<li>应用进程对已打开文件的文件描述符执行读<strong>系统调用</strong>（库函数）。</li>
+<li>独立于设备的 I/O 软件<strong>检查参数</strong>是否正确，若正确，检查<strong>高速缓存</strong>中有无要读取的信息块
+<ol>
+<li>若有，从缓冲区直接读至用户区，<strong>完成 I/O 请求</strong>。</li>
+<li>若数据不在缓冲区，执行物理 I/O 操作，独立于设备的 I/O 软件将设备的逻辑名转换成物理名，检查对设备操作的许可权，将 I/O 请求排队，阻塞应用进程且等待 I/O 操作完成。</li>
+</ol>
+</li>
+<li>内核启动设备驱动程序，分配存放读出块的缓冲区，准备接收数据并向设备控制寄存器发送启动命令，或建立 DMA 传输，启动 I/O。</li>
+<li>设备控制器操作设备，执行数据传输。</li>
+<li>当采用 DMA 控制器控制数据传输时，一旦传输完成，硬件产生 I/O 结束中断。</li>
+<li>CPU 响应中断，转向磁盘中断处理程序。它检查中断产生原因和设备的执行状态，若设备有错，向设备驱动程序发信号，检查是否能重复执行，如果允许，重发启动设备命令，再次传输；否则，向上层软件报告错误。若设备 I/O 正确完成，将数据传输到指定的用户进程空间，唤醒阻塞进程并将其放人就绪队列；然后，系统检查有无 I/O 请求在排队，若有，再启动设备，继续传输。至此，中断处理完成且返回，将成功或失败的信息逐层向上报告。</li>
+<li>当应用进程被再次调度执行时，从 I/O 系统调用的断点处恢复执行。</li>
+</ol>
+<h2 id="I-O-缓冲">I/O 缓冲</h2>
+<p>目的：</p>
+<ol>
+<li>解决<strong>CPU 与设备之间速度不匹配</strong>的矛盾，协调逻辑记录大小和物理记录大小不一致的问题</li>
+<li>减少 I/O 操作对 CPU 的中断次数</li>
+<li>放宽对 CPU 中断响应时间的要求</li>
+<li>提高 CPU 和设备的并行性</li>
+</ol>
+<p>缓冲区：在<strong>内存</strong>中开辟的存储区，专门用于临时存放 I/O 操作的数据</p>
+<p>操作：</p>
+<ol>
+<li>写操作：先向系统申请一个输入缓冲区，将数据送至缓冲区，直到装满或需要写存储，待适当时候系统将缓冲区内容写到设备上</li>
+<li>读操作：先向系统申请一个输出缓冲区，系统将设备上的物理记录读至缓冲区，根据要求将当前所需要的数据从缓冲区中读出并传送给进程</li>
+</ol>
+<h3 id="单缓冲">单缓冲</h3>
+<p>每当应用程序发出 I/O 操作时，操作系统在主存（内存）的系统区中开设一个缓冲区</p>
+<h4 id="工作机制">工作机制</h4>
+<p>输入：将数据读至缓冲区，系统将缓冲区数据送至用户区，应用程序对数据进行处理；如此往复，系统读入后续的数据</p>
+<p>输出：把数据从用户区复制到缓冲区，再将数据输出后，应用程序继续请求输出</p>
+<img src="/6323/14.png" style="zoom:33%;">
+<p>如果希望输入的数据被加工后再输出，则需要双缓冲。</p>
+<h4 id="性能计算">性能计算 *</h4>
+<blockquote>
+<p>读取到缓冲区需要时间 T，从缓冲区到用户区耗时 M，应用程序计算耗时 C</p>
+</blockquote>
+<ol>
+<li>无缓冲：T + C</li>
+<li>单缓冲：max(C, T) + M，M &lt;&lt; C, T</li>
+</ol>
+<h3 id="双缓冲">双缓冲</h3>
+<p>操作系统在主存的系统区中开设两个缓冲区</p>
+<h4 id="工作机制-2">工作机制</h4>
+<p>输入：</p>
+<ol>
+<li>设备首先将数据输入缓冲区 1，系统再从缓冲区 1 把数据传到用户区，供应用程序处理，同时从设备数据传送到缓冲区 2</li>
+<li>当缓冲区 1 为空，则再次从设备读出数据到缓冲区 1，将缓冲区 2 的数据传送到用户区，供应用程序处理，同时从设备数据传送到缓冲区 1</li>
+<li>仅当两个缓冲区全为空，并且进程还要提取数据时等待。</li>
+</ol>
+<p>输出：</p>
+<ol>
+<li>第一张卡片读入缓冲区 1，在打印缓冲区 1 中数据的同时，又把第二张卡片读入缓冲区 2。</li>
+<li>缓冲区 1 打印完毕时，缓冲区 2 也刚好输入完毕，让读卡机和打印机交换缓冲区。这样，I/O 设备就能够处于并行工作状态。</li>
+</ol>
+<img src="/6323/15.png" style="zoom:33%;">
+<h4 id="性能分析">性能分析</h4>
+<ol>
+<li>C &lt; T，输入比计算慢：M &lt;&lt; T，因此一块数据的传输和处理时间为 T，即 max(C, T)</li>
+<li>C &gt; T，输入比计算快：计算完成后，需要用 M 的时间来传输，所以一块数据的传输和处理时间为 C + M，即 max(C, T) + M</li>
+</ol>
+<h3 id="循环缓冲">循环缓冲</h3>
+<p>多缓冲组成的循环缓冲技术：解决了上面的 C 和 T 时间不匹配而导致的缓冲区被抽空或塞满的问题（<strong>解决设备和进程速度不匹配</strong>的问题）</p>
+<p>操作系统分配一组缓冲区，每个缓冲区度有指向下一个缓冲区的链接指针，最后一个缓冲区指针指向第一个缓冲区，组成循环缓冲，缓冲区的大小等于物理记录的大小，多缓冲的缓冲区是系统的<strong>公共资源</strong>，可供进程共享并由系统<strong>统一分配和管理</strong>。缓冲区用途可分为输人缓冲区、处理缓冲区和输出缓冲区。为了管理各类缓冲区，执行各种操作，必须设计专门的软件，这就是缓冲区自动管理系统。</p>
+<img src="/6323/16.png" style="zoom:33%;">
+<p>补充：数据缓冲区高速缓冲的实现思想（P267）</p>
+<h2 id="设备独立性">设备独立性</h2>
+<ol>
+<li>问题：作业执行前对设备提出申请时，指定某台具体的物理设备会让设备分配变得简单，但如果所指定设备出现故障，即便计算机系统中有同类设备也不能运行</li>
+<li>设备独立性：用户通常不指定物理设备，而是指定逻辑设备，使得用户作业和物理设备分离开来，再通过其它途径建立逻辑设备和物理设备之间的映射，包含两种：
+<ol>
+<li><strong>静态重定位</strong></li>
+<li><strong>动态重定位</strong>：当前多用，对硬件要求更高一些。</li>
+</ol>
+</li>
+<li>设备管理的功能就是将<strong>逻辑设备名转换为物理设备名</strong>，为此系统需要提供逻辑设备名和物理设备名的对应表以供转换使用。
+<ol>
+<li>逻辑设备号由用户定义。</li>
+<li>物理设备号由系统规定，不可修改。</li>
+</ol>
+</li>
+<li>微型计算机的操作系统中不一定支持设备独立性。</li>
+</ol>
+<h3 id="设备独立性的优点">设备独立性的优点</h3>
+<ol>
+<li>应用程序与<strong>具体物理设备</strong>无关，系统增减或变更设备时不需要修改源程序</li>
+<li>易于应对<strong>I/O 设备故障</strong>，提高系统可靠性</li>
+<li>增加设备分配的<strong>灵活性</strong>，更有效地利用设备资源，实现多道程序设计</li>
+</ol>
+<h2 id="设备分配方式">设备分配方式</h2>
+<p>设备管理的功能之一就是为计算机系统所接纳的每个计算任务分配所需要的外部设备。</p>
+<h3 id="设备的物理特性">设备的物理特性</h3>
+<ol>
+<li>独占设备：一次只能由一个进程独占使用；</li>
+<li>共享设备：可以让多个进程同时使用的设备，其管理工作主要是驱动调度和实施驱动，一般不必分配；</li>
+<li>虚拟设备：将独占设备改为共享设备。</li>
+</ol>
+<h3 id="分配方式">分配方式</h3>
+<ol>
+<li>静态分配：进程运行前申请，实现简单，能够防止系统发生<strong>死锁</strong>，但会降低设备利用率，独占型设备多选</li>
+<li>动态分配：进程随用随申请，提高设备利用率，但是对于打印机等独占型设备使用动态分配可以显著提高设备利用率。</li>
+</ol>
+<h3 id="联系-PV-操作">联系 PV 操作 *</h3>
+<ol>
+<li>操作过程：$... P(S_1) ... D(S_1)...$</li>
+<li>$P(S_1)$：申请 $D_1$ 设备</li>
+<li>然后在临界区内互斥使用该设备，独占式</li>
+<li>$V(S_1)$：归还 $D_1$ 设备</li>
+<li>$S_1$ 代表设备 $D_1$ 资源，P 操作前和 V 操作后都是代码</li>
+<li>存在死锁风险</li>
+</ol>
+<h3 id="设备分配的数据结构">设备分配的数据结构</h3>
+<h4 id="设备类表">设备类表</h4>
+<ol>
+<li>每类设备对应于<strong>设备类表</strong>的中的一栏</li>
+<li>包括：设备类、总台数、空闲台数、设备表起始地址等</li>
+<li>支持设备独立性时才会使用</li>
+</ol>
+<h4 id="设备表">设备表</h4>
+<ol>
+<li>每类设备都有<strong>各自的设备表</strong>，用来登记这类设备中的<strong>每台物理设备</strong></li>
+<li>包括：物理设备名（号）、逻辑设备名（号）、占有设备的进程号、是否分配、好/坏标志等</li>
+</ol>
+<h4 id="通道结构系统">通道结构系统 *</h4>
+<p>需要对通道、控制器和每台物理设备进行管理和控制，必须设置系统设备表、通道控制表、控制器控制表和设备控制表。</p>
+<ol>
+<li>整个系统建立一张系统设备表，记录系统配置的所有物理设备的情况，每台物理设备占有一栏，包括设备类型、台数、设备号、设备控制表指针等。</li>
+<li>对于通道控制表、控制器控制表和设备控制表，每个通道、控制器、设备各设置一张，分别记录各自的地址（标识符）、状态（忙/闲、已分配/未分配）、等待获得此部件的进程队列指针及一次分配后相互链接的指针，以备分配和执行 I/O 操作时使用。</li>
+</ol>
+<h2 id="磁盘的物理结构">磁盘的物理结构</h2>
+<ol>
+<li>磁盘是一种直接存取存储设备，又称为随机存取存储设备，每条物理记录都有明确的位置和唯一的地址。</li>
+<li>按照三维坐标进行随机存储。</li>
+</ol>
+<h3 id="磁盘的组成">磁盘的组成</h3>
+<ol>
+<li>磁盘由多个盘片组成，每个盘片被划分为多个同心圆结构的磁道，每个盘片的两面都是可以数据的</li>
+<li>不同盘片上位于相同位置的磁道构成的圆柱体称为<strong>柱面</strong></li>
+<li>每个磁道分为固定多个或不等个数的<strong>扇区</strong>：为了对大量扇区寻址，操作系统将相邻的扇区组合成簇存储文件</li>
+</ol>
+<img src="/6323/17.png" style="zoom:33%;">
+<h3 id="物理块（扇面）在磁盘上的三维地址（磁头号，柱面号，扇区号）">物理块（扇面）在磁盘上的三维地址（磁头号，柱面号，扇区号）</h3>
+<p>盘面号也被叫做<strong>磁头号</strong></p>
+<p>磁道号也被叫做<strong>柱面号</strong></p>
+<p>区别：“0 面 0 道 1 扇区”中的“面”是指磁头，不是柱面。面和道都是 0 开始，扇区是从 1 开始。</p>
+<h3 id="磁盘读写数据">磁盘读写数据</h3>
+<p>读写数据时，磁头必须定位到指定的磁道上的指定扇区的开始处</p>
+<p>过程：</p>
+<ol>
+<li><strong>寻道</strong>：控制移动臂到达指定柱面，选择磁头号，所用时间被称为<strong>查找时间</strong></li>
+<li><strong>旋转</strong>：等待要读写的扇区旋转到磁头下，所用时间被称为<strong>搜索延迟</strong></li>
+<li><strong>数据传送</strong></li>
+</ol>
+<p>高效的外存储都是用磁盘来完成的。</p>
+<img src="/6323/18.png" style="zoom:33%;">
+<h3 id="磁盘存取时间">磁盘存取时间</h3>
+<p>磁盘完成数据读写所需要的时间：是<strong>寻道时间、旋转延迟、传送时间</strong>的总和</p>
+<p>$$
+T_a = T_s + \frac{1}{2r} + \frac{b}{rN}
+$$</p>
+<ul>
+<li>$T_a$：（平均）存取时间</li>
+<li>$T_s$：寻道时间</li>
+<li>$r$：磁盘旋转速度（单位：转/秒）</li>
+<li>$b$：要传送的字节数</li>
+<li>$N$：一个磁道中的字节数</li>
+</ul>
+<h2 id="磁盘的驱动调度">磁盘的驱动调度 *</h2>
+<h3 id="磁盘调度策略">磁盘调度策略</h3>
+<p>磁盘可能同时接收到若干 I/O 请求：如果随机选择并响应 I/O 请求，可能得到最坏的性能</p>
+<p>驱动调度：</p>
+<ol>
+<li>系统采用一种调度策略，能够按<strong>最佳次序</strong>执行要求访问磁盘的多个 I/O 请求</li>
+<li>能减少为若干 I/O 请求服务所需要消耗的<strong>总时间</strong></li>
+</ol>
+<p>调度策略包括：</p>
+<ol>
+<li>旋转调度</li>
+<li>移臂调度</li>
+</ol>
+<h3 id="移臂调度">移臂调度</h3>
+<p>目的：使移动臂的移动时间最短，从而减少寻道总时间</p>
+<h4 id="FCFS-先来先服务算法">FCFS 先来先服务算法</h4>
+<ol>
+<li>移臂距离大，性能不好，移动臂是<strong>随机移动</strong>，寻道性能较差</li>
+<li>按顺序处理请求，对所有进程公平</li>
+</ol>
+<img src="/6323/22.png" style="zoom:33%;">
+<h4 id="最短查找时间优先（最小短距离法）-SSTF，Shortest-Service-Time-First">最短查找时间优先（最小短距离法） SSTF，Shortest Service Time First</h4>
+<ol>
+<li>先执行<strong>查找时间最短</strong>的请求，具有较好的寻道性能</li>
+<li><strong>存在“饥饿”现象</strong>：距离比较远的难以被满足</li>
+<li>选择使磁头臂从当前位置开始移动最少的磁盘 I/O 请求，因此 SSTF 策略总是选择导致<strong>最小寻道时间</strong>的请求，总是选择最小寻道时间并不能保证平均寻道时间最小，但是，它的性能比 FCFS 更好</li>
+</ol>
+<img src="/6323/21.png" style="zoom:33%;">
+<h4 id="SCAN-扫描算法（双向扫描算法）">SCAN 扫描算法（双向扫描算法）</h4>
+<p>移动臂每次向一个方向移动，遇到最近的 I/O 请求便进行处理，到达<strong>最后一个</strong>柱面后再向相反方向移动</p>
+<p>对最近扫描所跨越区域的请求响应较慢</p>
+<p>和电梯调度算法的不同：碰壁才会折返</p>
+<img src="/6323/23.png" style="zoom:33%;">
+<h4 id="分布扫描算法-N-step-SCAN">分布扫描算法 N-step-SCAN</h4>
+<p>进程<strong>重复请求同一磁道会垄断整个设备造成磁头臂的粘性</strong>，采用分步扫描可避免这类问题</p>
+<ol>
+<li><strong>把磁盘 I/O 请求队列分成长度为 N 的子队列，按照 FIFI 处理每一个子队列，每个子队列内部使用扫描算法</strong></li>
+<li>在处理一个队列时，新请求必须添加到<strong>其他</strong>某个队列中</li>
+<li>处理完一个子队列后再服务下一个队列</li>
+</ol>
+<p>如果在扫描的最后剩下的请求数小于 N，则它们全部将在下一次扫描时处理</p>
+<ol>
+<li>当 $N \rightarrow \infty$ 时，N-step-SCAN 的性能接近 SCAN</li>
+<li>当 $N = 1$ 时，实际上是 FIFO</li>
+</ol>
+<h4 id="LOOK-电梯调度算法">LOOK 电梯调度算法</h4>
+<ol>
+<li>无请求时移动臂停止不动，有请求时按电梯规律移动</li>
+<li>每次选择沿移动臂的移动方向最近的柱面</li>
+<li>如果当前移动方向上没有但相反方向有请求时，改变移动方向</li>
+</ol>
+<img src="/6323/26.png" style="zoom: 33%;">
+<h4 id="C-SCAN-循环扫描（单向扫描）">C-SCAN 循环扫描（单向扫描）</h4>
+<img src="/6323/24.png" style="zoom:33%;">
+<ol>
+<li>把扫描限定在一个方向</li>
+<li>当访问到沿某个方向的最后一个磁道时，磁头臂返回到磁盘相反方向磁道的末端，并再次开始扫描</li>
+</ol>
+<img src="/6323/38.png" style="zoom:33%;">
+<h4 id="补充：后进先出（LIFO，Last-in-first-out）">补充：后进先出（LIFO，Last-in, first-out）</h4>
+<ol>
+<li>在事务处理系统中，把设备资源提供给最近的用户，会导致磁头臂<strong>在一个顺序文件中移动时移动得很少，甚至不移动</strong></li>
+<li><strong>利用这种局部性可以提高吞吐量，减少队列长度</strong></li>
+<li>只要一个作业积极地使用文件系统，它就可以尽可能快地得到处理</li>
+<li>如果由于工作量大而<strong>磁盘保持忙</strong>状态，就有可能出现<strong>饿死</strong>的情况</li>
+<li>当一个作业已经往队列中送入一个 I/O 请求，并且错过了可以提供服务的位置时，该作业就有可能永远得不到服务，除非它之前的队列变为空</li>
+</ol>
+<h4 id="补充：单向扫描">补充：单向扫描</h4>
+<ol>
+<li>移动臂总向一个方向扫面，归途中不提供服务</li>
+<li>适用于不断有大量柱面均匀分布的请求的情形</li>
+<li>要求磁头臂仅仅沿一个方向移动，并在途中满足所有为完成的请求，直到它到达这个方向上的<strong>最后一个磁道</strong>，或者<strong>在这个方向上没有其他请求</strong>为止，后一种改进有时候称为 LOOK 策略（又称为电梯调度算法）</li>
+<li>接着反转服务方向，沿着相反方向扫描，同样按顺序完成所有请求</li>
+</ol>
+<h3 id="旋转调度">旋转调度 *</h3>
+<p>目的：<strong>使得旋转延迟的总时间最少</strong></p>
+<h4 id="循环排序">循环排序 *</h4>
+<p>通过优化 I/O 请求排序，在<strong>最少旋转圈数</strong>内完成位于同一柱面的访问请求</p>
+<p><strong>旋转位置测定硬件</strong>和多磁头同时读写技术有利于提高旋转调度的效率</p>
+<p>考虑磁道上保存四个物理块的旋转型设备，旋转 1 周需时 20ms，假定收到以下四个 I/O 请求。请求次序记录号：读记录 4、读记录 3、读记录 2、读记录 1</p>
+<p>多种循环排序：</p>
+<ol>
+<li>方法 1：按照 I/O 请求次序读记录 4、3、2、1，平均用 1/2 周定位，再加上 1/4 周读出记录，总处理时间等于 1/2+1/4+3*3/4=3 周，即 60ms。</li>
+<li>方法 2：如果次序为读记录 1、2、3、4，总处理时间等于 1/2+1/4+3*1/4=1.5 周，即 30ms。</li>
+<li>方法 3：如果知道当前读位置是记录 3，则采用次序为读记录 4、1、2、3，总处理时间等于 4*1/4 = 1 周，即 20ms。</li>
+</ol>
+<h4 id="优化分布">优化分布</h4>
+<ol>
+<li>通过信息在存储空间的排列方式来减少旋转延迟</li>
+<li><strong>交叉因子</strong>：如果沿着磁道按序对扇区编号，可能由于磁盘转速太快，造成处理当前扇区的数据时，下一个扇区已经跳过，需要再转一圈才能继续读数据。因此，对扇区编号时会间隔编号，例如交叉因子为 2：1 表示相邻编号之间会间隔 1 个扇区，3：1 表示会间隔 2 个扇区。</li>
+<li>按柱面而非盘面进行数据读写：连续记录数据时，先记录在同一柱面的不同磁道上，然后再更换柱面，可以减少数据读写时的移臂操作</li>
+</ol>
+<p>实例：考虑 10 个逻辑记录 A，B，……，J 被存于旋转型设备上，每道存放 10 个记录，安排如下：</p>
+<ol>
+<li>按照优化前：处理 10 个记录的总时间：10ms（移动到记录 A 的平均时间）+ 2ms（读记录 A）+4ms（处理记录 A）+9*[16ms（访问下一记录）+2ms（读记录）+4ms（处理记录）] = 214ms</li>
+<li>按照优化后：处理 10 个记录的总时间为：10ms（移动到记录 A 的平均时间）+10*[ 2ms（读记录）+ 4ms（处理记录）]=70ms</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>优化前</th>
+<th>优化后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/6323/27.png" style="zoom:33%;"></td>
+<td><img src="/6323/28.png" style="zoom: 33%;"></td>
+</tr>
+</tbody>
+</table>
+<h3 id="提高磁盘-I-O-速度的办法">提高磁盘 I/O 速度的办法 *</h3>
+<ol>
+<li>提前读：按照顺序访问时，可以读当前磁盘块时，提前把下一个磁盘块的数据也读入磁盘缓冲区。</li>
+<li>延迟写：由于缓冲区的数据不久以后还会再次被进程访问，因此不立即将缓冲区中的数据写回盘，而是挂载空闲缓冲区队列队尾，直到移动到空闲缓冲区队首时在写回。</li>
+<li>虚拟盘：用内存空间仿真磁盘，又叫 RAM 盘，相应的操作在内存中执行而不是硬盘中，比如：浏览器缓存等。</li>
+</ol>
+<h2 id="虚拟设备">虚拟设备</h2>
+<p>虚拟设备：使用一类物理设备模拟另一类物理设备的技术，让独享型设备变为共享设备。</p>
+<p>示例：</p>
+<ol>
+<li>内存卡模拟磁盘</li>
+<li>块设备模拟字符设备</li>
+<li>输入输出重定向</li>
+</ol>
+<h3 id="一个经典的-SPOOLing-系统">一个经典的 SPOOLing 系统</h3>
+<ol>
+<li>在<strong>内核外运行</strong>的<strong>系统</strong> I/O 软件，采用<strong>预输入、缓输出和井管理</strong>技术，是多道程序设计系统中处理<strong>独占型设备</strong>的一种方法，通过创建守护进程和特殊目录解决<strong>独占型设备</strong>的<strong>空占</strong>问题</li>
+<li>为存放输入数据和输出数据，系统在磁盘上开辟<strong>输入井和输出井</strong>。“井”是用作缓冲的存储区域，采用井的技术能调节<strong>供求之间的矛盾</strong>，消除<strong>人工干预</strong>带来的损失。</li>
+<li>不仅<strong>设备利用率提高</strong>，作业的<strong>运行时间也会缩短</strong>，每个作业都感觉各自拥有所需的独占设备</li>
+</ol>
+<img src="/6323/19.png" style="zoom:33%;">
+<blockquote>
+<p>chatGPT 对 SPOOLing 的描述如下：</p>
+<p>Spooling（Simultaneous Peripheral Operations On-line，同时操作外围设备）技术是一种计算机数据处理技术，它用于处理多个用户同时请求访问同一外围设备的情况。Spooling 技术的主要思想是，将外围设备的输入或输出数据缓存到磁盘或其他存储介质中，以便后续的处理和调度。</p>
+<p>举个例子来说明，比如打印机是一个常见的外围设备。在没有 Spooling 技术的情况下，如果多个用户同时请求打印，打印机可能只能先响应其中一个用户的请求，而其他用户需要等待很长时间。这是因为打印机一次只能处理一份文件，而且每个打印任务可能需要花费较长的时间。</p>
+<p>而采用 Spooling 技术后，用户的打印请求不是直接发送给打印机，而是先缓存到磁盘中。这样，所有的打印请求都可以在磁盘上排队等待打印，打印机只需要从磁盘中读取并打印每个任务即可。这种方式可以提高打印机的利用率，减少用户的等待时间。</p>
+<p>在计算机系统中，Spooling 技术不仅用于打印机，还可以用于其它外围设备，比如磁带机、磁盘驱动器、网络设备等等。通过 Spooling 技术，系统可以更高效地利用外围设备，减少用户的等待时间，提高数据处理的效率。</p>
+</blockquote>
+<h3 id="SPOOLing-设备组成">SPOOLing 设备组成</h3>
+<ol>
+<li>预输入程序：
+<ol>
+<li>将数据从<strong>输入设备</strong>传送到<strong>磁盘输入井</strong></li>
+<li>作用：操作系统将一批作业从输入设备上预先输入到磁盘的输入缓冲区中暂时保存，这称为“预输入”</li>
+<li>此后，由<strong>作业调度程序</strong>调度作业执行，作业使用数据时不必再启动输入设备，只要从磁盘的输入缓冲区中读入</li>
+</ol>
+</li>
+<li>缓输出程序：
+<ol>
+<li>将数据从<strong>磁盘输出井</strong>传送到<strong>输出设备</strong></li>
+<li>作用：作业执行中不必<strong>直接</strong>启动输出设备，只要将作业的输出数据暂时保存到磁盘的输出缓冲区</li>
+<li>当作业执行完毕后，由操作系统组织信息成批输出</li>
+</ol>
+</li>
+<li>井管理程序：
+<ol>
+<li>控制作业和井之间的数据交换</li>
+<li>放置在井中的文件被称为<strong>井文件</strong>，经文件空间管理简单，它被划分为等长的的物理块，每块用来存放一条或多条逻辑记录。</li>
+</ol>
+</li>
+<li>系统有一张作业表来登记进入系统的所有作业的 JCB，包括作业名、作业状态等信息。</li>
+<li>预输入表用来登记作业的各个输入文件的情况。</li>
+<li>缓输出表用来登记作业的各个输出文件的情况。</li>
+</ol>
+<h3 id="输入井的作业状态">输入井的作业状态</h3>
+<ol>
+<li>输入状态：正在预输入</li>
+<li>收容状态：预输入完成，等待执行</li>
+<li>执行状态：作业选中执行，正在从输入井读取输入，向输出井写入数据</li>
+<li>完成状态：作业已经撤离，输出结果等待缓输出。</li>
+<li>通过预处理，结合井管理，可以实现为<strong>脱机状态</strong>，从联机（online）脱机（offline)，成功耦合。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/6323/20.png" alt></th>
+<th><img src="/6323/37.png" alt="作业调度与进程调度的关系"></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>作业调度：决定有生命周期的进程的道数</li>
+</ol>
+<h3 id="SPOOLing-步骤">SPOOLing 步骤</h3>
+<ol>
+<li><strong>预输入</strong>：操作系统将作业需要的输入数据成批从输入设备上预先输入至磁盘的输入缓冲区中暂存：调度作业执行时，作业使用数据不必再启动输入设备，从磁盘的输入缓冲区读入即可</li>
+<li><strong>缓输出</strong>：作业不启动输出设备，只是将输出数据暂存到磁盘的输出缓冲区：作业执行完毕后，处理器空闲时，操作系统调用缓输出程序执行缓输出。</li>
+</ol>
+<h3 id="打印机-SPOOLing">打印机 SPOOLing</h3>
+<p>打印机空占问题：如果用户进程通过打开打印机的设备文件来申请和使用打印机，往往会造成该进程打开<strong>设备文件</strong>后长达数小时不用，但<strong>其他进程又无法使用打印机</strong></p>
+<p>打印机守护进程和 SPOOLing 打印目录</p>
+<ol>
+<li><strong>守护进程</strong>是唯一有<strong>特权</strong>使用打印机设备的进程</li>
+<li>打印文件前，用户进程先产生完整的<strong>待输出文件</strong>，并存放在打印目录下</li>
+<li>打印机空闲时，启动守护进程，打印<strong>待输出文件</strong></li>
+</ol>
+<h3 id="网络通信-SPOOLing-守护进程">网络通信 SPOOLing 守护进程 *</h3>
+<ol>
+<li>SPOOLing 技术不仅可用于打印机，还可用于其他场合。</li>
+<li>例如，在网络上传输文件常使用网络守护进程，发送文件之前先将其放在特定的网络 SPOOL 目录下，而后由网络通信守护进程将其取出并发送出去。</li>
+<li>这种文件传送方式的用途之一是因特网电子邮件系统
+<ol>
+<li>此网络将全世界数以千万台计的计算机连接在一起，通过通信网络进行通信。</li>
+<li>当向某人发送电子邮件时，用户使用一个类似于 send 的程序，它接收所要发送的信件并将其送人固定的电子邮件 SPOOL 目录下等待以后发送，整个电子邮件系统在操作系统之外作为一种应用程序运行。</li>
+</ol>
+</li>
+</ol>
+<h2 id="磁盘循环冗余阵列">磁盘循环冗余阵列 *</h2>
+<h3 id="RAID-0（无冗余）">RAID 0（无冗余）</h3>
+<ol>
+<li>RAID 0 连续的数据条带（每个条带可规定为 1 个或多个扇区）以轮转方式写到全部磁盘上。</li>
+<li>然后，采用并行交叉存取，减少 I/O 请求排队时间，适用于大数据量的 I/O 请求，但并<strong>无冗余校验功能，可靠性较差。</strong></li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/6323/29.png" alt></th>
+<th><img src="/6323/30.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="RAID-1（镜像）">RAID 1（镜像）</h3>
+<ol>
+<li>RAID 1 采用镜像盘双份所有数据来提高容错性，读请求拥有最小寻道时间，写请求可并行完成。<strong>缺点是容量下降一半，故成本很高</strong></li>
+</ol>
+<img src="/6323/31.png" style="zoom:33%;">
+<h3 id="RAID-2（通过海明码冗余）">RAID 2（通过海明码冗余）</h3>
+<ol>
+<li>RAID 2 采用数据字或字节交叉存放，<strong>并行存取获得高性能</strong>，使用<strong>海明校验码</strong>，适合大量顺序数据访问。由于<strong>使用多个冗余盘，成本较高</strong></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42426249/article/details/89428080">海明校验码</a></li>
+<li>按照海明码编码方式我们首先对原数据生成新数据，然后之后校验数据将对应校验码做异或，如果全为 0 则为正确，否则则为错误位置。</li>
+</ol>
+<img src="/6323/32.png" style="zoom:33%;">
+<h3 id="RAID-3（交错位奇偶校验）">RAID 3（交错位奇偶校验）</h3>
+<p>RAID 3 是 RAID 2 的简化版本，差别是它仅用一只冗余盘，采用奇偶校验技术。</p>
+<img src="/6323/33.png" style="zoom:33%;">
+<h3 id="RAID-4（块奇偶校验）">RAID 4（块奇偶校验）</h3>
+<p>RAID 4 采用<strong>独立存取磁盘阵列，数据条带交叉存放</strong>，访问请求可并行地获得满足，适合有较高 I/O 请求速度的应用场合，使用一只冗余盘存放奇偶校验 90 码。</p>
+<img src="/6323/34.png" style="zoom:33%;">
+<h3 id="RAID-5（块分布奇偶校验）">RAID 5（块分布奇偶校验）</h3>
+<p>RAID 5 与 RAID 4 的组织类似，但奇偶校验码循环分布在每个盘上使容错性更好。</p>
+<img src="/6323/35.png" style="zoom:33%;">
+<h3 id="RAID-6（双重冗余）">RAID 6（双重冗余）</h3>
+<p>RAID 6 采用双重冗余技术， P 和 Q 是两种不同的数据校验算法，其中一种是 RAID 4 和 RAID 5 所使用是异或计算，另一种是独立数据校验算法，即使有两个数据磁盘发生错误，也可重新生成数据。</p>
+<img src="/6323/36.png" style="zoom:33%;">
+<h3 id="磁盘-Cache">磁盘 Cache</h3>
+<ol>
+<li>磁盘高速缓存是主存中为磁盘扇区设置的一个缓冲区，包含磁盘中某些扇区的副本</li>
+<li>利用局部性原理，可以减少平均存储器存取时间</li>
+</ol>
+<h4 id="替换策略：LRU">替换策略：LRU</h4>
+<ol>
+<li>替换在高速缓存中<strong>未被访问的时间最长</strong>的块</li>
+<li>逻辑上，高速缓存有一个关于块的栈组成，最近访问过的块在栈顶，当高速缓存中的一个块被访问到时，它从栈中当前的位置移到栈顶</li>
+<li>当一个块从辅存中取入时，把位于栈顶的那一块移出，并把新到来的块压入栈顶</li>
+<li>并不需要在主存中真正移动这些块，有一个栈指针与高速缓存相关联</li>
+</ol>
+<h4 id="替换策略：LFU（Least-Frequently-Used）">替换策略：LFU（Least Frequently Used）</h4>
+<ol>
+<li>替换集合中<strong>被访问次数最少</strong>的块</li>
+<li>LFU 可以通过给每个块关联一个计数器来实现</li>
+<li>当一个块被读入时，它的计数器被指定为 1；当每次访问到这一块时，它的计数器增 1</li>
+<li>当需要替换时，选择计数器值最小的块</li>
+<li>直觉上，LFU 比 LRU 更适合，因为 LFU 使用了关于每个块的更多的相关信息</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/52714/" rel="prev" title="计算机与操作系统-03-存储管理">
+      <i class="fa fa-chevron-left"></i> 计算机与操作系统-03-存储管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/41267/" rel="next" title="计算机与操作系统-05-文件管理">
+      计算机与操作系统-05-文件管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">设备管理概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E7%B3%BB%E7%BB%9F%E3%80%81%E8%AE%BE%E5%A4%87%E4%B8%8E%E6%93%8D%E4%BD%9C"><span class="nav-number">1.1.</span> <span class="nav-text">I&#x2F;O 系统、设备与操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%AE%BE%E5%A4%87%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">1.2.</span> <span class="nav-text">I&#x2F;O 设备的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%89%E4%BF%A1%E6%81%AF%E4%BC%A0%E8%BE%93%E6%96%B9%E5%90%91%EF%BC%88I-O-%E6%93%8D%E4%BD%9C%E7%89%B9%E6%80%A7%EF%BC%89%E5%88%92%E5%88%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">按信息传输方向（I&#x2F;O 操作特性）划分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%89%E4%BA%A4%E4%BA%92%E5%8A%9F%E8%83%BD%E5%88%92%E5%88%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">按交互功能划分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%89%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86%EF%BC%88I-O-%E4%BF%A1%E6%81%AF%E4%BA%A4%E6%8D%A2%E5%8D%95%E4%BD%8D%EF%BC%89%E5%88%92%E5%88%86"><span class="nav-number">1.2.3.</span> <span class="nav-text">按设备管理（I&#x2F;O 信息交换单位）划分</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86%E7%9A%84%E7%9B%AE%E6%A0%87"><span class="nav-number">1.3.</span> <span class="nav-text">设备管理的目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">1.4.</span> <span class="nav-text">设备管理的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%AE%A1%E7%90%86%E7%9A%84%E5%B1%82%E6%AC%A1"><span class="nav-number">1.5.</span> <span class="nav-text">设备管理的层次</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#I-O-%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">I&#x2F;O 控制方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%8E%A7%E5%88%B6%E5%99%A8%EF%BC%88%E5%81%8F%E5%90%91%E7%A1%AC%E4%BB%B6%E9%83%A8%E5%88%86%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">设备控制器（偏向硬件部分）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">2.1.1.</span> <span class="nav-text">设备控制器的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86%EF%BC%88%E4%BE%8B%EF%BC%89"><span class="nav-number">2.1.2.</span> <span class="nav-text">设备控制器的组成部分（例）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2%E6%96%B9%E5%BC%8F%EF%BC%88%E7%A8%8B%E5%BA%8F%E7%9B%B4%E6%8E%A5%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">轮询方式（程序直接控制方式）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.1.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%89%E5%8F%8A%E6%8C%87%E4%BB%A4"><span class="nav-number">2.2.2.</span> <span class="nav-text">涉及指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%E5%92%8C%E8%AF%84%E4%BB%B7"><span class="nav-number">2.2.3.</span> <span class="nav-text">特点和评价</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%96%B9%E5%BC%8F"><span class="nav-number">2.3.</span> <span class="nav-text">中断方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B-2"><span class="nav-number">2.3.1.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%E5%92%8C%E8%AF%84%E4%BB%B7-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">特点和评价</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E5%AD%98%E5%82%A8%E5%99%A8%E8%AE%BF%E9%97%AE%EF%BC%88DMA%EF%BC%89%E6%96%B9%E5%BC%8F"><span class="nav-number">2.4.</span> <span class="nav-text">直接存储器访问（DMA）方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DMA-%E6%A8%A1%E5%9D%97"><span class="nav-number">2.4.1.</span> <span class="nav-text">DMA 模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B-3"><span class="nav-number">2.4.2.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9%E5%92%8C%E8%AF%84%E4%BB%B7-3"><span class="nav-number">2.4.3.</span> <span class="nav-text">特点和评价</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DMA-%E6%96%B9%E5%BC%8F%E4%B8%AD%E7%9A%84%E5%91%A8%E6%9C%9F%E7%AA%83%E5%8F%96"><span class="nav-number">2.4.4.</span> <span class="nav-text">DMA 方式中的周期窃取</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93%EF%BC%9AI-O-%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%E7%9A%84%E6%BC%94%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">小结：I&#x2F;O 控制方式的演化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E9%80%9A%E9%81%93%EF%BC%88%E7%AC%AC%E5%9B%9B%E7%A7%8D%EF%BC%8C%E6%9B%B4%E9%AB%98%E7%BA%A7%EF%BC%89"><span class="nav-number">2.6.</span> <span class="nav-text">I&#x2F;O 通道（第四种，更高级）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O-%E9%80%9A%E9%81%93%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.6.1.</span> <span class="nav-text">I&#x2F;O 通道描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#I-O-%E9%80%9A%E9%81%93%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">2.6.2.</span> <span class="nav-text">I&#x2F;O 通道的工作流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%A6%E6%9C%89%E5%B1%80%E9%83%A8%E5%AD%98%E5%82%A8%E5%99%A8%E7%9A%84-I-O-%E9%80%9A%E9%81%93"><span class="nav-number">2.6.3.</span> <span class="nav-text">带有局部存储器的 I&#x2F;O 通道</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E5%8F%91%E5%B1%95%E5%AF%B9%E6%80%BB%E7%BA%BF%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">2.7.</span> <span class="nav-text">I&#x2F;O 发展对总线的影响</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E6%80%BB%E7%BA%BF"><span class="nav-number">2.7.1.</span> <span class="nav-text">单总线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E7%9A%84%E4%B8%89%E7%BA%A7%E6%80%BB%E7%BA%BF%EF%BC%88%E4%BE%8B%EF%BC%89"><span class="nav-number">2.7.2.</span> <span class="nav-text">传统的三级总线（例）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%87%E7%94%A8%E5%8D%97%E5%8C%97%E6%A1%A5%E7%9A%84%E5%A4%9A%E7%BA%A7%E6%80%BB%E7%BA%BF%EF%BC%88%E4%BE%8B%EF%BC%89"><span class="nav-number">2.7.3.</span> <span class="nav-text">采用南北桥的多级总线（例）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%87%E7%94%A8-I-O-%E9%80%9A%E9%81%93%E7%9A%84%E5%A4%9A%E7%BA%A7%E6%80%BB%E7%BA%BF%EF%BC%88%E4%BE%8B%EF%BC%89"><span class="nav-number">2.7.4.</span> <span class="nav-text">采用 I&#x2F;O 通道的多级总线（例）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#I-O-%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">I&#x2F;O 软件的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">I&#x2F;O 软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%BD%AF%E4%BB%B6%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.</span> <span class="nav-text">I&#x2F;O 软件的层次结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.3.</span> <span class="nav-text">I&#x2F;O 中断处理程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">3.4.</span> <span class="nav-text">I&#x2F;O 中断处理程序的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.5.</span> <span class="nav-text">设备驱动程序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">3.5.1.</span> <span class="nav-text">设备驱动程序的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">3.5.2.</span> <span class="nav-text">设备驱动程序的处理方式 *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%B1%82%E6%AC%A1"><span class="nav-number">3.5.3.</span> <span class="nav-text">设备驱动程序的层次</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E4%BA%8E%E8%AE%BE%E5%A4%87%E7%9A%84-I-O-%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.6.</span> <span class="nav-text">独立于设备的 I&#x2F;O 软件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E5%91%BD%E5%90%8D"><span class="nav-number">3.6.1.</span> <span class="nav-text">设备命名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E4%BF%9D%E6%8A%A4"><span class="nav-number">3.6.2.</span> <span class="nav-text">设备保护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%90%E4%BE%9B%E4%B8%8E%E8%AE%BE%E5%A4%87%E6%97%A0%E5%85%B3%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8D%95%E4%BD%8D"><span class="nav-number">3.6.3.</span> <span class="nav-text">提供与设备无关的数据单位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%93%E5%86%B2%E6%8A%80%E6%9C%AF"><span class="nav-number">3.6.4.</span> <span class="nav-text">缓冲技术</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E5%92%8C%E7%8A%B6%E6%80%81%E8%B7%9F%E8%B8%AA"><span class="nav-number">3.6.5.</span> <span class="nav-text">设备分配和状态跟踪</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E5%92%8C%E6%8A%A5%E5%91%8A"><span class="nav-number">3.6.6.</span> <span class="nav-text">错误处理和报告</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4%E7%9A%84-I-O-%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.7.</span> <span class="nav-text">用户空间的 I&#x2F;O 软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E6%93%8D%E4%BD%9C%E5%BA%94%E6%89%A7%E8%A1%8C%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%8C%E4%BB%A5%E8%AF%BB%E6%93%8D%E4%BD%9C%E4%B8%BA%E4%BE%8B"><span class="nav-number">3.8.</span> <span class="nav-text">I&#x2F;O 操作应执行的步骤，以读操作为例 *</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#I-O-%E7%BC%93%E5%86%B2"><span class="nav-number">4.</span> <span class="nav-text">I&#x2F;O 缓冲</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%BC%93%E5%86%B2"><span class="nav-number">4.1.</span> <span class="nav-text">单缓冲</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">4.1.1.</span> <span class="nav-text">工作机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E8%AE%A1%E7%AE%97"><span class="nav-number">4.1.2.</span> <span class="nav-text">性能计算 *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E7%BC%93%E5%86%B2"><span class="nav-number">4.2.</span> <span class="nav-text">双缓冲</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6-2"><span class="nav-number">4.2.1.</span> <span class="nav-text">工作机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">4.2.2.</span> <span class="nav-text">性能分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E7%BC%93%E5%86%B2"><span class="nav-number">4.3.</span> <span class="nav-text">循环缓冲</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%8B%AC%E7%AB%8B%E6%80%A7"><span class="nav-number">5.</span> <span class="nav-text">设备独立性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%8B%AC%E7%AB%8B%E6%80%A7%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">5.1.</span> <span class="nav-text">设备独立性的优点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">设备分配方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%9A%84%E7%89%A9%E7%90%86%E7%89%B9%E6%80%A7"><span class="nav-number">6.1.</span> <span class="nav-text">设备的物理特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">6.2.</span> <span class="nav-text">分配方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E7%B3%BB-PV-%E6%93%8D%E4%BD%9C"><span class="nav-number">6.3.</span> <span class="nav-text">联系 PV 操作 *</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">6.4.</span> <span class="nav-text">设备分配的数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E7%B1%BB%E8%A1%A8"><span class="nav-number">6.4.1.</span> <span class="nav-text">设备类表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E8%A1%A8"><span class="nav-number">6.4.2.</span> <span class="nav-text">设备表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E9%81%93%E7%BB%93%E6%9E%84%E7%B3%BB%E7%BB%9F"><span class="nav-number">6.4.3.</span> <span class="nav-text">通道结构系统 *</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%9A%84%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84"><span class="nav-number">7.</span> <span class="nav-text">磁盘的物理结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">7.1.</span> <span class="nav-text">磁盘的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%9D%97%EF%BC%88%E6%89%87%E9%9D%A2%EF%BC%89%E5%9C%A8%E7%A3%81%E7%9B%98%E4%B8%8A%E7%9A%84%E4%B8%89%E7%BB%B4%E5%9C%B0%E5%9D%80%EF%BC%88%E7%A3%81%E5%A4%B4%E5%8F%B7%EF%BC%8C%E6%9F%B1%E9%9D%A2%E5%8F%B7%EF%BC%8C%E6%89%87%E5%8C%BA%E5%8F%B7%EF%BC%89"><span class="nav-number">7.2.</span> <span class="nav-text">物理块（扇面）在磁盘上的三维地址（磁头号，柱面号，扇区号）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E8%AF%BB%E5%86%99%E6%95%B0%E6%8D%AE"><span class="nav-number">7.3.</span> <span class="nav-text">磁盘读写数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%AD%98%E5%8F%96%E6%97%B6%E9%97%B4"><span class="nav-number">7.4.</span> <span class="nav-text">磁盘存取时间</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%9A%84%E9%A9%B1%E5%8A%A8%E8%B0%83%E5%BA%A6"><span class="nav-number">8.</span> <span class="nav-text">磁盘的驱动调度 *</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6%E7%AD%96%E7%95%A5"><span class="nav-number">8.1.</span> <span class="nav-text">磁盘调度策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E8%87%82%E8%B0%83%E5%BA%A6"><span class="nav-number">8.2.</span> <span class="nav-text">移臂调度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FCFS-%E5%85%88%E6%9D%A5%E5%85%88%E6%9C%8D%E5%8A%A1%E7%AE%97%E6%B3%95"><span class="nav-number">8.2.1.</span> <span class="nav-text">FCFS 先来先服务算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E7%9F%AD%E6%9F%A5%E6%89%BE%E6%97%B6%E9%97%B4%E4%BC%98%E5%85%88%EF%BC%88%E6%9C%80%E5%B0%8F%E7%9F%AD%E8%B7%9D%E7%A6%BB%E6%B3%95%EF%BC%89-SSTF%EF%BC%8CShortest-Service-Time-First"><span class="nav-number">8.2.2.</span> <span class="nav-text">最短查找时间优先（最小短距离法） SSTF，Shortest Service Time First</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SCAN-%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95%EF%BC%88%E5%8F%8C%E5%90%91%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95%EF%BC%89"><span class="nav-number">8.2.3.</span> <span class="nav-text">SCAN 扫描算法（双向扫描算法）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E6%89%AB%E6%8F%8F%E7%AE%97%E6%B3%95-N-step-SCAN"><span class="nav-number">8.2.4.</span> <span class="nav-text">分布扫描算法 N-step-SCAN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LOOK-%E7%94%B5%E6%A2%AF%E8%B0%83%E5%BA%A6%E7%AE%97%E6%B3%95"><span class="nav-number">8.2.5.</span> <span class="nav-text">LOOK 电梯调度算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C-SCAN-%E5%BE%AA%E7%8E%AF%E6%89%AB%E6%8F%8F%EF%BC%88%E5%8D%95%E5%90%91%E6%89%AB%E6%8F%8F%EF%BC%89"><span class="nav-number">8.2.6.</span> <span class="nav-text">C-SCAN 循环扫描（单向扫描）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9A%E5%90%8E%E8%BF%9B%E5%85%88%E5%87%BA%EF%BC%88LIFO%EF%BC%8CLast-in-first-out%EF%BC%89"><span class="nav-number">8.2.7.</span> <span class="nav-text">补充：后进先出（LIFO，Last-in, first-out）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9A%E5%8D%95%E5%90%91%E6%89%AB%E6%8F%8F"><span class="nav-number">8.2.8.</span> <span class="nav-text">补充：单向扫描</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E8%B0%83%E5%BA%A6"><span class="nav-number">8.3.</span> <span class="nav-text">旋转调度 *</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E6%8E%92%E5%BA%8F"><span class="nav-number">8.3.1.</span> <span class="nav-text">循环排序 *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%88%86%E5%B8%83"><span class="nav-number">8.3.2.</span> <span class="nav-text">优化分布</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E7%A3%81%E7%9B%98-I-O-%E9%80%9F%E5%BA%A6%E7%9A%84%E5%8A%9E%E6%B3%95"><span class="nav-number">8.4.</span> <span class="nav-text">提高磁盘 I&#x2F;O 速度的办法 *</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E8%AE%BE%E5%A4%87"><span class="nav-number">9.</span> <span class="nav-text">虚拟设备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%BB%8F%E5%85%B8%E7%9A%84-SPOOLing-%E7%B3%BB%E7%BB%9F"><span class="nav-number">9.1.</span> <span class="nav-text">一个经典的 SPOOLing 系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPOOLing-%E8%AE%BE%E5%A4%87%E7%BB%84%E6%88%90"><span class="nav-number">9.2.</span> <span class="nav-text">SPOOLing 设备组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E4%BA%95%E7%9A%84%E4%BD%9C%E4%B8%9A%E7%8A%B6%E6%80%81"><span class="nav-number">9.3.</span> <span class="nav-text">输入井的作业状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SPOOLing-%E6%AD%A5%E9%AA%A4"><span class="nav-number">9.4.</span> <span class="nav-text">SPOOLing 步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%8D%B0%E6%9C%BA-SPOOLing"><span class="nav-number">9.5.</span> <span class="nav-text">打印机 SPOOLing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1-SPOOLing-%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B"><span class="nav-number">9.6.</span> <span class="nav-text">网络通信 SPOOLing 守护进程 *</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E5%BE%AA%E7%8E%AF%E5%86%97%E4%BD%99%E9%98%B5%E5%88%97"><span class="nav-number">10.</span> <span class="nav-text">磁盘循环冗余阵列 *</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-0%EF%BC%88%E6%97%A0%E5%86%97%E4%BD%99%EF%BC%89"><span class="nav-number">10.1.</span> <span class="nav-text">RAID 0（无冗余）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-1%EF%BC%88%E9%95%9C%E5%83%8F%EF%BC%89"><span class="nav-number">10.2.</span> <span class="nav-text">RAID 1（镜像）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-2%EF%BC%88%E9%80%9A%E8%BF%87%E6%B5%B7%E6%98%8E%E7%A0%81%E5%86%97%E4%BD%99%EF%BC%89"><span class="nav-number">10.3.</span> <span class="nav-text">RAID 2（通过海明码冗余）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-3%EF%BC%88%E4%BA%A4%E9%94%99%E4%BD%8D%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C%EF%BC%89"><span class="nav-number">10.4.</span> <span class="nav-text">RAID 3（交错位奇偶校验）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-4%EF%BC%88%E5%9D%97%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C%EF%BC%89"><span class="nav-number">10.5.</span> <span class="nav-text">RAID 4（块奇偶校验）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-5%EF%BC%88%E5%9D%97%E5%88%86%E5%B8%83%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C%EF%BC%89"><span class="nav-number">10.6.</span> <span class="nav-text">RAID 5（块分布奇偶校验）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID-6%EF%BC%88%E5%8F%8C%E9%87%8D%E5%86%97%E4%BD%99%EF%BC%89"><span class="nav-number">10.7.</span> <span class="nav-text">RAID 6（双重冗余）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98-Cache"><span class="nav-number">10.8.</span> <span class="nav-text">磁盘 Cache</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E7%AD%96%E7%95%A5%EF%BC%9ALRU"><span class="nav-number">10.8.1.</span> <span class="nav-text">替换策略：LRU</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2%E7%AD%96%E7%95%A5%EF%BC%9ALFU%EF%BC%88Least-Frequently-Used%EF%BC%89"><span class="nav-number">10.8.2.</span> <span class="nav-text">替换策略：LFU（Least Frequently Used）</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

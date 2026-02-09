@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="降维（Dimensionality Reduction） 我们假设数据能够在低维空间被表示 高维数据在低维空间的表示是更加高效的。 SVD 示例 r 表示保留的特征值的数量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-05-数据降维">
+<meta property="og:url" content="https://eaglebear2002.github.io/58433/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="降维（Dimensionality Reduction） 我们假设数据能够在低维空间被表示 高维数据在低维空间的表示是更加高效的。 SVD 示例 r 表示保留的特征值的数量">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/1-1676530537700-137.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/005-%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/image-20221102204129802.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/image-20221102204150472.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/8-1676530537701-138.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/9-1676530537701-139.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/10-1676530537701-140.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/11-1676530537701-141.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/12-1676530537701-142.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/005-%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4-1667393965341-74.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/17-1676530537701-143.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/18-1676530537701-144.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/14.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/15-1676530537702-145.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/16-1676530537702-146.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/19-1676530537702-147.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/20-1676530537702-148.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/21-1676530537702-149.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/22-1676530537702-150.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/23.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/25.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/34.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/30.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/32.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58433/33.png">
+<meta property="article:published_time" content="2022-10-28T08:04:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.535Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/58433/1-1676530537700-137.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/58433/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-05-数据降维 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/58433/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-05-数据降维
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-28 16:04:00" itemprop="dateCreated datePublished" datetime="2022-10-28T16:04:00+08:00">2022-10-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="降维（Dimensionality-Reduction）">降维（Dimensionality Reduction）</h2>
+<p>我们假设数据能够在低维空间被表示</p>
+<p>高维数据在低维空间的表示是更加高效的。</p>
+<h3 id="SVD-示例">SVD 示例</h3>
+<p>r 表示保留的特征值的数量</p>
+<p><img src="/58433/1-1676530537700-137.png" alt></p>
+<h3 id="压缩-降低尺寸">压缩/降低尺寸</h3>
+<ol>
+<li>$10^6$行，$10^3$列，不更新</li>
+<li>随机访问一行数据，很少的错误时可以接受的</li>
+</ol>
+<p>如下的矩阵其实是个二维矩阵，我们通过缩放 $[1,1,1,0,0]$ 或 $[0,0,0,1,1]$ 可以重建所有的行。</p>
+<p><img src="/58433/005-%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4.jpg" alt></p>
+<h3 id="矩阵的秩">矩阵的秩</h3>
+<ol>
+<li>什么是矩阵 A 的秩？A 的线性独立列数</li>
+<li>例子：</li>
+</ol>
+<p>$$
+A = \begin{bmatrix}
+1 &amp; 2 &amp; 1 \
+-1 &amp; -3 &amp; 1 \
+3 &amp; 5 &amp; 0 \
+\end{bmatrix}\ Rank(A) = 2
+$$</p>
+<h3 id="秩是可以降维">秩是可以降维</h3>
+<p><img src="/58433/4.png" alt></p>
+<p>我们可以通过 $[1,2,1][-2,-3,1]$ 两个向量来重写矩阵 A，A 的新坐标为：$[1,0][0,1][1,-1]$。</p>
+<h3 id="降维的目的">降维的目的</h3>
+<ol>
+<li>数学上是<strong>发现数据中的轴</strong></li>
+<li>发现隐藏的联系和主题：比如经常一同出现的单词等</li>
+<li>移除相似和噪声特征：并不是所有单词都是有用的</li>
+<li>数据解释和可视化</li>
+<li>更容易处理和存储数据：（找到规律，压缩数据量）</li>
+</ol>
+<h3 id="降维的描述">降维的描述</h3>
+<p>与用两个坐标表示每一个点不同，我们用轴上的坐标表示每一个点（对应红线上点的位置）。</p>
+<p>通过这样做，我们会产生一些错误，因为这些点并不完全在直线上（信息损失），需要我们考虑我们是否可以接受这部分信息损失。</p>
+<h2 id="SVD">SVD</h2>
+<p>奇异值的值必然为正</p>
+<h3 id="SVD-的分类">SVD 的分类</h3>
+<table>
+<thead>
+<tr>
+<th>标准 SVD（无失真）</th>
+<th>近似 SVD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/58433/image-20221102204129802.png" alt></td>
+<td><img src="/58433/image-20221102204150472.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="SVD-的介绍">SVD 的介绍</h3>
+<p>变量（维数）较多，增加了分析问题的复杂性。</p>
+<p>数据丰富但知识贫乏：实际问题中，变量之间可能存在一定的相关，因此，多变量中可能存在资讯的重叠。</p>
+<p>人们自然希望通过克服相关、重叠性，<strong>用较少的变量来代替原来多的变量</strong>，而这种代替可以反映原来多个变量的大部分资讯，这实际上是一种“降维”的思想。</p>
+<h2 id="降维方法汇总">降维方法汇总</h2>
+<p><img src="/58433/6.png" alt></p>
+<h3 id="特征值与特征向量">特征值与特征向量</h3>
+<ol>
+<li>设 $A$ 是 $n$ 阶矩阵，如果数 $\lambda$ 和 n 维非零列向量使关系式$Ax = \lambda x$成立</li>
+<li>则称$\lambda$是方阵 A 的特征值，非零向量 x 称为 A 的对应特征值的特征向量。</li>
+<li>一般求解方法</li>
+</ol>
+<p>$$
+|A - \lambda I| = 0 \iff
+\begin{vmatrix}
+a_{11} &amp; a_{12} &amp; ... &amp; a_{1n} \
+a_{21} &amp; a_{22} &amp; ... &amp; a_{2n} \
+. &amp; . &amp; ... &amp; . \
+a_{n1} &amp; a_{n2} &amp; ... &amp; a_{nn} \
+\end{vmatrix} = 0
+$$</p>
+<h3 id="降维方法">降维方法</h3>
+<ol>
+<li>PCA（主成分分析，Principal-Component Analysis）</li>
+<li>LDA（线性判别分析）</li>
+<li>因子分析</li>
+<li>SVD（奇异值分解，Singular-Value Decomposition）</li>
+<li>CUR 分解</li>
+</ol>
+<h2 id="SVD（奇异值分解，Singular-Value-Decomposition）">SVD（奇异值分解，Singular-Value Decomposition）</h2>
+<p>$$
+A_{[m * n]} = U_{[m * r]} * \Sigma_{[r * r]} (V_{[n * r])^T}
+$$</p>
+<table>
+<thead>
+<tr>
+<th>矩阵符号</th>
+<th>矩阵名称</th>
+<th>矩阵描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$A$</td>
+<td>输入数据矩阵</td>
+<td>m * n 维</td>
+</tr>
+<tr>
+<td>$U$</td>
+<td>左奇异矩阵</td>
+<td>m * r 维，正交矩阵，$UU^T = I$</td>
+</tr>
+<tr>
+<td>$\Sigma$</td>
+<td>奇异值对角矩阵</td>
+<td>r * r 维，r 是矩阵 A 的秩，只有对角线上有值，其他元素均为 0</td>
+</tr>
+<tr>
+<td>$V$</td>
+<td>右奇异矩阵</td>
+<td>n * r 维，正交矩阵，$V^TV = I$</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Notes：奇异值分解的信息下降是非常快的，基本上前 100 个奇异值就可以表征大多数的数据。</p>
+</blockquote>
+<h3 id="SVD-图示">SVD 图示</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/58433/8-1676530537701-138.png" alt></th>
+<th><img src="/58433/9-1676530537701-139.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="奇异值求解">奇异值求解</h3>
+<p>$$
+AA^T = U\Sigma V^TV\Sigma^TU^T = U\Sigma\Sigma^TU^T \tag{1-1}
+$$</p>
+<p>$$
+A^TA = V\Sigma U^TU\Sigma V^T = V\Sigma^T\Sigma V^T \tag{1-2}
+$$</p>
+<blockquote>
+<p>我们通过简单分析可以知道 $AA^T$ 和 $A^TA$ 是对称矩阵</p>
+<ol>
+<li>我们利用上面的（1-1）式来进行特征值分解，得到的特征矩阵就是 U</li>
+<li>通过上面的（1-2）式来进行特征值分解，得到的特征矩阵就是 V</li>
+<li>对 $\Sigma\Sigma^T$ 或者 $\Sigma^T\Sigma$ 中的特征值开方，可以获得所有的奇异值</li>
+</ol>
+</blockquote>
+<h3 id="SVD-计算示例">SVD 计算示例</h3>
+<p>$$
+A = \begin{bmatrix}
+0 &amp; 1 \
+1 &amp; 1 \
+1 &amp; 0
+\end{bmatrix} <br>
+A^T = \begin{bmatrix}
+0 &amp; 1 &amp; 1 \
+1 &amp; 1 &amp; 0
+\end{bmatrix}
+$$</p>
+<p>求解特征值要从大到小排列</p>
+<table>
+<thead>
+<tr>
+<th>矩阵名</th>
+<th>矩阵值</th>
+<th>特征值</th>
+<th>特征矩阵</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$U$</td>
+<td>$U = A * A^T = \begin{bmatrix} 1 &amp; 1 &amp; 0 \ 1 &amp; 2 &amp; 0 \ 0 &amp; 1 &amp; 1\end{bmatrix}$</td>
+<td>$\lambda_1 = 3, u_1 = (\frac{1}{\sqrt{6}},\frac{2}{\sqrt{6}},\frac{1}{\sqrt{6}})^T$<br>$\lambda_2 = 1, u_2 = (\frac{1}{\sqrt{2}}, 0, -\frac{1}{\sqrt{2}})^T$<br>$\lambda_3 = 0, u_3 = (\frac{1}{\sqrt{3}}, -\frac{1}{\sqrt{3}}, \frac{1}{\sqrt{3}})^T$</td>
+<td>$\begin{bmatrix} \frac{1}{\sqrt{6}} &amp; \frac{1}{\sqrt{2}} &amp; \frac{1}{\sqrt{3}} \ \frac{2}{\sqrt{6}} &amp; 0 &amp; -\frac{1}{\sqrt{3}} \ \frac{1}{\sqrt{6}} &amp; -\frac{1}{\sqrt{2}} &amp; \frac{1}{\sqrt{3}} \end{bmatrix}$</td>
+</tr>
+<tr>
+<td>$V$</td>
+<td>$V = A^T*A = (\begin{matrix} 2 &amp; 1 \ 1 &amp; 2\end{matrix})$</td>
+<td>$\lambda_1 = 3,v_1 = (\frac{1}{\sqrt{2}}, \frac{1}{\sqrt{2}}) ^ T$<br>$\lambda_2 = 1,v_2 = (-\frac{1}{\sqrt{2}}, -\frac{1}{\sqrt{2}}) ^ T$</td>
+<td>$\begin{bmatrix} \frac{1}{\sqrt{2}} &amp; -\frac{1}{\sqrt{2}} \ \frac{1}{\sqrt{2}} &amp; -\frac{1}{\sqrt{2}} \end{bmatrix}$</td>
+</tr>
+</tbody>
+</table>
+<p>求解奇异值为：$\sqrt{3}$ 和 1</p>
+<h3 id="SVD-的性质">SVD 的性质</h3>
+<blockquote>
+<p>我们通常可以将一个实数矩阵 A 按照分解为$A = U\Sigma V^T$</p>
+</blockquote>
+<ol>
+<li>$U,\Sigma,V$：唯一</li>
+<li>U,V：列正交
+<ol>
+<li>$U^TU = I,V^TV = I$，I 是单位矩阵</li>
+<li>列是正交单位向量</li>
+</ol>
+</li>
+<li>$\Sigma$：对角矩阵：对角值（奇异值）为正，并以降序排列</li>
+</ol>
+<h3 id="SVD-的例子的解释（Users-to-Movies）">SVD 的例子的解释（Users to Movies）</h3>
+<p><img src="/58433/10-1676530537701-140.png" alt>
+<img src="/58433/11-1676530537701-141.png" alt></p>
+<ul>
+<li>U：“User to Concept”相似度矩阵
+<ul>
+<li>第一列：SciFi-concept</li>
+<li>第二列：Romance-concept</li>
+</ul>
+</li>
+<li>$\Sigma$：
+<ul>
+<li>第一对角值：“strength” of the SciFi-concept</li>
+<li>对角值：“strength” of each concept</li>
+</ul>
+</li>
+<li>V：“movie-to-concept”相似度矩阵</li>
+</ul>
+<p><img src="/58433/12-1676530537701-142.png" alt></p>
+<h3 id="SVD-的向量理解">SVD 的向量理解</h3>
+<p><img src="/58433/005-%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4-1667393965341-74.jpg" alt></p>
+<ol>
+<li>不使用二维（x, y）来描述一个点,而是使用一个点 z 来描述这个点。</li>
+<li>点的位置是在向量 v1 上的</li>
+<li>如何选择 v1：最小化 reconstruction errors（我们选择使用欧氏距离）</li>
+</ol>
+<h4 id="最小化-reconstruction-errors">最小化 reconstruction errors</h4>
+<p>SVD 目标：最小化 reconstruction errors</p>
+<p>$$
+\sum\limits_{i = 1}\limits^{N}\sum\limits_{j = 1}\limits^D||x_{ij} - z_{ij}||^2 \to 0
+$$</p>
+<p>如何被认为是没有了，下降结束了？设置最小的奇异值为 0</p>
+<p><img src="/58433/17-1676530537701-143.png" alt></p>
+<ol start="3">
+<li>得到 SVD 后的近似矩阵（将最小的奇异值设置为 0 和 U、V 中对应的行和列置为 0，重新做乘法得到新的矩阵）</li>
+</ol>
+<p><img src="/58433/18-1676530537701-144.png" alt></p>
+<h4 id="SVD-向量理解例子：Users-to-Movies">SVD 向量理解例子：Users to Movies</h4>
+<p><img src="/58433/14.png" alt>
+<img src="/58433/15-1676530537702-145.png" alt>
+<img src="/58433/16-1676530537702-146.png" alt></p>
+<h3 id="SVD-最低秩近似">SVD - 最低秩近似</h3>
+<p><img src="/58433/19-1676530537702-147.png" alt></p>
+<p>定理：如果 $A = U\Sigma V^T$ 并且 $B = U S V^T$，并且 S 是一个对角 r * r 的矩阵，并且 $s_i = \delta_i(i = 1...k)$，并且其他的 $s_i=0$，那么 B 是 A 的最合适的近似矩阵，并且 $rank(B) = k$</p>
+<ol>
+<li>什么是最好?B 在$rank(B) = k$的时候是$\min\limits_B||A-B||_F$的解</li>
+<li>$||A-B||<em>F = \sqrt{\sum\limits</em>{ij}(A_{ij} - B_{ij})^2}$</li>
+</ol>
+<h4 id="引理">引理</h4>
+<ol>
+<li>$||M||<em>F = \sum\limits_i(q</em>{ii})^2$ 当 M = P Q R 是 M 的 SVD 的时候</li>
+<li>$U\Sigma V^T - USV^T = U(\Sigma - S)V^T$</li>
+</ol>
+<h4 id="引理的证明">引理的证明</h4>
+<p>$$
+\begin{array}{l}
+|M|=\sum\limits_i\sum\limits_j\left(m_{i j}\right)^{2}=\sum\limits_i \sum\limits_j\left(\sum\limits_k \sum\limits_lp_{i k} q_{kl} r_{lj}\right)^{2} \
+|M|=\sum\limits_i\sum\limits_j\sum\limits_k\sum\limits_l \sum\limits_n\sum\limits_m p_{ik} q_{kl} r_{lj} p_{in} q_{nm} r_{mj}
+\end{array}
+$$</p>
+<ul>
+<li>$\sum\limits_ip_{ik}p_{in}$ 是 1，如果 k=n，不然为 0</li>
+<li>P 是列正交矩阵，R 是正交矩阵，Q 是对角矩阵</li>
+</ul>
+<p>$$
+\begin{array}{l}
+A = U \Sigma V^T, B = U S V^T \
+\
+\min\limits_{B, rank(B)=K}||A-B||<em>F \
+= \min ||\Sigma - S||<em>F = \min\limits</em>{s_i}\sum\limits</em>{i=1}\limits^r(\delta_i-s_i)^2
+\end{array}
+$$</p>
+<ul>
+<li>我们想要的是最小化 $\min\limits_{s_i}\sum\limits_{i=1}^r(\theta_i-s_i)^2$</li>
+<li>解决方案就是令 $s_i = \delta_i(i = 1...k)$ 并且其他 $s_i=0$</li>
+</ul>
+<p>$$
+\begin{array}{l}
+\min\limits_{s_i}\sum\limits_{i=1}\limits^k(\delta_i-s_i)^2 + \sum\limits_{i = k + 1}\limits^r\delta^2 \
+= \sum\limits_{i = k + 1}\limits^r\delta^2
+\end{array}
+$$</p>
+<h4 id="定理的说明">定理的说明</h4>
+<p><img src="/58433/20-1676530537702-148.png" alt>
+<img src="/58433/21-1676530537702-149.png" alt></p>
+<p>为什么将 $\delta_i$ 设置为 0 是正确的做法？</p>
+<ul>
+<li>向量 $u_i$ 和 $v_i$ 是单位长度，所以 $\delta_i$ 是用来调整他们的</li>
+<li>所以让 $\delta_i$ 成为 0 可以导致更少的损失</li>
+</ul>
+<p>我们应该保持多少 $\delta_s$，拇指原则：$\sum\limits_i\delta_i^2$ 的和在 80%-90%，保证信息损失不太多</p>
+<h3 id="SVD-算法的复杂度">SVD 算法的复杂度</h3>
+<ol>
+<li><strong>计算 SVD 的复杂度</strong>：$\min(O(nm^2), O(n^2m))$</li>
+<li>但是如果我们只想知道奇异值或者前 k 个奇异值，或者矩阵是稀疏矩阵，那么复杂度会大大下降</li>
+</ol>
+<h3 id="SVD-和特征分解的关系">SVD 和特征分解的关系</h3>
+<p>SVD 角度：$A = U \Sigma V^T$</p>
+<p>特征分解的角度：$A = X \Lambda X^T$</p>
+<ol>
+<li>A 是对称的</li>
+<li>$U,V,X$ 都是正交矩阵</li>
+<li>$\Lambda,\Sigma$ 都是对角的</li>
+</ol>
+<p>$$
+\begin{array}{l}
+AA^T \
+= U\Sigma V^T (U\Sigma V^T)^T \
+= U\Sigma V^T (V\Sigma^TU^T) \
+= U\Sigma\Sigma^TU^T(X \Lambda^2 X^T )\
+\
+A^TA \
+= V(\Sigma^TU^T)(U\Sigma V^T) \
+= V\Sigma\Sigma^TV^T(X \Lambda^2 X^T )
+\end{array}
+$$</p>
+<h3 id="案例：如何查询">案例：如何查询</h3>
+<p>查找类似这个矩阵的用户：将查询映射到“概念空间”中-怎么做？</p>
+<table>
+<thead>
+<tr>
+<th><img src="/58433/22-1676530537702-150.png" alt></th>
+<th><img src="/58433/23.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>user q：$q_{concept} = q V$</li>
+<li>user d：$d_{concept} = d V$</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/58433/24.png" alt></th>
+<th><img src="/58433/25.png" alt></th>
+</tr>
+</thead>
+</table>
+<p>观察：被评级为“Alien”，“Serenity”的用户 d 与被评级为“Matrix”的用户 q 相似，尽管 d 和 q 的共同点为零！</p>
+<p><img src="/58433/26.png" alt></p>
+<h3 id="SVD-的效果">SVD 的效果</h3>
+<p><img src="/58433/27.png" alt></p>
+<h2 id="CUR-分解">CUR 分解</h2>
+<p>目标：将矩阵 A 解释为 C，U，R，使得 $||A - C<em>U</em>R||_F$ 最小</p>
+<p><img src="/58433/34.png" alt></p>
+<h3 id="选择行和列的方式">选择行和列的方式</h3>
+<ol>
+<li>尽管我们是随机的选择行和列，但是我们还是保留了对于重要的行和列的权重</li>
+<li>行和列的权重计算：$f=\sum\limits_{i,j}a_{ij}^2$</li>
+<li>我们按照概率 $p_i = \sum\limits_{j}\frac{a_{ij}^2}{f}$ 选择行</li>
+<li>我们按照概率 $q_j = \sum\limits_{i}\frac{a_{ij}^2}{f}$</li>
+<li>归一化处理：将所有的元素都是除以 $\sqrt{rq_j}$（行）、$\sqrt{rp_i}$（列）</li>
+</ol>
+<h3 id="CUR-对列（行）进行取样">CUR 对列（行）进行取样</h3>
+<p>以列为例，行也是相似的</p>
+<p>输入：矩阵 $A \in R^{m * n}$，样例数 c</p>
+<p>输出：$C_d \in R^{m * c}$</p>
+<p>算法过程：</p>
+<ol>
+<li>对于 $\forall x \in [1, n]，P(x) = \frac{\sum\limits_iA(i, x)^2}{\sum\limits_{i,j}A(i,j)^2}$</li>
+<li>对于 $\forall i \in [1, c]$，以一列为例
+<ol>
+<li>选择 $k \in [1, n]$ 满足分布 $P(x)$</li>
+<li>计算 $C_d(:,i) = \frac{A(:,k)}{\sqrt{cP(k)}} = \frac{A(:, k)}{\sqrt{c * \frac{\sum\limits_iA(i, k)^2}{\sum\limits_{i,j}A(i,j)^2}}}$</li>
+</ol>
+</li>
+</ol>
+<p>请注意，这是一种随机算法，同一列可以多次采样</p>
+<h3 id="计算-U">计算 U</h3>
+<p>U 是一个 $r*r$ 的矩阵，所以是比较小的，并且如果他是高密度、难计算的也是可以的。</p>
+<p>首先计算 W，我们让 W 是列 C 和行 R 的交集，并且计算出 W 的 SVD 表示为 $W = X \Sigma Y^T$</p>
+<p>然后计算 $\Sigma$ 的 Moore-Penorse inverse（伪逆矩阵）：$\Sigma$</p>
+<ol>
+<li>$\Sigma$ 是一个对角矩阵</li>
+<li>他的 Moore-Penorse inverse 满足：
+<ol>
+<li>$\frac{1}{\sigma}$ 如果 $\sigma \neq 0$</li>
+<li>0 如果 $\sigma=0$</li>
+</ol>
+</li>
+</ol>
+<p>然后：$U = W^+ = Y(\Sigma^+)^2X^T$</p>
+<ol>
+<li>非零奇异值的倒数：$\Sigma_{ii}^{+} = 1/\Sigma_{ii}$</li>
+<li>$W^+$ 是伪逆</li>
+</ol>
+<p><img src="/58433/30.png" alt></p>
+<h4 id="为什么伪逆是有效的">为什么伪逆是有效的</h4>
+<p>$$
+\begin{matrix}
+W = X \Sigma Y \
+W^{-1} = X^{-1} * \Sigma^{-1} * Y^{-1} \
+\because X^{-1} = X^T, Y^{-1} = Y^T \
+\Sigma^{-1} = \frac{1}{\Sigma_{ii}} \
+\end{matrix}
+$$</p>
+<ul>
+<li>X、Y 正交矩阵，$\Sigma$ 是对角矩阵</li>
+<li>因此，如果 W 是非奇异矩阵，伪逆矩阵是真的逆矩阵</li>
+</ul>
+<h3 id="CUR-是可以被证明是-SVD-的一个很好近似">CUR 是可以被证明是 SVD 的一个很好近似</h3>
+<p><img src="/58433/31.png" alt></p>
+<h3 id="CUR-的优点和缺点">CUR 的优点和缺点</h3>
+<h4 id="优点">优点</h4>
+<ol>
+<li>很好计算：由于基向量是实际的列和行</li>
+<li>稀疏矩阵：由于基向量是实际的列和行</li>
+</ol>
+<h4 id="缺点">缺点</h4>
+<ol>
+<li>重复的列和行：大量的列将被多次采样</li>
+</ol>
+<h3 id="如何避免重复">如何避免重复</h3>
+<ol>
+<li>方案一：直接抛弃</li>
+<li>方法二：用重复项的平方根缩放（乘）列/行</li>
+</ol>
+<h2 id="SVD-和-CUR">SVD 和 CUR</h2>
+<p><img src="/58433/32.png" alt></p>
+<h3 id="简单的实验">简单的实验</h3>
+<p>DBLP bibliographic data</p>
+<ol>
+<li>Author-to-conference 的大稀疏矩阵</li>
+<li>$A_{ij}$：作者 i 在会议 j 上发表的论文数量</li>
+<li>428k 个作者（列），3659 会议（行）</li>
+<li>非常稀疏</li>
+</ol>
+<h3 id="DBLP-的结果">DBLP 的结果</h3>
+<p><img src="/58433/33.png" alt></p>
+<h2 id="线性假设">线性假设</h2>
+<p>SVD 只能用于线性投影：低维线性投影，保持欧式距离</p>
+<p>非线性方法：Isomap</p>
+<ol>
+<li>数据位于一个低维的非线性曲线</li>
+<li>使用距离度量对应的形状</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/25714/" rel="prev" title="嵌入式系统概论-10-嵌入式系统概论总结">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-10-嵌入式系统概论总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/839/" rel="next" title="自动化测试-04-05-智能软件测试">
+      自动化测试-04-05-智能软件测试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4%EF%BC%88Dimensionality-Reduction%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">降维（Dimensionality Reduction）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.</span> <span class="nav-text">SVD 示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9-%E9%99%8D%E4%BD%8E%E5%B0%BA%E5%AF%B8"><span class="nav-number">1.2.</span> <span class="nav-text">压缩&#x2F;降低尺寸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%A9%E9%98%B5%E7%9A%84%E7%A7%A9"><span class="nav-number">1.3.</span> <span class="nav-text">矩阵的秩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%A9%E6%98%AF%E5%8F%AF%E4%BB%A5%E9%99%8D%E7%BB%B4"><span class="nav-number">1.4.</span> <span class="nav-text">秩是可以降维</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4%E7%9A%84%E7%9B%AE%E7%9A%84"><span class="nav-number">1.5.</span> <span class="nav-text">降维的目的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4%E7%9A%84%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.6.</span> <span class="nav-text">降维的描述</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SVD"><span class="nav-number">2.</span> <span class="nav-text">SVD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">SVD 的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.2.</span> <span class="nav-text">SVD 的介绍</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4%E6%96%B9%E6%B3%95%E6%B1%87%E6%80%BB"><span class="nav-number">3.</span> <span class="nav-text">降维方法汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E5%80%BC%E4%B8%8E%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F"><span class="nav-number">3.1.</span> <span class="nav-text">特征值与特征向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E7%BB%B4%E6%96%B9%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">降维方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SVD%EF%BC%88%E5%A5%87%E5%BC%82%E5%80%BC%E5%88%86%E8%A7%A3%EF%BC%8CSingular-Value-Decomposition%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">SVD（奇异值分解，Singular-Value Decomposition）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E5%9B%BE%E7%A4%BA"><span class="nav-number">4.1.</span> <span class="nav-text">SVD 图示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%87%E5%BC%82%E5%80%BC%E6%B1%82%E8%A7%A3"><span class="nav-number">4.2.</span> <span class="nav-text">奇异值求解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E8%AE%A1%E7%AE%97%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.3.</span> <span class="nav-text">SVD 计算示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="nav-number">4.4.</span> <span class="nav-text">SVD 的性质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E4%BE%8B%E5%AD%90%E7%9A%84%E8%A7%A3%E9%87%8A%EF%BC%88Users-to-Movies%EF%BC%89"><span class="nav-number">4.5.</span> <span class="nav-text">SVD 的例子的解释（Users to Movies）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E5%90%91%E9%87%8F%E7%90%86%E8%A7%A3"><span class="nav-number">4.6.</span> <span class="nav-text">SVD 的向量理解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96-reconstruction-errors"><span class="nav-number">4.6.1.</span> <span class="nav-text">最小化 reconstruction errors</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SVD-%E5%90%91%E9%87%8F%E7%90%86%E8%A7%A3%E4%BE%8B%E5%AD%90%EF%BC%9AUsers-to-Movies"><span class="nav-number">4.6.2.</span> <span class="nav-text">SVD 向量理解例子：Users to Movies</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E6%9C%80%E4%BD%8E%E7%A7%A9%E8%BF%91%E4%BC%BC"><span class="nav-number">4.7.</span> <span class="nav-text">SVD - 最低秩近似</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E7%90%86"><span class="nav-number">4.7.1.</span> <span class="nav-text">引理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E7%90%86%E7%9A%84%E8%AF%81%E6%98%8E"><span class="nav-number">4.7.2.</span> <span class="nav-text">引理的证明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E7%90%86%E7%9A%84%E8%AF%B4%E6%98%8E"><span class="nav-number">4.7.3.</span> <span class="nav-text">定理的说明</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%AE%97%E6%B3%95%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">4.8.</span> <span class="nav-text">SVD 算法的复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E5%92%8C%E7%89%B9%E5%BE%81%E5%88%86%E8%A7%A3%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.9.</span> <span class="nav-text">SVD 和特征分解的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%A6%82%E4%BD%95%E6%9F%A5%E8%AF%A2"><span class="nav-number">4.10.</span> <span class="nav-text">案例：如何查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVD-%E7%9A%84%E6%95%88%E6%9E%9C"><span class="nav-number">4.11.</span> <span class="nav-text">SVD 的效果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CUR-%E5%88%86%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">CUR 分解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E8%A1%8C%E5%92%8C%E5%88%97%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">5.1.</span> <span class="nav-text">选择行和列的方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUR-%E5%AF%B9%E5%88%97%EF%BC%88%E8%A1%8C%EF%BC%89%E8%BF%9B%E8%A1%8C%E5%8F%96%E6%A0%B7"><span class="nav-number">5.2.</span> <span class="nav-text">CUR 对列（行）进行取样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97-U"><span class="nav-number">5.3.</span> <span class="nav-text">计算 U</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%AA%E9%80%86%E6%98%AF%E6%9C%89%E6%95%88%E7%9A%84"><span class="nav-number">5.3.1.</span> <span class="nav-text">为什么伪逆是有效的</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUR-%E6%98%AF%E5%8F%AF%E4%BB%A5%E8%A2%AB%E8%AF%81%E6%98%8E%E6%98%AF-SVD-%E7%9A%84%E4%B8%80%E4%B8%AA%E5%BE%88%E5%A5%BD%E8%BF%91%E4%BC%BC"><span class="nav-number">5.4.</span> <span class="nav-text">CUR 是可以被证明是 SVD 的一个很好近似</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CUR-%E7%9A%84%E4%BC%98%E7%82%B9%E5%92%8C%E7%BC%BA%E7%82%B9"><span class="nav-number">5.5.</span> <span class="nav-text">CUR 的优点和缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">5.5.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">5.5.2.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E9%87%8D%E5%A4%8D"><span class="nav-number">5.6.</span> <span class="nav-text">如何避免重复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SVD-%E5%92%8C-CUR"><span class="nav-number">6.</span> <span class="nav-text">SVD 和 CUR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%AE%9E%E9%AA%8C"><span class="nav-number">6.1.</span> <span class="nav-text">简单的实验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DBLP-%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="nav-number">6.2.</span> <span class="nav-text">DBLP 的结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%81%87%E8%AE%BE"><span class="nav-number">7.</span> <span class="nav-text">线性假设</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

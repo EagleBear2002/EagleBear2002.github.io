@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 RIP 协议 RIPv1 RIPv1 被认为是一种内部网关协议。  RIPv1 是一种距离向量协议，它以预定间隔将其整个路由表广播到每个邻居路由器。默认间隔为30 秒。 RIP 使用跳数作为度量标准，最大跳数为15，达到 16 跳的报文自动抛弃。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网计算-08-路由协议">
+<meta property="og:url" content="https://eaglebear2002.github.io/28848/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 RIP 协议 RIPv1 RIPv1 被认为是一种内部网关协议。  RIPv1 是一种距离向量协议，它以预定间隔将其整个路由表广播到每个邻居路由器。默认间隔为30 秒。 RIP 使用跳数作为度量标准，最大跳数为15，达到 16 跳的报文自动抛弃。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093405313.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093410087.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093426037.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093431599.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093435901.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093440880.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/3-1676528387114-586.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112243549.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093448375.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093511907.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093521354.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093529281.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093534557.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093539284.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093550704.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093600081.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093605356.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093609777.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093615650.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093622738.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/1.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/2.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093641304.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093645415.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230715220052916.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230715220057347.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230715220108528.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230715220115044.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093700082.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093705035.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230716093709830.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112307485.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112349666.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112354786.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112359563.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112404070.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112415214.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112420854.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112432124.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112443090.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112449943.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28848/image-20230721112458193.png">
+<meta property="article:published_time" content="2022-05-25T01:23:22.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.608Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/28848/image-20230716093405313.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/28848/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网计算-08-路由协议 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/28848/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网计算-08-路由协议
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-25 09:23:22" itemprop="dateCreated datePublished" datetime="2022-05-25T09:23:22+08:00">2022-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Spring-互联网计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="RIP-协议">RIP 协议</h2>
+<h3 id="RIPv1">RIPv1</h3>
+<p>RIPv1 被认为是一种<strong>内部网关协议</strong>。</p>
+<ol>
+<li>RIPv1 是一种距离向量协议，它以<strong>预定间隔</strong>将其<strong>整个路由表</strong>广播到每个<strong>邻居路由器</strong>。默认间隔为<strong>30 秒</strong>。</li>
+<li>RIP 使用<strong>跳数</strong>作为度量标准，最大跳数为<strong>15</strong>，达到 16 跳的报文自动抛弃。</li>
+</ol>
+<p>RIPv1 能够在多达六个等价路径上进行<strong>负载平衡（Load Balancing）</strong>，默认情况下为四个路径，最多 6 个，跳数相同才能完成负载均衡，跳数不同不满足条件。</p>
+<p>RIP 最初是在 RFC 1058 中指定的。RIPv1 具有以下限制：</p>
+<ol>
+<li>它不会在其更新中发送子网掩码信息：意味着必须用同样的子网掩码，不支持 VLSM 或无类域间路由（CIDR）。</li>
+<li>它以 255.255.255.255 的广播形式发送更新：只能发给邻居，不能通过路由器转发。</li>
+<li>它不支持身份验证（authentication）：只要启动 RIP 就可以接受到信息，也就意味着只要接入网络并且启动 RIP 进程，就可以了解到整个网络拓扑</li>
+</ol>
+<h4 id="RIP-配置">RIP 配置</h4>
+<p><code>router rip</code> 命令选择 RIP 作为路由协议。</p>
+<p><code>network</code> 命令分配基于 NIC 的网络地址，路由器将直接连接到该网络地址。</p>
+<p><img src="/28848/image-20230716093405313.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">router rip <span class="hljs-comment"># 选择 RIP 路由协议</span><br>network 1.0.0.0<br>network 2.0.0.0<br>凡是属于上面的网段的端口都运行 RIP 协议<br>这些网段必须做到直连该路由器<br></code></pre></td></tr></table></figure>
+<p><img src="/28848/image-20230716093410087.png" alt></p>
+<p>上图中，A 启动 RIP 进程，A 有 4 个端口</p>
+<h3 id="RIPv2">RIPv2</h3>
+<p>RIPv2 是 RIPv1 的改进版本，并且新增了以下的功能：</p>
+<ol>
+<li>这是一种使用<strong>跳数指标</strong>的距离矢量协议。</li>
+<li>它使用<strong>抑制计时器</strong>来防止路由循环，默认值为<strong>180 秒</strong>，6 倍于交换时间</li>
+<li>它使用<strong>水平分割</strong>（Split Horizon）来防止路由循环（Routing Loops）</li>
+<li>它使用 16 跳作为<strong>无限距离的度量</strong>。（15 跳及以内可达）</li>
+</ol>
+<h4 id="RIPv2-的配置">RIPv2 的配置</h4>
+<p><code>network</code> 命令导致实现以下三个功能：</p>
+<ol>
+<li>路由更新从接口多播。</li>
+<li>如果路由更新进入相同的界面，则将对其进行处理。</li>
+<li>广播直接连接到该接口的子网。</li>
+</ol>
+<p><code>version 2</code>：表示启动 RIPv2，直接使用 <code>router rip</code> 默认为 v1，一定要输入这个命令才能启动 RIPv2</p>
+<p><img src="/28848/image-20230716093426037.png" alt></p>
+<h4 id="验证与故障排除">验证与故障排除</h4>
+<p>验证 RIPv2：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router#show ip protocols <span class="hljs-comment">#验证 RIP 配置</span><br>Router#show ip route <span class="hljs-comment">#显示 IP 路由表</span><br></code></pre></td></tr></table></figure>
+<p>故障排除 RIPv2：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router#debug ip rip <span class="hljs-comment">#显示更新路由表的时候的更新</span><br>Router#undebug all <span class="hljs-comment">#（或 no debug all）：停止 debug</span><br></code></pre></td></tr></table></figure>
+<p>实例：</p>
+<p><img src="/28848/image-20230716093431599.png" alt></p>
+<h4 id="debug-IP-RIP-命令"><code>debug IP RIP</code> 命令</h4>
+<p><img src="/28848/image-20230716093435901.png" alt></p>
+<p><code>debug ip rip</code> 命令显示 RIP 路由更新的发送和接收。在本示例中，更新是通过 183.8.128.130 发送的</p>
+<p>它报告了三台路由器，其中一台无法访问，因为其跳数大于 15。然后通过 183.8.128.2 广播了更新</p>
+<p><img src="/28848/image-20230716093440880.png" alt></p>
+<p>上图是查看路由表：Codes：表示对于路由协议类型的描述</p>
+<p>120/1：表示 1 跳到达，120/2：表示 2 跳到达</p>
+<h3 id="RIPv1-和-RIPv2-之间的区别">RIPv1 和 RIPv2 之间的区别</h3>
+<p><img src="/28848/3-1676528387114-586.png" alt></p>
+<ol>
+<li>支持有类路由：可以携带子网掩码</li>
+<li>使用组播地址进行发送广播：<strong>特定给 RIP 接受，避免了接受后发现没有启动 RIP 进程耽误时间</strong></li>
+<li>需要身份认证才确定是否继续进行接收</li>
+</ol>
+<h2 id="OSPF-协议">OSPF 协议</h2>
+<p>本文介绍单个区域（single-srea）OSPF 协议。</p>
+<h3 id="OSPF-概述">OSPF 概述</h3>
+<ol>
+<li>开放最短路径优先（OSPF，Open Shortest Path First）是基于开放标准（即该标准可以再扩充）的链路状态路由协议</li>
+<li>网络工程任务组（IETF，Internet Engineering Task Force）的多个标准中对此进行了描述：最新的描述是 RFC 2328（已经不是最新的了）</li>
+<li>与 RIPv1 和 RIPv2 相比，OSPF 正在成为首选的 IGP 协议，因为它具有可伸缩性</li>
+<li>和 RIP 相比优势比较大，很多网络公司在研究 OSPF 的优化</li>
+</ol>
+<h3 id="路由信息">路由信息</h3>
+<ol>
+<li><strong>链接的状态</strong>是<strong>对接口及其与其相邻路由器的关系的描述</strong></li>
+<li>链接状态的集合形成一个<strong>链接状态数据库</strong>，有时也称为<strong>拓扑数据库</strong></li>
+<li>路由器应用 Dijkstra 最短路径优先（SPF）算法来构建以自己为根的 SPF 树</li>
+<li>路由器通过 SPF 树计算最佳路径，然后选择最佳路径并将其放置在<strong>路由表</strong>中</li>
+</ol>
+<h3 id="OSPF-和-RIP-差别">OSPF 和 RIP 差别</h3>
+<p><img src="/28848/image-20230721112243549.png" alt></p>
+<p>OSPF：用于大型网络，基于带宽，可以分层（将网络划分成 2 层），收敛更快，支持多路负载均衡</p>
+<p>What is the Best Path from A to B?</p>
+<p><img src="/28848/image-20230716093448375.png" alt></p>
+<p>上面带宽大，2 跳达到，下面带宽小，1 跳到达。</p>
+<p>OSPF 从上面走，RIP 从下面走，但是上面会快一些，因此 OSPF 选择的路径是更加优越的</p>
+<h3 id="OSPF-特征">OSPF 特征</h3>
+<p>OSPF 的特征克服了这些限制</p>
+<ol>
+<li>更健壮</li>
+<li>更具可扩展性（有层次性涉及，涉及的网络更大）</li>
+</ol>
+<p>大型 OSPF 网络使用分层设计，分为两层</p>
+<ol>
+<li>将大的网络分成多个 area，每一个 area 只和 area 0 相连，<strong>保证 area 没有回路</strong></li>
+<li><strong>层次最多只有 2 个</strong>，一个 area 就是 area 0。其它 area 都需要和 area0 相连</li>
+<li>层次维持树的关系</li>
+</ol>
+<p><img src="/28848/image-20230716093511907.png" alt></p>
+<h3 id="OSPF-术语">OSPF 术语</h3>
+<p><img src="/28848/image-20230716093521354.png" alt></p>
+<ul>
+<li>连接（Link）：两个设备之间的物理链路</li>
+</ul>
+<p><img src="/28848/image-20230716093529281.png" alt></p>
+<ul>
+<li>邻居（Neighbors）：相邻的路由器</li>
+<li>链路状态（Link-State）：物理链路的信息，包括路由器连接关系、通过什么接口、链路带宽、网络类型（点对点、多路复用）等，不同网络类型处理代价不同（两种网络类型：点对点，多路复用）</li>
+</ul>
+<p><img src="/28848/image-20230716093534557.png" alt></p>
+<ul>
+<li>代价/费用（Cost）：不同网络链路处理的时候的代价，和链路带宽相关，成反比关系，<strong>一般是固定值除以带宽</strong></li>
+</ul>
+<p><img src="/28848/image-20230716093539284.png" alt></p>
+<ul>
+<li>区域（Area）：一个有很多路由器的端口都属于的区域（相同）</li>
+</ul>
+<p><img src="/28848/image-20230716093550704.png" alt></p>
+<ul>
+<li>自治系统（Autonomous System，AS）：多个 Area 形成一个自治系统</li>
+</ul>
+<p><img src="/28848/image-20230716093600081.png" alt></p>
+<p><img src="/28848/image-20230716093605356.png" alt></p>
+<p><img src="/28848/image-20230716093609777.png" alt></p>
+<ul>
+<li>Neighbours 必须在一个 Area 中，Neighbour 之间交换拓扑数据库（Topology Databases）当中存的是 link-state</li>
+<li>一个 Area 中获得全部 Link-State 后计算 Tree，生成表</li>
+</ul>
+<p><img src="/28848/image-20230716093615650.png" alt></p>
+<ul>
+<li>指定路由器（Designated Router，DR）：只有在多路复用的链路下使用，被选举出来</li>
+<li>备用指定路由器（Backup Designated Router，BDR）：如果 DR 坏了，再次选举会出现问题，如果 DR 损坏，BDR 立即成为 DR，目的是提高交换效率</li>
+</ul>
+<h3 id="OSPF-域">OSPF 域</h3>
+<p>逻辑指称的 OSPF 域。</p>
+<p>区域用 32 位数字标识，可以是 IP 格式（标准定义），也可以是一个十进制值，例如：区域 0 或区域 0.0.0.0。</p>
+<p>区域 0：区域编号为 0 的单个区域。 area 是 OSPF 两层结构划分的单位</p>
+<p>OSPF 使用 2 级分层模型：逻辑上必须是 2 层结构，而物理实现上可能有一定的差异，如果更多需要进行逻辑配置。</p>
+<p>在多区域 OSPF 网络中，要求所有区域都连接到区域 0（主干）。</p>
+<p>注意，Area 是对端口的划分，即一个路由器的不同端口可以属于不同 area。</p>
+<p><img src="/28848/image-20230716093622738.png" alt></p>
+<p>ABR（Area Border Router）：区域边界路由器，有一定的约束（一个路由器最多连接 3 个路由器）。</p>
+<p>一个 Area 中不能有超过 50 台路由器，否则会导致 SPF 算法产生的计算量和内存过大。</p>
+<h3 id="OSPF-行为">OSPF 行为</h3>
+<p>OSPF 使用邻居的邻接关系（Adjacencies）来全面了解网络。</p>
+<p>OSPF 操作包括五个步骤：</p>
+<ol>
+<li>建立邻接关系</li>
+<li>选择 DR 和 BDR（如果需要）：<strong>多路复用的时候才需要</strong></li>
+<li>发现路线</li>
+<li>选择适当的路线</li>
+<li>维护路线信息</li>
+</ol>
+<p>OSPF 具有七个状态，它们是：</p>
+<ol>
+<li>初始化（Init）</li>
+<li>双向操作（2Way）</li>
+<li>预先启动（Ex Start）</li>
+<li>交换（Exchange）</li>
+<li>加载（Loading）</li>
+<li>完成（Full）</li>
+</ol>
+<p><img src="/28848/1.jpg" alt></p>
+<p><img src="/28848/2.jpg" alt></p>
+<h3 id="最短路径算法">最短路径算法</h3>
+<p>最短路径算法（shortest path algorithm）使用该节点作为起点并依次检查它具有的有关相邻节点的信息来计算无环拓扑</p>
+<p>SPF：有权图-&gt;树</p>
+<p><img src="/28848/image-20230716093641304.png" alt></p>
+<p>以 C 为根的例子：找到最短的路径。</p>
+<p>不根据跳数来进行选择**，而是根据最小权和来寻找**</p>
+<h3 id="选择-DR-和-BDR">选择 DR 和 BDR</h3>
+<p>OSPF 网络类型</p>
+<ol>
+<li>广播多路复用网络，例如以太网</li>
+<li>点对点网络</li>
+<li>非广播多路复用网络（NBMA，Non-broadcast multi-access）</li>
+</ol>
+<p><img src="/28848/image-20230716093645415.png" alt></p>
+<h3 id="DR-BDR">DR &amp; BDR</h3>
+<h4 id="为什么要选择-DR-和-BDR？">为什么要选择 DR 和 BDR？</h4>
+<p><img src="/28848/image-20230715220052916.png" alt></p>
+<p>如上图，如果不选择 DR 和 BDR 会导致每一个路由器都和其他所有路由器交流（每个有 10 个连接）。每一个节点都要建立 $10 = (5 \times 4 / 2)$ 个链接，对于链路的复杂比较高，如果有了 DR 就只需要 $4=n-1$ 个连接。</p>
+<p>BDR 是 DR 的备份，其他路由器之间就不用通信了。如果有 DR 则只需要 4 条连接。DR 和 BDR 之间必然有连接。</p>
+<p><img src="/28848/image-20230715220057347.png" alt></p>
+<p>只有多路复用的实现方式需要 DR 和 BDR</p>
+<ol>
+<li>然后，每个路由器与 DR 和 BDR 形成邻接关系</li>
+<li>对于所有 OSPF 路由器，DR 使用 224.0.0.5（自己的 IP）的<strong>主播地址</strong>向该网段上的所有其他路由器发送链接状态信息</li>
+<li>为确保 DR/BDR 看到所有路由器在网段上发送的链接状态，使用了所有 DR/BDR 的多播地址 224.0.0.6（DR 和 BDR 之间）</li>
+</ol>
+<h4 id="多路复用中的-OSPF">多路复用中的 OSPF</h4>
+<ol>
+<li>Giga/Fast/Ethernet，FDDI，Token Ring</li>
+</ol>
+<p><img src="/28848/image-20230715220108528.png" alt></p>
+<ol start="2">
+<li>几个 Area 有几个 DR 和 BDR（是在不同 Area 上）</li>
+<li>DR 和 BDR 归属于区域</li>
+</ol>
+<h3 id="OSPF-报文">OSPF 报文</h3>
+<ol>
+<li>OSPF 只有 5 个类型的报文</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Fuction</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hello</td>
+<td>Hello</td>
+</tr>
+<tr>
+<td>Database Description</td>
+<td>DBD</td>
+</tr>
+<tr>
+<td>Link-State Request</td>
+<td>LSR</td>
+</tr>
+<tr>
+<td>Link-State Update</td>
+<td>LSU</td>
+</tr>
+<tr>
+<td>Link-State Acknowledgement</td>
+<td>LSAck</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>DBD：LSA，发现没有发送 LSR</li>
+<li>由于传输要求比较高，所以设计了 LSAck</li>
+</ul>
+<h4 id="OSPF-Hello-协议">OSPF Hello 协议</h4>
+<ol>
+<li>路由器在接口上启动 OSPF 路由过程时，将发送 hello 数据包，并继续以固定的时间间隔（intervals）发送 hello。</li>
+<li>控制（govern）OSPF hello 数据包交换的规则称为 Hello 协议</li>
+<li>Hello 数据包的地址为 224.0.0.5</li>
+<li>默认情况下，广播多路访问和点对点网络上<strong>每 10 秒</strong>发送一次 Hello 报文</li>
+<li>在连接到 NBMA 网络的接口（例如帧中继）上，默认时间是 30 秒</li>
+<li>保持心跳，确定还活着。Hello 几乎是空报文，给所有跑 OSPF 的路由器发送</li>
+</ol>
+<h4 id="OSPF-报文头部">OSPF 报文头部</h4>
+<p>Hello 报文的 Type 字段设置为 1</p>
+<p><img src="/28848/image-20230715220115044.png" alt></p>
+<h4 id="哪个路由器将成为-DR？">哪个路由器将成为 DR？</h4>
+<p>优先级为第一关键字，Router ID 为第二关键字，最大的是 DR，第二大的是 BDR</p>
+<p>优先级：1-255，默认值：1</p>
+<p>如何决定 Router ID：</p>
+<ol>
+<li>如果有环回端口（loopback 端口，逻辑上的端口），将该端口 IP 地址作为 Router ID，以避免一般端口宕机出现问题；环回端口需要手动配置</li>
+<li>如果没有环回 IP 地址，则将物理接口的最高 IP 地址作为 Router ID（Active 的端口上的 IP 作为参考）</li>
+<li>如果接口出现故障，则路由器必须重新建立邻接关系并重新转换（re-advertising）LSA</li>
+</ol>
+<h3 id="OSPF-操作的完整步骤">OSPF 操作的完整步骤</h3>
+<p><img src="/28848/image-20230716093700082.png" alt></p>
+<ul>
+<li>一开始的状态是 Down State</li>
+<li>然后发送 Hello 报文（Init State）</li>
+<li>B 收到 A 的报文（收到报文一定是邻居）：Hello 报文的 TTL 是 1，所以不会跨路由器传播，收到即丢弃</li>
+<li>收到后，B 也会发送自己的 Hello，然后 A 收到后进入 Two Way 状态</li>
+</ul>
+<p><img src="/28848/image-20230716093705035.png" alt></p>
+<ul>
+<li>准备交换数据库（Exstart Starts）</li>
+<li>首先确认主方（发送方）、从方（接受方），保证数据有序，简单就是谁的 Router ID 高</li>
+<li>Router ID 高的（主方）发送自己 DBD 报文，从方对主方发送的 DBD 接受处理并发送</li>
+</ul>
+<p><img src="/28848/image-20230716093709830.png" alt></p>
+<ul>
+<li>交换完成后，各自检查自己是不是有全部的信息
+<ul>
+<li>如果有完整的信息，则发送 LSAck</li>
+<li>如果发现有没有的，则发送 LSR，等待 LSU（整个链路的详细信息，不是 LSA）来进行学习，之后收到完成后发送 LSAck</li>
+</ul>
+</li>
+</ul>
+<h3 id="回顾：OSPF-操作">回顾：OSPF 操作</h3>
+<ol>
+<li>Step 1：Set up the adjacency relationships</li>
+<li>Step 2：Elect DR and BDR（if needed）</li>
+<li>Step 3：Discover the routes</li>
+<li>Step 4：Choose appropriate routes</li>
+<li>Step 5：Maintain the route information</li>
+</ol>
+<h4 id="步骤-1：建立路由器邻接">步骤 1：建立路由器邻接</h4>
+<ol>
+<li>路由器每隔一段时间发送一次 hello 数据包，Hello 报文的 TTL 是 1，表明不会跨路由传播</li>
+<li>如果邻居被发现了：将邻居添加到邻居数据库</li>
+<li>发现网络类型
+<ol>
+<li>如果是多路复用网络，进入 DR/BDR 选举过程，然后进入步骤 2</li>
+<li>如果是点对点或点对多点网络，则不会举行 DR/BDR 选举过程，并跳过步骤 2</li>
+<li>如果 hello 数据包标头中的 DR/BDR 字段已被占用（即 DR/BDR 对已经存在），则不会进行 DR/BDR 选举，并跳过步骤 2</li>
+</ol>
+</li>
+<li>如果对方的 DP/BDP 优于我的 DP/BDP，则接受对方的。</li>
+</ol>
+<p><img src="/28848/image-20230721112307485.png" alt></p>
+<blockquote>
+<p>Hello Interval：如果不同不能建立关系，Hello 报文包含了 DR 信息在内的必要的参数</p>
+</blockquote>
+<h4 id="步骤-2：选举-DR-和-BDR">步骤 2：选举 DR 和 BDR</h4>
+<ol>
+<li>如果没有其他路由器联机，则该路由器将成为 DR。下一个要“启动”的路由器将是 BDR</li>
+<li>如果多个路由器（两个或更多）同时联机，则
+<ol>
+<li>优先级最高的路由器成为 DR：优先级为零表示“从不 DR”</li>
+<li>如果存在平局，则具有最高 Router ID 的路由器将成为 DR： Router ID 是最高的环回或接口 IP 地址</li>
+<li>具有第二高优先级或 Router ID 的路由器成为 BDR</li>
+</ol>
+</li>
+<li>如果 DR 无效，则 BDR 变为 DR</li>
+<li>然而
+<ol>
+<li>如果新的 OSPF 路由器以更高的优先级或 Router ID 加入网络，则当前的 DR 和 BDR <strong>不会更改</strong></li>
+<li>仅当当前 DR 失败时，它才成为新的 BDR</li>
+</ol>
+</li>
+</ol>
+<h4 id="步骤-3：发现路线">步骤 3：发现路线</h4>
+<ol>
+<li>这一步从 Ex Start 状态转换到 Full 状态</li>
+<li>路由器确定“主/从（master/slave）”关系</li>
+<li>多路复用网络中的 DR/BDR 交换 LSA，并且所有其他 DR 将其 Type 2 DBD 发送给 DR/BDR</li>
+<li>如有必要，路由器可以通过发送请求更多信息的 LSR 进入负载状态：所有路由器必须在“加载状态”中等待，直到完全更新请求的路由器</li>
+<li>路由器现在进入完整状态</li>
+</ol>
+<h4 id="步骤-4：选择适当的路线">步骤 4：选择适当的路线</h4>
+<ol>
+<li>现在，将与网络上的所有其他路由器并行地计算 SPF 算法。
+<ol>
+<li>切记：在发生这种情况之前，所有路由器必须具有相同的链接状态数据库</li>
+<li>SPF 使用 Cost 作为指标</li>
+<li>SPF 将从其自身到目的地的每条路径的成本相加，并以路由器为根来构建树</li>
+<li>OSPF 然后在路由表中安装成本最低的路径：最多将安装 4 条等价路径以进行负载共享</li>
+</ol>
+</li>
+</ol>
+<h4 id="步骤-5：维护路由信息">步骤 5：维护路由信息</h4>
+<ol>
+<li>常规的 Hello 交换是 OSPF 用于检测新邻居或故障（downed）邻居的机制</li>
+<li>根据网络的类型，Hello 数据包以不同的默认间隔发送（确定对方是不是还好）
+<ol>
+<li>对于速度为 T1（1.544 Mbps） 或更高的链接，每 10 秒：广播多路访问和点对点链接</li>
+<li>对于小于 T1 的链接，每 30 秒：非广播多路访问链接</li>
+<li>“死间隔”是问候间隔的四倍。（如果在这样子对方还没有成功则对方死了）</li>
+</ol>
+</li>
+</ol>
+<h4 id="链路状态变化出现">链路状态变化出现</h4>
+<p><img src="/28848/image-20230721112349666.png" alt></p>
+<ul>
+<li>Router A tells all OSPF DRs on 224.0.0.6（组播地址）</li>
+<li>Event 触发交换：比如 A 连接的网段断掉了，否则不会有影响，只在有 event 发生时才会更新</li>
+<li>A 使用 LSU（linkState update）告知<strong>DR</strong></li>
+</ul>
+<p><img src="/28848/image-20230721112354786.png" alt></p>
+<ul>
+<li>DR tells others on 224.0.0.5</li>
+<li>DR 通过 LSU 告知所有的路由器</li>
+</ul>
+<p><img src="/28848/image-20230721112359563.png" alt></p>
+<ul>
+<li>如果 B 连接了别的 Area，则继续进行交换</li>
+</ul>
+<p><img src="/28848/image-20230721112404070.png" alt></p>
+<ul>
+<li>所有的路由信息交换完毕后，同时更新路由表。</li>
+</ul>
+<h3 id="基本的-OSPF-配置">基本的 OSPF 配置</h3>
+<ol>
+<li>在路由器上启动 OSPF
+<ol>
+<li><code>Router（config）## router ospf process-id</code></li>
+<li>进程号：process-id
+<ol>
+<li>取值： 1 ~ 65535</li>
+<li>在一台路由器上识别多个 OSPF 进程</li>
+<li>通常在整个 AS（自治系统）中保持相同的进程 ID</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>在路由器上识别 IP 网络
+<ol>
+<li><code>Router（config-router） ## network address wildcardmask area area-id</code>
+wildcardmask 和 subnet mask 相反</li>
+<li>网络地址可以是整个网络，子网或接口的地址。</li>
+<li>address：IP 地址</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28848/image-20230721112415214.png" alt></p>
+<ul>
+<li>只有一个 Area，则为 area0</li>
+<li><strong>Wild-card Mask 和子网掩码相反</strong>：子网掩码是 255.255.255.0，则 Wild-card Address 就是 0.0.0.255</li>
+<li>写 IP 和写网段最后都是一样的</li>
+</ul>
+<h3 id="配置回路（Loop）地址">配置回路（Loop）地址</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router(config)#interface loopback number<br>Router(config-if)#ip address address subnet-mask<br></code></pre></td></tr></table></figure>
+<ol>
+<li>为 OSPF 路由器 ID 添加稳定性
+<ol>
+<li>必须在 OSPF 进程开始之<strong>前</strong>配置回环接口：会涉及到主从关系确定和 DR 的选举</li>
+<li>配置环回地址时，请使用/32 掩码以避免潜在的路由问题</li>
+<li>I 建议您在基于 OSPF 的网络中的所有关键路由器上使用环回地址（专用或公用地址）。</li>
+<li>一旦配置立刻生效，不需要 no shutdown 的命令即可。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28848/image-20230721112420854.png" alt></p>
+<blockquote>
+<p>配置回路地址的方式如上图，删除只需要在前面添加 no</p>
+</blockquote>
+<h3 id="修改-OSPF-接口优先级">修改 OSPF 接口优先级</h3>
+<ol>
+<li>操纵 DR/BDR 选举
+<ol>
+<li><code>Router（config-if） ## ip ospf priority number</code></li>
+<li>优先级：越大越高
+<ol>
+<li>值：0-255,默认为 1</li>
+<li>优先级 0 表示接口不能被选为 DR 或 BDR</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>操作 OSPF 的端口的优先级：<code>Router ## show ip ospf [interface type number]</code></li>
+<li>Example：</li>
+</ol>
+<p><img src="/28848/image-20230721112432124.png" alt></p>
+<h3 id="OSPF-成本-指标">OSPF 成本 = 指标</h3>
+<ol>
+<li>Cost 适用于所有路由器连接路径</li>
+<li>16 位数字（1 - 65,535）</li>
+<li>较低的 Cost-&gt;更理想</li>
+<li>路径决定是基于路径的总成本。</li>
+<li>指标受到带宽的影响</li>
+<li>用一个很大的数字去除以当前的带宽得到代价，计算方法如下</li>
+</ol>
+<p><img src="/28848/image-20230721112443090.png" alt></p>
+<h4 id="OSPF-路径-COST">OSPF 路径 COST</h4>
+<ol>
+<li>连接到同一链接的所有接口必须就该链接的成本达成一致。否则，该链接将被视为关闭
+<ol>
+<li>意味着可以手动调整优先级</li>
+<li>串行链路的 Cisco 路由器默认成本为 1784（56Kbps 带宽）：<code>Router（config-if） ## ip ospf cost number（1-65536）</code></li>
+<li>如果链路是更低速的，你必须为其确定真实的链路速度。</li>
+<li>If the line is a slower speed, you must specify the real link speed： <code>Router（config-if） ## bandwidth number（Kbps）</code></li>
+<li>cost 的计算标准不同公司有不同标准</li>
+</ol>
+</li>
+<li>例子：
+<ol>
+<li>需要更改成本的常见情况是在多供应商（multi-vendor）路由环境中。成本更改将确保一个供应商的成本值与另一供应商的成本值匹配。</li>
+<li>另一种情况是使用千兆以太网。默认成本将最低成本值 1 分配给 100 Mbps 链路。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/28848/image-20230721112449943.png" alt></p>
+<blockquote>
+<p>现在的除数已经比这个要大了</p>
+</blockquote>
+<h4 id="设置-OSPF-计时器">设置 OSPF 计时器</h4>
+<ol>
+<li>OSPF 区域中的所有路由器必须在相同的 hello 间隔和相同的死间隔上<strong>达成一致</strong>，默认情况下：
+<ol>
+<li>T1 或更高链接（广播）为 10 秒</li>
+<li>慢于 T1 的链接为 30 秒（非广播）</li>
+<li>死亡间隔= 4 *问候间隔</li>
+</ol>
+</li>
+<li>更改问候间隔的命令</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router(config-if)## ip ospf hello-interval seconds<br>Router(config-if)## ip ospf dead-interval seconds<br></code></pre></td></tr></table></figure>
+<ol start="3">
+<li>注意：停顿间隔将自动调整为新的 hello 间隔的四倍。（只配置了一个的时候）</li>
+</ol>
+<p><img src="/28848/image-20230721112458193.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/61317/" rel="prev" title="互联网计算-06-会话、表示、应用层">
+      <i class="fa fa-chevron-left"></i> 互联网计算-06-会话、表示、应用层
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/18151/" rel="next" title="互联网计算-07-路由与路由器">
+      互联网计算-07-路由与路由器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RIP-%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">RIP 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1"><span class="nav-number">1.1.</span> <span class="nav-text">RIPv1</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RIP-%E9%85%8D%E7%BD%AE"><span class="nav-number">1.1.1.</span> <span class="nav-text">RIP 配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv2"><span class="nav-number">1.2.</span> <span class="nav-text">RIPv2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RIPv2-%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.1.</span> <span class="nav-text">RIPv2 的配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E4%B8%8E%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4"><span class="nav-number">1.2.2.</span> <span class="nav-text">验证与故障排除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#debug-IP-RIP-%E5%91%BD%E4%BB%A4"><span class="nav-number">1.2.3.</span> <span class="nav-text">debug IP RIP 命令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1-%E5%92%8C-RIPv2-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.3.</span> <span class="nav-text">RIPv1 和 RIPv2 之间的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF-%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.</span> <span class="nav-text">OSPF 协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E6%A6%82%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">OSPF 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E4%BF%A1%E6%81%AF"><span class="nav-number">2.2.</span> <span class="nav-text">路由信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E5%92%8C-RIP-%E5%B7%AE%E5%88%AB"><span class="nav-number">2.3.</span> <span class="nav-text">OSPF 和 RIP 差别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E7%89%B9%E5%BE%81"><span class="nav-number">2.4.</span> <span class="nav-text">OSPF 特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E6%9C%AF%E8%AF%AD"><span class="nav-number">2.5.</span> <span class="nav-text">OSPF 术语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E5%9F%9F"><span class="nav-number">2.6.</span> <span class="nav-text">OSPF 域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E8%A1%8C%E4%B8%BA"><span class="nav-number">2.7.</span> <span class="nav-text">OSPF 行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84%E7%AE%97%E6%B3%95"><span class="nav-number">2.8.</span> <span class="nav-text">最短路径算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9-DR-%E5%92%8C-BDR"><span class="nav-number">2.9.</span> <span class="nav-text">选择 DR 和 BDR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DR-BDR"><span class="nav-number">2.10.</span> <span class="nav-text">DR &amp; BDR</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%80%89%E6%8B%A9-DR-%E5%92%8C-BDR%EF%BC%9F"><span class="nav-number">2.10.1.</span> <span class="nav-text">为什么要选择 DR 和 BDR？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B8%AD%E7%9A%84-OSPF"><span class="nav-number">2.10.2.</span> <span class="nav-text">多路复用中的 OSPF</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E6%8A%A5%E6%96%87"><span class="nav-number">2.11.</span> <span class="nav-text">OSPF 报文</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OSPF-Hello-%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.11.1.</span> <span class="nav-text">OSPF Hello 协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OSPF-%E6%8A%A5%E6%96%87%E5%A4%B4%E9%83%A8"><span class="nav-number">2.11.2.</span> <span class="nav-text">OSPF 报文头部</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%93%AA%E4%B8%AA%E8%B7%AF%E7%94%B1%E5%99%A8%E5%B0%86%E6%88%90%E4%B8%BA-DR%EF%BC%9F"><span class="nav-number">2.11.3.</span> <span class="nav-text">哪个路由器将成为 DR？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E6%93%8D%E4%BD%9C%E7%9A%84%E5%AE%8C%E6%95%B4%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.12.</span> <span class="nav-text">OSPF 操作的完整步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E9%A1%BE%EF%BC%9AOSPF-%E6%93%8D%E4%BD%9C"><span class="nav-number">2.13.</span> <span class="nav-text">回顾：OSPF 操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E5%BB%BA%E7%AB%8B%E8%B7%AF%E7%94%B1%E5%99%A8%E9%82%BB%E6%8E%A5"><span class="nav-number">2.13.1.</span> <span class="nav-text">步骤 1：建立路由器邻接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E9%80%89%E4%B8%BE-DR-%E5%92%8C-BDR"><span class="nav-number">2.13.2.</span> <span class="nav-text">步骤 2：选举 DR 和 BDR</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E5%8F%91%E7%8E%B0%E8%B7%AF%E7%BA%BF"><span class="nav-number">2.13.3.</span> <span class="nav-text">步骤 3：发现路线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E9%80%89%E6%8B%A9%E9%80%82%E5%BD%93%E7%9A%84%E8%B7%AF%E7%BA%BF"><span class="nav-number">2.13.4.</span> <span class="nav-text">步骤 4：选择适当的路线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-5%EF%BC%9A%E7%BB%B4%E6%8A%A4%E8%B7%AF%E7%94%B1%E4%BF%A1%E6%81%AF"><span class="nav-number">2.13.5.</span> <span class="nav-text">步骤 5：维护路由信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E8%B7%AF%E7%8A%B6%E6%80%81%E5%8F%98%E5%8C%96%E5%87%BA%E7%8E%B0"><span class="nav-number">2.13.6.</span> <span class="nav-text">链路状态变化出现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84-OSPF-%E9%85%8D%E7%BD%AE"><span class="nav-number">2.14.</span> <span class="nav-text">基本的 OSPF 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%9B%9E%E8%B7%AF%EF%BC%88Loop%EF%BC%89%E5%9C%B0%E5%9D%80"><span class="nav-number">2.15.</span> <span class="nav-text">配置回路（Loop）地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-OSPF-%E6%8E%A5%E5%8F%A3%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">2.16.</span> <span class="nav-text">修改 OSPF 接口优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-%E6%88%90%E6%9C%AC-%E6%8C%87%E6%A0%87"><span class="nav-number">2.17.</span> <span class="nav-text">OSPF 成本 &#x3D; 指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OSPF-%E8%B7%AF%E5%BE%84-COST"><span class="nav-number">2.17.1.</span> <span class="nav-text">OSPF 路径 COST</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE-OSPF-%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-number">2.17.2.</span> <span class="nav-text">设置 OSPF 计时器</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

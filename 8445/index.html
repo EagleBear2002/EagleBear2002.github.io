@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="该技术针对检测产生的误报进行识别。 源码静态分析背景 大多数的软件缺陷都与源码相关  源码静态分析是软件缺陷检测的常用方法之一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自动化测试-11-源代码有效警告智能化识别技术研究">
+<meta property="og:url" content="https://eaglebear2002.github.io/8445/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="该技术针对检测产生的误报进行识别。 源码静态分析背景 大多数的软件缺陷都与源码相关  源码静态分析是软件缺陷检测的常用方法之一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/8445/image-20221019180052513.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/8445/image-20221019180858302.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/8445/image-20221020145614127.png">
+<meta property="article:published_time" content="2022-10-18T02:12:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.566Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/8445/image-20221019180052513.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/8445/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自动化测试-11-源代码有效警告智能化识别技术研究 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/8445/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自动化测试-11-源代码有效警告智能化识别技术研究
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-18 10:12:00" itemprop="dateCreated datePublished" datetime="2022-10-18T10:12:00+08:00">2022-10-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">2022Fall-自动化测试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>该技术针对检测产生的误报进行识别。</p>
+<h2 id="源码静态分析背景">源码静态分析背景</h2>
+<h3 id="大多数的软件缺陷都与源码相关">大多数的软件缺陷都与源码相关</h3>
+<p><img src="/8445/image-20221019180052513.png" alt></p>
+<h3 id="源码静态分析是软件缺陷检测的常用方法之一">源码静态分析是软件缺陷检测的常用方法之一</h3>
+<table>
+<thead>
+<tr>
+<th>方法名称</th>
+<th>方法说明</th>
+<th>特点</th>
+<th>典型工具</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>人工（黑盒）</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>人工（白盒）</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>模糊测试</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>源码静态分析</td>
+<td>使用符号执行、程序依赖分析、抽象解释等方式检测缺陷及漏洞</td>
+<td>白盒、检测速度快、存在误报</td>
+<td>Coverity、CheckMarx、Fortify</td>
+</tr>
+<tr>
+<td>软件成分分析（二进制代码）</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="源码静态分析的作用">源码静态分析的作用</h3>
+<ul>
+<li>开发过程中就能自动检测代码缺陷问题：黑盒测试一般都是在集成阶段进行的系统测试，而源代码检测除了在集成测试阶段可进行测试外，还可在开发过程中进行实时监测，解决代码问题。甚至在需求和设计阶段就可提出代码层面的可验证的安全需求和约束。将软件的安全质量问题发现和解决窗口提前，降低研发成本，缩短研发周期，提高产品质量。</li>
+<li>检测环境方便，测试覆盖率高：无需搭建复杂的系统运行环境，只需程序员保证源代码可编译即可检测，全量代码检测能够实现较高的代码覆盖率。</li>
+<li>全面检测代码安全性、可靠性、性能、以及代码规范性问题：开发人员主要聚焦于业务逻辑实现，源码静态分析聚焦于源代码本身的安全、可靠、性能和规范性，除了业界通用标准规则外，企业内部公共组建的使用规范还可定制规则进行检测。</li>
+<li>持续提升开发测试人员的编码水平：在代码自动检测、人工审计和问题修复过程中，能持续提升开发和测试人员代码水平，以便编写出更加安全、更加可靠、更加规范的程序。</li>
+<li>源码检测是软件设计的必然要求：源码检测和验证是软件设计的必然需求，将源代码编译成软件产品的构建过程已经完全自动化。因此，编写源代码就是软件设计的重要过程，对源代码的测试验证就是对软件设计的自动评审。</li>
+</ul>
+<h3 id="源码静态分析技术概览">源码静态分析技术概览</h3>
+<p><img src="/8445/image-20221019180858302.png" alt></p>
+<h3 id="源码静态分析技术分类">源码静态分析技术分类</h3>
+<p>按照技术分类：</p>
+<ul>
+<li>基于模式匹配</li>
+<li>基于数据流分析</li>
+<li>基于符号执行</li>
+<li>基于抽象解释</li>
+<li>基于演绎推理</li>
+<li>基于模型检测</li>
+</ul>
+<p>按照使用方式分类：</p>
+<ul>
+<li>非编译型（源码）：无需编译即可检测，对检测环境无要求，如 PMD</li>
+<li>编译检测一体型（字节码）：源码需要编译才可检测，并且是编译的同时就进行检测，如：klocwork、cpptest</li>
+<li>编译捕获和检测分离型（字节码）：先编译通过才能检测，如：fortify， spotbugs，该类型的优点是：用户可以在开发环境中进行编译捕获，然后将中间文件拿到检测环境中进行检测，检测服务器无需搭建编译环境</li>
+</ul>
+<p>Ps：基于二进制码进行检测的工具，如：angr，mcsema，bap，IDA Home</p>
+<h3 id="源码静态分析工具多种多样">源码静态分析工具多种多样</h3>
+<h3 id="源码静态分析工具以警告的形式告知开发人员源码中可能存在的缺陷">源码静态分析工具以警告的形式告知开发人员源码中可能存在的缺陷</h3>
+<h3 id="源码静态分析工具面临的主要问题—无效警告-误报">源码静态分析工具面临的主要问题—无效警告/误报</h3>
+<p><img src="/8445/image-20221020145614127.png" alt></p>
+<h3 id="警告分类">警告分类</h3>
+<ul>
+<li>警告：warning/alarm/alert/violation</li>
+<li>无效警告（false positive/unactionable warnings）：开发人员没有进行修改的警告（i.e., the warnings that do not be acted on by developers.）
+<ol>
+<li>由于静态分析工具过估计程序行为产生的误报</li>
+<li>涉及到过时代码产生的警告</li>
+<li>不影响软件和用户使用的缺陷</li>
+<li>不同开发者的编程技能</li>
+</ol>
+</li>
+<li>有效警告/正报（true positive/actionable warnings）：开发者动手修改的警告，（i.e., the warnings that are acted on by developers.）</li>
+</ul>
+<h2 id="警告数据集构建">警告数据集构建</h2>
+<h2 id="有效警告识别技术">有效警告识别技术</h2>
+<h3 id="什么是有效警告识别？">什么是有效警告识别？</h3>
+<p>有效警告识别（actionable warning identification/postprocessing warnings）：</p>
+<ul>
+<li>降低报告给开发者的警告数--Reducing the number of warnings by reporting them to users</li>
+<li>利用额外的信息丰富警告进而降低人工审核的工作量--Reducing manual inspection effort by enriching warnings with additional information</li>
+<li>在检测过程中提供帮助或工具支持以简化人工审核警告的过程--Simplifying manual inspection of warnings by providing assistance and tool support during the inspection process</li>
+</ul>
+<p>参考文献：</p>
+<ul>
+<li>[ ] <em>Survey of Approaches for Postprocessing of Static Analysis Alarms</em></li>
+</ul>
+<h3 id="有效警告识别分类">有效警告识别分类</h3>
+<ul>
+<li>警告消减 Pruning of alarms</li>
+<li>警告排序 Ranking of alarms</li>
+<li>警告聚类 Clustering of alarms</li>
+<li>无效警告自动过滤 Automated false positives elimination</li>
+<li>基于静态和动态分析组合 Combination of static and dynamic analyses</li>
+<li>人工审查简化 Simplification of manual inspection</li>
+</ul>
+<h3 id="警告消减">警告消减</h3>
+<h4 id="基于机器学习的警告消减">基于机器学习的警告消减</h4>
+<p>参考文献：</p>
+<ul>
+<li>[ ] <em>Finding Patterns in Static Analysis Alerts - Improving Actionable Alert Ranking</em></li>
+<li>[x] <em>Is There A “Golden” Feature Set for Static Warning Identification?</em></li>
+<li>[x] <em>Learning to Recognize Actionable Static Code Warnings (is Intrinsically Easy)</em></li>
+<li>[ ] <em>Learning a Classifier for False Positive Error Reports Emitted by Static Code Analysis Tools</em></li>
+<li>[ ] <em>Classifying False Positive Static Checker Alarms In Continuous Integration Using Convolutional Neural Networks</em></li>
+<li>[ ] <em>An Empirical Assessment of Machine Learning Approaches for Triaging Reports of a Java Static Analysis Tool</em></li>
+</ul>
+<p>机器学习能够帮助挖掘有效警告和无效警告中模式差异，进而去分类有效警告和无效警告。然而，机器学习模型需要大量训练集。此外，哪一种类型的警告模式应该去挖掘以及如何呈现还需要进一步改进。</p>
+<h4 id="基于源代码演变的警告消减">基于源代码演变的警告消减</h4>
+<p>通过源代码的演变来判断哪些警告是新增的，哪些警告是消失的，哪些警告是一直存在的？</p>
+<p>该方法只适用项目源码有持续演变的情况，如果项目处于初始版本则该方法不适用。</p>
+<h3 id="警告排序">警告排序</h3>
+<p>将更可能是有效警告的排在其他警告的前面</p>
+<h4 id="基于历史信息感知的警告排序">基于历史信息感知的警告排序</h4>
+<p>生存时间越短的警告越重要，因此应该分配越高的优先级，以便开发人员能够更快修复这些警告。</p>
+<ul>
+<li>如何去识别修复的警告是很困难的</li>
+<li>该方法要求项目具有大量的历史信息</li>
+<li>跨项目的之间信息不能互用</li>
+</ul>
+<h4 id="基于用户反馈自适应的警告排序">基于用户反馈自适应的警告排序</h4>
+<p>参考文献：</p>
+<ul>
+<li>[ ] <em>Correlation Exploitation in Error Ranking</em></li>
+<li>[ ] <em>Efindbugs- Effective error ranking for findbugs</em></li>
+</ul>
+<p>特点：</p>
+<ul>
+<li>需要用户参与，用户标记警告的正确性？</li>
+<li>依赖初始警告标记的有效性</li>
+</ul>
+<h4 id="基于多工具组合的警告排序">基于多工具组合的警告排序</h4>
+<h3 id="警告聚类">警告聚类</h3>
+<p>基于警告相似度或相关性对警告进行聚类</p>
+<ul>
+<li>Sound</li>
+<li>Unsound</li>
+</ul>
+<p>特点：Sound 聚类只用审核每个类簇中的一个警告，该类簇的其他警告则无需在审核，因此，该方法能够高效地提升审核的速率，但是如何保证每个类簇的中 sound 时一个具有挑战性的问题。Unsound 聚类主要基于警告的相似度对其进行聚类，但是该方法可能会导致假阴性，即有效警告被遗漏。</p>
+<h3 id="无效警告自动过滤">无效警告自动过滤</h3>
+<p>基于模型检测或符号执行在没有用户介入的情况下精准删除无效警告</p>
+<ul>
+<li>模型检测：模型检测的基本思想是用状态迁移系统（S）示系统的行为，用模态逻辑公式（F）述系统的性质。这样“系统是否具有所期望的性质”就转化为数学问题“状态迁移系统 S 是否是公式 F 的一个模型”，用公式表示为 S╞F。对有穷状态系统，这个问题是可判定的，即可以用计算机程序在有限时间内自动确定。</li>
+<li>符号执行：使用符号执行分析一个程序时，该程序会使用符号值作为输入，而非一般执行程序时使用的具体值。在达到目标代码时，分析器可以得到相应的路径约束，然后通过约束求解器来得到可以触发目标代码的具体值。</li>
+</ul>
+<p>特点：相较其他方法而言，该方法更加精确。但是，在大项目上，该方法的扩展性较差且效率较低。</p>
+<h3 id="基于静态和动态分析组合">基于静态和动态分析组合</h3>
+<p>利用动态分析来验证静态分析报告的警告</p>
+<p>特点：该方法验证后的警告具有较高的准确性，但是，该方法需要执行代码。</p>
+<ul>
+<li>[ ] <em>Validating Static Warnings via Testing Code Fragments</em></li>
+</ul>
+<h3 id="人工审查简化">人工审查简化</h3>
+<p>在人工审查警告的过程中简化其过程</p>
+<ul>
+<li>半自动化警告审查</li>
+<li>基于反馈的人工审查</li>
+<li>基于检查表的人工审查</li>
+<li>相关警告查询</li>
+<li>警告自动修复建议</li>
+<li>基于可视化的警告审查工具</li>
+</ul>
+<p>特点：能为用户审核警告提供较大的帮助，但是也需要用户参与。</p>
+<h3 id="总结">总结</h3>
+<table>
+<thead>
+<tr>
+<th>方法类别</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>警告消减</td>
+<td>只有分类为有效的警告被检查，其他的被分类为无效的警告则不会报告给用户</td>
+<td>由于被消减后的警告中不能保证是否还存在有效警告，因此该方法可能导致假阴性</td>
+</tr>
+<tr>
+<td>警告排序</td>
+<td>在审查过程中，将更可能是有效的警告排在列表的前面，这种方法不会导致假阴性</td>
+<td>该方法一般需要审核所有的警告，用户反馈的方法需要人工介入</td>
+</tr>
+<tr>
+<td>警告聚类</td>
+<td>分组检查警告可以降低审查工作量</td>
+<td>基于 unsound 聚类方法可能导致假阴性；基于 sound 聚类的方法审查工作量的降低依赖支配警告的数量</td>
+</tr>
+<tr>
+<td>无效警告自动过滤</td>
+<td>相比于其他方法，该方法更加自动化且更加精确</td>
+<td>该方面在可扩展性和效率上还存在问题</td>
+</tr>
+<tr>
+<td>基于动静态结合</td>
+<td>能够展示有效警告的错误场景</td>
+<td>需要实际执行程序</td>
+</tr>
+<tr>
+<td>人工审查简化</td>
+<td>在审查过程中能够提供较大的帮助</td>
+<td>在审查过程中需要人工介入</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/57931/" rel="prev" title="自动化测试-14-复习">
+      <i class="fa fa-chevron-left"></i> 自动化测试-14-复习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/36342/" rel="next" title="有效警告识别技术文献综述">
+      有效警告识别技术文献综述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">源码静态分析背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E5%A4%9A%E6%95%B0%E7%9A%84%E8%BD%AF%E4%BB%B6%E7%BC%BA%E9%99%B7%E9%83%BD%E4%B8%8E%E6%BA%90%E7%A0%81%E7%9B%B8%E5%85%B3"><span class="nav-number">1.1.</span> <span class="nav-text">大多数的软件缺陷都与源码相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E6%98%AF%E8%BD%AF%E4%BB%B6%E7%BC%BA%E9%99%B7%E6%A3%80%E6%B5%8B%E7%9A%84%E5%B8%B8%E7%94%A8%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80"><span class="nav-number">1.2.</span> <span class="nav-text">源码静态分析是软件缺陷检测的常用方法之一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">源码静态分析的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88"><span class="nav-number">1.4.</span> <span class="nav-text">源码静态分析技术概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.</span> <span class="nav-text">源码静态分析技术分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7%E5%A4%9A%E7%A7%8D%E5%A4%9A%E6%A0%B7"><span class="nav-number">1.6.</span> <span class="nav-text">源码静态分析工具多种多样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7%E4%BB%A5%E8%AD%A6%E5%91%8A%E7%9A%84%E5%BD%A2%E5%BC%8F%E5%91%8A%E7%9F%A5%E5%BC%80%E5%8F%91%E4%BA%BA%E5%91%98%E6%BA%90%E7%A0%81%E4%B8%AD%E5%8F%AF%E8%83%BD%E5%AD%98%E5%9C%A8%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="nav-number">1.7.</span> <span class="nav-text">源码静态分析工具以警告的形式告知开发人员源码中可能存在的缺陷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7%E9%9D%A2%E4%B8%B4%E7%9A%84%E4%B8%BB%E8%A6%81%E9%97%AE%E9%A2%98%E2%80%94%E6%97%A0%E6%95%88%E8%AD%A6%E5%91%8A-%E8%AF%AF%E6%8A%A5"><span class="nav-number">1.8.</span> <span class="nav-text">源码静态分析工具面临的主要问题—无效警告&#x2F;误报</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AD%A6%E5%91%8A%E5%88%86%E7%B1%BB"><span class="nav-number">1.9.</span> <span class="nav-text">警告分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AD%A6%E5%91%8A%E6%95%B0%E6%8D%AE%E9%9B%86%E6%9E%84%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">警告数据集构建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E6%95%88%E8%AD%A6%E5%91%8A%E8%AF%86%E5%88%AB%E6%8A%80%E6%9C%AF"><span class="nav-number">3.</span> <span class="nav-text">有效警告识别技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%89%E6%95%88%E8%AD%A6%E5%91%8A%E8%AF%86%E5%88%AB%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">什么是有效警告识别？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E6%95%88%E8%AD%A6%E5%91%8A%E8%AF%86%E5%88%AB%E5%88%86%E7%B1%BB"><span class="nav-number">3.2.</span> <span class="nav-text">有效警告识别分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AD%A6%E5%91%8A%E6%B6%88%E5%87%8F"><span class="nav-number">3.3.</span> <span class="nav-text">警告消减</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E8%AD%A6%E5%91%8A%E6%B6%88%E5%87%8F"><span class="nav-number">3.3.1.</span> <span class="nav-text">基于机器学习的警告消减</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%BA%90%E4%BB%A3%E7%A0%81%E6%BC%94%E5%8F%98%E7%9A%84%E8%AD%A6%E5%91%8A%E6%B6%88%E5%87%8F"><span class="nav-number">3.3.2.</span> <span class="nav-text">基于源代码演变的警告消减</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AD%A6%E5%91%8A%E6%8E%92%E5%BA%8F"><span class="nav-number">3.4.</span> <span class="nav-text">警告排序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%8E%86%E5%8F%B2%E4%BF%A1%E6%81%AF%E6%84%9F%E7%9F%A5%E7%9A%84%E8%AD%A6%E5%91%8A%E6%8E%92%E5%BA%8F"><span class="nav-number">3.4.1.</span> <span class="nav-text">基于历史信息感知的警告排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%94%A8%E6%88%B7%E5%8F%8D%E9%A6%88%E8%87%AA%E9%80%82%E5%BA%94%E7%9A%84%E8%AD%A6%E5%91%8A%E6%8E%92%E5%BA%8F"><span class="nav-number">3.4.2.</span> <span class="nav-text">基于用户反馈自适应的警告排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%A4%9A%E5%B7%A5%E5%85%B7%E7%BB%84%E5%90%88%E7%9A%84%E8%AD%A6%E5%91%8A%E6%8E%92%E5%BA%8F"><span class="nav-number">3.4.3.</span> <span class="nav-text">基于多工具组合的警告排序</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AD%A6%E5%91%8A%E8%81%9A%E7%B1%BB"><span class="nav-number">3.5.</span> <span class="nav-text">警告聚类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E6%95%88%E8%AD%A6%E5%91%8A%E8%87%AA%E5%8A%A8%E8%BF%87%E6%BB%A4"><span class="nav-number">3.6.</span> <span class="nav-text">无效警告自动过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%9D%99%E6%80%81%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%BB%84%E5%90%88"><span class="nav-number">3.7.</span> <span class="nav-text">基于静态和动态分析组合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%BA%E5%B7%A5%E5%AE%A1%E6%9F%A5%E7%AE%80%E5%8C%96"><span class="nav-number">3.8.</span> <span class="nav-text">人工审查简化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.9.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

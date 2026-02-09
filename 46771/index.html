@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 本文梳理了数据库事务的发展史。在 SQL 标准规定的 SER、RR、RC 和 RU 之外，重点介绍了 SI 隔离级别。本文还介绍了提高事务隔离级别的几种方式，并展望了未来可能出现的高效 SER 的实现方式。本文是 数据库事务发展史+SSI 隔离级别原理 课程笔记。 1992 年：ANSI SQL92 事务隔离级别    Isolation Level Dirty Read Fuzzy Rea">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库事务发展史和 SSI 隔离级别原理">
+<meta property="og:url" content="https://eaglebear2002.github.io/46771/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 本文梳理了数据库事务的发展史。在 SQL 标准规定的 SER、RR、RC 和 RU 之外，重点介绍了 SI 隔离级别。本文还介绍了提高事务隔离级别的几种方式，并展望了未来可能出现的高效 SER 的实现方式。本文是 数据库事务发展史+SSI 隔离级别原理 课程笔记。 1992 年：ANSI SQL92 事务隔离级别    Isolation Level Dirty Read Fuzzy Rea">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206161531384.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206162221751.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206164755807.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206164943435.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206165100458.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231206165424713.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212101442475.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231208194007025.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103055557.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103109405.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103118001.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103142641.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103303070.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103402188.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212103522191.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212105902109.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212111023253.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212111147280.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212110849722.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212111455211.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46771/image-20231212111548017.png">
+<meta property="article:published_time" content="2023-12-06T06:24:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.783Z">
+<meta property="article:author" content="EagleBear2002">
+<meta property="article:tag" content="文献综述">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/46771/image-20231206161531384.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/46771/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>数据库事务发展史和 SSI 隔离级别原理 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/46771/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库事务发展史和 SSI 隔离级别原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-12-06 14:24:00" itemprop="dateCreated datePublished" datetime="2023-12-06T14:24:00+08:00">2023-12-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" itemprop="url" rel="index"><span itemprop="name">隔离级别</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>摘要</strong></p>
+<p>本文梳理了数据库事务的发展史。在 SQL 标准规定的 SER、RR、RC 和 RU 之外，重点介绍了 SI 隔离级别。本文还介绍了提高事务隔离级别的几种方式，并展望了未来可能出现的高效 SER 的实现方式。本文是 <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1LS4y1A7yb/?spm_id_from=333.999.0.0">数据库事务发展史+SSI 隔离级别原理</a> 课程笔记。</p>
+<h2 id="1992-年：ANSI-SQL92-事务隔离级别">1992 年：ANSI SQL92 事务隔离级别</h2>
+<table>
+<thead>
+<tr>
+<th>Isolation Level</th>
+<th>Dirty Read</th>
+<th>Fuzzy Read</th>
+<th>Phantom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Read Comitted</td>
+<td>不允许</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+</tr>
+</tbody>
+</table>
+<p>Dirty Read、Fuzzy Read 和 Phantom 分别表示脏读、不可重复读、幻读三种异象（phenomenon）。</p>
+<p>最经典的表格，但几乎所有的教材（包括南大软院采用的教材）都止步于此。</p>
+<p>但其实 SQL92 的隔离级别存在许多问题：</p>
+<ol>
+<li>只涉及单版本，没有考虑 MVCC；</li>
+<li>对异象的自然语言表述存在歧义。</li>
+</ol>
+<h2 id="1995-年：Snapshot-的提出">1995 年：Snapshot 的提出</h2>
+<p>1995 年，微软 Hal Berenson 等人发表文章《A Critique of ANSI SQL Isolation Levels》[^SIGMOD1995]。</p>
+<h3 id="隔离级别定义">隔离级别定义</h3>
+<p>文章首先对 SQL92 中的三种异象进行了精准定义，并新增了 P0 异象。以下定义中的 P 是 phenomenon，A 是 anomaly，中括号中的 P 是查询谓词。以下的 $w1[x]$ 表示 $T_1$ 写记录 $x$，$rc$ 则表示 read cursor，$a1, c2$ 表示 $T_1$ Abort，$T_2$ Commit。</p>
+<p>$$
+\text{Dirty Write } P0: w1[x] \dots w2[x] \dots (c1 \text{ or } a1) \
+\text{Dirty Read } P1: w1[x] \dots r2[x] \dots (c1 \text{ or } a1) \
+\text{Non-Repeatable Read } P2: r1[x] \dots w2[x] \dots (c1 \text{ or } a1) \
+\text{Phantom } P3: r1[P] \dots w2[y \in P] \dots (c1 \text{ or } a1) \
+$$</p>
+<p>使用 P0-P3 描述 SQL92 提出的四种隔离级别：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Isolation Level</th>
+<th style="text-align:center">P0 Dirty Write</th>
+<th style="text-align:center">P1 Dirty Read</th>
+<th style="text-align:center">P2 Fuzzy Read</th>
+<th style="text-align:center">P3 Phantom</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Read Uncommitted</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">允许</td>
+<td style="text-align:center">允许</td>
+<td style="text-align:center">允许</td>
+</tr>
+<tr>
+<td style="text-align:center">Read Comitted</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">允许</td>
+<td style="text-align:center">允许</td>
+</tr>
+<tr>
+<td style="text-align:center">Repeatable Read</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">允许</td>
+</tr>
+<tr>
+<td style="text-align:center">Serializable</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+<td style="text-align:center">不允许</td>
+</tr>
+</tbody>
+</table>
+<p>文章还描述了 P1-P3 的严格版本：</p>
+<p>$$
+\text{Dirty Read } A1: w1[x] \dots r2[x] \dots (a1 \text{ and } c2 \text{ in either order}) \
+\text{Non-Repeatable Read } A2: r1[x] \dots w2[x] \dots c2 \dots r1[x] \dots c1 \
+\text{Phantom } A3: r1[P] \dots w2[y \in P] \dots c2 \dots r1[P] \dots c1
+$$</p>
+<p>文章还描述了其他几种异象：</p>
+<p>$$
+\text{Lost Update } P4: r1[x] \dots w2[x] \dots w1[x] \dots c1\
+\text{Cursor Lost Update } P4C: rc1[x] \dots w2[x] \dots w1[x] \dots c1\
+\text{Read Skew } A5A: r1[x] \dots w2[x] \dots w2[y] \dots c2 \dots r1[y] \dots (c1 \text{ or } a1)\
+\text{Write Skew } A5B: r1[x] \dots r2[y] \dots w1[y] \dots w2[x] \dots (c1 \text{ and } a1 \text{ occur})\
+$$</p>
+<table>
+<thead>
+<tr>
+<th>Isolation Level</th>
+<th>P0 Dirty Write</th>
+<th>P1 Dirty Read</th>
+<th>P4C Cursor Lost Update</th>
+<th>P4 Lost Update</th>
+<th>P2 Fuzzy Read</th>
+<th>P3 Phantom</th>
+<th>A5A Read Skew</th>
+<th>A5B Write Skew</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted</td>
+<td>不允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Read Comitted</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Cursor Stability</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>有时允许</td>
+<td>有时允许</td>
+<td>允许</td>
+<td>允许</td>
+<td>有时允许</td>
+</tr>
+<tr>
+<td>Repeatable Read (Read Atomic)</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>允许</td>
+<td>不允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Snapshot Isolation</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>有时允许</td>
+<td>不允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+<td>不允许</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>从上表可以看出，在某一隔离级别中，P4 丢失更新和 P2 不可重复读总是同时被允许或被禁止。</p>
+<p>另外，上表只考虑到两个事务的异象，未考虑到多个事务的异象。例如 SI 可能在三个两两不冲突的事务中出现不一致的现象，此时三个事务的优先图出现环。</p>
+<p>上表中出现“有时允许”的原因可能是相应异象的定义并不统一。例如 SQL 标准中的术语幻象问题指非可重复谓词读（在这种情况下 SI 解决了幻象问题）；但在另一些领域（如《数据库系统概念（第 6 版）》中译版第 390 页脚注也提到了这一问题，该书中 P369 对幻象问题的定义是“查询结果会因另一并发事务是先于还是后于执行的查询而有所不同”，因此该书不认为 SI 解决了幻象问题。</p>
+<p>笔者在 <a href="https://eaglebear2002.github.io/393">MySQL 可重复读如何“避免”幻读？ | EagleBear2002 的博客</a> 这篇文章中深入讨论了幻读问题及其“解决”方案。</p>
+</blockquote>
+<p>根据上表，绘制隔离级别关系图。</p>
+<p><img src="/46771/image-20231206161531384.png" alt></p>
+<h3 id="SI-的实现">SI 的实现</h3>
+<p>RC、RU 和 RR 一般用二阶段锁来实现。问题：小规模问题上会造成锁浪费。</p>
+<p>SI 需要实现 MVCC。</p>
+<p>Snapshot Isolation 的实现：</p>
+<ul>
+<li>事务开始时，获取一个时间戳 StartTimestamp</li>
+<li>读数据时，读 StartTimestamp 时刻的快照</li>
+<li>写数据时，追加数据的新版本</li>
+<li>事务准备提交时，获取一个 CommitTimestamp，它需要比现存的 StartTimestamp 和 CommitTimestamp 都大</li>
+<li>事务提交时进行冲突检查，如果没有其他事务在 [StartTS, CommitTS] 区间内提交了与自己的 WriteSet 有交集的数据，则本事务可以提交</li>
+</ul>
+<p>左边用例通过了 SI，但无法防止 Write Skew。</p>
+<p><img src="/46771/image-20231206162221751.png" alt></p>
+<ul>
+<li>Snapshot Isolation 无法防止 Write Skew</li>
+<li>Write Skew 在很多工程实践中是可接受的，所以 SI 隔离级别比较常见。电商公司一般使用 RC 或 RR 上。Oracle 默认 SI。</li>
+<li>SI 隔离级别使用乐观的时间戳方法，在性能和隔离性上取得了较好的平衡。推测：SI+A5B 的性能可能优于 RR+P3</li>
+<li>需求：如何在 SI 级别的基础上，消灭 Write Skew，达成 SERIALIZABLE？</li>
+</ul>
+<h2 id="1999-年：基于图的事务依赖分析">1999 年：基于图的事务依赖分析</h2>
+<h3 id="等效分析：交换不冲突的操作">等效分析：交换不冲突的操作</h3>
+<p>左右两边形式上都没有避免 Dirty Read，但从<strong>执行结果</strong>上看，左边用例是满足 SER 的，右边不满足。</p>
+<p><img src="/46771/image-20231206164755807.png" alt></p>
+<p>两个用例都没有避免不可重复读，但左边用例从执行结果上满足 SER，右边不满足。</p>
+<p><img src="/46771/image-20231206164943435.png" alt></p>
+<p>写偏序不符合 SER。</p>
+<p><img src="/46771/image-20231206165100458.png" alt></p>
+<p>作者提出了导致事务之间异常的三种冲突：</p>
+<ul>
+<li>读写冲突：Read-write conflicts（泛化 P2）</li>
+<li>写读冲突： Write-read conflicts （泛化 P1）</li>
+<li>写写冲突： Write-write conflicts （泛化 P0）</li>
+</ul>
+<p><img src="/46771/image-20231206165424713.png" alt></p>
+<p><img src="/46771/image-20231212101442475.png" alt></p>
+<p><img src="/46771/image-20231208194007025.png" alt></p>
+<h3 id="在图上的分析：可在计算机上高效实现">在图上的分析：可在计算机上高效实现</h3>
+<p>等效分析（交换等效操作）很难在计算机上高效实现。作者提出了<strong>基于图的事务依赖分析</strong>。</p>
+<p><img src="/46771/image-20231212103055557.png" alt></p>
+<p><img src="/46771/image-20231212103109405.png" alt></p>
+<p><img src="/46771/image-20231212103118001.png" alt></p>
+<p><img src="/46771/image-20231212103142641.png" alt></p>
+<p>需要注意的是，基于冲突或基于图的依赖分析，会有错杀的情况，并不是完美的。即，有些本来符合隔离级别要求的事务会被回滚。</p>
+<p>但错杀只影响效率，不影响数据库的正确。</p>
+<p><img src="/46771/image-20231212103303070.png" alt></p>
+<p>Adya 的论文给 SI 隔离级别实现 SER 提供了理论基础。</p>
+<h2 id="2008-年：SSI-横空出世">2008 年：SSI 横空出世</h2>
+<p>悉尼大学的 Cahill 等人发表文章《Serializable Isolation for Snapshot Databases》</p>
+<p>痛点：基于依赖图的分析，实现起来依然复杂，且占用较多资源。如下图这样复杂的图终于有许多边，搜索成本高。</p>
+<img src="/46771/image-20231212103402188.png" style="zoom:50%;">
+<p>分析发现，所有成环的事务依赖中，</p>
+<p>所以在 SI 下，可以<strong>不分析成环的问题，只判断有没有两个 R-W 边组成的断点（Pivot）</strong>，选择一个事务回滚。</p>
+<p>但是这种方法会造成更严重的错杀（False-positive）</p>
+<p>但是错杀只会影响效率，并不影响数据库的正确，跟收益相比，还是可以接受的。</p>
+<img src="/46771/image-20231212103522191.png" style="zoom:50%;">
+<p>如果能实现上述想法，SI 隔离级别就解决了 A5B 问题，也就是所谓的“写偏序问题”</p>
+<p>这样 SI 隔离级别就能升级为 Serializable 隔离级别。这种做法，被叫做 SSI 隔离级别：Serializable Snapshot Isolation</p>
+<h2 id="2012-年：终于落地">2012 年：终于落地</h2>
+<p>2012 年，业界知名的 PostgreSQL 数据库率先将 SSI 隔离级别商用。</p>
+<p>PostgreSQL 开发了一个专门的 SSI Lock Manager，用来监控 RW 边的产生。</p>
+<p>这套理论与实现比较适合单点式数据库，因为单点式数据库可以集中管理事务依赖信息。</p>
+<p>对原生分布式数据库来说，由于没有事务的集中管理机制，无法完全按照 SSI 理论实现</p>
+<h2 id="2012-年：WSI-另辟蹊径">2012 年：WSI 另辟蹊径</h2>
+<p>同年，雅虎的 Yabandeh 等人发表文章《A Critique of Snapshot Isolation》</p>
+<p>首先给 SI 隔离级别起了个别名：Read Snapshot Isolation（RSI），也就是“读快照”</p>
+<p>Yabandeh 认为，SI 可以叫做“读快照”：</p>
+<p><img src="/46771/image-20231212105902109.png" alt></p>
+<p>基于读快照，提出了写快照隔离级别（Write Snapshot Isolation， WSI） ：</p>
+<ul>
+<li>事务在修改数据时，直接基于事务启动时的数据库快照修改。</li>
+<li>事务读取数据时，要维护读取的数据集，也就是记录自己读取过哪些数据。</li>
+<li>事务提交时，要校验自己的读取数据集有没有被其他事务修改，如果有的话，则会造成 RW 依赖问题，进而有造成写偏序问题的风险，只要发现有 RW 依赖，事务立即 abort。</li>
+</ul>
+<p><img src="/46771/image-20231212111023253.png" alt></p>
+<p>基于以上原理，可得 WSI 杜绝一切 RW 依赖，就不会有两条 RW 边相邻，更没有依赖成环问题了所以 WSI 也解决了 A5B 问题，可以认为实现了 SSI。</p>
+<p><img src="/46771/image-20231212111147280.png" alt></p>
+<p>WSI 会造成更多的假阳性，造成更多本来可以并发的事务回滚</p>
+<p>但是 WSI 的思想非常利于分布式事务的工程实现，并且不影响数据库的正确性</p>
+<p>以下四种解决方案中，假阳性依次递增，工程实现难度依次递减。单点数据库一般用第三种，分布式数据库一般用第四种。</p>
+<p><img src="/46771/image-20231212110849722.png" alt></p>
+<h2 id="2014-年：CockroachDB-实现-WSI">2014 年：CockroachDB 实现 WSI</h2>
+<p>WSI 理论给了 CockroachDB 很大的启发。</p>
+<p>2014 年，CockroachDB 基于自己的 SI 隔离级别，完成了 SSI 隔离级别的实现 CockroachDB 在内存中维护了事务的读取 span 集，在提交时，会做以下工作：</p>
+<ul>
+<li>查看自己读取的 span 中是否有其他事务的 intent，如果有的话，说明产生的 RW 依赖，本事务会 abort。（解决 A5B 写偏序问题）</li>
+<li>查看自己读取的 span 中是否有比自己较新的 key，如果有的话，说明已经有时间戳较新的事务更新了自己的 span，且已经提交，本事务只能 abort 了。（解决 P3 幻读问题）</li>
+</ul>
+<p><img src="/46771/image-20231212111455211.png" alt></p>
+<p>另外为了优化只读事务的性能，CockroachDB 对只读事务做了特殊处理：</p>
+<p>如果一个事务只有读，没有任何写，就算产生 RW 依赖，不会导致 abort。</p>
+<img src="/46771/image-20231212111548017.png" style="zoom:50%;">
+<h2 id="总结">总结</h2>
+<ol>
+<li>数据库事务的发展史</li>
+<li>事务问题的分析方法</li>
+<li>单点式 SSI 隔离级别的理论与实现</li>
+<li>分布式 SSI 隔离级别的理论与实现</li>
+</ol>
+<p>[^SIGMOD1995]: Hal Berenson, Phil Bernstein, Jim Gray, Jim Melton, Elizabeth O'Neil, and Patrick O'Neil. 1995. A critique of ANSI SQL isolation levels. In Proceedings of the 1995 ACM SIGMOD international conference on Management of data (SIGMOD '95). Association for Computing Machinery, New York, NY, USA, 1–10. <a target="_blank" rel="noopener" href="https://doi.org/10.1145/223784.223785">https://doi.org/10.1145/223784.223785</a>
+[^李海翔]: 李海翔,李晓燕,刘畅,等.数据库管理系统中数据异常体系化定义与分类[J].软件学报,2022,33(03):909-930.DOI:10.13328/j.cnki.jos.006442.</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E7%8C%AE%E7%BB%BC%E8%BF%B0/" rel="tag"># 文献综述</a>
+          </div>
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/43883/" rel="prev" title="如何调度千余辆私家车错峰入校">
+      <i class="fa fa-chevron-left"></i> 如何调度千余辆私家车错峰入校
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/35365/" rel="next" title="软件质量管理-03-团队动力学">
+      软件质量管理-03-团队动力学 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1992-%E5%B9%B4%EF%BC%9AANSI-SQL92-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">1.</span> <span class="nav-text">1992 年：ANSI SQL92 事务隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1995-%E5%B9%B4%EF%BC%9ASnapshot-%E7%9A%84%E6%8F%90%E5%87%BA"><span class="nav-number">2.</span> <span class="nav-text">1995 年：Snapshot 的提出</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">隔离级别定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SI-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.</span> <span class="nav-text">SI 的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1999-%E5%B9%B4%EF%BC%9A%E5%9F%BA%E4%BA%8E%E5%9B%BE%E7%9A%84%E4%BA%8B%E5%8A%A1%E4%BE%9D%E8%B5%96%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">1999 年：基于图的事务依赖分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E6%95%88%E5%88%86%E6%9E%90%EF%BC%9A%E4%BA%A4%E6%8D%A2%E4%B8%8D%E5%86%B2%E7%AA%81%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">3.1.</span> <span class="nav-text">等效分析：交换不冲突的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%9B%BE%E4%B8%8A%E7%9A%84%E5%88%86%E6%9E%90%EF%BC%9A%E5%8F%AF%E5%9C%A8%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8A%E9%AB%98%E6%95%88%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">在图上的分析：可在计算机上高效实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2008-%E5%B9%B4%EF%BC%9ASSI-%E6%A8%AA%E7%A9%BA%E5%87%BA%E4%B8%96"><span class="nav-number">4.</span> <span class="nav-text">2008 年：SSI 横空出世</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2012-%E5%B9%B4%EF%BC%9A%E7%BB%88%E4%BA%8E%E8%90%BD%E5%9C%B0"><span class="nav-number">5.</span> <span class="nav-text">2012 年：终于落地</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2012-%E5%B9%B4%EF%BC%9AWSI-%E5%8F%A6%E8%BE%9F%E8%B9%8A%E5%BE%84"><span class="nav-number">6.</span> <span class="nav-text">2012 年：WSI 另辟蹊径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2014-%E5%B9%B4%EF%BC%9ACockroachDB-%E5%AE%9E%E7%8E%B0-WSI"><span class="nav-number">7.</span> <span class="nav-text">2014 年：CockroachDB 实现 WSI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

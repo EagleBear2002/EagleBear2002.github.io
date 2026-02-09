@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Architectural Pattern  架构模式是一组架构设计决策，适用于重复出现的设计问题，并进行了参数化处理以解决出现该问题的不同软件开发环境。An architectural pattern is a set of architectural design decisions that are applicable to a recurring design problem, and">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构设计-03-Architectural Pattern">
+<meta property="og:url" content="https://eaglebear2002.github.io/28203/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="Architectural Pattern  架构模式是一组架构设计决策，适用于重复出现的设计问题，并进行了参数化处理以解决出现该问题的不同软件开发环境。An architectural pattern is a set of architectural design decisions that are applicable to a recurring design problem, and">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/8.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/13.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/14.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/15.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/16.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/17.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/18.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/19.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/21.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/20.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/22.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/23.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/25.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/28.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/29.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/30.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/28203/32.png">
+<meta property="article:published_time" content="2023-05-10T07:16:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.668Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/28203/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/28203/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构设计-03-Architectural Pattern | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/28203/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构设计-03-Architectural Pattern
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-10 15:16:00" itemprop="dateCreated datePublished" datetime="2023-05-10T15:16:00+08:00">2023-05-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Architectural-Pattern">Architectural Pattern</h2>
+<ol>
+<li>架构模式是一组架构设计决策，适用于重复出现的设计问题，并进行了参数化处理以解决出现该问题的不同软件开发环境。An architectural pattern is a set of architectural design decisions that are applicable to a recurring design problem, and parameterized to account for different software development contexts in which that problem appears.</li>
+<li>体系结构模式与 DSSA 相似，但适用于较低级别，范围更窄。Architectural patterns are similar to I SSAs but applied at a lower level&quot; and within a much narrower scope.</li>
+<li>课本 227 页</li>
+</ol>
+<img src="/28203/1.png" style="zoom: 33%;">
+<h2 id="Domain-Specific-Software-Architecture">Domain-Specific Software Architecture</h2>
+<ol>
+<li>领域特定的软件体系结构（DSSA）是软件组件的组合 Domain-Specific Software Architectures (DSSA) is an assemblage of sottware components
+<ol>
+<li>专用于特定类型的任务（域） specialized for a particular type of task (domain) generalized for effective use across that domain, and</li>
+<li>普遍适用于该领域的有效使用 composed in a standardized structure (topology)</li>
+<li>有效构建成功应用程序的标准化结构（拓扑）组成 effective for building successful applications.</li>
+</ol>
+</li>
+<li>DSSA 是最大限度地重用知识和进行先期开发并因此开发新的体系结构设计的卓越手段。DSSAs are the pre-eminent means for maximal reuse of knowledge and prior development and hence for developing a new architectural design.</li>
+</ol>
+<h2 id="Program-Design-Patterns">(Program) Design Patterns</h2>
+<h3 id="Architectural-Patterns">Architectural Patterns</h3>
+<ol>
+<li>架构模式 Architecture pattern
+<ol>
+<li>是在实践中反复发现的一套设计决策 is a package of design decisions that is found repeatedly in practice,</li>
+<li>具有允许重复使用的已知属性，并且描述了一类架构 has known properties that permit reuse, and describes a class of architectures.</li>
+</ol>
+</li>
+<li>架构模式建立了以下之间的关系：Architecture pattern establishes a relationship between:
+<ol>
+<li>背景：世界上经常发生的常见问题，会引起问题 A context: A recurring, common situation in the world that gives rise to a problem.</li>
+<li>一个问题：在给定的上下文中出现的问题，经过适当概括 A problem: The problem, appropriately generalized, that arises in the given context.</li>
+<li>解决方案：针对问题的成功架构解决方案，并进行了适当抽象 A solution: A successful architecture resolution to the problem, appropriately abstracted.</li>
+</ol>
+</li>
+<li>在实践中找到模式 Patterns are found in practice
+<ol>
+<li>一个人不发明模式，一个人发现它们 One does not invent patterns, one discovers them</li>
+<li>永远不会有一个完整的模式列表 There will never be a complete list of patterns</li>
+</ol>
+</li>
+</ol>
+<h3 id="Layered-Pattern">Layered Pattern</h3>
+<p>对应 4+1 视图中的逻辑视图</p>
+<h4 id="Layered-Pattern-Solution">Layered Pattern Solution</h4>
+<img src="/28203/2.png" style="zoom:33%;">
+<p>层间的访问必须按照逐层进行访问</p>
+<h4 id="Stack-of-boxes-Notation">Stack-of-boxes Notation</h4>
+<img src="/28203/3.png" style="zoom: 33%;">
+<h4 id="基于分层模式的系统">基于分层模式的系统</h4>
+<img src="/28203/4.png" style="zoom:33%;">
+<h4 id="分层模式变体">分层模式变体</h4>
+<img src="/28203/5.png" style="zoom:33%;">
+<ol>
+<li>上面的 A、B、C：不是一种分层模式：
+<ol>
+<li>分层的核心是为了实现关注点分离</li>
+<li>不是分层模式：
+<ol>
+<li>形成了环状依赖</li>
+<li>没有实现关注点分离，一个的修改可能有多个原因</li>
+<li>是一种软件的坏味道</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>下面的 A、B、C、D：是一种分层模式：
+<ol>
+<li>也可以是一种分层模式，D 不期待 A 的结果且 D 不期待 B 的结果</li>
+<li>而严格意义和其他场景中，不认为是一种分层模式</li>
+</ol>
+</li>
+</ol>
+<h4 id="分层模式对质量属性的影响">分层模式对质量属性的影响</h4>
+<ol>
+<li>可修改性</li>
+<li>可模块化</li>
+<li>可维护性</li>
+<li>可复用性</li>
+</ol>
+<h3 id="Broker-Pattern">Broker Pattern</h3>
+<p>Broker 可以理解为中间人，撮合双方达成交易。</p>
+<h4 id="解决方案">解决方案</h4>
+<img src="/28203/6.png" style="zoom:33%;">
+<h4 id="概述图">概述图</h4>
+<img src="/28203/7.png" style="zoom:33%;">
+<h4 id="质量属性体现模式的优缺点">质量属性体现模式的优缺点</h4>
+<ol>
+<li>优点
+<ol>
+<li>Interoperability：根本目的，提高 Server-Client 之间的交互性</li>
+<li>Scaliability：可伸缩和扩展</li>
+<li>Modifiabiliy：</li>
+<li>两面性：
+<ol>
+<li>Security：代理对象屏蔽了系统内部的具体实现</li>
+<li>Reliability：服务降级和实例重启</li>
+<li>Availability：</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>缺点：
+<ol>
+<li>Security：成为被攻击的对象</li>
+<li>Reliabiliy：可靠性会降低</li>
+</ol>
+</li>
+<li>两面性：
+<ol>
+<li>Performance：整体大集群的性能可能会提高（QPS 等提高），但是局部单点性能会下降，多次网络请求、多次匹配，有可能会抵消。</li>
+</ol>
+</li>
+</ol>
+<h3 id="Model-View-Controller-Pattern-MVC">Model-View-Controller Pattern (MVC)</h3>
+<ol>
+<li>使用运行时、动态、相互之间的关系来审视，集成到了开发框架中，也是分层架构的变种（会强调各模块之间的约束关系，model 不可以直接返回到 controller）
+<ol>
+<li>model 业务逻辑</li>
+<li>view 处理用户展示，接收用户操作</li>
+<li>controller 对用户操作进行处理，将信息通知给 model</li>
+</ol>
+</li>
+<li>model -&gt; controller 不会产生通信</li>
+</ol>
+<h4 id="解决方案-2">解决方案</h4>
+<img src="/28203/8.png" style="zoom:33%;">
+<h4 id="概述图-2">概述图</h4>
+<img src="/28203/9.png" style="zoom:33%;">
+<h3 id="Pipe-and-Filter-Pattern">Pipe-and-Filter Pattern</h3>
+<ol>
+<li>filter：相当于 component，起到数据处理、计算作用，每个 filter 有 input 和多个 output，数据处理后传递给后续的部分。</li>
+<li>pipe：连接 filter，相当于 connector，将 output 导入到其他的 filter 的 input 中去，不会孤立存在。</li>
+<li>管道和过滤模式不会孤立存在，应用在顺序处理结构，有一系列的数据结构 filter，体现依赖关系。</li>
+<li>场景应用在科学计算的场景中，需要避免出现环形的 filter，不适用于有很多交互产生的场景。</li>
+</ol>
+<h4 id="解决方案-3">解决方案</h4>
+<img src="/28203/10.png" style="zoom:33%;">
+<h4 id="概述图-3">概述图</h4>
+<img src="/28203/11.png" style="zoom:33%;">
+<ol>
+<li>每一组件表示 filter，连接两个组件的部分是 pipe（类似于 queue 交易任务的排队等待处理）</li>
+<li>任何一个 filter 都依赖于前一个 filter 的输出，中间没有机会接收外部的交互来改变严格定义好的流程。</li>
+<li>不适用于一些可以引入变形的场景（相互独立、不依赖前面的产出，会带来损耗）</li>
+</ol>
+<h3 id="Client-Server-Pattern">Client-Server Pattern</h3>
+<ol>
+<li>包含两类不同的 component</li>
+<li>请求发起 client、server 接收请求，这里没有 broker，不能动态改变 client 和 server 的关系，相对更固定，但是一个 client 可以连接多个 server</li>
+<li>一个 component 在一个关系中可以是 client，也可能是 server，非绝对，但是成对的关系相对固定。</li>
+<li>会受到负载的限制。</li>
+<li>Server 可能有性能瓶颈，但是可以通过事先规划避免。</li>
+<li>Server 可能单点失效，但是 broker 可以控制</li>
+</ol>
+<h4 id="解决方案-4">解决方案</h4>
+<img src="/28203/12.png" style="zoom:33%;">
+<h4 id="概述图-4">概述图</h4>
+<img src="/28203/13.png" style="zoom:33%;">
+<ol>
+<li>ATM 验证身份，某一个 server 会给很多设备提供服务。</li>
+<li>ATM 操作安全监控、盗刷之类，通过 monitoring 发现问题找到记录</li>
+<li>对银行工作人员而言，需要新的业务，policy 发生变化，银行工作人员定义 ATM 上的操作</li>
+<li>银行负责安全金融的根据 ATM、对照用户操作行为是否有安全隐患，多对多。</li>
+<li>问题：broker 也存在 client 和 server 之间的关系，对质量属性的影响，做一下比较，broker 是之前，c/s 是 90 年代流行广泛应用
+<ol>
+<li>互操作性：可能导致变弱？没有 broker，需要人为连接</li>
+<li>安全性：Client、Server 不采用 broker 可能被拦截</li>
+<li>伸缩性</li>
+<li>性能</li>
+<li>可修改性</li>
+</ol>
+</li>
+<li>小型局域网、互联网还没有普及，规模有限，直接联系，性能上安全性可能带来更大收益</li>
+<li>broker 的一些负面影响就不必承担了，c/s 会比 broker 投入更少，收益可能更大</li>
+</ol>
+<h3 id="Peer-to-Peer-Pattern">Peer-to-Peer Pattern</h3>
+<ol>
+<li>这一刻是提供者，下一刻就是消费者，是对等的</li>
+<li>不单单提供服务，还能提供物流（对于整个网络）</li>
+<li>对每一个 peer 可能会给他一个规定对的连接数</li>
+</ol>
+<h4 id="解决方案-5">解决方案</h4>
+<img src="/28203/14.png" style="zoom:33%;">
+<h4 id="概述图-5">概述图</h4>
+<img src="/28203/15.png" style="zoom:33%;">
+<ol>
+<li>可能安全性不受保障，因为节点既是 Client 又是 Server，被攻击可能性提高了，attack、surface 受攻击面变大</li>
+<li>数据分布在不同的节点上，相同数据多处拷贝，如果要的话，可能会导致数据不一致（数据一致性难度更大），不能保证数据一定可用，数据可用性不能百分之百保证。</li>
+<li>可用性 availability，同一个数据多个副本，所以个别数据出问题不影响整体。</li>
+<li>但又不能保证 availability，不会以后任何一个节点有权限。</li>
+<li>Performance：多个节点同时提供服务，性能快（多个渠道获取数据，并行能力提高）</li>
+</ol>
+<h3 id="Service-Oriented-Pattern">Service-Oriented Pattern</h3>
+<ol>
+<li>broker 架构的延续。</li>
+<li>component 包含服务提供者、服务消费者。</li>
+<li>除了这些 component 还有 ESB、企业服务组件、连接处理，包括发现、注册。</li>
+<li>Registry of Services</li>
+<li>Orchestration Server 不同的 Service 按照一定的顺序进行编排，提供更高级的（申请贷款流程）</li>
+<li>Connectors：
+<ol>
+<li>SOAP：</li>
+<li>REST：</li>
+<li>Asynchronous messaging connector</li>
+</ol>
+</li>
+</ol>
+<h4 id="解决方案-6">解决方案</h4>
+<img src="/28203/16.png" style="zoom:33%;">
+<h4 id="概述图-6">概述图</h4>
+<img src="/28203/17.png" style="zoom:33%;">
+<ol>
+<li>旅行社有一系列需求</li>
+<li>真正提供服务的是酒店、导游之类的，系统需要通过 Web Service Broker 连接到不同的真正提供者。下单：商家发货。</li>
+</ol>
+<h4 id="SOA-中的连接器">SOA 中的连接器</h4>
+<ol>
+<li>SOAP（简单对象访问协议）：服务使用者和提供者通过通常在HTTP 之上交换请求/答复XML 消息进行交互 SOAP (Simple Object Access Protocol): Service consumers and providers interact by exchanging request/reply XML messages typically on top of HTTP</li>
+<li>REST（代表性状态传输）：服务使用者发送依赖于四个基本HTTP 命令（POST，GET，PUT，DELETE）的 HTTP 请求 REST (Representational State Transfer) : A service consumer sends HT TP requests that rely on; four basic HTTP commands (POST, GET, PUT, DELETE)</li>
+<li>异步消息传递（“即发即忘”）：参与者不必等待收据的确认。Asynchronous messaging (&quot;fire-and-forget&quot;): Participants do not have to wait for an acknowledgment of receipt.</li>
+</ol>
+<h4 id="SOA-和其他架构的区别">SOA 和其他架构的区别</h4>
+<ol>
+<li>具备 broker 的优势，这里又不想继承 broker，所以 broker 消失了</li>
+<li>出现类似集基础设施的组件，代替单一节点 broker，单点失效的问题消失了</li>
+<li>商业模式的变化、看技术可用性</li>
+<li>基础条件——互联网普及范围参与者人数规模比以往大这样一个背景下打破 broker c-s</li>
+<li>追求更高互操作性更高伸缩性</li>
+<li>技术条件下提供的服务越来越多现在可以分得更细更大差异化更细粒度的组合可以实现出来社会分工越来越细（不同航空公司不同酒店细粒度体现如果固定就很难实现差异化）微服务也是这样的体现服务粒度越来越小是有很多技术条件支持的（单体系统内部复杂度外化外面复杂度可以进行动态绑定可以提供多样化服务）</li>
+</ol>
+<h3 id="Publish-Subscribe-Pattern">Publish-Subscribe Pattern</h3>
+<ol>
+<li>subscribe 注册对于 publiser 进行注册</li>
+<li>某一个 publiser 发布自己的消息可能订阅其他消息（朋友圈微博）</li>
+</ol>
+<h4 id="解决方案-7">解决方案</h4>
+<img src="/28203/18.png" style="zoom:33%;">
+<ol>
+<li>传统操作系统也是通过事件驱动方式来管理的</li>
+<li>IDE 环境注册后就行结构发布的事件</li>
+<li>数据发生变化会反映到环境中去</li>
+<li>性能上的延迟（可限制 subscriber 数量订阅越多性能下降）</li>
+<li>scalability publisher 数量不会变多</li>
+<li>发布者不关心每个订阅者都收到不是 guarantee</li>
+</ol>
+<h4 id="概述图-7">概述图</h4>
+<img src="/28203/19.png" style="zoom:33%;">
+<h3 id="Shared-Data-Pattern">Shared-Data Pattern</h3>
+<p>中间安全数据会被很多人共享登录访问</p>
+<h4 id="解决方案-8">解决方案</h4>
+<img src="/28203/21.png" style="zoom:33%;">
+<ol>
+<li>这样一个系统模式有什么问题嘛？</li>
+<li>单点失效性能瓶颈问题（都要对它操作） 安全性（攻击中心点有风险）对安全性数据来说强调强一致性如果有副本有一段时间才能到其他副本上更（可能成为漏洞任何时刻访问数据都必须一致）</li>
+<li>一致性：
+<ol>
+<li>CAP 原则又称 CAP 定理，指的是在一个分布式系统中，一致性（Consistency）、可用性（Availability）、分区容错性（Partition tolerance）</li>
+<li>看哪个更重要只能同时实现两者</li>
+<li>其他实现一致性方式：最终一致性（不保证任何时候访问数据都一致但是可以保证最终结果要一致） 互联网不可能牺牲可用性也必须是分布式结构（面对分布在很多地方保证信号要求） 一致性设计难度非常大</li>
+</ol>
+</li>
+</ol>
+<h4 id="概述图-8">概述图</h4>
+<img src="/28203/20.png" style="zoom:33%;">
+<p>既有读又有写</p>
+<h3 id="Map-Reduce-Pattern">Map-Reduce Pattern</h3>
+<ol>
+<li>软件和外部环境的关系 部署</li>
+<li>map 对数据进行抽取所需要的信息信息转换</li>
+<li>可以有多个 map 处理数据工作内容不一样</li>
+<li>相互独立可以运行</li>
+<li>reduce 进行合并产出想要的答案</li>
+</ol>
+<h4 id="解决方案-9">解决方案</h4>
+<img src="/28203/22.png" style="zoom:33%;">
+<ol>
+<li>map reduce 部署在不同的地方</li>
+<li>词频分析案例大量数据</li>
+<li>Map-Reduce Based System</li>
+<li>每一个 partition 对应一个 map 每一个 map 任务一样不同实例</li>
+<li>所有词汇使用频率标注出来</li>
+<li>通过 reduce 进行合并</li>
+<li>最后进行排序</li>
+</ol>
+<h4 id="概述图-9">概述图</h4>
+<img src="/28203/23.png" style="zoom:33%;">
+<h3 id="Multi-Tier-Pattern">Multi-Tier Pattern</h3>
+<ol>
+<li>部署的环境划分</li>
+<li>layer 是真实存在的</li>
+<li>这里是逻辑的组合没有和层的强依赖关系</li>
+<li>不同的部署环境里面分层不同但是软件完成内容一样</li>
+</ol>
+<h4 id="解决方案-10">解决方案</h4>
+<img src="/28203/24.png" style="zoom:33%;">
+<ol>
+<li>旅行社例子</li>
+<li>tier 只是部署方案决定并没有改变代码本身</li>
+</ol>
+<h4 id="概述图-10">概述图</h4>
+<img src="/28203/25.png" style="zoom:33%;">
+<p>三大类：modular 类、runtime process 动态类、软件和非软件环境关系（部署关系）11 个架构模式</p>
+<h3 id="不同的模式对于质量属性不同的影响">不同的模式对于质量属性不同的影响</h3>
+<p>某一个 Pattern 会对一些质量属性产生积极影响，但是也会对其他属性产生不好的影响</p>
+<h2 id="Architecture-Patterns-and-Tactics">Architecture Patterns and Tactics</h2>
+<ol>
+<li>策略比模式简单。他们使用单一的结构或机制来应对单一的架构力量 Tactics are simpler than patterns; they use a single structure or mechanism to address a single architectural force.WW</li>
+<li>模式通常将多个设计决策组合到一个包中 Patterns typically combine multiple design decisions into a package.</li>
+<li>模式和策略共同构成了软件设计师的主要工具 Patterns and tactics together constitute the software architect' s primary tools.</li>
+<li>战术是设计的“构建块”，可从中创建架构模式 Tactics are &quot;building blocks&quot; of design from which architectural patterns are created.</li>
+<li>大多数模式包含几种不同的策略，这些策略可能 Most patterns consist of several different tactics that may:
+<ol>
+<li>都有共同的目的 all serve a common purpose,</li>
+<li>经常被选择来承诺不同的质量属性 be often chosen to promise different quality attributes</li>
+</ol>
+</li>
+<li>示例：分层模式 Example: layered pattern
+<ol>
+<li>提高语义一致性 Increase semantic coherence</li>
+<li>限制依赖 Restrict dependencies</li>
+</ol>
+</li>
+<li>tactic 是设计最小粒度 tactic 进行组合一个 tactic 是为了某一个质量属性也会影响其他属性（正面、负面）</li>
+<li>针对某一个质量属性 Modifiability 相关的 tactic 和 pattern 之间的关系是否涉及到</li>
+</ol>
+<img src="/28203/26.png" style="zoom:33%;">
+<ol>
+<li>设计深度问题</li>
+</ol>
+<img src="/28203/27.png" style="zoom: 25%;">
+<img src="/28203/28.png" style="zoom: 25%;">
+<ol>
+<li>椭圆形——某一个 tactic 如 ping/Echo</li>
+<li>可用性有贡献但是可能会产生其他影响（系统复杂度、资源影响、性能）</li>
+<li>如果性能很在意就对它单独进行设计成本、增加资源利用率问题</li>
+</ol>
+<img src="/28203/29.png" style="zoom: 25%;">
+<img src="/28203/30.png" style="zoom:25%;">
+<ol>
+<li>为了提高利用率需要引入调度机制</li>
+<li>最终判断是 ASR
+<ol>
+<li>负面影响系统可以容忍对最在意的 asr 可以忽略就可以停止，每一个 tactic 都会增加系统复杂度和规模</li>
+<li>没有足够人力物力实现也可以停止</li>
+<li>整个过程不断迭代最后达成妥协</li>
+</ol>
+</li>
+</ol>
+<img src="/28203/31.png" style="zoom:25%;">
+<h2 id="Reading-Materials">Reading Materials</h2>
+<p><img src="/28203/32.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/24376/" rel="prev" title="软件架构设计-01-Introduction">
+      <i class="fa fa-chevron-left"></i> 软件架构设计-01-Introduction
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20764/" rel="next" title="软件架构设计-04-Designing Architecture">
+      软件架构设计-04-Designing Architecture <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Architectural-Pattern"><span class="nav-number">1.</span> <span class="nav-text">Architectural Pattern</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Domain-Specific-Software-Architecture"><span class="nav-number">2.</span> <span class="nav-text">Domain-Specific Software Architecture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Program-Design-Patterns"><span class="nav-number">3.</span> <span class="nav-text">(Program) Design Patterns</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Architectural-Patterns"><span class="nav-number">3.1.</span> <span class="nav-text">Architectural Patterns</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Layered-Pattern"><span class="nav-number">3.2.</span> <span class="nav-text">Layered Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Layered-Pattern-Solution"><span class="nav-number">3.2.1.</span> <span class="nav-text">Layered Pattern Solution</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stack-of-boxes-Notation"><span class="nav-number">3.2.2.</span> <span class="nav-text">Stack-of-boxes Notation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%88%86%E5%B1%82%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.2.3.</span> <span class="nav-text">基于分层模式的系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B1%82%E6%A8%A1%E5%BC%8F%E5%8F%98%E4%BD%93"><span class="nav-number">3.2.4.</span> <span class="nav-text">分层模式变体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B1%82%E6%A8%A1%E5%BC%8F%E5%AF%B9%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.2.5.</span> <span class="nav-text">分层模式对质量属性的影响</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Broker-Pattern"><span class="nav-number">3.3.</span> <span class="nav-text">Broker Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.3.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE"><span class="nav-number">3.3.2.</span> <span class="nav-text">概述图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7%E4%BD%93%E7%8E%B0%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.3.3.</span> <span class="nav-text">质量属性体现模式的优缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Model-View-Controller-Pattern-MVC"><span class="nav-number">3.4.</span> <span class="nav-text">Model-View-Controller Pattern (MVC)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-2"><span class="nav-number">3.4.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-2"><span class="nav-number">3.4.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pipe-and-Filter-Pattern"><span class="nav-number">3.5.</span> <span class="nav-text">Pipe-and-Filter Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-3"><span class="nav-number">3.5.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-3"><span class="nav-number">3.5.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-Server-Pattern"><span class="nav-number">3.6.</span> <span class="nav-text">Client-Server Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-4"><span class="nav-number">3.6.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-4"><span class="nav-number">3.6.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Peer-to-Peer-Pattern"><span class="nav-number">3.7.</span> <span class="nav-text">Peer-to-Peer Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-5"><span class="nav-number">3.7.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-5"><span class="nav-number">3.7.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-Oriented-Pattern"><span class="nav-number">3.8.</span> <span class="nav-text">Service-Oriented Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-6"><span class="nav-number">3.8.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-6"><span class="nav-number">3.8.2.</span> <span class="nav-text">概述图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOA-%E4%B8%AD%E7%9A%84%E8%BF%9E%E6%8E%A5%E5%99%A8"><span class="nav-number">3.8.3.</span> <span class="nav-text">SOA 中的连接器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOA-%E5%92%8C%E5%85%B6%E4%BB%96%E6%9E%B6%E6%9E%84%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.8.4.</span> <span class="nav-text">SOA 和其他架构的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Publish-Subscribe-Pattern"><span class="nav-number">3.9.</span> <span class="nav-text">Publish-Subscribe Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-7"><span class="nav-number">3.9.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-7"><span class="nav-number">3.9.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shared-Data-Pattern"><span class="nav-number">3.10.</span> <span class="nav-text">Shared-Data Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-8"><span class="nav-number">3.10.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-8"><span class="nav-number">3.10.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Map-Reduce-Pattern"><span class="nav-number">3.11.</span> <span class="nav-text">Map-Reduce Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-9"><span class="nav-number">3.11.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-9"><span class="nav-number">3.11.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multi-Tier-Pattern"><span class="nav-number">3.12.</span> <span class="nav-text">Multi-Tier Pattern</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-10"><span class="nav-number">3.12.1.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0%E5%9B%BE-10"><span class="nav-number">3.12.2.</span> <span class="nav-text">概述图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84%E6%A8%A1%E5%BC%8F%E5%AF%B9%E4%BA%8E%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7%E4%B8%8D%E5%90%8C%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.13.</span> <span class="nav-text">不同的模式对于质量属性不同的影响</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Architecture-Patterns-and-Tactics"><span class="nav-number">4.</span> <span class="nav-text">Architecture Patterns and Tactics</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reading-Materials"><span class="nav-number">5.</span> <span class="nav-text">Reading Materials</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

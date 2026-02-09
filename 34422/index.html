@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 输入输出 I&#x2F;O 设备  通常包括一些非数字组件。 典型的 CPU 数字接口：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式系统概论-05-基于主线的计算系统">
+<meta property="og:url" content="https://eaglebear2002.github.io/34422/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 输入输出 I&#x2F;O 设备  通常包括一些非数字组件。 典型的 CPU 数字接口：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027165723045.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027165859902.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/8.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027185556867.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027185605811.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/15.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/05-Bus-based%20computering%20systems.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/17.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/18.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/05-Bus-based%20computering%20systems-1666873392469-57.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/05-Bus-based%20computering%20systems-1666873465914-59.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/21.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027202742972.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/34422/image-20221027202748843.png">
+<meta property="article:published_time" content="2022-10-27T08:20:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.546Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/34422/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/34422/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>嵌入式系统概论-05-基于主线的计算系统 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/34422/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式系统概论-05-基于主线的计算系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-27 16:20:00" itemprop="dateCreated datePublished" datetime="2022-10-27T16:20:00+08:00">2022-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%AE%BA/" itemprop="url" rel="index"><span itemprop="name">2022Fall-嵌入式系统概论</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="输入输出">输入输出</h2>
+<h3 id="I-O-设备">I/O 设备</h3>
+<ol>
+<li>通常包括一些非数字组件。</li>
+<li>典型的 CPU 数字接口：</li>
+</ol>
+<p><img src="/34422/1.png" alt></p>
+<h3 id="应用：8251-UART">应用：8251 UART</h3>
+<ol>
+<li>通用异步接收器发送器（UART）：提供串行通信。</li>
+<li>允许对许多通信参数进行编程。</li>
+</ol>
+<h3 id="串行通讯">串行通讯</h3>
+<ol>
+<li>字符分别传输：</li>
+</ol>
+<p><img src="/34422/2.png" alt></p>
+<p>串行通讯参数：</p>
+<ol>
+<li>波特率（Baud (bit) rate）</li>
+<li>每个字符的比特数</li>
+<li>奇偶校验/无奇偶校验：奇偶校验</li>
+<li>停止位的长度（1、1.5、2 位）</li>
+</ol>
+<h3 id="CPU-接口">CPU 接口</h3>
+<p><img src="/34422/3.png" alt></p>
+<h3 id="I-O-设备分类">I/O 设备分类</h3>
+<h4 id="从属关系分类">从属关系分类</h4>
+<ol>
+<li>系统设备：操作系统启动时已经在系统中注册的标准设备。
+<ol>
+<li>示例包括 NOR/NAND 闪存，触摸板等。</li>
+<li>操作系统中有用于这些设备的设备驱动程序和管理程序。</li>
+<li>用户应用程序只需调用操作系统提供的标准命令或功能即可使用这些设备。</li>
+</ol>
+</li>
+<li>用户设备：操作系统启动时未在系统中注册的非标准设备。
+<ol>
+<li>通常，设备驱动程序由用户提供。用户必须以某种方式将这些设备的控制权转移到 OS 进行管理。</li>
+<li>典型的设备包括 SD 卡，U 盘等。</li>
+</ol>
+</li>
+</ol>
+<h4 id="使用分类">使用分类</h4>
+<ol>
+<li>专用设备：同一时间只能被一个进程使用的设备。对于多个并发进程，每个进程使用设备是互斥的。一旦操作系统将设备分配给一个特定的进程，它将被该进程独占，直到该进程使用后释放它。</li>
+<li>共享设备：可被多个进程同时寻址的设备。共享设备必须是可寻址的，并且是随机寻址的。共享设备机制可以提高每个设备的利用率。</li>
+<li>虚拟设备：通过虚拟技术将一台独占设备虚拟成多台逻辑设备，供多个用户进程同时使用， 通常把这种经过虚拟的设备称为虚拟设备。</li>
+</ol>
+<h4 id="特征分类">特征分类</h4>
+<ol>
+<li>存储设备：用于存储信息的设备。嵌入式系统中的典型
+例子包括硬盘、固态硬盘、NOR/NAND 闪存。</li>
+<li>I/O 设备：</li>
+<li>输入设备：输入设备负责将信息从外部源输入到内部系统，例如触摸面板，条形码扫描仪等。</li>
+<li>输出设备：输出设备负责将嵌入式系统处理的信息输出到外部世界，例如 LCD 显示器，扬声器等。</li>
+</ol>
+<h4 id="信息传递单位类别">信息传递单位类别</h4>
+<ol>
+<li>块设备：这种类型的设备以数据块为单位组织和交换数据。
+<ol>
+<li>它是一种结构装置。</li>
+<li>典型的设备是硬盘。</li>
+<li>在 I/O 操作中，即使只是单字节读/写，也应该读取或写入整个数据块。</li>
+</ol>
+</li>
+<li>字符设备：这种类型的设备以字符为单位组织和交换数据。
+<ol>
+<li>它是一种非结构性的设备。</li>
+<li>字符设备的类型很多，例如串行端口，触摸面板，打印机。</li>
+<li>字符设备的基本特征是传输速率低且无法寻址。当字符设备执行 I/O 操作时，通常使用中断。</li>
+</ol>
+</li>
+</ol>
+<h3 id="I-O-设备组成">I/O 设备组成</h3>
+<p>通常，I/O 设备由两部分组成：机械部分和电子部分。电子部分称为设备控制器或适配器。</p>
+<p><img src="/34422/image-20221027165723045.png" alt></p>
+<h4 id="可编程-I-O">可编程 I/O</h4>
+<ol>
+<li>通信期间选择控制寄存器或数据缓冲区的三种方法
+<ol>
+<li>独立的 I/O 端口：需要专门的指令来完成。</li>
+<li>内存映射的 I/O。</li>
+<li>混合解决方案（统一编址）。混合模型包括内存映射的 I/O 数据缓冲区和用于控制寄存器的单独的 I/O 端口。</li>
+</ol>
+</li>
+<li>英特尔 x86 提供了输入输出说明。大多数其他 CPU 使用内存映射的 I/O。</li>
+<li>I/O 指令不排除内存映射的 I/O</li>
+</ol>
+<p><img src="/34422/image-20221027165859902.png" alt="（a）独立的 I/O 和内存空间、（b）内存映射的 I/O、（c）混合解决方案"></p>
+<h4 id="内存映射的-I-O">内存映射的 I/O</h4>
+<p>内存映射 I/O 的优点可总结为：</p>
+<ol>
+<li>在内存映射的 I/O 模式下，设备控制寄存器只是内存中的变量，并且可以与其他变量一样用 C 寻址。因此，可以完全用 C 语言编写 I/O 设备驱动程序。</li>
+<li>在这种模式下，不需要特殊的保护机制即可阻止用户进程执行 I/O 操作。</li>
+</ol>
+<p>内存映射 I/O 模式的缺点可以总结为：</p>
+<ol>
+<li>当前大多数嵌入式处理器都支持内存缓存。缓存设备控制寄存器将导致灾难。为了防止这种情况，必须为硬件提供选择性禁用缓存的功能。这将增加嵌入式系统中硬件和软件的复杂性。</li>
+<li>如果只有一个地址空间，则所有内存模块和所有 I/O 设备都必须检查所有内存引用，以便确定要响应的内存引用。这会严重影响系统性能。</li>
+</ol>
+<p>ARM 内存映射的 I/O：</p>
+<ol>
+<li>定义设备地址：<code>DEV1 EQU 0x1000</code></li>
+<li>读写代码：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs assembly">LDR r1,#DEV1 ; set up device adrs<br>LDR r0,[r1] ; read DEV1<br>LDR r0,#8 ; set up value to write<br>STR r0,[r1] ; write value to device<br></code></pre></td></tr></table></figure>
+<h5 id="Peek-and-poke">Peek and poke</h5>
+<p>传统 HLL 接口：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">peek</span><span class="hljs-params">(<span class="hljs-type">char</span> *location)</span> </span>&#123;<br>   <span class="hljs-keyword">return</span> *location;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">poke</span><span class="hljs-params">(<span class="hljs-type">char</span> *location, <span class="hljs-type">char</span> newval)</span> </span>&#123;<br>   (*location) = newval;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="忙等（busy-wait）输出">忙等（busy/wait）输出</h5>
+<p>对设备进行编程的最简单方法。使用指令测试设备何时准备就绪：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp">current_char = mystring;<br><span class="hljs-keyword">while</span> (*current_char != <span class="hljs-string">&#x27;\0&#x27;</span>) &#123;<br>   <span class="hljs-built_in">poke</span>(OUT_CHAR,*current_char);<br>   <span class="hljs-keyword">while</span> (<span class="hljs-built_in">peek</span>(OUT_STATUS) != <span class="hljs-number">0</span>);<br>   current_char++;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="同步忙等输入输出：">同步忙等输入输出：</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">while</span> (TRUE) &#123;<br>   <span class="hljs-comment">/* read */</span><br>   <span class="hljs-keyword">while</span> (<span class="hljs-built_in">peek</span>(IN_STATUS) == <span class="hljs-number">0</span>);<br>   achar = (<span class="hljs-type">char</span>)<span class="hljs-built_in">peek</span>(IN_DATA);<br>   <span class="hljs-comment">/* write */</span><br>   <span class="hljs-built_in">poke</span>(OUT_DATA,achar);<br>   <span class="hljs-built_in">poke</span>(OUT_STATUS,<span class="hljs-number">1</span>);<br>   <span class="hljs-keyword">while</span> (<span class="hljs-built_in">peek</span>(OUT_STATUS) != <span class="hljs-number">0</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="中断-I-O">中断 I/O</h4>
+<p>忙等是非常低效的。而中断 I/O 是相对高效的。</p>
+<ol>
+<li>CPU 在测试设备时不能做其他工作。</li>
+<li>很难实现同步 I/O</li>
+</ol>
+<p>中断允许设备更改 CPU 中的控制流：导致子例程调用以处理设备。</p>
+<h5 id="中断接口">中断接口</h5>
+<p><img src="/34422/5.png" alt></p>
+<h5 id="中断行为">中断行为</h5>
+<ol>
+<li>基于子程序的调用机制</li>
+<li>中断迫使下一条指令成为子程序调用到预定位置。</li>
+<li>返回地址被保存以恢复执行前台程序。</li>
+</ol>
+<h5 id="中断物理接口">中断物理接口</h5>
+<ol>
+<li>CPU 和设备通过 CPU 总线连接。</li>
+<li>CPU 和设备握手</li>
+<li>设备声明中断请求（interrupt request）</li>
+<li>CPU 可以处理中断时会声明中断确认（interrupt acknowledge）</li>
+</ol>
+<h5 id="字符-I-O-处理">字符 I/O 处理</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">input_handler</span><span class="hljs-params">()</span> </span>&#123;<br>   achar = <span class="hljs-built_in">peek</span>(IN_DATA);<br>   gotchar = TRUE;<br>   <span class="hljs-built_in">poke</span>(IN_STATUS,<span class="hljs-number">0</span>);<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">output_handler</span><span class="hljs-params">()</span> </span>&#123;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="主程序">主程序</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>   <span class="hljs-keyword">while</span> (TRUE) &#123;<br>      <span class="hljs-keyword">if</span> (gotchar) &#123;<br>         <span class="hljs-built_in">poke</span>(OUT_DATA,achar);<br>         <span class="hljs-built_in">poke</span>(OUT_STATUS,<span class="hljs-number">1</span>);<br>         gotchar = FALSE;<br>      &#125;<br>   &#125;<br>   <span class="hljs-comment">// other processing....</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="例子：带缓冲区的中断-I-O">例子：带缓冲区的中断 I/O</h5>
+<p>字节队列如下：</p>
+<p><img src="/34422/6.png" alt></p>
+<p>基于缓冲区的输入处理程序：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">input_handler</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-type">char</span> achar;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">full_buffer</span>()) error = <span class="hljs-number">1</span>;<br>    <span class="hljs-keyword">else</span> &#123;<br>        achar = <span class="hljs-built_in">peek</span>(IN_DATA);<br>        <span class="hljs-built_in">add_char</span>(achar);<br>    &#125;<br>    <span class="hljs-built_in">poke</span>(IN_STATUS, <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">if</span> (nchars == <span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-built_in">poke</span>(OUT_DATA,<span class="hljs-built_in">remove_char</span>());<br>        <span class="hljs-built_in">poke</span>(OUT_STATUS,<span class="hljs-number">1</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h5 id="I-O-时序图">I/O 时序图</h5>
+<p><img src="/34422/7.png" alt></p>
+<h5 id="优先级和向量">优先级和向量</h5>
+<p>两种机制让我们可以使中断更具体：</p>
+<ol>
+<li>优先级：确定什么中断首先获取 CPU。</li>
+<li>中断向量：确定每种中断类型需要调用什么代码。</li>
+</ol>
+<p>这两种机制是正交的：大多数 CPU 都提供两者。</p>
+<h5 id="优先级例子">优先级例子</h5>
+<p>中断嵌套受到中断嵌套允许位控制</p>
+<p><img src="/34422/8.png" alt></p>
+<h5 id="中断优先级">中断优先级</h5>
+<ol>
+<li><strong>屏蔽</strong>：优先级低于当前优先级的中断直到待处理的中断完成后才被识别。</li>
+<li><strong>不可屏蔽中断（NMI）</strong>：最高优先级，从不屏蔽。经常情况下被用于关闭电源。</li>
+</ol>
+<p><img src="/34422/9.png" alt></p>
+<h5 id="中断向量">中断向量</h5>
+<ol>
+<li>允许使用不同的代码处理不同的设备。</li>
+<li>中断向量表：可以通过 ISR 寻找到，放置在起始地址。</li>
+</ol>
+<p><img src="/34422/10.png" alt></p>
+<h5 id="中断向量获取">中断向量获取</h5>
+<p><img src="/34422/11.png" alt></p>
+<h5 id="通用状态机">通用状态机</h5>
+<p><img src="/34422/12.png" alt></p>
+<h5 id="中断序列">中断序列</h5>
+<ol>
+<li>CPU 确认请求。</li>
+<li>设备发送引导程序。</li>
+<li>CPU 调用处理程序。</li>
+<li>软件流程请求。</li>
+<li>CPU 将状态恢复到前台程序。</li>
+</ol>
+<h5 id="中断开销的来源">中断开销的来源</h5>
+<ol>
+<li>处理程序执行时间</li>
+<li>中断机制开销</li>
+<li>注册保存/恢复</li>
+<li>管道相关的罚时</li>
+<li>与缓存有关的罚时</li>
+</ol>
+<h2 id="中断设计准则">中断设计准则</h2>
+<p>虽然糟糕的代码很难调试，但糟糕的 ISR 几乎是无法调试的。</p>
+<p>如何调试？</p>
+<ol>
+<li>首先，在您布置中断映射之前，不要考虑为您的新嵌入式系统编写一行代码。列出每个中断，并给出例程应该做什么的英文描述。</li>
+<li>地图是预算。它可以让您评估中断时间将花在哪里。</li>
+<li>估计每个 ISR 的复杂性。</li>
+<li>ISR 的基本规则是使处理程序保持简短。</li>
+<li>当然，短是用时间而不是代码大小来衡量的。避免循环。避免冗长的复杂指令（重复动作、可怕的数学等）。</li>
+<li>在 ISR 中尽快重新启用中断。预先做硬件关键和不可重入的事情，然后执行中断启用指令。给其他 ISR 一个战斗的机会来做他们的事情。</li>
+</ol>
+<h3 id="中断图">中断图</h3>
+<p><img src="/34422/image-20221027185556867.png" alt></p>
+<h3 id="用指向空例程的指针填充所有未使用的中断向量">用指向空例程的指针填充所有未使用的中断向量</h3>
+<p><img src="/34422/image-20221027185605811.png" alt></p>
+<h3 id="C-还是汇编？">C 还是汇编？</h3>
+<ol>
+<li>如果例程将使用汇编语言，则将时间转换为大致的指令数。如果一条平均指令需要 x 微秒（取决于时钟速率、等待状态等），那么很容易获得对代码允许复杂度的关键估计。</li>
+<li>C 更成问题。事实上，没有办法科学地用 C 编写中断处理程序！ 你不知道一行 C 需要多长时间。您甚至无法进行估算，因为每条线路的时间变化很大。
+<ul>
+<li>字符串比较可能会导致运行时库调用，结果完全不可预测。</li>
+<li>FOR 循环可能需要一些简单的整数比较或大量的处理开销。</li>
+</ul>
+</li>
+<li>您可能会发现一个编译器在处理中断时慢得可怜。尝试另一个或切换到汇编。</li>
+</ol>
+<h3 id="调试中断代码">调试中断代码</h3>
+<ol>
+<li>如果您忘记更改寄存器怎么办？
+<ol>
+<li>前台程序可能会显示神秘的错误。</li>
+<li>错误将很难重复：取决于中断的时间。</li>
+</ol>
+</li>
+</ol>
+<h3 id="调试-INT-INTA-周期">调试 INT/INTA 周期</h3>
+<ol>
+<li>设备硬件产生中断脉冲。</li>
+<li>中断控制器（如果有）优先处理多个同时请求并向处理器发出单个中断。</li>
+<li>CPU 以中断确认周期进行响应。</li>
+<li>控制器在数据总线上丢弃一个中断向量。</li>
+<li>CPU 读取向量并计算用户存储向量在内存中的地址。然后它获取这个值。</li>
+<li>CPU 推送当前上下文，禁用中断，并跳转到 ISR。</li>
+</ol>
+<h3 id="查找丢失的中断">查找丢失的中断</h3>
+<ol>
+<li>您可以使用一个递增/递减计数器建立一个小的电路，该计数器对每个中断进行计数，并减少每个中断应答的计数。如果计数器始终显示零或一的值，则一切正常。</li>
+<li>一种设计经验法则将有助于最大程度地减少丢失的中断：在最早的安全位置重新启用 ISR 中的中断。</li>
+</ol>
+<h3 id="避免-NMI">避免 NMI</h3>
+<ol>
+<li>为像天启这样的灾难预留 NMI（不可屏蔽的中断）。电源故障、系统关闭和即将发生的灾难都是使用 NMI 监控的好东西。定时器或 UART 中断不是。</li>
+<li>NMI 甚至会破坏编码良好的中断处理程序，因为大多数 ISR 在硬件服务的前几行代码中是不可重入的。NMI 也会阻碍您的堆栈管理工作。</li>
+<li>NMI 与大多数工具的混合很差。调试任何 ISR（NMI 或其他）充其量是令人恼火的。很少有工具能很好地在 ISR 内执行单步执行和设置断点。</li>
+</ol>
+<h3 id="断点问题">断点问题</h3>
+<p>尽管断点确实是很棒的调试辅助工具，但它们就像海森堡的不确定性原则：观察系统的行为会改变它。您可以使用实时跟踪（至少在所有调试器和某些智能逻辑分析器中都可用）来欺骗海森堡（至少在调试嵌入式代码中！）。</p>
+<h3 id="一个简单-ISR-调试">一个简单 ISR 调试</h3>
+<p>调试 ISR 的最快方法是什么？</p>
+<ul>
+<li>不要调试</li>
+<li>如果您的 ISR 只有 10 或 20 行代码，请通过检查进行调试。不要启动各种复杂且不可预测的工具。</li>
+<li>保持处理程序简单而简短。</li>
+</ul>
+<h3 id="可重用代码">可重用代码</h3>
+<p>在嵌入式世界中，例程必须满足以下条件才能重新进入：</p>
+<ol>
+<li>它以原子方式使用所有共享变量，除非每个共享变量都分配给该函数的特定实例。</li>
+<li>它不调用非可重入函数。</li>
+<li>它不会以非原子方式使用硬件。</li>
+</ol>
+<p>可重用，即被中断之后还可以再次进入</p>
+<h4 id="原子变量">原子变量</h4>
+<p>第一个规则和最后一个规则都使用“原子”一词，该词源于希腊语，意思是“不可分割”。在计算机世界中，“原子”是指不能中断的操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">mov ax, bx 原子式<br>temp = foobar; temp += 1; foobar = temp; 非原子<br>foobar += 1; 非原子？先加法，再移动<br><br>mov ax,[foobar]<br>inc ax<br>mov [foobar],ax ; 非原子<br><br>inc [foobar] ; 非原子，先从寄存器中读，然后加载进来两步骤<br>lock inc [foobar] ; 将总线锁死<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>规则 2 告诉我们调用函数继承了被调用者的重入问题</p>
+<p>规则 3 是唯一嵌入的警告。硬件看起来很像一个变量。如果处理一个设备需要多个 I/O 操作，则会产生重入问题。</p>
+</blockquote>
+<h4 id="保持代码可重入">保持代码可重入</h4>
+<p>消除非重入代码的最佳选择是什么？</p>
+<ol>
+<li>经验法则是避免共享变量。全局变量是无止境的调试难题和失败的代码。使用自动变量或动态分配的内存。</li>
+<li>最常见的方法是在非重入代码期间禁用中断。</li>
+<li>信号量</li>
+</ol>
+<h4 id="递归">递归</h4>
+<p>如果函数调用自身，则该函数是递归的。因此，所有递归函数都必须是可重入的……但并非所有可重入函数都是递归的。</p>
+<blockquote>
+<p>嵌入式不建议使用递归，核心栈空间可能不足、执行时间比较复杂。</p>
+</blockquote>
+<h3 id="异步硬件-防火墙">异步硬件/防火墙</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// QAR 公司 RTEMS</span><br><span class="hljs-type">int</span> timer_hi;<br><span class="hljs-function">interrupt <span class="hljs-title">timer</span><span class="hljs-params">()</span></span>&#123;<br>    <span class="hljs-comment">// 中断，让高时间位自增 1</span><br>   ++timer_hi;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">long</span> <span class="hljs-title">timer_read</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>&#123;<br>   <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> low, high;<br>   <span class="hljs-comment">// 这里有问题，读硬件的时候值是 ffffff</span><br>   low = <span class="hljs-built_in">inword</span>(hardware_register); <span class="hljs-comment">// 存在被 ISR 抢断的情况，比如产生了溢出</span><br>   high = timer_hi;<br>   <span class="hljs-keyword">return</span> (high &lt;&lt; <span class="hljs-number">16</span> + low);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="比赛条件-Race-Conditions">比赛条件 Race Conditions</h4>
+<p>timer_read 的错误条件之一可能是：（顺序变化导致的结果变化，重要）</p>
+<ol>
+<li>它读取硬件，并获得 <code>0xffff</code> 的值</li>
+<li>在有机会从变量 <code>timer_hi</code> 检索大部分时间之前，硬件将再次递增至 <code>0x0000</code></li>
+<li>溢出触发中断。ISR 运行。<code>timer_hi</code> 现在为 0</li>
+<li>0001，而不是 0，因为它只是十亿分之一秒。</li>
+<li>ISR 返回；我们无所畏惧的 <code>timer_read</code> 例程，不知道发生了中断，巧妙地将新的 0 连接起来</li>
+<li><code>0001</code> 加上以前读取的计时器值为 <code>0Xffff</code>，并返回 <code>0X1ffff</code>，这是一个非常不正确的值。</li>
+</ol>
+<h4 id="选项">选项</h4>
+<p>最简单的方法是在尝试读取计时器之前将其停止：失去时间。在此期间关闭中断将消除不必要的任务，但会增加系统延迟和复杂性。</p>
+<p>另一种解决方案是先读取 <code>timer_hi</code> 变量，然后读取硬件计时器，然后重新读取 <code>timer_hi</code>。如果两个变量值都不相同，则会发生中断。迭代直到两个变量读取相等。</p>
+<ol>
+<li>好处是：正确的数据，中断持续存在，并且系统不会丢失计数。</li>
+<li>缺点：在负载繁重的多任务环境中，该例程可能会循环很长时间才能获得两次相同的读取。函数的执行时间不确定。我们已经从非常简单的计时器读取器转变为可以运行几毫秒而不是微秒的更为复杂的代码。</li>
+</ol>
+<p>另一种选择是简单地禁用读取周围的中断。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">long</span> <span class="hljs-title">timer_read</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>&#123;<br>   <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> low, high;<br>   push_interrupt_state;<br>   disable_interrupts;<br>   low = <span class="hljs-built_in">inword</span>(Timer_register);<br>   high = timer_hi;<br>   <span class="hljs-keyword">if</span>(<span class="hljs-built_in">inword</span>(timer_overflow))&#123;<br>      ++high;<br>      low = <span class="hljs-built_in">inword</span>(timer_register);<br>   &#125;<br>   pop_interrupt_state;<br>   <span class="hljs-keyword">return</span> (((ulong)high) &lt;&lt; <span class="hljs-number">16</span> + (ulong)low);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="总线">总线</h2>
+<h3 id="CPU-总线">CPU 总线</h3>
+<p>总线允许 CPU，内存，设备进行通信：共享的通讯媒体。</p>
+<p>总线是：</p>
+<ol>
+<li>一组电线</li>
+<li>通信协议</li>
+</ol>
+<h3 id="总线协议">总线协议</h3>
+<ol>
+<li>总线协议决定了设备是如何进行通信的</li>
+<li>总线上的设备会经历状态序列.协议是由状态机指定的，协议中的每个参与者都有一个状态机。</li>
+<li>可能包含异步逻辑行为。</li>
+</ol>
+<h3 id="四周期握手">四周期握手</h3>
+<p><img src="/34422/15.png" alt></p>
+<ol>
+<li>设备 1 引发 enq。</li>
+<li>设备 2 以 ack 响应。</li>
+<li>完成后，设备 2 降低确认。</li>
+<li>设备 1 降低 enq。</li>
+</ol>
+<h3 id="微处理器总线">微处理器总线</h3>
+<p><img src="/34422/05-Bus-based%20computering%20systems.jpg" alt></p>
+<ol>
+<li>时钟提供同步</li>
+<li>读时 R/W 为 true（读时 R/W' 为 false）</li>
+<li>地址是地址线的比特捆绑</li>
+<li>数据是 n 位数据线束</li>
+<li>当 n 位数据就绪时，数据就绪信号发出</li>
+</ol>
+<h3 id="总线复用">总线复用</h3>
+<p><img src="/34422/17.png" alt="总线复用"></p>
+<h3 id="系统总线配置">系统总线配置</h3>
+<p>多个总线允许并行处理：慢设备在其中一条总线上，快设备位于另一条单独的总线上，桥连接两条总线。</p>
+<p>PC 端类似，使用南桥和北桥来完成，北桥连接 CPU</p>
+<p><img src="/34422/18.png" alt></p>
+<h3 id="桥状态图">桥状态图</h3>
+<p><img src="/34422/05-Bus-based%20computering%20systems-1666873392469-57.jpg" alt></p>
+<h3 id="ARM-AMBA-总线">ARM AMBA 总线</h3>
+<p>两个类别：</p>
+<ol>
+<li>AHB 是高性能的。</li>
+<li>APB 是低速，低成本的。</li>
+</ol>
+<p>AHB 支持流水线，突发传输，拆分事务，多个总线主控（H：高速）</p>
+<p>所有设备都是 APB 上的从设备。</p>
+<ol>
+<li>APB 是外部</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/34422/05-Bus-based%20computering%20systems-1666873465914-59.jpg" alt></th>
+<th><img src="/34422/21.png" alt></th>
+</tr>
+</thead>
+</table>
+<ul>
+<li>USB3.0 是高速设备</li>
+<li>SPI 和 I^2^C 也是非常多的
+<ul>
+<li>SPI：点对点星型设备</li>
+<li>I^2^C：串行设备</li>
+<li>开源硬件一般同时支持这两个</li>
+</ul>
+</li>
+<li>市面上的开源硬件支持 USB、SPI 和 I^2^C</li>
+</ul>
+<h3 id="Arduino-Uno-R3">Arduino Uno R3</h3>
+<p><img src="/34422/image-20221027202742972.png" alt></p>
+<p><img src="/34422/image-20221027202748843.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/24134/" rel="prev" title="嵌入式系统概论-06-嵌入式软件系统">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-06-嵌入式软件系统
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/890/" rel="next" title="嵌入式系统概论-08-嵌入式系统建模">
+      嵌入式系统概论-08-嵌入式系统建模 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA"><span class="nav-number">1.</span> <span class="nav-text">输入输出</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%AE%BE%E5%A4%87"><span class="nav-number">1.1.</span> <span class="nav-text">I&#x2F;O 设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%EF%BC%9A8251-UART"><span class="nav-number">1.2.</span> <span class="nav-text">应用：8251 UART</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B2%E8%A1%8C%E9%80%9A%E8%AE%AF"><span class="nav-number">1.3.</span> <span class="nav-text">串行通讯</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU-%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.4.</span> <span class="nav-text">CPU 接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%AE%BE%E5%A4%87%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.</span> <span class="nav-text">I&#x2F;O 设备分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%B1%9E%E5%85%B3%E7%B3%BB%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.1.</span> <span class="nav-text">从属关系分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.2.</span> <span class="nav-text">使用分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.3.</span> <span class="nav-text">特征分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E4%BC%A0%E9%80%92%E5%8D%95%E4%BD%8D%E7%B1%BB%E5%88%AB"><span class="nav-number">1.5.4.</span> <span class="nav-text">信息传递单位类别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#I-O-%E8%AE%BE%E5%A4%87%E7%BB%84%E6%88%90"><span class="nav-number">1.6.</span> <span class="nav-text">I&#x2F;O 设备组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E7%BC%96%E7%A8%8B-I-O"><span class="nav-number">1.6.1.</span> <span class="nav-text">可编程 I&#x2F;O</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E7%9A%84-I-O"><span class="nav-number">1.6.2.</span> <span class="nav-text">内存映射的 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Peek-and-poke"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">Peek and poke</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BF%99%E7%AD%89%EF%BC%88busy-wait%EF%BC%89%E8%BE%93%E5%87%BA"><span class="nav-number">1.6.2.2.</span> <span class="nav-text">忙等（busy&#x2F;wait）输出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%BF%99%E7%AD%89%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%EF%BC%9A"><span class="nav-number">1.6.2.3.</span> <span class="nav-text">同步忙等输入输出：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD-I-O"><span class="nav-number">1.6.3.</span> <span class="nav-text">中断 I&#x2F;O</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.6.3.1.</span> <span class="nav-text">中断接口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.6.3.2.</span> <span class="nav-text">中断行为</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E7%89%A9%E7%90%86%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.6.3.3.</span> <span class="nav-text">中断物理接口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6-I-O-%E5%A4%84%E7%90%86"><span class="nav-number">1.6.3.4.</span> <span class="nav-text">字符 I&#x2F;O 处理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BB%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.6.3.5.</span> <span class="nav-text">主程序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90%EF%BC%9A%E5%B8%A6%E7%BC%93%E5%86%B2%E5%8C%BA%E7%9A%84%E4%B8%AD%E6%96%AD-I-O"><span class="nav-number">1.6.3.6.</span> <span class="nav-text">例子：带缓冲区的中断 I&#x2F;O</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#I-O-%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-number">1.6.3.7.</span> <span class="nav-text">I&#x2F;O 时序图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E5%90%91%E9%87%8F"><span class="nav-number">1.6.3.8.</span> <span class="nav-text">优先级和向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7%E4%BE%8B%E5%AD%90"><span class="nav-number">1.6.3.9.</span> <span class="nav-text">优先级例子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">1.6.3.10.</span> <span class="nav-text">中断优先级</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%90%91%E9%87%8F"><span class="nav-number">1.6.3.11.</span> <span class="nav-text">中断向量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%90%91%E9%87%8F%E8%8E%B7%E5%8F%96"><span class="nav-number">1.6.3.12.</span> <span class="nav-text">中断向量获取</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">1.6.3.13.</span> <span class="nav-text">通用状态机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%BA%8F%E5%88%97"><span class="nav-number">1.6.3.14.</span> <span class="nav-text">中断序列</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%BC%80%E9%94%80%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="nav-number">1.6.3.15.</span> <span class="nav-text">中断开销的来源</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E8%AE%BE%E8%AE%A1%E5%87%86%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">中断设计准则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%9B%BE"><span class="nav-number">2.1.</span> <span class="nav-text">中断图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%8C%87%E5%90%91%E7%A9%BA%E4%BE%8B%E7%A8%8B%E7%9A%84%E6%8C%87%E9%92%88%E5%A1%AB%E5%85%85%E6%89%80%E6%9C%89%E6%9C%AA%E4%BD%BF%E7%94%A8%E7%9A%84%E4%B8%AD%E6%96%AD%E5%90%91%E9%87%8F"><span class="nav-number">2.2.</span> <span class="nav-text">用指向空例程的指针填充所有未使用的中断向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C-%E8%BF%98%E6%98%AF%E6%B1%87%E7%BC%96%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">C 还是汇编？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E4%B8%AD%E6%96%AD%E4%BB%A3%E7%A0%81"><span class="nav-number">2.4.</span> <span class="nav-text">调试中断代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95-INT-INTA-%E5%91%A8%E6%9C%9F"><span class="nav-number">2.5.</span> <span class="nav-text">调试 INT&#x2F;INTA 周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E4%B8%A2%E5%A4%B1%E7%9A%84%E4%B8%AD%E6%96%AD"><span class="nav-number">2.6.</span> <span class="nav-text">查找丢失的中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D-NMI"><span class="nav-number">2.7.</span> <span class="nav-text">避免 NMI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%AD%E7%82%B9%E9%97%AE%E9%A2%98"><span class="nav-number">2.8.</span> <span class="nav-text">断点问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95-ISR-%E8%B0%83%E8%AF%95"><span class="nav-number">2.9.</span> <span class="nav-text">一个简单 ISR 调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E9%87%8D%E7%94%A8%E4%BB%A3%E7%A0%81"><span class="nav-number">2.10.</span> <span class="nav-text">可重用代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E5%8F%98%E9%87%8F"><span class="nav-number">2.10.1.</span> <span class="nav-text">原子变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E6%8C%81%E4%BB%A3%E7%A0%81%E5%8F%AF%E9%87%8D%E5%85%A5"><span class="nav-number">2.10.2.</span> <span class="nav-text">保持代码可重入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92"><span class="nav-number">2.10.3.</span> <span class="nav-text">递归</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E7%A1%AC%E4%BB%B6-%E9%98%B2%E7%81%AB%E5%A2%99"><span class="nav-number">2.11.</span> <span class="nav-text">异步硬件&#x2F;防火墙</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AF%94%E8%B5%9B%E6%9D%A1%E4%BB%B6-Race-Conditions"><span class="nav-number">2.11.1.</span> <span class="nav-text">比赛条件 Race Conditions</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E9%A1%B9"><span class="nav-number">2.11.2.</span> <span class="nav-text">选项</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BA%BF"><span class="nav-number">3.</span> <span class="nav-text">总线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU-%E6%80%BB%E7%BA%BF"><span class="nav-number">3.1.</span> <span class="nav-text">CPU 总线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BA%BF%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.2.</span> <span class="nav-text">总线协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E5%91%A8%E6%9C%9F%E6%8F%A1%E6%89%8B"><span class="nav-number">3.3.</span> <span class="nav-text">四周期握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E5%A4%84%E7%90%86%E5%99%A8%E6%80%BB%E7%BA%BF"><span class="nav-number">3.4.</span> <span class="nav-text">微处理器总线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BA%BF%E5%A4%8D%E7%94%A8"><span class="nav-number">3.5.</span> <span class="nav-text">总线复用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%80%BB%E7%BA%BF%E9%85%8D%E7%BD%AE"><span class="nav-number">3.6.</span> <span class="nav-text">系统总线配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%A5%E7%8A%B6%E6%80%81%E5%9B%BE"><span class="nav-number">3.7.</span> <span class="nav-text">桥状态图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARM-AMBA-%E6%80%BB%E7%BA%BF"><span class="nav-number">3.8.</span> <span class="nav-text">ARM AMBA 总线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Arduino-Uno-R3"><span class="nav-number">3.9.</span> <span class="nav-text">Arduino Uno R3</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

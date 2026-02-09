@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 考试题  给出功能需求，设计功能测试用例 给出设计图，按要求写集成测试用例，Stub 和 Driver 给出方法的描述，按要求写单元测试用例，Mock Object Junit 基本用法  Bug 起源 第一个 Bug">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-19-软件测试">
+<meta property="og:url" content="https://eaglebear2002.github.io/58710/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 考试题  给出功能需求，设计功能测试用例 给出设计图，按要求写集成测试用例，Stub 和 Driver 给出方法的描述，按要求写单元测试用例，Mock Object Junit 基本用法  Bug 起源 第一个 Bug">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/1-1676529354807-2031.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/2-1676529354807-2032.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/3-1676529354807-2033.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/4-1676529354807-2034.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/5-1676529354808-2035.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/6-1676529354808-2036.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/7-1676529354808-2037.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/8-1676529354808-2038.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/9-1676529354808-2039.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/10-1676529354808-2040.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/11-1676529354809-2041.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/12-1676529354809-2042.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/13-1676529354809-2043.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/14-1676529354809-2044.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/15-1676529354809-2045.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/16-1676529354809-2046.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/17-1676529354809-2047.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/18-1676529354809-2048.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/25-1676529354810-2049.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/26-1676529354810-2050.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/27-1676529354810-2051.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/19-1676529354810-2052.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/20-1676529354810-2053.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/21-1676529354810-2054.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/22-1676529354810-2055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/23-1676529354810-2056.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/24-1676529354810-2057.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/28-1676529354811-2058.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/29-1676529354811-2059.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/30-1676529354811-2060.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/31-1676529354811-2061.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/32-1676529354811-2062.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/58710/33-1676529354811-2063.png">
+<meta property="article:published_time" content="2022-05-31T09:02:26.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.634Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/58710/1-1676529354807-2031.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/58710/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-19-软件测试 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/58710/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-19-软件测试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 17:02:26" itemprop="dateCreated datePublished" datetime="2022-05-31T17:02:26+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="考试题">考试题</h2>
+<ol>
+<li>给出功能需求，设计功能测试用例</li>
+<li>给出设计图，按要求写集成测试用例，Stub 和 Driver</li>
+<li>给出方法的描述，按要求写单元测试用例，Mock Object</li>
+<li>Junit 基本用法</li>
+</ol>
+<h2 id="Bug-起源">Bug 起源</h2>
+<h3 id="第一个-Bug">第一个 Bug</h3>
+<p><img src="/58710/1-1676529354807-2031.png" alt></p>
+<h3 id="千年虫病毒">千年虫病毒</h3>
+<ol>
+<li>在七十年代，程序员利用宝贵的内存和磁盘空间通过两位来存储年份</li>
+<li>他们从来没有想到程序可以运行到 2000 年</li>
+</ol>
+<h3 id="辐射机问题">辐射机问题</h3>
+<ol>
+<li>Therac-25 放射治疗机中的软件有缺陷，导致数名癌症患者接受致命的过量放射。 四名患者死亡</li>
+<li>独立科学家进行的一项调查发现，即使在加拿大原子能有限公司（AECL）为已修复特定错误之后，仍发生了事故。</li>
+<li>他们在报告中写道：&quot;这里的基本错误涉及不良的软件工程实践，以及建立依赖该软件进行安全操作的机器。&quot;</li>
+</ol>
+<h3 id="爱国者导弹防御-1991">爱国者导弹防御 1991</h3>
+<ol>
+<li>爱国者导弹防御系统未能防御多种导弹</li>
+<li>系统时钟中累积了微小的计时误差，因此 14 小时后，跟踪系统不再准确</li>
+<li>在对 KSA 达兰的攻击中，该系统已运行 100 多个小时</li>
+<li>该系统是可移动的，因此开发人员没想到它会在一个地方停留 14 小时</li>
+</ol>
+<h3 id="奔腾处理器的浮点数-bug">奔腾处理器的浮点数 bug</h3>
+<ol>
+<li>$(4195835/3145727) \times 3145727 - 4195835 \neq 0$</li>
+<li>测试工程师企图淡化 Bug，管理人员认为这并不要紧</li>
+<li>一位用户报告说，1994 年 10 月 30 日，英特尔试图淡化该错误。 如果您可以证明自己受到影响，可以更换芯片</li>
+<li>最终，他们道歉。 更换所有芯片，耗资 4.5 亿美元</li>
+<li>有趣的是，1.13 MHz Pentium III 导致软件冻结</li>
+</ol>
+<h3 id="迪士尼的《狮子王动画故事书》-1994">迪士尼的《狮子王动画故事书》 1994</h3>
+<ol>
+<li>迪士尼发行了第一张针对儿童的多媒体 CD-ROM</li>
+<li>一个大型广告系列，称其为“购买游戏”</li>
+<li>圣诞节过后，许多生气的父母正与迪斯尼通电话，背景中有哭泣的孩子</li>
+<li>问题是游戏只能在少数平台上运行，而包装盒上对此一无所知，因为迪斯尼尚未意识到问题所在</li>
+<li>兼容性的问题，只能在部分 CD 中进行播放</li>
+</ol>
+<h2 id="什么是对的软件？">什么是对的软件？</h2>
+<h3 id="你是否正确的构造了软件">你是否正确的构造了软件</h3>
+<ol>
+<li>软件正确性
+<ol>
+<li>在且仅在以下情况下，才根据规范 S 考虑程序 P：对于每个有效输入，P 的输出均符合规范 S</li>
+</ol>
+</li>
+<li>验证：常常我们会将软件与终端用户或者其他利益相关者的需求进行比较。</li>
+</ol>
+<h3 id="Verification-and-Validation-验证和确认重要">Verification and Validation 验证和确认重要</h3>
+<ol>
+<li>Verification: 验证，检查开发者是否正确地使用技术建立系统，确保系统能够在于其的环境中按照技术要求正确地运行。</li>
+<li>Validation: 确认，检查开发者是否家里了正确的系统，确保最终产品符合规格。</li>
+<li>V&amp;V 差异无关紧要</li>
+<li>V&amp;V 通常是指试图确保软件按要求运行的任何活动。</li>
+<li>Ex 见课本 320 页,重要，会考 V&amp;V</li>
+</ol>
+<h4 id="如果软件是错误的">如果软件是错误的</h4>
+<ol>
+<li>定义
+<ol>
+<li>缺陷:系统代码中存在的不正确的地方，计算时存在除 0 可能</li>
+<li>错误:如果系统执行到缺陷代码，就可能使得执行结果不符合预期且无法预测，表现出来的不稳定的状态，比如计算时存在除 0 可能的代码，一旦除 0 则会发生错误</li>
+<li>失败，有 Failure 一定有 fault 和 Error，而倒过来是未必成立的。失败是指错误的发生会使得软件的功能失效，比如，系统某个功能输出不正确、异常终止、不符合时间或者空间的限制等。</li>
+</ol>
+</li>
+<li>关系
+<ol>
+<li>缺陷可能在被活动激发前很长时间不被检测到</li>
+<li>如果错误传播到输出，则最终会导致失败。</li>
+</ol>
+</li>
+<li>缺陷、错误和失败：该链可以递归地迭代：依次由其他交互系统的故障引起故障。</li>
+</ol>
+<h2 id="Common-V-V-Activities-常见的-V-V-活动">Common V&amp;V Activities 常见的 V&amp;V 活动</h2>
+<ol>
+<li>静态分析技术
+<ol>
+<li>仅基于（手动或自动）检查软件模型和代码的项目文档以及有关需求和设计的其他相关信息</li>
+<li>通常会产生有效的结果，但精度可能较弱</li>
+<li>容易产生误报，因为多态的存在导致很多只能在运行的时候才报错。</li>
+</ol>
+</li>
+<li>动态测试技术
+<ol>
+<li>运行软件以暴露可能的故障</li>
+<li>还观察了程序的行为和性能属性</li>
+<li>产生更精确的结果，但仅适用于经过检查的执行</li>
+<li>动态容易漏报，没有运行到一定不会报告</li>
+</ol>
+</li>
+</ol>
+<h3 id="静态分析技术">静态分析技术</h3>
+<ol>
+<li>可以在需求阶段应用； 在设计阶段； 在实施阶段</li>
+<li>传统静态技术-大量手动操作，容易出错，耗时
+<ol>
+<li>软件检查-根据已编译的常见和历史缺陷清单，对生成的文档（可交付成果）进行逐步分析</li>
+<li>软件评审-将工作产品的不同方面呈现给项目人员（经理，用户，客户等）和其他感兴趣的涉众以征求意见或批准的过程</li>
+<li>阅读代码-对生成的代码进行桌面分析，以发现不违反样式或语法的键入错误</li>
+<li>算法分析和跟踪-可以得出所用算法的复杂性以及最坏情况，平均情况和概率分析评估的过程</li>
+</ol>
+</li>
+<li>依靠形式化方法的静态分析技术</li>
+<li>27min 漏了</li>
+</ol>
+<h3 id="动态分析技术">动态分析技术</h3>
+<ol>
+<li>测试-基于对有价输入的代码执行（必要时必须包括表征系统状态的参数和环境条件的定义）
+<ol>
+<li>检查指定输入和指定输出</li>
+</ol>
+</li>
+<li>性能分析-程序配置文件记录了一组受控执行过程中某些感兴趣的实体出现的次数
+<ol>
+<li>频谱执行情况:一个向量，从第一行到最后一行，形成一个 01 向量</li>
+<li>分支覆盖法</li>
+</ol>
+</li>
+</ol>
+<h3 id="软件开发中的验证与确认活动">软件开发中的验证与确认活动</h3>
+<p><img src="/58710/2-1676529354807-2032.png" alt></p>
+<h2 id="软件测试的目的">软件测试的目的</h2>
+<ol>
+<li>目的一:向开发者和用户展示软件满足了需求，表明软件产品是一个合格的产品。
+<ol>
+<li>有效性测试</li>
+</ol>
+</li>
+<li>目的二:找出软件中的缺陷和不足
+<ol>
+<li>缺陷测试:只有发现了缺陷的测试才是成功的测试</li>
+</ol>
+</li>
+<li>总而言之，软件测试是为评价与改进产品质量、标识产品缺陷和问题而进行的活动。</li>
+</ol>
+<h3 id="测试用例">测试用例</h3>
+<p><img src="/58710/3-1676529354807-2033.png" alt></p>
+<ol>
+<li>差分测试</li>
+</ol>
+<ul>
+<li>开发者：理解系统含义，但是只是大体上，通过流程进行了测试</li>
+<li>独立测试人员：必须学习系统相关，但是会去尝试破坏系统，并且是通过质量来驱动测试</li>
+</ul>
+<h3 id="桩与驱动">桩与驱动</h3>
+<p><img src="/58710/4-1676529354807-2034.png" alt></p>
+<ol>
+<li>桩程序是被测试部件的交互环境，他扮演被测试部件需要调用的其他系统部件。桩程序对其他系统部件的扮演仅限于规格相同，内部代码要简单的多，通常是直接返回固定数据或者按照固定规则返回数据。</li>
+<li>驱动程序负责创建被测试部件的执行环境，并驱动和监控被测试部件执行测试用例的过程，判定测试用例的执行结果。</li>
+</ol>
+<h3 id="测试空间">测试空间</h3>
+<ol>
+<li>黑盒测试、白盒测试、灰盒测试</li>
+</ol>
+<p><img src="/58710/5-1676529354808-2035.png" alt></p>
+<h2 id="测试层次">测试层次</h2>
+<p><img src="/58710/6-1676529354808-2036.png" alt></p>
+<ul>
+<li>开发者主要是进行单元测试，可以进行一定程度上的集成测试和系统测试</li>
+<li>重点:
+<ul>
+<li>$\alpha$ 测试:在软件发布前，让小规模、有代表性的潜在用户试用，可以在开发机构中进行。</li>
+<li>$\beta$ 测试:在用户处进行</li>
+</ul>
+</li>
+</ul>
+<h3 id="单元测试">单元测试</h3>
+<p><img src="/58710/7-1676529354808-2037.png" alt></p>
+<ol>
+<li>在过程化编程中，一个单元就是一个函数与过程。</li>
+<li>在面向对象编程中，一个单元就是类的一个方法。</li>
+<li>发现技术缺陷和代码缺陷</li>
+</ol>
+<h3 id="集成测试">集成测试</h3>
+<ol>
+<li>集成测试一般在单元测试和系统测试之间</li>
+</ol>
+<h4 id="自顶向下的集成测试">自顶向下的集成测试</h4>
+<p><img src="/58710/8-1676529354808-2038.png" alt></p>
+<ol>
+<li>一定要一步一步集成</li>
+</ol>
+<h4 id="自底向上的集成测试">自底向上的集成测试</h4>
+<p><img src="/58710/9-1676529354808-2039.png" alt></p>
+<h3 id="系统测试">系统测试</h3>
+<p><img src="/58710/10-1676529354808-2040.png" alt></p>
+<h2 id="测试技术">测试技术</h2>
+<p><img src="/58710/11-1676529354809-2041.png" alt></p>
+<ol>
+<li>测试的目的是发现尽可能多的缺陷，并不绝对要求发现所有缺陷。</li>
+</ol>
+<h3 id="测试用例的选择">测试用例的选择</h3>
+<p><img src="/58710/12-1676529354809-2042.png" alt></p>
+<ol>
+<li>课本 P326 页图 19-7 :工程追求足够好，而不是最好。</li>
+</ol>
+<h3 id="随机测试">随机测试</h3>
+<p><img src="/58710/13-1676529354809-2043.png" alt></p>
+<ol>
+<li>比如 int 的越界问题:两类测试用例，不越界和越界</li>
+</ol>
+<h3 id="黑盒测试重要">黑盒测试重要</h3>
+<ol>
+<li>黑盒测试是将测试对象作为一个黑盒子，完全基于输入和输出数据来判断测试对象的正确性。</li>
+</ol>
+<h4 id="黑盒测试方法-等价类划分">黑盒测试方法-等价类划分</h4>
+<p><img src="/58710/14-1676529354809-2044.png" alt></p>
+<ul>
+<li>把所有可能的输入数据，即程序的输入域划分为若干部分（子集），从每个子集中选取少量具有代表性的数据作为测试用例。</li>
+<li>例子</li>
+</ul>
+<p><img src="/58710/15-1676529354809-2045.png" alt></p>
+<h4 id="黑盒测试方法-边界值分析">黑盒测试方法-边界值分析</h4>
+<ol>
+<li>边界值分析是等价类划分方法的补充，实践证明，错误最容易发生在各等价类的边界，而不是等价类的内部。</li>
+<li>对定价类划分的补充，错误容易发生在各个等价类的边界上，而不是等价类的内部，因此针对边界情况设计测试用例，可以发现更多的缺陷。</li>
+</ol>
+<p><img src="/58710/16-1676529354809-2046.png" alt></p>
+<h4 id="黑盒测试方法-决策表">黑盒测试方法-决策表</h4>
+<ul>
+<li>决策表是为复杂逻辑判断设计测试用例的技术。决策表示由条件声明、行动声明、规则选项和行动选项等四个象限组成的表格。</li>
+</ul>
+<p><img src="/58710/17-1676529354809-2047.png" alt></p>
+<h4 id="黑盒测试方法-状态转换">黑盒测试方法-状态转换</h4>
+<ul>
+<li>状态转换是针对复杂测试对象的测试技术。该类复杂测试对象对输入数据的反映是多样的，还需要依赖自身的状态才能决定。</li>
+<li>状态转换包含有效转换和无效转换，只有在复杂情况和可靠性要求较高的情况下才会为无效转换设计测试用例。</li>
+</ul>
+<p><img src="/58710/18-1676529354809-2048.png" alt></p>
+<ul>
+<li>例子</li>
+</ul>
+<p><img src="/58710/25-1676529354810-2049.png" alt>
+<img src="/58710/26-1676529354810-2050.png" alt>
+<img src="/58710/27-1676529354810-2051.png" alt></p>
+<h3 id="白盒测试重要">白盒测试重要</h3>
+<ol>
+<li>白盒测试是将测试对象看做透明的，不关心测试对象的规格，而是按照测试对象内部的程序结构来设计测试用例进行测试工作。</li>
+</ol>
+<h4 id="白盒测试方法-语句覆盖">白盒测试方法-语句覆盖</h4>
+<ol>
+<li>语句覆盖设计测试用例的标注是保证被测试的对象的每一行代码都至少执行了一次。</li>
+</ol>
+<p><img src="/58710/19-1676529354810-2052.png" alt>
+<img src="/58710/20-1676529354810-2053.png" alt></p>
+<ul>
+<li>所有的路径都覆盖一遍，路径覆盖</li>
+</ul>
+<p><img src="/58710/21-1676529354810-2054.png" alt></p>
+<h4 id="白盒测试方法-条件覆盖">白盒测试方法-条件覆盖</h4>
+<ol>
+<li>条件覆盖设计测试用例的标准是确保程序中每个判断的每个结果都至少满足一次。</li>
+</ol>
+<p><img src="/58710/22-1676529354810-2055.png" alt></p>
+<h4 id="白盒测试方法-路径覆盖">白盒测试方法-路径覆盖</h4>
+<ol>
+<li>路径覆盖测试用例的标准是确保程序中每一条独立执行的路径都至少执行一次。</li>
+</ol>
+<p><img src="/58710/23-1676529354810-2056.png" alt></p>
+<h3 id="特定测试技术">特定测试技术</h3>
+<p><img src="/58710/24-1676529354810-2057.png" alt></p>
+<h3 id="面向对象的测试技术">面向对象的测试技术</h3>
+<p><img src="/58710/28-1676529354811-2058.png" alt></p>
+<h2 id="测试活动">测试活动</h2>
+<ol>
+<li>测试计划:在开始具体的软件测试活动之前，必须首先进行测试计划，以明确测试的工作范围、资源与成本、基本策略、进度安排等。</li>
+<li>测试设计:测试的成功取决于有效设计的测试用例</li>
+<li>测试执行:执行测试前需要选择好测试工具</li>
+<li>测试评价:在测试完成后，必须评价测试结果</li>
+<li>以上详见课本 332 页</li>
+</ol>
+<h3 id="测试用例日志">测试用例日志</h3>
+<p><img src="/58710/29-1676529354811-2059.png" alt></p>
+<h3 id="缺陷报告">缺陷报告</h3>
+<p><img src="/58710/30-1676529354811-2060.png" alt></p>
+<h2 id="测试度量">测试度量</h2>
+<p><img src="/58710/31-1676529354811-2061.png" alt></p>
+<ul>
+<li>需求覆盖率=被测试的需求数量/需求总数</li>
+<li>模块覆盖率=被测试的模块数量/模块总数</li>
+<li>代码覆盖率=被测试的代码行/代码行数</li>
+</ul>
+<h3 id="缺陷度量">缺陷度量</h3>
+<p><img src="/58710/32-1676529354811-2062.png" alt></p>
+<h3 id="覆盖率">覆盖率</h3>
+<p><img src="/58710/33-1676529354811-2063.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/43232/" rel="prev" title="软件工程与计算II-18-代码设计">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-18-代码设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/7247/" rel="next" title="软件工程与计算II-20-软件交付">
+      软件工程与计算II-20-软件交付 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E8%AF%95%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">考试题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bug-%E8%B5%B7%E6%BA%90"><span class="nav-number">2.</span> <span class="nav-text">Bug 起源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E4%B8%AA-Bug"><span class="nav-number">2.1.</span> <span class="nav-text">第一个 Bug</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%83%E5%B9%B4%E8%99%AB%E7%97%85%E6%AF%92"><span class="nav-number">2.2.</span> <span class="nav-text">千年虫病毒</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%90%E5%B0%84%E6%9C%BA%E9%97%AE%E9%A2%98"><span class="nav-number">2.3.</span> <span class="nav-text">辐射机问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%88%B1%E5%9B%BD%E8%80%85%E5%AF%BC%E5%BC%B9%E9%98%B2%E5%BE%A1-1991"><span class="nav-number">2.4.</span> <span class="nav-text">爱国者导弹防御 1991</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%94%E8%85%BE%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E6%B5%AE%E7%82%B9%E6%95%B0-bug"><span class="nav-number">2.5.</span> <span class="nav-text">奔腾处理器的浮点数 bug</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%AA%E5%A3%AB%E5%B0%BC%E7%9A%84%E3%80%8A%E7%8B%AE%E5%AD%90%E7%8E%8B%E5%8A%A8%E7%94%BB%E6%95%85%E4%BA%8B%E4%B9%A6%E3%80%8B-1994"><span class="nav-number">2.6.</span> <span class="nav-text">迪士尼的《狮子王动画故事书》 1994</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AF%B9%E7%9A%84%E8%BD%AF%E4%BB%B6%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">什么是对的软件？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%A0%E6%98%AF%E5%90%A6%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%9E%84%E9%80%A0%E4%BA%86%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">你是否正确的构造了软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Verification-and-Validation-%E9%AA%8C%E8%AF%81%E5%92%8C%E7%A1%AE%E8%AE%A4%E9%87%8D%E8%A6%81"><span class="nav-number">3.2.</span> <span class="nav-text">Verification and Validation 验证和确认重要</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E8%BD%AF%E4%BB%B6%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">如果软件是错误的</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Common-V-V-Activities-%E5%B8%B8%E8%A7%81%E7%9A%84-V-V-%E6%B4%BB%E5%8A%A8"><span class="nav-number">4.</span> <span class="nav-text">Common V&amp;V Activities 常见的 V&amp;V 活动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF"><span class="nav-number">4.1.</span> <span class="nav-text">静态分析技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF"><span class="nav-number">4.2.</span> <span class="nav-text">动态分析技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%84%E9%AA%8C%E8%AF%81%E4%B8%8E%E7%A1%AE%E8%AE%A4%E6%B4%BB%E5%8A%A8"><span class="nav-number">4.3.</span> <span class="nav-text">软件开发中的验证与确认活动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95%E7%9A%84%E7%9B%AE%E7%9A%84"><span class="nav-number">5.</span> <span class="nav-text">软件测试的目的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">5.1.</span> <span class="nav-text">测试用例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%A9%E4%B8%8E%E9%A9%B1%E5%8A%A8"><span class="nav-number">5.2.</span> <span class="nav-text">桩与驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%A9%BA%E9%97%B4"><span class="nav-number">5.3.</span> <span class="nav-text">测试空间</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%B1%82%E6%AC%A1"><span class="nav-number">6.</span> <span class="nav-text">测试层次</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="nav-number">6.1.</span> <span class="nav-text">单元测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">6.2.</span> <span class="nav-text">集成测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B%E7%9A%84%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">6.2.1.</span> <span class="nav-text">自顶向下的集成测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E7%9A%84%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">6.2.2.</span> <span class="nav-text">自底向上的集成测试</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%B5%8B%E8%AF%95"><span class="nav-number">6.3.</span> <span class="nav-text">系统测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%8A%80%E6%9C%AF"><span class="nav-number">7.</span> <span class="nav-text">测试技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">7.1.</span> <span class="nav-text">测试用例的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%B5%8B%E8%AF%95"><span class="nav-number">7.2.</span> <span class="nav-text">随机测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95%E9%87%8D%E8%A6%81"><span class="nav-number">7.3.</span> <span class="nav-text">黑盒测试重要</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E7%AD%89%E4%BB%B7%E7%B1%BB%E5%88%92%E5%88%86"><span class="nav-number">7.3.1.</span> <span class="nav-text">黑盒测试方法-等价类划分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E8%BE%B9%E7%95%8C%E5%80%BC%E5%88%86%E6%9E%90"><span class="nav-number">7.3.2.</span> <span class="nav-text">黑盒测试方法-边界值分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E5%86%B3%E7%AD%96%E8%A1%A8"><span class="nav-number">7.3.3.</span> <span class="nav-text">黑盒测试方法-决策表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2"><span class="nav-number">7.3.4.</span> <span class="nav-text">黑盒测试方法-状态转换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%99%BD%E7%9B%92%E6%B5%8B%E8%AF%95%E9%87%8D%E8%A6%81"><span class="nav-number">7.4.</span> <span class="nav-text">白盒测试重要</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%99%BD%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E8%AF%AD%E5%8F%A5%E8%A6%86%E7%9B%96"><span class="nav-number">7.4.1.</span> <span class="nav-text">白盒测试方法-语句覆盖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%99%BD%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E6%9D%A1%E4%BB%B6%E8%A6%86%E7%9B%96"><span class="nav-number">7.4.2.</span> <span class="nav-text">白盒测试方法-条件覆盖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%99%BD%E7%9B%92%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95-%E8%B7%AF%E5%BE%84%E8%A6%86%E7%9B%96"><span class="nav-number">7.4.3.</span> <span class="nav-text">白盒测试方法-路径覆盖</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%AE%9A%E6%B5%8B%E8%AF%95%E6%8A%80%E6%9C%AF"><span class="nav-number">7.5.</span> <span class="nav-text">特定测试技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%B5%8B%E8%AF%95%E6%8A%80%E6%9C%AF"><span class="nav-number">7.6.</span> <span class="nav-text">面向对象的测试技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%B4%BB%E5%8A%A8"><span class="nav-number">8.</span> <span class="nav-text">测试活动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E6%97%A5%E5%BF%97"><span class="nav-number">8.1.</span> <span class="nav-text">测试用例日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%99%B7%E6%8A%A5%E5%91%8A"><span class="nav-number">8.2.</span> <span class="nav-text">缺陷报告</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%BA%A6%E9%87%8F"><span class="nav-number">9.</span> <span class="nav-text">测试度量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%99%B7%E5%BA%A6%E9%87%8F"><span class="nav-number">9.1.</span> <span class="nav-text">缺陷度量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%8E%87"><span class="nav-number">9.2.</span> <span class="nav-text">覆盖率</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

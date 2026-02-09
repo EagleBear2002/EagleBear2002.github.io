@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="常见存储方式  关系型数据库 NoSQL：泛指非关系型数据库，比如 MongoDB 全文检索框架：Elasticsearch  存储的区别  行式存储：大数据量查询，如果没有索引，则会遍历 列式存储：可以大量的压缩空间 位图索引">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-03-大数据存储和处理">
+<meta property="og:url" content="https://eaglebear2002.github.io/9000/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="常见存储方式  关系型数据库 NoSQL：泛指非关系型数据库，比如 MongoDB 全文检索框架：Elasticsearch  存储的区别  行式存储：大数据量查询，如果没有索引，则会遍历 列式存储：可以大量的压缩空间 位图索引">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102185633157.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102185848455.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102185907398.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102185910839.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102190156023.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102190334972.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102190351583.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/3-1676530490719-48.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194311974.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194316077.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194323548.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194334253.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194418874.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194421898.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194446247.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194454270.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194610150.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194754387.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102194800336.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102195459485.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/9000/image-20221102195652638.png">
+<meta property="article:published_time" content="2022-09-26T08:07:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.533Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/9000/image-20221102185633157.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/9000/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-03-大数据存储和处理 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/9000/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-03-大数据存储和处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-09-26 16:07:00" itemprop="dateCreated datePublished" datetime="2022-09-26T16:07:00+08:00">2022-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="常见存储方式">常见存储方式</h2>
+<ol>
+<li>关系型数据库</li>
+<li>NoSQL：泛指非关系型数据库，比如 MongoDB</li>
+<li>全文检索框架：Elasticsearch</li>
+</ol>
+<h3 id="存储的区别">存储的区别</h3>
+<ol>
+<li>行式存储：大数据量查询，如果没有索引，则会遍历</li>
+<li>列式存储：可以大量的压缩空间</li>
+<li>位图索引</li>
+</ol>
+<p><img src="/9000/image-20221102185633157.png" alt></p>
+<h3 id="不同形式存储的对比">不同形式存储的对比</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>name</th>
+<th>age</th>
+<th>sex</th>
+<th>aihao</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>小明</td>
+<td>21</td>
+<td>男</td>
+<td>女</td>
+</tr>
+<tr>
+<td>2</td>
+<td>隔壁老王</td>
+<td>25</td>
+<td></td>
+<td>隔壁孩子</td>
+</tr>
+</tbody>
+</table>
+<p>MySQL 形式存储：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-number">1</span>,小明,<span class="hljs-number">21</span>,男,女<br><span class="hljs-number">2</span>,隔壁老王,<span class="hljs-number">25</span>, <span class="hljs-keyword">null</span>,隔壁孩子<br></code></pre></td></tr></table></figure>
+<p>HBase 的形式存储：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;1, name&gt;,小明<br>&lt;1, age&gt;,21<br>...<br>&lt;2, name&gt;,隔壁老王<br></code></pre></td></tr></table></figure>
+<ol>
+<li>HBase 是一个分布式列式存储系统，记录按<strong>列簇</strong>集中存放，通过主键（row，key）和主键的 range 来检索数据。</li>
+<li>HBase 表中每个列都属于某一个列簇</li>
+<li>列簇是表的 Schame 的一部分，但是列不是，列名都是以列簇作为前缀。</li>
+<li>传统表中使用 Alter 子句来修改表结构，而 HBase 直接插入就可以修改表结构</li>
+</ol>
+<h3 id="ES-方式">ES 方式</h3>
+<table>
+<thead>
+<tr>
+<th>文档 id</th>
+<th>文档内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>doc1</td>
+<td>how are you? fine, thank you, and you? I fine too, thank you!</td>
+</tr>
+<tr>
+<td>doc2</td>
+<td>good morning, LiLei, good morning, Hanmeimei</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>倒排索引示例：ES 的存储（倒排索引）的结果如下</p>
+<ol>
+<li>应该将查询频率高的单词放在前面（越高越前）</li>
+<li>ES 默认将文档存储，也可以配置不存储文件信息</li>
+<li>TF-IDF 算法：参见[Tec1-TF-IDF 算法](Tec1-TF-IDF <a target="_blank" rel="noopener" href="http://xn--nwwt82a.md">算法.md</a>)</li>
+</ol>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>dictionary</th>
+<th>posting-list</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fine</td>
+<td><code>-&gt;</code> doc1</td>
+</tr>
+<tr>
+<td>Hanmei</td>
+<td><code>-&gt;</code> doc2</td>
+</tr>
+<tr>
+<td>good</td>
+<td><code>-&gt;</code> doc2</td>
+</tr>
+<tr>
+<td>LiLei</td>
+<td><code>-&gt;</code> doc2</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>you</td>
+<td><code>-&gt;</code> doc1 <code>-&gt;</code> doc2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="列存储和行存储">列存储和行存储</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>列存储</th>
+<th>行存储</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>关注点</td>
+<td>经常关注一张表某几列而非整表数据的时候</td>
+<td>关注整张表的内容，或者需要经常更新数据</td>
+</tr>
+<tr>
+<td>计算需要</td>
+<td>数据表列有非常多行数据并且需要聚集计算的时候</td>
+<td>不需要聚集运算，或者快速查询需求</td>
+</tr>
+<tr>
+<td>计算方式</td>
+<td>基于一列或者比较少的列计算的时候</td>
+<td>需要经常读取某行数据</td>
+</tr>
+<tr>
+<td>数据形式</td>
+<td>数据表拥有非常多的列的时候</td>
+<td>数据表本身数据行并不多</td>
+</tr>
+<tr>
+<td>数据特性</td>
+<td>数据表列有非常多的重复数据，有利于高度压缩</td>
+<td>数据表的列本身有太多唯一的数据</td>
+</tr>
+</tbody>
+</table>
+<h3 id="读写的区别">读写的区别</h3>
+<p><img src="/9000/image-20221102185848455.png" alt></p>
+<h3 id="聚簇索引和非聚簇索引">聚簇索引和非聚簇索引</h3>
+<p>物理存储的最小的单位是块（Block）</p>
+<table>
+<thead>
+<tr>
+<th>聚集索引</th>
+<th>非聚集索引</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/9000/image-20221102185907398.png" alt></td>
+<td><img src="/9000/image-20221102185910839.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="MySQL">MySQL</h3>
+<ol>
+<li>查询：<code>Select (tuple) from database</code></li>
+<li>插入：<code>Insert into database value</code></li>
+<li>更新：<code>Update database set xxx = xxx where statement</code></li>
+<li>删除：<code>Delete from database where xxx</code></li>
+</ol>
+<h3 id="HBase">HBase</h3>
+<h4 id="HBase-对-LSM-的实现">HBase 对 LSM 的实现</h4>
+<p>LSM，Log-Structured Merge-Tree，日志结构合并树</p>
+<ol>
+<li>假设内存非常大，有限的使用内存存储，结合日志结构实现。</li>
+<li>有数据更新不是立马更新，而是先驻留数据，积累到一定条目后归并排序，然后追加到磁盘的队列中，这样子可以显著减少磁盘的开销，一次性大规模写入，减少随机的 I/O，不能命中会导致较多的磁盘消耗。</li>
+</ol>
+<h4 id="HBase-的实现">HBase 的实现</h4>
+<ol>
+<li>查询</li>
+<li>插入</li>
+<li>更新&amp;删除：看做一个插入操作，使用时间戳和 Delete 标识来标识</li>
+</ol>
+<blockquote>
+<p>memstore：插入时优先放置到 memstore，驻存内存，到了一定程度后再刷新到 storeFile、插入都是写入操作</p>
+</blockquote>
+<h3 id="ES">ES</h3>
+<h4 id="ES-的部分实现方式、">ES 的部分实现方式、</h4>
+<p><img src="/9000/image-20221102190156023.png" alt></p>
+<ol>
+<li>一个 Node 是一个进程</li>
+<li>容灾的话就是多副本容灾</li>
+</ol>
+<h4 id="ES-的操作">ES 的操作</h4>
+<ol>
+<li>插入：和 HBase 相似，不是写入即可查询，建立 index 需要比较大的开销</li>
+<li>读取</li>
+<li>更新&amp;删除</li>
+</ol>
+<h3 id="不同存储的容灾方式">不同存储的容灾方式</h3>
+<table>
+<thead>
+<tr>
+<th>存储方式</th>
+<th>结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MySQL</td>
+<td>单节点，包含数据、日志两个层面的操作</td>
+</tr>
+<tr>
+<td>HBase &amp; HDFS</td>
+<td>分布式文件系统，每一个节点操作类似 MySQL 的单节点</td>
+</tr>
+<tr>
+<td>ES</td>
+<td>各节点备份</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Hadoop-介绍">Hadoop 介绍</h2>
+<p>Hadoop：一个 Apache 基金会开发的开源软件框架，支持在由普通计算机组成的集群中运行海量数据的分布式计算，他可以让应用程序轻松扩展到上千个节点和 PB 级别的数据。</p>
+<h3 id="Google-三大论文">Google 三大论文</h3>
+<p>MapReduce、GFS、Big Table</p>
+<h3 id="Doug-Cutting-山寨项目">Doug Cutting 山寨项目</h3>
+<p>MapReduce、HDFS、HBase</p>
+<h3 id="大数据处理层次架构">大数据处理层次架构</h3>
+<p><img src="/9000/image-20221102190334972.png" alt></p>
+<h3 id="Hadoop-核心">Hadoop 核心</h3>
+<p>MapReduce：</p>
+<ol>
+<li>Map：任务的分解</li>
+<li>Reduce：结构的汇总</li>
+</ol>
+<p>HDFS：</p>
+<ol>
+<li>NameNode</li>
+<li>DataNode</li>
+<li>Client</li>
+</ol>
+<h4 id="MapReduce">MapReduce</h4>
+<p>MapReduce 是一种并行编程模型，其实是分治算法的一种实现，适用于大规模数据集的并行计算</p>
+<ol>
+<li>map：<code>(k1,v1) -&gt; list(k2,v2)</code></li>
+<li>reduce：<code>(k2,list(v2)) -&gt; (k3, v3)</code></li>
+</ol>
+<p>示例：曹冲称象</p>
+<p><img src="/9000/image-20221102190351583.png" alt="过程：Input-Map-Sort-Combine-Partition-Reduce-Output"></p>
+<h4 id="HDFS-的基本概念">HDFS 的基本概念</h4>
+<ol>
+<li>Block</li>
+<li>NameNode &amp; Secondary NameNode</li>
+<li>Datanode</li>
+</ol>
+<p><img src="/9000/3-1676530490719-48.png" alt="HDFS 架构"></p>
+<h5 id="Block">Block</h5>
+<ol>
+<li>块大小默认为 64M（v1.0）/128M（v2.0）</li>
+<li>数据和元数据</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[root@ungeo10 current]# du -sh *6680210538719580844*<br>40M blk_-6680210538719580844<br>320K blk_-6680210538719580844_1005.meta<br></code></pre></td></tr></table></figure>
+<ol start="3">
+<li>备份</li>
+<li>一次写入多次读取</li>
+</ol>
+<h5 id="NameNode">NameNode</h5>
+<p>可以看做是分布式文件系统中的管理者，存储文件系统的 metadata，主要负责管理文件系统的命名空间，集群配置信息，存储块的复制。</p>
+<p>两个文件：EditLog、FSImage</p>
+<p>两个映射：<code>Filename -&gt; BlockSequence(FsImage)</code>、<code>Block -&gt; DatanodeList(BlockReport)</code></p>
+<p>单点（NameNode）风险</p>
+<h5 id="Secondary-NameNode">Secondary NameNode</h5>
+<p>不是备用 NameNode，而是秘书</p>
+<p>合并和保存 EditLog、FSImage：</p>
+<ol>
+<li>Checkpoint.period</li>
+<li>Checkpoint.size</li>
+</ol>
+<h5 id="Datanode">Datanode</h5>
+<p>文件存储的基本单位。它存储文件块在本地文件系统中，保存了文件块的 meta-data，同时周期性的发送所有存在的文件块的报错给 Namenode</p>
+<h5 id="HDFS-文件读写">HDFS 文件读写</h5>
+<p>读文件：读取完之后会校验（Check Sum），未通过则告知错误</p>
+<p><img src="/9000/image-20221102194311974.png" alt></p>
+<p>写文件：复制的策略，冗余数据放置在机柜中，跨机柜要经过交换机等设备</p>
+<p><img src="/9000/image-20221102194316077.png" alt></p>
+<h2 id="HBase-2">HBase</h2>
+<table>
+<thead>
+<tr>
+<th><img src="/9000/image-20221102194323548.png" style="zoom:50%;"></th>
+<th><img src="/9000/image-20221102194334253.png" alt></th>
+</tr>
+</thead>
+</table>
+<p>HBase 以谷歌的 BigTable 为模型，并用 Java 编写</p>
+<p>HBase 是在 HDFS 上开发，提供了一种容错的方式存储大量的稀疏数据</p>
+<p>一个 HBase 系统包括一组表，每个表包含行和列，就像传统的数据库一样。每个表都必须有一个定义为主键的元素，所有对 HBase 表的访问尝试都必须使用这个主键。一个 HBase Column 表示一个对象属性。</p>
+<h3 id="什么是-HBase">什么是 HBase</h3>
+<p>HBase 是一个分布式、非结构化、稀疏、面向列的数据库。</p>
+<p>HBase 是基于 HDFS，山寨版的 BigTable，继承了可靠性、高性能、可伸缩性</p>
+<h3 id="HBase-架构">HBase 架构</h3>
+<p><img src="/9000/image-20221102194418874.png" alt>
+<img src="/9000/image-20221102194421898.png" alt></p>
+<h3 id="HBase-角色">HBase 角色</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>内容描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZooKeeper</td>
+<td>1. 一个高效的、可扩展的协调系统<br>2. Hadoop 的子项目，不属于 HBase</td>
+</tr>
+<tr>
+<td>HMaster</td>
+<td>1. 管理网络对 Table 的增、删、改、查操作<br>2. 管理 HRegionServer 负载均衡</td>
+</tr>
+<tr>
+<td>HRegionServer</td>
+<td>1. 管理一系列 HRegion<br>2. Region 读写的场所</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/9000/image-20221102194446247.png" alt></p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>内容描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HRegion</td>
+<td>1. 对应 Table 的 Region<br>2. HStore 和 HLog</td>
+</tr>
+<tr>
+<td>HStore</td>
+<td>1. 对应了 Table 中的一个 Column Family 的存储<br>2. MemStore<br>3. StoreFile（HFile）</td>
+</tr>
+<tr>
+<td>StoreFile</td>
+<td>1. Compact<br>2. Split</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/9000/image-20221102194454270.png" alt></p>
+<h3 id="HBase-数据模型">HBase 数据模型</h3>
+<p>Table &amp; Column Family：</p>
+<ol>
+<li>RowKey：Table 的主键，记录按照 RowKey 排序；</li>
+<li>Timestamp：每次数据操作对应的时间戳，可以看作是数据的 version number（垃圾清理）；</li>
+<li>Column Family：Table 在水平方向由一个或者多个 Column Family 组成，一个 Column Family 中可以由任意多个 Colum 组成。</li>
+</ol>
+<p><img src="/9000/image-20221102194610150.png" alt></p>
+<p>Table &amp; Region：</p>
+<ol>
+<li>记录数不断增多后，Table 会逐渐分裂成多份 splits，成为 regions；</li>
+<li>一个 region 由 [startkey,endkey) 表示；</li>
+<li>不同的 region 会被 Master 分配给相应的 RegionServer 进行管理。</li>
+</ol>
+<p><img src="/9000/image-20221102194754387.png" alt></p>
+<ol>
+<li><code>.META.</code>：记录用户表的 Region 信息，可以有多个 regoin</li>
+<li><code>-ROOT-</code>：记录 <code>.META.</code> 表的 Region 信息，只有一个 region</li>
+<li><code>Zookeeper</code>：记录了 <code>-ROOT-</code> 表的 location</li>
+</ol>
+<p><img src="/9000/image-20221102194800336.png" alt></p>
+<h3 id="数据导入">数据导入</h3>
+<p>Sybase -&gt; HBase：</p>
+<ol>
+<li>bcp out</li>
+<li>importtsv</li>
+</ol>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sh">hadoop jar ~/hbase-0.92.1/hbase-0.92.1.jar importtsv \<br>-Dimporttsv.separator= <span class="hljs-string">&quot;,&quot;</span> <span class="hljs-comment"># 指定输入文件的分隔符为;\</span><br>-Dimporttsv.bulk.output=/output <span class="hljs-comment"># 输出 hfile 到/output</span><br>-Dimporttsv.columns=HBASE ROW KEY,cf1:USER NAME<br><span class="hljs-comment">#源文件的第一列为 rowkey ，第二列为 cf1:USER NAME\</span><br><span class="hljs-built_in">users</span> /bulkload/users.txt <span class="hljs-comment">#导入 hbase 的 users 表中,输入文件在/bulkload\</span><br>hadoop jar ~/hbase-0.92. 1/hbase-0.92.1.jar completebulkload/output <span class="hljs-built_in">users</span><br></code></pre></td></tr></table></figure>
+<h3 id="访问接口">访问接口</h3>
+<p>Hadoop &amp; HBase 提供 JAVA 接口</p>
+<p>Thrift 支持多语言访问 HBase，C++、C#、Cocoa、Erlang、Haskell、Java、Ocami、Perl、PHP、Python、Ruby、Smalltalk</p>
+<h2 id="Hive">Hive</h2>
+<p>Hive 是基于 Hadoop 的数据仓库工具</p>
+<ul>
+<li>学习成本低</li>
+<li>提供完整的 SQL 查询功能</li>
+<li>可以将结构化的数据文件映射为一张数据库表。</li>
+<li>可以将 SQL 语句转换为 MapReduce 任务进行运行。</li>
+<li>可以通过类 SQL 语句快速实现简单的 MapReduce 统计，不必开发专门的 MapReduce 应用</li>
+</ul>
+<h3 id="Hive-体系结构">Hive 体系结构</h3>
+<p><img src="/9000/image-20221102195459485.png" alt></p>
+<h3 id="Hive-运维要点">Hive 运维要点</h3>
+<p>Hive 相当于一套 Hadoop 的访问接口，运维如下几个问题需要注意：</p>
+<ol>
+<li>使用单独的数据库存储元数据</li>
+<li>定义合理的表分区和键</li>
+<li>设置合理的 bucket 数据量</li>
+<li>进行表压缩</li>
+<li>定义外部表使用规范</li>
+<li>合理的控制 Mapper，Reducer 数量</li>
+</ol>
+<h2 id="Pig">Pig</h2>
+<p>Apache Pig 架构：</p>
+<ol>
+<li>严格用于使用 Pig 分析 Hadoop 中的数据的语言称为 Pig Latin，是一种高级数据处理语言。它提供了一组丰富的数据类型和操作符来对数据执行各种操作。</li>
+<li>要执行特定任务时，程序员使用 Pig，需要用 Pig Latin 语言编写 Pig 脚本，并使用任何执行机制（Grunt Shell，UDFs，Embedded）执行它们。执行后，这些脚本将通过应用 Pig 框架的一系列转换来生成所需的输出。</li>
+<li>在内部，Apache Pig 将这些脚本转换为一系列 MapReduce 作业，因此，它使程序员的工作变得容易。</li>
+</ol>
+<h3 id="Pig-组成组成">Pig 组成组成</h3>
+<ol>
+<li>Parser（解析器）：最初，Pig 脚本由解析器处理，它检查脚本的语法，类型检查和其他杂项检查。解析器的输出将是 DAG（有向无环图），它表示 Pig Latin 语句和逻辑运算符。在 DAG 中，脚本的逻辑运算符表示为节点，数据流表示为边。</li>
+<li>Optimizer（优化器）：逻辑计划（DAG）传递到逻辑优化器，逻辑优化器执行逻辑优化，例如投影和下推。</li>
+<li>Compiler（编译器）：编译器将优化的逻辑计划编译为一系列 MapReduce 作业。</li>
+<li>Execution engine（执行引擎）：最后，MapReduce 作业以排序顺序提交到 Hadoop。这些 MapReduce 作业在 Hadoop 上执行，产生所需的结果。</li>
+</ol>
+<p><img src="/9000/image-20221102195652638.png" alt></p>
+<h3 id="Pig-与-SQL-区别">Pig 与 SQL 区别</h3>
+<ol>
+<li>使用延迟评价</li>
+<li>使用 ETL</li>
+<li>能够在管道中任何时刻存储数据</li>
+<li>支持管道分裂</li>
+</ol>
+<p>Pig Latin 是程序性的，它在管道范例中非常自然，而 SQL 则是声明性的。在 SQL 用户中，可以指定要连接两个表的数据，但不能指定要使用的连接实现。</p>
+<p>Pig Latin 允许用户指定一个实现或实现的各个方面 ，以在多个方面执行脚本。Pig Latin 编程类似于指定查询执行计划。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/8691/" rel="prev" title="需求与商业模式创新-03-商业模式画布-渠道通路">
+      <i class="fa fa-chevron-left"></i> 需求与商业模式创新-03-商业模式画布-渠道通路
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/39196/" rel="next" title="大数据分析-01-大数据导论">
+      大数据分析-01-大数据导论 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">常见存储方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.</span> <span class="nav-text">存储的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%BD%A2%E5%BC%8F%E5%AD%98%E5%82%A8%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">1.2.</span> <span class="nav-text">不同形式存储的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">ES 方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%97%E5%AD%98%E5%82%A8%E5%92%8C%E8%A1%8C%E5%AD%98%E5%82%A8"><span class="nav-number">1.4.</span> <span class="nav-text">列存储和行存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.5.</span> <span class="nav-text">读写的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95"><span class="nav-number">1.6.</span> <span class="nav-text">聚簇索引和非聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL"><span class="nav-number">1.7.</span> <span class="nav-text">MySQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase"><span class="nav-number">1.8.</span> <span class="nav-text">HBase</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HBase-%E5%AF%B9-LSM-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.8.1.</span> <span class="nav-text">HBase 对 LSM 的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HBase-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.8.2.</span> <span class="nav-text">HBase 的实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES"><span class="nav-number">1.9.</span> <span class="nav-text">ES</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ES-%E7%9A%84%E9%83%A8%E5%88%86%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F%E3%80%81"><span class="nav-number">1.9.1.</span> <span class="nav-text">ES 的部分实现方式、</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES-%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">1.9.2.</span> <span class="nav-text">ES 的操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E5%AD%98%E5%82%A8%E7%9A%84%E5%AE%B9%E7%81%BE%E6%96%B9%E5%BC%8F"><span class="nav-number">1.10.</span> <span class="nav-text">不同存储的容灾方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop-%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">Hadoop 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Google-%E4%B8%89%E5%A4%A7%E8%AE%BA%E6%96%87"><span class="nav-number">2.1.</span> <span class="nav-text">Google 三大论文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Doug-Cutting-%E5%B1%B1%E5%AF%A8%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.2.</span> <span class="nav-text">Doug Cutting 山寨项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E5%B1%82%E6%AC%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">2.3.</span> <span class="nav-text">大数据处理层次架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hadoop-%E6%A0%B8%E5%BF%83"><span class="nav-number">2.4.</span> <span class="nav-text">Hadoop 核心</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MapReduce"><span class="nav-number">2.4.1.</span> <span class="nav-text">MapReduce</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HDFS-%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">2.4.2.</span> <span class="nav-text">HDFS 的基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Block"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">Block</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NameNode"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">NameNode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Secondary-NameNode"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">Secondary NameNode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Datanode"><span class="nav-number">2.4.2.4.</span> <span class="nav-text">Datanode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#HDFS-%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99"><span class="nav-number">2.4.2.5.</span> <span class="nav-text">HDFS 文件读写</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HBase-2"><span class="nav-number">3.</span> <span class="nav-text">HBase</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-HBase"><span class="nav-number">3.1.</span> <span class="nav-text">什么是 HBase</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase-%E6%9E%B6%E6%9E%84"><span class="nav-number">3.2.</span> <span class="nav-text">HBase 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase-%E8%A7%92%E8%89%B2"><span class="nav-number">3.3.</span> <span class="nav-text">HBase 角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HBase-%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.4.</span> <span class="nav-text">HBase 数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5"><span class="nav-number">3.5.</span> <span class="nav-text">数据导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.6.</span> <span class="nav-text">访问接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive"><span class="nav-number">4.</span> <span class="nav-text">Hive</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">4.1.</span> <span class="nav-text">Hive 体系结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-%E8%BF%90%E7%BB%B4%E8%A6%81%E7%82%B9"><span class="nav-number">4.2.</span> <span class="nav-text">Hive 运维要点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pig"><span class="nav-number">5.</span> <span class="nav-text">Pig</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pig-%E7%BB%84%E6%88%90%E7%BB%84%E6%88%90"><span class="nav-number">5.1.</span> <span class="nav-text">Pig 组成组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pig-%E4%B8%8E-SQL-%E5%8C%BA%E5%88%AB"><span class="nav-number">5.2.</span> <span class="nav-text">Pig 与 SQL 区别</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

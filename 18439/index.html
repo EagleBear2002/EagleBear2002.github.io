@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 模块化的原则（总结）   核心就是上面的 题目是，给例子，发现违反的原则并纠正  面向对象中的模块与耦合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-14-面向对象的模块化">
+<meta property="og:url" content="https://eaglebear2002.github.io/18439/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 模块化的原则（总结）   核心就是上面的 题目是，给例子，发现违反的原则并纠正  面向对象中的模块与耦合">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/1-1653988171899651.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162017761.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162024599.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162027658.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162030872.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162033896.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162055972.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162043407.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/9-1653988171900667.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162141665.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162202221.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162219441.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162224170.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162229469.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162237125.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162241501.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162339236.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162343854.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162356567.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162408169.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162434416.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162440570.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162448142.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162452033.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162455694.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162501068.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162509736.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/24-1653988171901701.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162606988.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162732039.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162736119.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162743524.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18439/image-20230706162746802.png">
+<meta property="article:published_time" content="2022-05-31T08:55:29.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.630Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18439/1-1653988171899651.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18439/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-14-面向对象的模块化 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18439/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-14-面向对象的模块化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 16:55:29" itemprop="dateCreated datePublished" datetime="2022-05-31T16:55:29+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="模块化的原则（总结）">模块化的原则（总结）</h2>
+<p><img src="/18439/1-1653988171899651.png" alt></p>
+<ol>
+<li>核心就是上面的</li>
+<li>题目是，给例子，发现违反的原则并纠正</li>
+</ol>
+<h2 id="面向对象中的模块与耦合">面向对象中的模块与耦合</h2>
+<h3 id="类">类</h3>
+<ol>
+<li>模块化是消除软件复杂度的一个重要方法，它有效地将一个复杂系统分解为若干个代码片段，每一个代码片段完成一个功能，并且包含完成这个功能所需要的信息。</li>
+<li>模块化希望代码片段由两部分组成：接口和实现。</li>
+</ol>
+<h3 id="模块">模块</h3>
+<ol>
+<li>一段代码
+<ol>
+<li>方法</li>
+<li>类</li>
+<li>模块（包）</li>
+</ol>
+</li>
+<li>耦合：通过段</li>
+<li>聚合：内部段</li>
+</ol>
+<h3 id="耦合中的结构方法与-OO-方法">耦合中的结构方法与 OO 方法</h3>
+<ol>
+<li>耦合：耦合是对从一个模块到另一个模块的连接所建立的关联强度的度量。</li>
+<li>结构化方法：连接是对其他地方定义的某些标签或地址的引用</li>
+<li>面向对象方法
+<ol>
+<li>访问耦合</li>
+<li>继承耦合</li>
+</ol>
+</li>
+</ol>
+<h3 id="降低耦合的设计原则">降低耦合的设计原则</h3>
+<ol>
+<li>原则一：Global Variables Consider Harmful</li>
+<li>原则二：To be Explicit</li>
+<li>原则三：Do not Repeat</li>
+<li>原则四：Programming to Interface</li>
+</ol>
+<h2 id="访问耦合">访问耦合</h2>
+<p><img src="/18439/image-20230706162017761.png" alt></p>
+<h3 id="隐式耦合：Cascading-Message-级联调用问题">隐式耦合：Cascading Message 级联调用问题</h3>
+<p><img src="/18439/image-20230706162024599.png" alt></p>
+<h4 id="解决方案-—-引入局部变量">解决方案 — 引入局部变量</h4>
+<p><img src="/18439/image-20230706162027658.png" alt></p>
+<ul>
+<li>避免隐式耦合，变为显式耦合，降低耦合度</li>
+</ul>
+<h4 id="Cascading-Message-问题案例">Cascading Message 问题案例</h4>
+<p><img src="/18439/image-20230706162030872.png" alt></p>
+<ul>
+<li>使用委托的方式来解决，委托给一个类来完成这个业务</li>
+</ul>
+<h4 id="解决方案-—-委托">解决方案 — 委托</h4>
+<p><img src="/18439/image-20230706162033896.png" alt></p>
+<h2 id="组件耦合原理">组件耦合原理</h2>
+<h3 id="原则四：面向接口编程">原则四：面向接口编程</h3>
+<ol>
+<li>编程到所需的接口，不仅是受支持的接口</li>
+<li>按照约定设计
+<ol>
+<li>模块/类合同：所需方法/提供的方法</li>
+<li>方法合同：前提条件，后置条件，不变式</li>
+</ol>
+</li>
+<li>在考虑（非继承的）类与类之间的关系时，一方面要求值访问对方的接口，另一方面要避免隐式访问。</li>
+<li>课本 231 页关于契约的含义的补充：
+<ol>
+<li>前置条件</li>
+<li>后值条件</li>
+<li>不变式</li>
+</ol>
+</li>
+<li>案例</li>
+</ol>
+<p><img src="/18439/image-20230706162055972.png" alt></p>
+<h3 id="原则五：迪米特法则">原则五：迪米特法则</h3>
+<ol>
+<li>通俗说法
+<ol>
+<li>你可以自己玩。(this)</li>
+<li>你可以玩自己的玩具，但不能拆开它们（自己的成员变量）</li>
+<li>你可以玩送给你的玩具。（方法）</li>
+<li>你可以玩自己制作的玩具。（自己创建的对象）</li>
+</ol>
+</li>
+<li>更加形式化的说法：
+<ol>
+<li>每个单元对于其他单元只能拥有优先的知识，只是与当前单元紧密联系的单元</li>
+<li>每个单元只能和它的朋友交谈，不能和陌生单元交谈</li>
+<li>只和自己的直接的朋友交谈</li>
+</ol>
+</li>
+<li>课本 232 页的例子很生动</li>
+</ol>
+<h4 id="问题案例">问题案例</h4>
+<p><img src="/18439/image-20230706162043407.png" alt></p>
+<ul>
+<li>通过联系人获得信息</li>
+<li>如何获得其他的引用？
+<ol>
+<li>this</li>
+<li>成员变量：对 在 Contact 里面持有 PostalArea 的一个成员变量。</li>
+<li>方法</li>
+<li>自己创建</li>
+</ol>
+</li>
+<li>这里需要再去确定一下</li>
+</ul>
+<h3 id="原则六：接口隔离原则（ISP-也叫接口最小化原则">原则六：接口隔离原则（ISP)/也叫接口最小化原则</h3>
+<ol>
+<li>不应强迫客户端依赖于不使用的接口。 马丁（R. Martin)，1996 年</li>
+<li>原则 6：接口隔离原则（ISP)：面向简单接口编程</li>
+<li>许多客户端专用接口比一个通用接口要好</li>
+</ol>
+<h3 id="解释接口隔离原则">解释接口隔离原则</h3>
+<ol>
+<li>多用途的类
+<ol>
+<li>方法分成不同组</li>
+<li>没有一个用户使用所有的方法</li>
+</ol>
+</li>
+<li>可能会导致不想要的依赖：使用类的一个方面的客户端也间接依赖于其他方面的依赖性</li>
+<li>ISP 有助于解决问题：使用多个客户端特定的接口</li>
+</ol>
+<h4 id="案例一：GUI-界面问题">案例一：GUI 界面问题</h4>
+<p><img src="/18439/9-1653988171900667.png" alt></p>
+<ul>
+<li>进一步细化接口，避免出现不必要的依赖。</li>
+</ul>
+<h4 id="案例二：Application-的依赖问题">案例二：Application 的依赖问题</h4>
+<p><img src="/18439/image-20230706162141665.png" alt></p>
+<ul>
+<li>想法一：将 ApplicationForm 拆开</li>
+<li>想法二：将 Controller 合并</li>
+<li>根据具体情况选择想法一和想法二</li>
+</ul>
+<h5 id="Solution">Solution</h5>
+<p><img src="/18439/image-20230706162202221.png" alt></p>
+<h2 id="继承耦合">继承耦合</h2>
+<p><img src="/18439/image-20230706162219441.png" alt></p>
+<ol>
+<li>在以上的各种类型的继承关系中，修改规格、修改实现、精化规格是不可以接受的。</li>
+<li>扩展是最好的继承耦合</li>
+</ol>
+<h3 id="修饰继承耦合">修饰继承耦合</h3>
+<ol>
+<li>没有任何规则和限制的修改</li>
+<li>最差的继承耦合</li>
+<li>如果客户端使用父引用，则需要使用 parent 和 child 方法
+<ol>
+<li>隐含的</li>
+<li>有两个连接，比较复杂</li>
+</ol>
+</li>
+<li>危害多态</li>
+</ol>
+<h4 id="案例">案例</h4>
+<p><img src="/18439/image-20230706162224170.png" alt></p>
+<ul>
+<li>父类能做的子类都能做吗?对</li>
+<li>子类能做的父类都能做吗?*</li>
+</ul>
+<h3 id="完善继承耦合">完善继承耦合</h3>
+<ol>
+<li>定义新信息</li>
+<li>继承的信息仅根据预定规则进行更改</li>
+<li>如果客户使用父母参考，则需要整个父母和子女的修饰
+<ol>
+<li>1+connections</li>
+</ol>
+</li>
+<li>常见的</li>
+</ol>
+<p><img src="/18439/image-20230706162229469.png" alt></p>
+<h3 id="扩展继承耦合">扩展继承耦合</h3>
+<ol>
+<li>子类仅添加方法和实例变量，而没有修改或修饰任何继承的方法和实例变量</li>
+<li>如果客户端使用父引用，则仅需要父引用：一次引用</li>
+</ol>
+<h2 id="降低继承耦合的方法">降低继承耦合的方法</h2>
+<h3 id="继承耦合原理">继承耦合原理</h3>
+<h3 id="原则七：里氏替换原则">原则七：里氏替换原则</h3>
+<ol>
+<li>所有派生类都必须可以替代其基类</li>
+<li>&quot;使用指针或对基类的引用的函数必须能够在不知道的情况下使用派生类的对象。&quot; -R. Martin，1996 年</li>
+</ol>
+<h4 id="问题案例一：银行问题">问题案例一：银行问题</h4>
+<p><img src="/18439/image-20230706162237125.png" alt></p>
+<ul>
+<li>继承关系有问题吗？</li>
+<li>继承后子类能够当做父类看待吗？不能，因为子类要求比父类更强</li>
+<li>解决方案：在父类中增加新的变量完成</li>
+</ul>
+<p><img src="/18439/image-20230706162241501.png" alt></p>
+<h4 id="问题案例二：Is-a-Square-a-Rectangle">问题案例二：Is a Square a Rectangle?</h4>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">Rect</span> <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Rect</span>();<br>setWidth = <span class="hljs-number">4</span>;<br>setHeight = <span class="hljs-number">5</span>;<br><span class="hljs-keyword">assert</span>(<span class="hljs-number">20</span> == getArea());<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Square</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Rect</span>&#123;<br>   <span class="hljs-comment">// Square invariant, height = width</span><br>   setWidth(x) &#123;<br>      setHeight()=x;<br>   &#125;<br>   setHeight(x) &#123;<br>      setWidth(x)<br>   &#125;<br>&#125; <span class="hljs-comment">// violate LSP?</span><br></code></pre></td></tr></table></figure>
+<ol>
+<li>正方形继承长方形：正方形条件比长方形条件更强，多限制条件。</li>
+<li>正方形继承长方形是不合适的。</li>
+<li>长方形继承正方形也是不合适的</li>
+</ol>
+<h4 id="问题案例三：Penguin-is-a-bird">问题案例三：Penguin is a bird?</h4>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Bird</span> &#123;<br>   <span class="hljs-comment">// has beak, wings,...</span><br>   <span class="hljs-keyword">public</span>： virtual <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span>;<br>   <span class="hljs-comment">// Bird can fly</span><br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Parrot</span> ： <span class="hljs-keyword">public</span> Bird &#123;<br>   <span class="hljs-comment">// Parrot is a bird</span><br>   <span class="hljs-keyword">public</span>： virtual <span class="hljs-keyword">void</span> <span class="hljs-title function_">mimic</span><span class="hljs-params">()</span>;<br>   <span class="hljs-comment">// Can Repeat words...</span><br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Penguin</span> ： <span class="hljs-keyword">public</span> Bird &#123;<br>   <span class="hljs-keyword">public</span>： <span class="hljs-keyword">void</span> <span class="hljs-title function_">fly</span><span class="hljs-params">()</span> &#123;<br>      error (<span class="hljs-string">&quot;Penguins don’t fly!&quot;</span>);<br>   &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+<ul>
+<li>不应该被叫做 brid，而应该是 flyingBird</li>
+<li>Penguins Fail to Fly!</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">void</span> <span class="hljs-title function_">PlayWithBird</span> <span class="hljs-params">(Bird abird)</span> &#123;<br>   abird.fly();<br>   <span class="hljs-comment">// OK if Parrot.</span><br>   <span class="hljs-comment">// if bird happens to be Penguin...OOOPS!!</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>不建模：“企鹅不可能”，它建模&quot;企鹅可能很好，但如果他们尝试是错误的&quot;，则尝试运行时错误 $\to$ 不可取</li>
+<li>考虑可替代性-LSP 失败</li>
+</ol>
+<h3 id="里氏替换原则总结">里氏替换原则总结</h3>
+<ol>
+<li>LSP 与语义和替换有关
+<ol>
+<li>设计前先了解
+<ol>
+<li>必须清楚地记录每个方法和类的含义和目的</li>
+<li>缺乏用户理解将导致事实上违反 LSP</li>
+</ol>
+</li>
+<li>可替换性至关重要
+<ol>
+<li>每当任何系统中的任何代码引用任何类时，</li>
+<li>该类别的任何将来或现有的子类别都必须 100% 可替换</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>&quot;在派生类中重新定义一种方法时，只能用一个较弱的方法代替其先决条件，而用一个较强的方法代替其后置条件&quot; — B. Meyer，1988 年</p>
+</blockquote>
+<ol>
+<li>合同设计
+<ol>
+<li>对象的广告行为：
+<ol>
+<li>更弱的前置条件</li>
+<li>更强的后置条件</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>派生类服务应仅需更多且承诺不少于</li>
+<li>LSP 用来判断是否可以进行继承</li>
+</ol>
+<h4 id="课堂练习">课堂练习</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/18439/image-20230706162339236.png" alt></th>
+<th><img src="/18439/image-20230706162343854.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>两种设计都不好，因为前置条件强了</li>
+</ol>
+<h3 id="设计原则八：组合代替继承">设计原则八：组合代替继承</h3>
+<ol>
+<li>组合优于继承</li>
+<li>使用继承实现多态</li>
+<li>使用委托不继承重用代码！</li>
+</ol>
+<h4 id="Coad-的继承规则">Coad 的继承规则</h4>
+<ol>
+<li>仅在满足以下所有条件时才使用继承：
+<ol>
+<li>子类表示“是一种特殊的”，而不是“是一种角色”</li>
+<li>子类的实例永远不需要成为另一个类的对象</li>
+<li>子类扩展而不是覆盖或取消其父类的职责</li>
+<li>子类不会扩展仅是实用程序类的功能</li>
+</ol>
+</li>
+</ol>
+<h4 id="继承-组合实例一">继承/组合实例一</h4>
+<p><img src="/18439/image-20230706162356567.png" alt></p>
+<ul>
+<li>如果出现一个用户既是 Passenger 也是 Agent</li>
+<li>Java 不允许多继承</li>
+</ul>
+<p><img src="/18439/image-20230706162408169.png" alt></p>
+<ul>
+<li>直接的想法就是直接组合</li>
+<li>Person 里面持有 Passenger、Agent，但是这时候对于单一身份的人是很奇怪的</li>
+</ul>
+<h4 id="继承-组合示例二">继承/组合示例二</h4>
+<p><img src="/18439/image-20230706162434416.png" alt></p>
+<ul>
+<li>Person 持有 Role，Passenger 和 Agent 实现抽象接口 PersonRole</li>
+<li>Role 可以是一个 List</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Object</span> &#123;<br>	<span class="hljs-keyword">public</span>： <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">update</span><span class="hljs-params">()</span> </span>&#123;&#125;;<br>	<span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">draw</span><span class="hljs-params">()</span> </span>&#123;&#125;;<br> 	<span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">collide</span><span class="hljs-params">(Object objects[])</span> </span>&#123;&#125;;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Visible</span> ： <span class="hljs-keyword">public</span> Object &#123;<br>    <span class="hljs-keyword">public</span>：<br>      <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">draw</span><span class="hljs-params">()</span> </span>&#123;<br>        <span class="hljs-comment">/* draw model at position of this object */</span> &#125;;<br>    <span class="hljs-keyword">private</span>： Model* model;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solid</span> ： <span class="hljs-keyword">public</span> Object &#123;<br>    <span class="hljs-keyword">public</span>：<br>      <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">collide</span><span class="hljs-params">(Object objects[])</span> </span>&#123;<br>	<span class="hljs-comment">/* check and react to collisions with objects */</span> &#125;;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Movable</span> ： <span class="hljs-keyword">public</span> Object &#123;<br>    <span class="hljs-keyword">public</span>：<br>      <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">update</span><span class="hljs-params">()</span> </span>&#123;<br>		 <span class="hljs-comment">/* update position */</span> &#125;;<br>&#125;;<br></code></pre></td></tr></table></figure>
+<ul>
+<li>问题：游戏引擎中存在很多的对象，三个类分别实现方法之一</li>
+<li>继承三件事但是只做了一件，Promise No Less 不符合</li>
+<li>接口应该拆成 3 个</li>
+</ul>
+<p><img src="/18439/image-20230706162440570.png" alt></p>
+<h2 id="内聚">内聚</h2>
+<ol>
+<li>内聚的分类参考课本 237 页，功能内聚、信息内聚、过程内聚、时间内聚、逻辑内聚、偶然内聚。</li>
+</ol>
+<p><img src="/18439/image-20230706162448142.png" alt></p>
+<ul>
+<li>方法和属性保持一致</li>
+</ul>
+<p><img src="/18439/image-20230706162452033.png" alt></p>
+<ul>
+<li>提高内聚性：将一个类分为三个类</li>
+</ul>
+<p><img src="/18439/image-20230706162455694.png" alt></p>
+<ul>
+<li>将时间抽象出来</li>
+</ul>
+<h3 id="方法内聚">方法内聚</h3>
+<ol>
+<li>一类方法是普通耦合</li>
+<li>所有方法尽一责
+<ol>
+<li>信息内聚</li>
+<li>相对功能（功能内聚）</li>
+<li>第九个原则：单一职责原理</li>
+</ol>
+</li>
+</ol>
+<h3 id="提高内聚的方法">提高内聚的方法</h3>
+<h4 id="原则九：单一责任原则（SRP">原则九：单一责任原则（SRP)</h4>
+<blockquote>
+<p>“一个类只有一个改变的理由”-罗伯特·马丁（Robert Martin)</p>
+</blockquote>
+<ol>
+<li>与内聚性相关并从中导出，即模块中的元素应在功能上紧密相关</li>
+<li>班级履行某种职责的责任也是班级变化的原因</li>
+<li>一个高内聚的类不仅要是信息内聚的，还应该是功能内聚的。</li>
+</ol>
+<h5 id="SRP-Example">SRP Example</h5>
+<p><img src="/18439/image-20230706162501068.png" alt></p>
+<ul>
+<li>修改的原因：
+<ul>
+<li>业务逻辑</li>
+<li>XML 格式</li>
+</ul>
+</li>
+<li>如何修改如何分开</li>
+</ul>
+<h5 id="解决方案">解决方案</h5>
+<p><img src="/18439/image-20230706162509736.png" alt></p>
+<ul>
+<li>我们将两部分职责分离开</li>
+</ul>
+<h4 id="单一职责原则">单一职责原则</h4>
+<ol>
+<li>班级只有一个改变的理由：职能/职责的凝聚力</li>
+<li>几个职责：表示更改的几个原因 $\to$ 更频繁的更改</li>
+<li>听起来很简单
+<ol>
+<li>在现实生活中并非如此轻松</li>
+<li>具有复杂性，重复性，不透明性的 Tradeo</li>
+</ol>
+</li>
+</ol>
+<h3 id="课堂练习-2">课堂练习</h3>
+<p><img src="/18439/24-1653988171901701.png" alt></p>
+<p><img src="/18439/image-20230706162606988.png" alt></p>
+<ul>
+<li>打电话和挂起两个职责分离开</li>
+</ul>
+<p><img src="/18439/image-20230706162732039.png" alt></p>
+<ul>
+<li>几何画板：Draw 和 Area 的计算如何分开</li>
+</ul>
+<p><img src="/18439/image-20230706162736119.png" alt></p>
+<ul>
+<li>解决方案：集合长方形和图形长方形一一对应</li>
+</ul>
+<h2 id="耦合和内聚的度量">耦合和内聚的度量</h2>
+<h3 id="类之间的耦合度量">类之间的耦合度量</h3>
+<h4 id="第一种度量：CBO（方法调用耦合）">第一种度量：CBO（方法调用耦合）</h4>
+<ol>
+<li>对象类之间的耦合（CBO)</li>
+<li>CBO = 该类访问他类的成员方法的数量 + 其他类的成员访问该类的成员方法的数量</li>
+<li>其他类的计数：
+<ol>
+<li>哪个访问此类中的方法或变量，或者</li>
+<li>包含此类访问的方法或变量</li>
+<li>不包括继承</li>
+</ol>
+</li>
+<li>越低越好</li>
+</ol>
+<h4 id="第二种度量：DAC（数据抽象耦合）">第二种度量：DAC（数据抽象耦合）</h4>
+<ol>
+<li>数据抽象耦合（DAC)</li>
+<li>DAC = 统计一类包含的其他类的其他类的实例的数量，不包括继承关系带来的实例引用</li>
+<li>具有 ADT 类型的属性数量取决于其他类的定义</li>
+<li>越低越好</li>
+</ol>
+<h4 id="第三种度量：Ca-和-Ce（有效和）">第三种度量：Ca 和 Ce（有效和）</h4>
+<ol>
+<li>Ce 和 Ca（有效和有效偶联）
+<ol>
+<li>Ca：在此类之外依赖于这类内部的类的数量</li>
+<li>Ce：这个类中依赖于这个类的外部的类的数量</li>
+</ol>
+</li>
+<li>越低越好</li>
+</ol>
+<h4 id="第四种度量：DIT-继承树的深度">第四种度量：DIT 继承树的深度</h4>
+<ol>
+<li>继承树的深度</li>
+<li>从节点到树的根的最大长度</li>
+<li>随着 DIT 的增长，由于高度的继承性，很难预测类的行为</li>
+<li>积极地，较大的 DIT 值意味着可以重用许多方法</li>
+<li>理论上 DIT 是越大也好，但是同样也会带来很难实现 LSP 的问题，DIT&gt;3 同样也需要审查继承机制的正确性。</li>
+</ol>
+<h4 id="第五种度量-Number-of-children-NOC-子类的数量">第五种度量 Number of children (NOC) 子类的数量</h4>
+<ol>
+<li>是一个类的直接子类的数量</li>
+<li>随着 NOC 的增长，可复用性增加，抽象减弱了</li>
+<li>随着 NOC 的增长，抽象可能变得稀疏</li>
+<li>NOC 的增加意味着测试量将增加</li>
+<li>一般 NOC 超过三，就需要认真审查继承机制的正确性，检查是否满足 LSP</li>
+</ol>
+<h4 id="衡量类凝聚力-LCOM">衡量类凝聚力 LCOM</h4>
+<blockquote>
+<p>Lack of cohesion in methods (LCOM)</p>
+</blockquote>
+<p><img src="/18439/image-20230706162743524.png" alt></p>
+<ul>
+<li>交集为空则在 P 中，交集不为空则在 Q 中</li>
+</ul>
+<ol>
+<li>值越低越好</li>
+<li>还定义了许多其他版本的 LCOM</li>
+<li>如果 LCOM&gt;= 1，则应将类划分</li>
+</ol>
+<p><img src="/18439/image-20230706162746802.png" alt></p>
+<ol start="5">
+<li>课本 241、242 页</li>
+</ol>
+<h3 id="Summary：Principles-from-Modularization-模块化的原则">Summary：Principles from Modularization 模块化的原则</h3>
+<ol>
+<li>《Global Variables Consider Harmful》 全局变量被认为是有害的</li>
+<li>《To be Explicit》让代码清晰一点</li>
+<li>《Do not Repeat》避免重复</li>
+<li>《Programming to Interface(Design by Contract)》面向接口编程，按照契约设计</li>
+<li>《The Law of Demeter》迪米特法则</li>
+<li>《Interface Segregation Principle(ISP)》接口分离原则</li>
+<li>《Liskov Substitution Principle (LSP)》里氏替换原则：Request No More, Promise No Less</li>
+<li>《Favor Composition Over Inheritance》 选择组合而不是继承</li>
+<li>《Single Responsibility Principle》单一职责原理</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/14417/" rel="prev" title="软件工程与计算II-13-模块化与信息隐藏">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-13-模块化与信息隐藏
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/65210/" rel="next" title="软件工程与计算II-15-面向对象的信息隐藏">
+      软件工程与计算II-15-面向对象的信息隐藏 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8C%96%E7%9A%84%E5%8E%9F%E5%88%99%EF%BC%88%E6%80%BB%E7%BB%93%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">模块化的原则（总结）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%B8%AD%E7%9A%84%E6%A8%A1%E5%9D%97%E4%B8%8E%E8%80%A6%E5%90%88"><span class="nav-number">2.</span> <span class="nav-text">面向对象中的模块与耦合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97"><span class="nav-number">2.2.</span> <span class="nav-text">模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E4%B8%AD%E7%9A%84%E7%BB%93%E6%9E%84%E6%96%B9%E6%B3%95%E4%B8%8E-OO-%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">耦合中的结构方法与 OO 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E8%80%A6%E5%90%88%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">2.4.</span> <span class="nav-text">降低耦合的设计原则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%80%A6%E5%90%88"><span class="nav-number">3.</span> <span class="nav-text">访问耦合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%BC%8F%E8%80%A6%E5%90%88%EF%BC%9ACascading-Message-%E7%BA%A7%E8%81%94%E8%B0%83%E7%94%A8%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">隐式耦合：Cascading Message 级联调用问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-%E2%80%94-%E5%BC%95%E5%85%A5%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F"><span class="nav-number">3.1.1.</span> <span class="nav-text">解决方案 — 引入局部变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Cascading-Message-%E9%97%AE%E9%A2%98%E6%A1%88%E4%BE%8B"><span class="nav-number">3.1.2.</span> <span class="nav-text">Cascading Message 问题案例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-%E2%80%94-%E5%A7%94%E6%89%98"><span class="nav-number">3.1.3.</span> <span class="nav-text">解决方案 — 委托</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E8%80%A6%E5%90%88%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">组件耦合原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E5%9B%9B%EF%BC%9A%E9%9D%A2%E5%90%91%E6%8E%A5%E5%8F%A3%E7%BC%96%E7%A8%8B"><span class="nav-number">4.1.</span> <span class="nav-text">原则四：面向接口编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%BA%94%EF%BC%9A%E8%BF%AA%E7%B1%B3%E7%89%B9%E6%B3%95%E5%88%99"><span class="nav-number">4.2.</span> <span class="nav-text">原则五：迪米特法则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%A1%88%E4%BE%8B"><span class="nav-number">4.2.1.</span> <span class="nav-text">问题案例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E5%85%AD%EF%BC%9A%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99%EF%BC%88ISP-%E4%B9%9F%E5%8F%AB%E6%8E%A5%E5%8F%A3%E6%9C%80%E5%B0%8F%E5%8C%96%E5%8E%9F%E5%88%99"><span class="nav-number">4.3.</span> <span class="nav-text">原则六：接口隔离原则（ISP)&#x2F;也叫接口最小化原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99"><span class="nav-number">4.4.</span> <span class="nav-text">解释接口隔离原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9AGUI-%E7%95%8C%E9%9D%A2%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.1.</span> <span class="nav-text">案例一：GUI 界面问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9AApplication-%E7%9A%84%E4%BE%9D%E8%B5%96%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.2.</span> <span class="nav-text">案例二：Application 的依赖问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Solution"><span class="nav-number">4.4.2.1.</span> <span class="nav-text">Solution</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88"><span class="nav-number">5.</span> <span class="nav-text">继承耦合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E9%A5%B0%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88"><span class="nav-number">5.1.</span> <span class="nav-text">修饰继承耦合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">5.1.1.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88"><span class="nav-number">5.2.</span> <span class="nav-text">完善继承耦合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88"><span class="nav-number">5.3.</span> <span class="nav-text">扩展继承耦合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">6.</span> <span class="nav-text">降低继承耦合的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E8%80%A6%E5%90%88%E5%8E%9F%E7%90%86"><span class="nav-number">6.1.</span> <span class="nav-text">继承耦合原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%B8%83%EF%BC%9A%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="nav-number">6.2.</span> <span class="nav-text">原则七：里氏替换原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%A1%88%E4%BE%8B%E4%B8%80%EF%BC%9A%E9%93%B6%E8%A1%8C%E9%97%AE%E9%A2%98"><span class="nav-number">6.2.1.</span> <span class="nav-text">问题案例一：银行问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%A1%88%E4%BE%8B%E4%BA%8C%EF%BC%9AIs-a-Square-a-Rectangle"><span class="nav-number">6.2.2.</span> <span class="nav-text">问题案例二：Is a Square a Rectangle?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%A1%88%E4%BE%8B%E4%B8%89%EF%BC%9APenguin-is-a-bird"><span class="nav-number">6.2.3.</span> <span class="nav-text">问题案例三：Penguin is a bird?</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99%E6%80%BB%E7%BB%93"><span class="nav-number">6.3.</span> <span class="nav-text">里氏替换原则总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BE%E5%A0%82%E7%BB%83%E4%B9%A0"><span class="nav-number">6.3.1.</span> <span class="nav-text">课堂练习</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99%E5%85%AB%EF%BC%9A%E7%BB%84%E5%90%88%E4%BB%A3%E6%9B%BF%E7%BB%A7%E6%89%BF"><span class="nav-number">6.4.</span> <span class="nav-text">设计原则八：组合代替继承</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Coad-%E7%9A%84%E7%BB%A7%E6%89%BF%E8%A7%84%E5%88%99"><span class="nav-number">6.4.1.</span> <span class="nav-text">Coad 的继承规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF-%E7%BB%84%E5%90%88%E5%AE%9E%E4%BE%8B%E4%B8%80"><span class="nav-number">6.4.2.</span> <span class="nav-text">继承&#x2F;组合实例一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF-%E7%BB%84%E5%90%88%E7%A4%BA%E4%BE%8B%E4%BA%8C"><span class="nav-number">6.4.3.</span> <span class="nav-text">继承&#x2F;组合示例二</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E8%81%9A"><span class="nav-number">7.</span> <span class="nav-text">内聚</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%86%85%E8%81%9A"><span class="nav-number">7.1.</span> <span class="nav-text">方法内聚</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E5%86%85%E8%81%9A%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">7.2.</span> <span class="nav-text">提高内聚的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E5%88%99%E4%B9%9D%EF%BC%9A%E5%8D%95%E4%B8%80%E8%B4%A3%E4%BB%BB%E5%8E%9F%E5%88%99%EF%BC%88SRP"><span class="nav-number">7.2.1.</span> <span class="nav-text">原则九：单一责任原则（SRP)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SRP-Example"><span class="nav-number">7.2.1.1.</span> <span class="nav-text">SRP Example</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">7.2.1.2.</span> <span class="nav-text">解决方案</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%8E%9F%E5%88%99"><span class="nav-number">7.2.2.</span> <span class="nav-text">单一职责原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BE%E5%A0%82%E7%BB%83%E4%B9%A0-2"><span class="nav-number">7.3.</span> <span class="nav-text">课堂练习</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%A6%E5%90%88%E5%92%8C%E5%86%85%E8%81%9A%E7%9A%84%E5%BA%A6%E9%87%8F"><span class="nav-number">8.</span> <span class="nav-text">耦合和内聚的度量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E4%B9%8B%E9%97%B4%E7%9A%84%E8%80%A6%E5%90%88%E5%BA%A6%E9%87%8F"><span class="nav-number">8.1.</span> <span class="nav-text">类之间的耦合度量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%A7%8D%E5%BA%A6%E9%87%8F%EF%BC%9ACBO%EF%BC%88%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E8%80%A6%E5%90%88%EF%BC%89"><span class="nav-number">8.1.1.</span> <span class="nav-text">第一种度量：CBO（方法调用耦合）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%A7%8D%E5%BA%A6%E9%87%8F%EF%BC%9ADAC%EF%BC%88%E6%95%B0%E6%8D%AE%E6%8A%BD%E8%B1%A1%E8%80%A6%E5%90%88%EF%BC%89"><span class="nav-number">8.1.2.</span> <span class="nav-text">第二种度量：DAC（数据抽象耦合）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E7%A7%8D%E5%BA%A6%E9%87%8F%EF%BC%9ACa-%E5%92%8C-Ce%EF%BC%88%E6%9C%89%E6%95%88%E5%92%8C%EF%BC%89"><span class="nav-number">8.1.3.</span> <span class="nav-text">第三种度量：Ca 和 Ce（有效和）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E7%A7%8D%E5%BA%A6%E9%87%8F%EF%BC%9ADIT-%E7%BB%A7%E6%89%BF%E6%A0%91%E7%9A%84%E6%B7%B1%E5%BA%A6"><span class="nav-number">8.1.4.</span> <span class="nav-text">第四种度量：DIT 继承树的深度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E7%A7%8D%E5%BA%A6%E9%87%8F-Number-of-children-NOC-%E5%AD%90%E7%B1%BB%E7%9A%84%E6%95%B0%E9%87%8F"><span class="nav-number">8.1.5.</span> <span class="nav-text">第五种度量 Number of children (NOC) 子类的数量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A1%E9%87%8F%E7%B1%BB%E5%87%9D%E8%81%9A%E5%8A%9B-LCOM"><span class="nav-number">8.1.6.</span> <span class="nav-text">衡量类凝聚力 LCOM</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Summary%EF%BC%9APrinciples-from-Modularization-%E6%A8%A1%E5%9D%97%E5%8C%96%E7%9A%84%E5%8E%9F%E5%88%99"><span class="nav-number">8.2.</span> <span class="nav-text">Summary：Principles from Modularization 模块化的原则</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="什么是软件架构（体系结构）？  很多人都试图给“架构”下定义，而这些定义相互之间却很难统一 架构是一系列重要决策的集合，包括：软件的组织、构成系统的结构要素及其接口的选择、元素在协作中表现的行为 软件架构即一系列重要的设计决策，这些决策上的失误可能最终导致软件系统项目的失败 软件系统的架构将系统定义为计算组件（Components）及组件之间的交互：连接（Connector）和约束（Constra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构设计-07-Microservice Architecture">
+<meta property="og:url" content="https://eaglebear2002.github.io/18541/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="什么是软件架构（体系结构）？  很多人都试图给“架构”下定义，而这些定义相互之间却很难统一 架构是一系列重要决策的集合，包括：软件的组织、构成系统的结构要素及其接口的选择、元素在协作中表现的行为 软件架构即一系列重要的设计决策，这些决策上的失误可能最终导致软件系统项目的失败 软件系统的架构将系统定义为计算组件（Components）及组件之间的交互：连接（Connector）和约束（Constra">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/image-20230614103912789.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/image-20230614103921244.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/image-20230614103930166.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/3-1686484404626-764.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/4-1686484404626-765.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/5-1686484404626-766.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/6-1686484404626-767.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/7-1686484404627-768.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/8-1686484404627-769.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/9-1686484404627-770.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18541/10-1686484404627-771.png">
+<meta property="article:published_time" content="2023-06-09T02:59:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.676Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18541/image-20230614103912789.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18541/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构设计-07-Microservice Architecture | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18541/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构设计-07-Microservice Architecture
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-09 10:59:00" itemprop="dateCreated datePublished" datetime="2023-06-09T10:59:00+08:00">2023-06-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是软件架构（体系结构）？">什么是软件架构（体系结构）？</h2>
+<ol>
+<li>很多人都试图给“架构”下定义，而这些定义相互之间却很难统一</li>
+<li>架构是一系列重要决策的集合，包括：软件的组织、构成系统的结构要素及其接口的选择、元素在协作中表现的行为</li>
+<li>软件架构即一系列重要的设计决策，这些决策上的失误可能最终导致软件系统项目的失败</li>
+<li>软件系统的架构将系统定义为计算组件（Components）及组件之间的交互：连接（Connector）和约束（Constraints）</li>
+<li>软件架构是一组具有特定形式的架构元素，包括:负责完成数据加工的处理元素（Processing Elements）、作为被加工信息的数据元素（Data Elements）、及用于将不同部分组合在一起的连接元素（Connecting Elements）。</li>
+<li>软件架构包括系统组件、连接件和约束的集合，反映不同涉众需求的集合、以及原理（Rationale）的集合。</li>
+<li>软件架构是以组件、组件相互间的关系、组件与环境之间的关系所描述的软件系统的基本组织结构，以及指导其设计与演化的原理（Principle）。</li>
+<li>软件架构是系统的单一或多重结构，它们由软件元素、这些元素的外部可见属性，以及元素之间的关系组成。</li>
+</ol>
+<h2 id="软件架构的演化">软件架构的演化</h2>
+<h3 id="单体架构">单体架构</h3>
+<ol>
+<li>单体（Monolithic）应用的全部功能被集成在一起作为一个单一的单元。</li>
+<li>单体架构更多地作为应用的部署架构，即只要它部署在同一台（虚拟）机器上，运行于同一进程中，而无论应用内部如何模块化，服务化或者分层。</li>
+</ol>
+<img src="/18541/image-20230614103912789.png" style="zoom:67%;">
+<h3 id="分层架构">分层架构</h3>
+<ol>
+<li>关注点分离原则</li>
+<li>软件系统的组件被分成多个相互不重叠的层次，每一层都有着特定的职能，仅处理本层的逻辑，而并不关心其它层的实现。
+<ol>
+<li>表现层</li>
+<li>业务层</li>
+<li>持久层</li>
+<li>数据层</li>
+</ol>
+</li>
+<li>分层架构模式特点：
+<ol>
+<li>+结构简单</li>
+<li>+易于组织开发</li>
+<li>+便于独立测试、维护</li>
+<li>-不易实现持续发布、部署</li>
+<li>-性能代价</li>
+<li>-可扩展性差</li>
+</ol>
+</li>
+</ol>
+<img src="/18541/image-20230614103921244.png" style="zoom:67%;">
+<h3 id="面向服务架构（SOA）">面向服务架构（SOA）</h3>
+<ol>
+<li>面向服务架构（SOA）：是一个分布式组件的集合，这些组件为其它组件提供服务（provider），或者消费其它组件所提供的服务（consumer），而无需知道其它组件的实现细节。</li>
+<li>企业服务总线（ESB）：为服务间的相互调用提供支持环境，路由服务间的消息，并对消息和数据进行必要的转换。</li>
+<li>服务编排引擎（Orchestration Engine）：可以根据预先定义的脚本对服务消费者与服务提供者之间的交互进行指挥。</li>
+</ol>
+<img src="/18541/image-20230614103930166.png" style="zoom:67%;">
+<ol start="4">
+<li>面向服务架构的特点:
+<ol>
+<li>+服务自身高内聚、服务间松耦合，最小化开发维护中的相互影响</li>
+<li>+良好的互操作性，符合开放标准</li>
+<li>+模组化， 高重用性</li>
+<li>+服务动态识别、注册、调用</li>
+<li>-系统复杂性提高</li>
+<li>-难以测试验证</li>
+<li>-各独立服务的演化不可控</li>
+<li>-中间件易成为性能瓶颈</li>
+</ol>
+</li>
+<li>面向服务架构实现原则:
+<ol>
+<li>服务解耦:服务之间的关系最小化，只是互相知道接口</li>
+<li>服务契约:服务按照描述文档所定义的服务契约行事</li>
+<li>服务封装:除了服务契约所描述内容，服务将对外部隐藏实现逻辑</li>
+<li>服务重用:将逻辑分布在不同的服务中，以提高服务的重用性</li>
+<li>服务组合:一组服务可以协调工作，组合起来形成定制组合业务需求</li>
+<li>服务自治:服务对所封装的逻辑具有控制权</li>
+<li>服务无状态:服务将一个活动所需保存的资讯最小化</li>
+</ol>
+</li>
+</ol>
+<img src="/18541/3-1686484404626-764.png" style="zoom:50%;">
+<h3 id="构建云原生应用（SaaS）的-12-要素">构建云原生应用（SaaS）的 12 要素 *</h3>
+<ol>
+<li>基准代码:一份基准代码，多份部署。基准代码和应用之间总是保持一一对应的关系。所有部署的基准代码相同，但每份部署可以使用其不同的版本。</li>
+<li>依赖:显式声明依赖关系。应用程序一定通过依赖清单，确切地声明所有依赖项。</li>
+<li>配置:在环境中存储配置。将应用的配置存储于环境变量中。环境变量可以非常方便地在不同的部署间做修改，却不动一行代码。</li>
+<li>后端服务:把后端服务当作附加资源。应用不会区别对待本地或第三方服务。对应用程序而言，两种都是附加资源。</li>
+<li>构建，发布，运行:严格区分构建，发布，运行这三个步骤。</li>
+<li>进程:以一个或多个无状态进程运行应用。应用的进程必须无状态且无共享。</li>
+<li>端口绑定:通过端口绑定提供服务。应用完全自我加载而不依赖任何网络服务器就可以创建一个面向网络的服务。</li>
+<li>并发:通过进程模型进行扩展。开发人员可以运用这个模型去设计应用架构，将不同工作分配给不同的进程类型。</li>
+<li>易处理:快速启动和优雅终止可最大化健壮性。应用的进程是可支配的，意思是说它们可以瞬间开启或停止。</li>
+<li>开发环境与线上环境等价:尽可能保持开发、预发布、线上环境相同。应用想要做到持续部署就必须缩小本地与线上差异。</li>
+<li>日志:把日志当作事件流。应用本身考虑存储自己的输出流。不应该试图去写或者管理日志文件。</li>
+<li>管理进程:后台管理任务当作一次性进程运行。一次性管理进程应该和正常的常驻进程使用同样的环境。</li>
+</ol>
+<h2 id="微服务架构风格">微服务架构风格</h2>
+<h3 id="什么是微服务架构">什么是微服务架构?</h3>
+<ol>
+<li>微服务（Microservices）架构风格是一种将一个单一应用程序开发为一组小型服务的方法，每个服务运行在自己的进程中，服务间通信采用轻量级通信机制，这些服务围绕业务能力构建并可通过自动部署机制独立部署。</li>
+<li>微服务架构本质上仍然是一种分布式架构，也是面向服务架构的一种扩展。</li>
+</ol>
+<h3 id="微服务架构的特点">微服务架构的特点</h3>
+<ol>
+<li>通过服务组件化
+<ol>
+<li>组件是一个可独立替换或升级的软件单元，微服务架构实现组件化的方式是分解成服务。</li>
+<li>服务是一种进程外的组件，它通过 Web 服务请求或远程过程调用（RPC）机制通信。</li>
+<li>使用服务作为组件的主要原因是服务是可独立部署。</li>
+<li>使用服务作为组件产生更加明确的组件发布接口。</li>
+</ol>
+</li>
+<li>内聚和解耦
+<ol>
+<li>基于微服务构建的系统目标是尽可能的解耦和尽可能的内聚，他们拥有各自的领域逻辑。</li>
+<li>当系统被划分成分离的服务时，可利用领域驱动设计（Domain-Driven Design）的理念，把一个复杂域划分成多个限界上下文（Bounded Context），并且映射出它们之间的关系。</li>
+<li>服务和上下文边界的确定有助于澄清和强化分离，实现解耦。</li>
+</ol>
+</li>
+<li>围绕业务能力组织
+<ol>
+<li>传统软件系统开发管理通常聚焦在技术层面，导致 UI 团队、服务逻辑团队、数据库团队等的划分，将始终伴随跨团队的沟通、交接和预算审批等。</li>
+<li>微服务采用围绕业务能力的划分方法来组织服务，实现在服务的业务领域内的宽栈实现，其团队都是跨职能的，包括全方位开发技能，如用户体验、数据库项目管理。</li>
+<li>微服务采用产品开发模式，而非项目模式，开发团队负责软件的整个产品周期，持续关注软件如何帮助用户提升业务能力，实现价值交付。</li>
+</ol>
+</li>
+<li>去中心化
+<ol>
+<li>去中心化治理，在构建微服务时可以有服务自己的技术栈选择。
+<ol>
+<li>服务之间只需要约定接口，而无需关注彼此的内部实现;</li>
+<li>同样，运维只需要知道服务的部署规范。</li>
+</ol>
+</li>
+<li>去中心化数据存储，微服务更倾向于让每个服务管理自己的数据库，或者同一数据库技术的不同实例，或完全不同的数据库系统。</li>
+<li>去中心化数据管理，对跨微服务的数据来说，去中心化责任对管理升级带来困难，微服务架构强调服务间的无事务协作，需要权衡更大一致性的业务损失与修复错误的代价。</li>
+</ol>
+</li>
+<li>基础设施自动化
+<ol>
+<li>随着基础设施的自动化，特别是云和 Web Services 等技术的发展，已经降低构建部署和运维微服务的操作复杂度。</li>
+</ol>
+</li>
+<li>服务设计与演进
+<ol>
+<li>高可用性
+<ol>
+<li>任何服务调用都可能因为服务提供者不可用而失败，客户端必须尽可能有效的应对这种失效。</li>
+<li>为每个单独的服务设置完善的监控和日志记录，有助于对于快速发现不良突发行为而尽早修复。</li>
+</ol>
+</li>
+<li>变更与演化
+<ol>
+<li>把组件放在服务中，只需重新部署修改的服务，可以在更细粒度上实现频繁快速的发布。</li>
+<li>服务的划分上，系统中很少变更的部分应该和正在经历频繁改动的部分放在不同的服务里（如果不断地-起改变两个服务，它们应该被合并）。</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="微服务架构与传统架构比较">微服务架构与传统架构比较</h3>
+<p><img src="/18541/4-1686484404626-765.png" alt></p>
+<ul>
+<li>《Microservice Architecture in Reality: An Industrial Inquir》</li>
+</ul>
+<h3 id="微服务架构的核心模式">微服务架构的核心模式</h3>
+<ol>
+<li>核心模式即针对采用微服务系统在特定场景下的特定问题，所使用的成熟的架构解决方案集合。</li>
+<li>服务注册与发现：服务消费者获取服务提供者的机制，以实现两者间的解耦服务发现组件
+<ol>
+<li>微服务启动时将自己的地址等信息注册到服务发现组件</li>
+<li>服务消费者可从服务发现组件查询服务提供者的网络地址和调用接口</li>
+<li>各个微服务与服务发现组件使用一定机制通信，如长时间无法通信即注销该实例</li>
+<li>微服务数量、地址和接口等发生变更时，会重新注册到服务发现组件，无需人工修改</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18541/5-1686484404626-766.png" alt></p>
+<ol start="3">
+<li>API 网关
+<ol>
+<li>微服务架构的应用客户端如何访问各项服务?
+<ol>
+<li>微服务提供的是细粒度 API，客户端需要同多项服务进行交互。</li>
+<li>不同客户端需要不同的数据。</li>
+<li>不同客户端的性能要求亦有所区别。</li>
+<li>服务实例数量与其位置（地址和端口）会发生动态变化。</li>
+<li>服务的划分方式会随时间的推移而改变。</li>
+</ol>
+</li>
+<li>API 网关作为全部客户端的单一入口点，可以针对不同客户端提供出不同的 API。
+<ol>
+<li>确保客户端不必关心应用程序的微服务拆分方式。</li>
+<li>确保客户端不受服务实例位置的影响。</li>
+<li>为每套客户端提供最优 API。</li>
+<li>降低请求往返次数。</li>
+<li>将从客户端调用多项服务的逻辑转换为从 AP|网关处调用，以简化整个客户端。</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18541/6-1686484404626-767.png" alt></p>
+<ol start="3">
+<li>熔断器
+<ol>
+<li>微服务之间难免存在依赖关系，同时相互之间通过网络进行通信，一旦任何服务或网络出现问题会引起请求失败，并可能导致级联故障，将不可用在系统中逐渐放大。</li>
+<li>熔断器模式
+<ol>
+<li>可以防止程序不断地尝试执行可能会失败的操作;</li>
+<li>可以使程序能够诊断错误是否经修正，进而再次尝试调用操作。</li>
+</ol>
+</li>
+<li>熔断器的实现
+<ol>
+<li>闭合状态:对程序的请求能够直接引起方法的调用。</li>
+<li>断开状态:对程序的请求会立即返回错误响应。</li>
+<li>半断开状态:允许对程序的一定数量的请求可以调用服务，如调用成功，可认为之前导致调用失败的错误已经修正，熔断器切换到闭合状态;如调用失败，则认为问题仍存在，熔断器切回到断开状态。</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18541/7-1686484404627-768.png" alt></p>
+<h3 id="微服务架构的实现">微服务架构的实现</h3>
+<img src="/18541/8-1686484404627-769.png" style="zoom:67%;">
+<h3 id="微服务技术选型（轻量级）">微服务技术选型（轻量级）</h3>
+<ol>
+<li>微服务技术选型（轻量级）
+<ol>
+<li>开发服务: Spring Boot</li>
+<li>封装服务: Docker</li>
+<li>部署服务: Jenkins</li>
+<li>注册服务: ZooKeeper</li>
+<li>调用服务: Node.js</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18541/9-1686484404627-770.png" alt></p>
+<h2 id="小结">小结</h2>
+<ol>
+<li>什么是软件架构（体系结构）？
+<ol>
+<li>结构，元素（组件），属性，关系，行为，原则</li>
+</ol>
+</li>
+<li>软件架构的演化
+<ol>
+<li>单体 - 分层 - 面向服务 - 微服务</li>
+</ol>
+</li>
+<li>微服务架构的特点
+<ol>
+<li>服务颗粒化:服务粒度由业务功能决定，服务间尽可能解耦</li>
+<li>责任单一化:单一职责原则，服务内尽可能内聚</li>
+<li>运行隔离化:服务运行在各自进程中，互不影响</li>
+<li>管理自动化:对服务提供自动化部署与监控预警能力，高效管理</li>
+</ol>
+</li>
+<li>微服务架构的挑战
+<ol>
+<li>运维要求高:微服务数量多，部署与监控要求高</li>
+<li>发布复杂度:部署环境多样化，网络性能系统容错、分布式事务等挑战</li>
+<li>部署依赖强:服务间相互调用关系复杂，存在部署顺序依赖</li>
+<li>通信成本高:跨进程调用比进程内调用消耗更多的资源</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18541/10-1686484404627-771.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/57516/" rel="prev" title="软件架构设计-05-Evaluating Architecture">
+      <i class="fa fa-chevron-left"></i> 软件架构设计-05-Evaluating Architecture
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/62917/" rel="next" title="软件详细设计-10-表驱动">
+      软件详细设计-10-表驱动 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84%EF%BC%88%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%EF%BC%89%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是软件架构（体系结构）？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">软件架构的演化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">单体架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">分层架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%EF%BC%88SOA%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">面向服务架构（SOA）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%BA%91%E5%8E%9F%E7%94%9F%E5%BA%94%E7%94%A8%EF%BC%88SaaS%EF%BC%89%E7%9A%84-12-%E8%A6%81%E7%B4%A0"><span class="nav-number">2.4.</span> <span class="nav-text">构建云原生应用（SaaS）的 12 要素 *</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E9%A3%8E%E6%A0%BC"><span class="nav-number">3.</span> <span class="nav-text">微服务架构风格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">什么是微服务架构?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">3.2.</span> <span class="nav-text">微服务架构的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%B8%8E%E4%BC%A0%E7%BB%9F%E6%9E%B6%E6%9E%84%E6%AF%94%E8%BE%83"><span class="nav-number">3.3.</span> <span class="nav-text">微服务架构与传统架构比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.4.</span> <span class="nav-text">微服务架构的核心模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.5.</span> <span class="nav-text">微服务架构的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%88%E8%BD%BB%E9%87%8F%E7%BA%A7%EF%BC%89"><span class="nav-number">3.6.</span> <span class="nav-text">微服务技术选型（轻量级）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

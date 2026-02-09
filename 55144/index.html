@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder 的博客，更换了更清晰的图片并根据新的课程设计做了补充和修正。 再读《没有银弹》 软件开发有很多困难，但是本质难题是：  不可见性：软件项目是一个逻辑实体 复杂性：实体数量众多 可变性 一致性  进一步分析：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件质量管理-02-软件过程的历史演变和经典工作">
+<meta property="og:url" content="https://eaglebear2002.github.io/55144/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder 的博客，更换了更清晰的图片并根据新的课程设计做了补充和修正。 再读《没有银弹》 软件开发有很多困难，但是本质难题是：  不可见性：软件项目是一个逻辑实体 复杂性：实体数量众多 可变性 一致性  进一步分析：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113342418.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113348846.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113502852.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113507055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113516369.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113521543.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55144/image-20230920113530204.png">
+<meta property="article:published_time" content="2023-09-20T03:33:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.651Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/55144/image-20230920113342418.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/55144/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件质量管理-02-软件过程的历史演变和经典工作 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/55144/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件质量管理-02-软件过程的历史演变和经典工作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-09-20 11:33:00" itemprop="dateCreated datePublished" datetime="2023-09-20T11:33:00+08:00">2023-09-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Fall-%E8%BD%AF%E4%BB%B6%E8%B4%A8%E9%87%8F%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">2023Fall-软件质量管理</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder 的博客</a>，更换了更清晰的图片并根据新的课程设计做了补充和修正。</p>
+<h2 id="再读《没有银弹》">再读《没有银弹》</h2>
+<p>软件开发有很多困难，但是本质难题是：</p>
+<ol>
+<li>不可见性：软件项目是一个逻辑实体</li>
+<li>复杂性：实体数量众多</li>
+<li>可变性</li>
+<li>一致性</li>
+</ol>
+<p>进一步分析：</p>
+<ol>
+<li>除了不可见性以外，其他三个本质难题因项目而异。</li>
+<li>四大本质难题互相促进。</li>
+<li>本质难题变化带动软件方法（过程）演变。</li>
+</ol>
+<p>本质难题无法彻底解决。</p>
+<h2 id="软件发展">软件发展</h2>
+<p>软件危机：指落后的软件生产方式无法满足迅速增长的计算机软件需求，从而导致软件开发与维护过程中出现一系列严重问题的现象。主要体现有：</p>
+<ol>
+<li>软件开发费用和进度失控</li>
+<li>软件可靠性差</li>
+<li>生产出来的软件难以维护</li>
+<li>用户对“已完成”系统不满意现象经常发现</li>
+</ol>
+<h2 id="软件发展三大阶段">软件发展三大阶段</h2>
+<p>软件发展的两个趋势：</p>
+<ol>
+<li>软件项目规模日益扩大：使得软件越来越难做。</li>
+<li>软件在整个系统中的比重日益增加：将软件质量问题的影响上升到前所未有的高度。</li>
+</ol>
+<p><img src="/55144/image-20230920113342418.png" alt></p>
+<ol>
+<li>软硬件一体化阶段（50 年代到 70 年代）
+<ol>
+<li>软件完全依附于硬件</li>
+<li>软件作坊</li>
+</ol>
+</li>
+<li>软件成为独立的产品（70 年代到 90 年代）</li>
+<li>网络化和服务化（90 年代中期至今）</li>
+</ol>
+<h3 id="软件完全依附于硬件">软件完全依附于硬件</h3>
+<h4 id="典型特征">典型特征</h4>
+<ol>
+<li>软件应用典型特征：软件支持硬件完成计算任务、功能单一、复杂度有限、几乎不需要需求变更。</li>
+<li>软件开发典型特征：硬件太贵、团队以硬件工程师和数学家为主。</li>
+</ol>
+<h4 id="典型软件过程和实践">典型软件过程和实践</h4>
+<p><img src="/55144/image-20230920113348846.png" alt></p>
+<ol>
+<li>Measure twice, cut once：这句话强调了在应用更改之前仔细检查代码以在问题成为主要问题之前识别和纠正问题的重要性</li>
+<li>相同的软件工程实践：code review &amp; inspection</li>
+<li>整个过程非常线性</li>
+</ol>
+<h3 id="软件作坊">软件作坊</h3>
+<h4 id="典型特征-2">典型特征</h4>
+<ol>
+<li>软件应用典型特征：功能简单、规模小；</li>
+<li>软件开发典型特征：很多非专业领域的人员涌入软件开发领域、高级程序语言出现、质疑权威文化盛行。</li>
+</ol>
+<h4 id="典型软件过程和实践-2">典型软件过程和实践</h4>
+<ol>
+<li>Code And Fix</li>
+<li>软件危机和软件工程：Code And Fix 不适合大型软件项目开发</li>
+</ol>
+<h3 id="软件成为独立产品">软件成为独立产品</h3>
+<h4 id="典型特征-3">典型特征</h4>
+<p>软件应用特征：摆脱了硬件束缚（OS）、功能强大、规模和复杂度剧增、个人电脑出现 $\to$ 普通人成为软件用户 $\to$ 需求多变和兼容性要求、来自市场的压力。</p>
+<h4 id="软件典型过程和实践">软件典型过程和实践</h4>
+<h5 id="方法之一：形式化方法">方法之一：形式化方法</h5>
+<p>将所有的方法当作数学方法，做数学化的检验，主要解决质量和正确性问题。</p>
+<h5 id="方法之二：结构化设计和瀑布模型">方法之二：结构化设计和瀑布模型</h5>
+<p><img src="/55144/image-20230920113502852.png" alt></p>
+<p><img src="/55144/image-20230920113507055.png" alt></p>
+<p>上图是瀑布模型，每个阶段都有一个往回的箭头；下图不是生命周期模型。</p>
+<ol>
+<li>自顶向下，逐步求精。</li>
+<li>问题和不足（效率和质量）：
+<ol>
+<li>形式化在扩展性和可用性方面存在不足。</li>
+<li>瀑布模型成为一个重文档、慢节奏的过程。</li>
+</ol>
+</li>
+</ol>
+<h5 id="生命周期模型">生命周期模型</h5>
+<ol>
+<li>
+<p>是什么：一个对软件过程的人为划分</p>
+</li>
+<li>
+<p>主要作用：便于传达，复制成功</p>
+</li>
+<li>
+<p>lean development 说：其实 royee 提出瀑布生命周期模型的本意是该生命周期模型不适合软件开发</p>
+</li>
+<li>
+<p>royee：</p>
+<ol>
+<li>本意是瀑布模型不是一个单一的生命周期模型，是很多的元素的融合，是系列的生命周期模型，包括编码改错、改进等等。</li>
+<li>软件团队在选择生命周期模型时，应当结合上下文选择生命周期模型，往往越复杂，有越多的元素，自己选择最合适的。</li>
+<li>大部分的项目团队轻视了项目的复杂和挑战，选择了一个简单的不适用的瀑布模型。</li>
+</ol>
+</li>
+<li>
+<p>问题和不足（效率和质量）</p>
+<ol>
+<li>形式化存在扩展性和可用性方面存在不足</li>
+<li>瀑布模型成为一个重文档，慢节奏的过程。</li>
+</ol>
+</li>
+</ol>
+<img src="/55144/image-20230920113516369.png" style="zoom:67%;">
+<h5 id="成熟度模型（最开始是-CMM，现在是-CMMI）">成熟度模型（最开始是 CMM，现在是 CMMI）</h5>
+<ol>
+<li>什么是有管理的：状态获取？</li>
+<li>管理的是三个要素：目标、状态和纠偏</li>
+<li>CMMI 的 3 级中的标准化目的不是简单的替换</li>
+<li>CMMI 从 2 级升级到 3 级的原因：固化最佳实践，对小组而言则是能够更快地学习其他的做法</li>
+<li>CMMI 3 级的重点是已定义</li>
+<li>CMMI 4 级我们希望能够看到一个预测模型</li>
+<li>4 级和 5 级更多是根据结果（未来）来进行管理</li>
+<li>2 级和 3 级关注的是当前的状态</li>
+</ol>
+<p><img src="/55144/image-20230920113521543.png" alt></p>
+<ol start="5">
+<li>分级
+<ol>
+<li>第一级：初始级别</li>
+<li>第二级：和项目有关</li>
+<li>第三级：促成共享，来自于团队标准</li>
+<li>第四级：定量管理，提升对未来结果的一种预测，对偏差的预测</li>
+</ol>
+</li>
+<li>一些讨论：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/b7407257eedb">https://www.jianshu.com/p/b7407257eedb</a></li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>解析</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CMMI 是过程改进模型而非软件过程或者软件过程模型</td>
+<td>CMMI 指导软件过程改进，不指导开发</td>
+</tr>
+<tr>
+<td>CMMI 不是过程优劣的标准，也不适合用作公司之间的能力比较</td>
+<td>CMMI 本身是有评级。美国国防部订单招标要求企业至少达到 CMMI 的 3 级。因为公司的能力需要绝对东西，也就是能力强，能力弱，而 CMMI 衡量的是相对的水平，CMMI 仅仅关注在本公司的目标下的等级</td>
+</tr>
+<tr>
+<td>为什么 CMMI VS. Agile 是一个伪命题？</td>
+<td>TODO</td>
+</tr>
+</tbody>
+</table>
+<h3 id="网络化和服务化">网络化和服务化</h3>
+<h4 id="典型特征-4">典型特征</h4>
+<p>软件应用特征：功能更复杂，规模更大、用户数量急剧增加（这会带来什么问题？）、快速演化和需求不确定、分发方式的变化（SaaS）。</p>
+<h4 id="典型软件过程和实践-3">典型软件过程和实践</h4>
+<ol>
+<li>迭代式：<strong>大型软件系统的开发过程也是一个逐步学习和交流的过程，软件系统的交付不是一次完成，而是通过多个迭代周期，逐步来完成交付。</strong></li>
+<li>【2022Fall】【2021Fall】【2020-mid】雪鸟会议和敏捷宣言
+<ol>
+<li>个体和互动胜过流程和工具</li>
+<li>可以工作的软件胜过详尽的文档</li>
+<li>客户合作胜过合同谈判</li>
+<li>响应变化胜过遵循计划</li>
+<li>也就是说，<strong>尽管右项有其价值，我们更重视左项的价值</strong>。</li>
+<li>请务必关注最后一句话，非常重要</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>十二条敏捷原则：</p>
+<ol>
+<li>我们最重要的目标，是通过持续不断地及早交付有价值的软件使客户满意。</li>
+<li>欣然面对需求变化，即使在开发后期也一样。为了客户的竞争优势，敏捷过程掌控变化。</li>
+<li>经常地交付可工作的软件，相隔几星期或一两个月，倾向于采取较短的周期。</li>
+<li>业务人员和开发人员必须相互合作，项目中的每一天都不例外。</li>
+<li>激发个体的斗志，以他们为核心搭建项目。提供所需的环境和支援，辅以信任，从而达成目标。</li>
+<li>不论团队内外，传递信息效果最好效率也最高的方式是面对面的交谈。</li>
+<li>可工作的软件是进度的首要度量标准。</li>
+<li>敏捷过程倡导可持续开发。责任人、开发人员和用户要能够共同维持其步调稳定延续。</li>
+<li>坚持不懈地追求技术卓越和良好设计，敏捷能力由此增强。</li>
+<li>以简洁为本，它是极力减少不必要工作量的艺术。</li>
+<li>最好的架构、需求和设计出自自组织团队。</li>
+<li>团队定期地反思如何能提高成效，并依此调整自身的举止表现。</li>
+</ol>
+</blockquote>
+<p><img src="/55144/image-20230920113530204.png" alt></p>
+<ol start="4">
+<li>XP（eXtreme Programing） 方法：偏重于一些工程实践的描述</li>
+<li>SCRUM：管理框架和管理实践</li>
+<li>Kanban：
+<ol>
+<li>精益生产（丰田制造法）的具体实现</li>
+<li>可视化工作流、限定 WIP、管理周期时间</li>
+<li>马丁提出了微服务架构</li>
+</ol>
+</li>
+<li>开源软件开发方法：是一种基于并行开发模式的软件开发的组织与管理方式
+<ol>
+<li>Linus 定律：如果有足够多的 beta 测试者和合作开发者，几乎所有问题都会很快显现，然后自然有人会把它解决。</li>
+<li>早发布，常发布，倾听用户的反馈 、把你的用户当成开发合作者对待，如果想让代码质量快速提升并有效排错，这是最省心的途径、设计上的完美不是没有东西可以再加，而是没有东西可以再减</li>
+<li>代码管理：严格的代码提交社区审核制度、内部开源（inner source）、众包（Crowdsourcing）</li>
+</ol>
+</li>
+</ol>
+<h2 id="当前软件发展：更深化的网络化和服务化">当前软件发展：更深化的网络化和服务化</h2>
+<h3 id="软件应用典型特征">软件应用典型特征</h3>
+<ol>
+<li>进一步服务化和网络化（移动是主流）、随处可见（pervasive）</li>
+<li>用户需求多样化进一步凸显</li>
+<li>软件产品和服务的地位变化</li>
+<li>错综复杂的部署环境</li>
+<li>近乎苛刻的用户期望
+<ol>
+<li>多：功能丰富，个性化</li>
+<li>快：快速使用，及时更新，快速解决问题</li>
+<li>好：稳定，可靠，安全，可信</li>
+<li>省：用户的获得成本低，最好免费</li>
+</ol>
+</li>
+</ol>
+<h3 id="软件开发的典型特征">软件开发的典型特征</h3>
+<ol>
+<li>空前强大的开发和部署环境——XaaS
+<ol>
+<li>IaaS</li>
+<li>PaaS</li>
+<li>SaaS, FaaS</li>
+</ol>
+</li>
+<li>盛行共享和开源</li>
+<li>潜在支撑获得了长足进步（AI，Bigdata， Cloud，etc.）</li>
+</ol>
+<h3 id="【2021Fall】【2018Fall】典型软件过程和实践：DevOps">【2021Fall】【2018Fall】典型软件过程和实践：DevOps</h3>
+<ol>
+<li>方法论基础是敏捷软件开发、精益思想以及看板 Kanban 方法。</li>
+<li>以领域驱动设计为指导的微服务架构方式</li>
+<li>大量虚拟化技术的使用</li>
+<li>一切皆服务 XaaS（X as a Service）的理念指导</li>
+<li>构建了强大的工具链，支持高水平自动化</li>
+</ol>
+<h2 id="敏捷软件开发">敏捷软件开发</h2>
+<p>敏捷中也有计划驱动</p>
+<h3 id="敏捷目的">敏捷目的</h3>
+<p>为了使软件开发团队具有高效工作和快速响应变化的能力。</p>
+<h3 id="敏捷原则">敏捷原则</h3>
+<ol>
+<li>最重要的是通过尽早和不断交付有价值的软件满足客户需要</li>
+<li>欢迎需求的变化</li>
+<li>经常交付可以工作的软件，从几星期到几个月，时间尺度越短越好</li>
+<li>业务人员和开发者应该在整个项目过程中始终朝夕在一起工作</li>
+<li>最好的信息传达方式是面对面的交谈</li>
+</ol>
+<h3 id="敏捷宣言（重要）">敏捷宣言（重要）</h3>
+<ol>
+<li>敏捷软件开发宣言的 4 个简单的价值观：
+<ol>
+<li>个体和交互 胜过 过程和工具</li>
+<li>可以工作的软件 胜过 面面俱到的文档</li>
+<li>客户合作 胜过 合同谈判</li>
+<li>响应变化 胜过 遵循计划</li>
+</ol>
+</li>
+<li>也就是说，尽管右项有其价值，我们更重视左项的价值</li>
+</ol>
+<h3 id="敏捷软件开发方法">敏捷软件开发方法</h3>
+<h4 id="极限编程-XP">极限编程 XP</h4>
+<p>eXtreme Programming，极限的含义是指把好的开发实践运用到极致。</p>
+<p>极限编程的有效实践：</p>
+<ol>
+<li>客户作为开发团队的成员——客户代表</li>
+<li>使用用户素材</li>
+<li>短交付周期</li>
+<li>验收测试</li>
+<li>结对编程——结对编程就是由两名开发人员在同一台计算机上共同编写解决同一个问题的程序代码，通常一个人编码，另一个人对代码进行审查与测试，以保证代码的正确性与可读性。结对编程是加强开发人员相互沟通与评审的一种方式。</li>
+<li>测试驱动开发——极限编程强调“测试先行”。在编码之前，应该首先设计好测试方案，然后再编程，直至所有测试都获得通过之后才可以结束工作。</li>
+<li>集体所有</li>
+<li>持续集成</li>
+<li>可持续的开发速度 &lt;=40h/week</li>
+<li>开放的工作空间</li>
+<li>重构</li>
+<li>使用隐喻</li>
+</ol>
+<h4 id="Scrum">Scrum</h4>
+<p>TODO：</p>
+<h4 id="Kanban-方法">Kanban 方法</h4>
+<ol>
+<li>精益生产（丰田制造法）的具体实现</li>
+<li>可视化工作流、限定 WIP、管理周期时间</li>
+<li>马丁提出了微服务架构</li>
+</ol>
+<h2 id="课程小论文（2023Fall-没有）">课程小论文（2023Fall 没有）</h2>
+<p>从软件发展的三大历史阶段以及软件过程的演变当中，我们可以总结出哪些规律性的东西？</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/3244/" rel="prev" title="软件质量管理-01-概述">
+      <i class="fa fa-chevron-left"></i> 软件质量管理-01-概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/14026/" rel="next" title="分布式数据库中的数据一致性">
+      分布式数据库中的数据一致性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%8D%E8%AF%BB%E3%80%8A%E6%B2%A1%E6%9C%89%E9%93%B6%E5%BC%B9%E3%80%8B"><span class="nav-number">1.</span> <span class="nav-text">再读《没有银弹》</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%8F%91%E5%B1%95"><span class="nav-number">2.</span> <span class="nav-text">软件发展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%8F%91%E5%B1%95%E4%B8%89%E5%A4%A7%E9%98%B6%E6%AE%B5"><span class="nav-number">3.</span> <span class="nav-text">软件发展三大阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%8C%E5%85%A8%E4%BE%9D%E9%99%84%E4%BA%8E%E7%A1%AC%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">软件完全依附于硬件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81"><span class="nav-number">3.1.1.</span> <span class="nav-text">典型特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.1.2.</span> <span class="nav-text">典型软件过程和实践</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%BD%9C%E5%9D%8A"><span class="nav-number">3.2.</span> <span class="nav-text">软件作坊</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81-2"><span class="nav-number">3.2.1.</span> <span class="nav-text">典型特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B%E5%92%8C%E5%AE%9E%E8%B7%B5-2"><span class="nav-number">3.2.2.</span> <span class="nav-text">典型软件过程和实践</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%88%90%E4%B8%BA%E7%8B%AC%E7%AB%8B%E4%BA%A7%E5%93%81"><span class="nav-number">3.3.</span> <span class="nav-text">软件成为独立产品</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81-3"><span class="nav-number">3.3.1.</span> <span class="nav-text">典型特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%85%B8%E5%9E%8B%E8%BF%87%E7%A8%8B%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.3.2.</span> <span class="nav-text">软件典型过程和实践</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%BD%A2%E5%BC%8F%E5%8C%96%E6%96%B9%E6%B3%95"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">方法之一：形式化方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%B9%8B%E4%BA%8C%EF%BC%9A%E7%BB%93%E6%9E%84%E5%8C%96%E8%AE%BE%E8%AE%A1%E5%92%8C%E7%80%91%E5%B8%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">方法之二：结构化设计和瀑布模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.3.2.3.</span> <span class="nav-text">生命周期模型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E7%86%9F%E5%BA%A6%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%9C%80%E5%BC%80%E5%A7%8B%E6%98%AF-CMM%EF%BC%8C%E7%8E%B0%E5%9C%A8%E6%98%AF-CMMI%EF%BC%89"><span class="nav-number">3.3.2.4.</span> <span class="nav-text">成熟度模型（最开始是 CMM，现在是 CMMI）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%8C%96%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">网络化和服务化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81-4"><span class="nav-number">3.4.1.</span> <span class="nav-text">典型特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B%E5%92%8C%E5%AE%9E%E8%B7%B5-3"><span class="nav-number">3.4.2.</span> <span class="nav-text">典型软件过程和实践</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E8%BD%AF%E4%BB%B6%E5%8F%91%E5%B1%95%EF%BC%9A%E6%9B%B4%E6%B7%B1%E5%8C%96%E7%9A%84%E7%BD%91%E7%BB%9C%E5%8C%96%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">当前软件发展：更深化的网络化和服务化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%BA%94%E7%94%A8%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81"><span class="nav-number">4.1.</span> <span class="nav-text">软件应用典型特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E7%9A%84%E5%85%B8%E5%9E%8B%E7%89%B9%E5%BE%81"><span class="nav-number">4.2.</span> <span class="nav-text">软件开发的典型特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E3%80%902021Fall%E3%80%91%E3%80%902018Fall%E3%80%91%E5%85%B8%E5%9E%8B%E8%BD%AF%E4%BB%B6%E8%BF%87%E7%A8%8B%E5%92%8C%E5%AE%9E%E8%B7%B5%EF%BC%9ADevOps"><span class="nav-number">4.3.</span> <span class="nav-text">【2021Fall】【2018Fall】典型软件过程和实践：DevOps</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91"><span class="nav-number">5.</span> <span class="nav-text">敏捷软件开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E7%9B%AE%E7%9A%84"><span class="nav-number">5.1.</span> <span class="nav-text">敏捷目的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%8E%9F%E5%88%99"><span class="nav-number">5.2.</span> <span class="nav-text">敏捷原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E5%AE%A3%E8%A8%80%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">敏捷宣言（重要）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%8F%E6%8D%B7%E8%BD%AF%E4%BB%B6%E5%BC%80%E5%8F%91%E6%96%B9%E6%B3%95"><span class="nav-number">5.4.</span> <span class="nav-text">敏捷软件开发方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%81%E9%99%90%E7%BC%96%E7%A8%8B-XP"><span class="nav-number">5.4.1.</span> <span class="nav-text">极限编程 XP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Scrum"><span class="nav-number">5.4.2.</span> <span class="nav-text">Scrum</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kanban-%E6%96%B9%E6%B3%95"><span class="nav-number">5.4.3.</span> <span class="nav-text">Kanban 方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BE%E7%A8%8B%E5%B0%8F%E8%AE%BA%E6%96%87%EF%BC%882023Fall-%E6%B2%A1%E6%9C%89%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">课程小论文（2023Fall 没有）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\read{\mathsf{read}} \def\write{\mathsf{write}} \def\Writes{\mathsf{Writes}} \def\SER{\mathsf{SER}} \def\SI{\mathsf{SI}} \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CONCUR&#39;17-Algebraic Laws for Weak Consistency">
+<meta property="og:url" content="https://eaglebear2002.github.io/5054/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\read{\mathsf{read}} \def\write{\mathsf{write}} \def\Writes{\mathsf{Writes}} \def\SER{\mathsf{SER}} \def\SI{\mathsf{SI}} \def\po{\mathsf{\textcolor{red}{po}}} \def\so{\mathsf{\textcolor{purple}">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/5054/image-20240828174228009.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/5054/image-20240829151105515.png">
+<meta property="article:published_time" content="2024-08-28T09:38:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.763Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/5054/image-20240828174228009.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/5054/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CONCUR'17-Algebraic Laws for Weak Consistency | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/5054/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CONCUR'17-Algebraic Laws for Weak Consistency
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-28 17:38:00" itemprop="dateCreated datePublished" datetime="2024-08-28T17:38:00+08:00">2024-08-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\read{\mathsf{read}}
+\def\write{\mathsf{write}}
+\def\Writes{\mathsf{Writes}}
+\def\SER{\mathsf{SER}}
+\def\SI{\mathsf{SI}}
+\def\po{\mathsf{\textcolor{red}{po}}}
+\def\so{\mathsf{\textcolor{purple}{so}}}
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\VIS{\mathsf{\textcolor{orange}{VIS}}}
+\def\antiVIS{\mathsf{\overline{\VIS^{-1}}}}
+\def\AR{\mathsf{\textcolor{pink}{AR}}}
+\def\WR{\mathsf{\textcolor{teal}{WR}}}
+\def\WW{\mathsf{\textcolor{red}{WW}}}
+\def\RW{\mathsf{\textcolor{blue}{RW}}}
+\def\T{\mathcal{T}}
+\def\X{\mathcal{X}}
+\def\Executions{\mathsf{Executions}}
+\def\modelOf{\mathsf{modelOf}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>现代分布式系统通常依赖于所谓的弱一致性数据库，这种数据库通过削弱分布式事务处理的一致性保证来实现可扩展性。这种数据库的语义已被形式化为两种不同的风格，一种基于抽象执行，另一种基于依赖图。这两种风格的选择是根据预期应用做出的。前者用于指定和验证数据库的实现，而后者用于证明数据库客户端程序的属性。在本文中，我们提出了一组新的代数定律（不等式），将这两种规范风格联系起来。这些定律将基于抽象执行的规范中使用的二元关系与基于依赖图的规范中使用的二元关系联系起来。然后我们表明，这种代数联系产生了所谓的鲁棒性标准：确保弱一致性数据库的客户端程序不会因弱一致性而表现出异常行为的条件。这些标准使得推理这些客户端程序变得容易，并可能成为动态或静态程序分析的基础。对于某一类一致性模型规范，我们证明了连接两种规范风格的完整抽象结果。</p>
+<p>作者：</p>
+<ul>
+<li>Andrea Cerone, IMDEA Software Institute</li>
+<li>Alexey Gotsman, IMDEA Software Institute</li>
+<li>Hongseok Yang, University of Oxford, UK</li>
+</ul>
+<h2 id="Introduction">Introduction</h2>
+<p>现代分布式系统通常依赖于通过削弱分布式事务处理的一致性保证来实现可扩展性的数据库。这些数据库被认为实现了弱一致性模型。这种弱一致性数据库允许更快的事务处理，但会表现出异常行为，而这些行为在具有强一致性保证的数据库中不会出现，例如可序列化性。弱一致性数据库有两个重要问题：</p>
+<ol>
+<li>找到其一致性模型的优雅形式规范，并证明这些规范已由数据库中使用的协议正确实现；</li>
+<li>为在这些数据库上运行的应用程序开发有效的推理技术。</li>
+</ol>
+<p>这些问题已经通过使用两种不同的形式化方法来解决，它们以不同的方式对弱一致性数据库的运行时行为进行建模。</p>
+<p>当目标是验证实现弱一致性模型的协议的正确性时，分布式数据库的运行时行为通常用<strong>抽象执行</strong> [13] 来描述，抽象执行抽象出了数据库的低级实现细节（第 2 节）。图 1 中的细边描述了一个抽象执行的示例。</p>
+<p><img src="/5054/image-20240828174228009.png" alt></p>
+<p>图 1 中的历史是不符合 SER 的，因为无法选择一个合适的 $\VIS$，使得最终的抽象执行把 $T_1, T_2$ 关联起来且结果的读操作和可见的更新一致。</p>
+<p>使用抽象执行的一致性模型规范已被用于证明实现弱一致性模型的协议的正确性，以及证明这些模型的操作性和依赖于实现的描述[11, 12, 13, 15]。</p>
+<p>另一种形式化方法使用<strong>依赖图</strong>来定义弱隔离级别，它已用于证明在弱一致性数据库上运行的客户端程序的属性。在图 4 中用粗边表示。</p>
+<p>使用依赖图时，一致性模型被指定为事务集，其中存在满足某些属性的 $\WR, \WW, \RW$ 关系，通常表述为非循环的特定关系 [7, 16]；例如，可以通过要求依赖图是非循环的来指定可序列化性。由于事务的依赖关系在编译时可能被过度近似，因此依赖图方面的一致性模型规范已广泛用于手动或自动推理弱一致性数据库的客户端程序的属性 [19, 27]。它们还被用于验证一致性模型实现的复杂性和不可判定性结果 [9]。</p>
+<p>我们的最终目标是揭示这两种指定弱一致性模型的风格之间的深层联系，这在文献中已暗示了特定的一致性模型。例如，这种联系将为我们提供一种系统的方法，从基于抽象执行的规范中推导出基于依赖图的弱一致性模型的规范，同时确保原始规范和派生规范在某种意义上是等价的。这样，即使数据库的一致性模型是根据抽象执行来指定的，我们也可以使用基于依赖图的技术 [9, 16, 18] 来证明弱一致性数据库的客户端程序的属性。</p>
+<p>在本文中，我们介绍了朝着这一最终目标迈出的第一步。首先，我们观察到每个抽象执行都确定了一个底层依赖图。然后，我们在代数层面研究这两个结构之间的联系。我们提出了一组代数定律，这些定律在原始抽象执行所属的一致性模型的规范中是参数化的（第 4 节）。这些定律可用于推导形式为 $R_G \subseteq R_A$ 的属性：这里 $R_G$ 是来自带测试的 Kleene 代数 [22] 的表达式，其基本项是事务的运行时依赖关系，测试是事务的属性。关系 $R_A$ 是抽象执行的基本关系之一：$\VIS, \AR$ 或我们称之为反可见性的新关系 $\antiVIS = \set{(T, S) \mid \lnot(S \xrightarrow{\VIS} T)}$。我们提出的一些代数定律表明，每种依赖关系与抽象执行关系之间存在直接联系：$\WR \subseteq \VIS, \WW \subseteq \AR, \RW \subseteq \antiVIS$。其他定律捕捉了抽象执行关系 $\VIS, \AR, \antiVIS$ 之间的联系。这种联系的确切性质取决于所考虑的抽象执行的一致性模型的规范。</p>
+<p>我们特别感兴趣的是推导 $R_G \subseteq \AR$ 形式的属性。这种形式的属性产生了所谓的客户端程序鲁棒性标准，这些条件确保程序即使在弱一致性模型下运行时也只表现出可序列化的行为 [7, 10, 19]。由于 $\AR$ 是全序，这意味着 $R_G$ 必须是无环的，因此所有环都必须是 $R_G$ 的补集。然后我们可以在编译时检查是否存在此类关键环：由于可序列化数据库的依赖图始终是无环的，因此这确保了所述应用程序仅表现出可序列化的行为。</p>
+<p>另一项贡献是，我们表明，对于相关的一类一致性模型，我们的代数定律可用于推导此类模型中的依赖图不仅必要而且充分的属性（第 5 节）。</p>
+<h2 id="Abstract-Executions">Abstract Executions</h2>
+<blockquote>
+<p>定义 1</p>
+<p>历史 $\T = \set{T_1, T_2, \dots, T_n}$ 是事务的集合。</p>
+</blockquote>
+<p>一致性模型 $\Gamma$ 是客户端程序与数据库交互时可能出现的一组历史记录。为了正式定义 $\Gamma$，我们用两个关系（称为可见性 $\VIS$ 和仲裁 $\AR$）来扩充历史记录。</p>
+<blockquote>
+<p>定义 2</p>
+<p>抽象执行 $\X = (\T, \VIS, \AR)$。其中 $\VIS \subseteq \AR$，并且 $\AR$ 是全序。</p>
+</blockquote>
+<blockquote>
+<p>定义 3</p>
+<p>抽象执行 $\X = (\T, \VIS, \AR)$ 应该有 Last Write Win（LWW）性质，即若事务 $T \ni (\read \ x : n)$，则集合 $\T' = \set{\VIS^{-1}(T) \cap \Writes_x}$ 非空，且 $\max_\AR (\T') \ni (\write \ x : n)$。</p>
+</blockquote>
+<blockquote>
+<p>定义 4</p>
+<p>如果抽象执行 $\X = (\T, \VIS, \AR)$ 中 $\VIS$ 有传递性，则称该执行尊重因果（respect causality）。若抽象执行有 LWW 和尊重因果两种性质，则该执行是合法的（valid）。</p>
+</blockquote>
+<p>除非另有说明，否则我们始终假设抽象执行是有效的。几个有趣的一致性模型允许的所有抽象执行都尊重因果关系。它们还简化了我们结果的数学发展。在 [17，附录 B] 中，我们解释了如何将我们的结果推广到不尊重因果关系的一致性模型。我们还讨论了如何将模型推广到考虑会话和会话保证 [29]。</p>
+<p>我们可以分两步使用抽象执行来指定一致性模型。首先，我们确定抽象执行或公理的属性，这些属性正式表达了非正式的一致性保证，并形成一个满足属性的抽象执行集合。</p>
+<p>接下来，我们将这个集合中的抽象执行投影到底层历史记录，并将一致性模型 $\Gamma$ 定义为结果历史记录的集合。抽象执行隐藏了客户端程序和弱一致性数据库之间交互的低级操作细节。这一优势已被用于证明此类数据库实现了预期的一致性模型[11、12、13、15、20]。</p>
+<h3 id="Specification-of-Weak-Consistency-Models">Specification of Weak Consistency Models</h3>
+<p>在本节中，我们将介绍一个使用上面讨论的规范风格来指定一致性模型的简单框架。在我们的框架中，一致性模型的公理通过下面这种形式为的不等式将可见性和仲裁关系关联起来：</p>
+<p>$$
+R_1 ; AR_\X ; R_2 \subseteq VIS_\X
+$$</p>
+<p>其中 $R_1$ 和 $R_2$ 是事务之间的特殊关系，$\X$ 是抽象执行。正如我们稍后将解释的那样，这种形式的公理为抽象执行 X 中的两个事务通过 VISX 关联建立了必要条件，即它们不能同时执行。</p>
+<p>尽管它很简单，但该框架具有足够的表达能力来捕获分布式数据库的几种一致性模型 [15, 23]；正如我们将在第 4 节中展示的那样，这种简单性的好处之一是我们可以系统地推断一致性模型的鲁棒性标准。</p>
+<p>正如我们将看到的，上述形式的公理中的关系 $R_1, R_2$ 可能取决于抽象执行 $\X$ 的可见性关系。为了定义这种关系，我们引入了规范函数的概念。</p>
+<blockquote>
+<p>定义 5</p>
+<p>函数 $\rho : 2^{\mathbb{T} \times \mathbb{T}} \to 2^{\mathbb{T} \times \mathbb{T}}$ 是一个规范函数（specification function），若对于每个历史 $\T$ 和关系 $R \subseteq \T \times \T$，都有 $\rho(R) = \rho(\T \times \T) \cap R?$。其中 $R?$ 是 $R$ 的传递闭包。一致性保证（consistency guarantee），或者简称保证（guarantee），是一对规范函数 $(\rho、\pi)$。</p>
+</blockquote>
+<p>我们总是把规范函数应用到非传递性的关系上，尽管应用的结果是传递性的。</p>
+<p>每个一致性保证 $(\rho, \pi)$ 定义了如下形式的公理：</p>
+<p>$$
+\rho(\VIS_\X) ; \AR_\X ; \pi(\VIS_\X) \subseteq \VIS_\X
+$$</p>
+<p>若 $\X$ 满足该公理，我们称其满足一致性保证 $(\rho, \pi)$。一致性保证限制了 $\X$ 中的两个事务 $T, S$ 不能并发执行，即它们必须通过 $\VIS_\X$ 边连接。根据定义，在抽象执行中 $\VIS$ 边不能与 $\AR$ 边相矛盾，因此，上述事务 $T, S$ 的执行顺序自然由 $\AR$ 决定：事实上，规范函数的定义确保了 $\rho(\VIS_\X) \subseteq \VIS_\X?$ 和 $\pi(\VIS_\X) \subseteq \VIS_\X?$ ，以便 $\rho(\VIS_\X) ; \AR_\X ; \pi(\VIS_\X) \subseteq \AR_\X$ 对所有 $\X$ 成立。</p>
+<blockquote>
+<p>定义 6</p>
+<p>一致性模型规范 $\Sigma$ 或 x-specification 是一致性保证的集合 $\set{(\rho_i, \pi_i)}_{i \in I}$，其中 $I$ 是某个 index set（这是什么？）。</p>
+</blockquote>
+<p>我们定义 $\Executions(\Sigma)$ 为在 $\Sigma$ 下所有合法的抽象执行的集合。令 $\modelOf(\Sigma) := \set{\T_\X \mid \X \in \Executions(\Sigma)}$。</p>
+<h3 id="Examples-of-Consistency-Model-Specifications">Examples of Consistency Model Specifications</h3>
+<p><img src="/5054/image-20240829151105515.png" alt></p>
+<p>图 2 显示了规范函数和一致性保证的几个示例。在图中，我们使用关系 $[\T] := \set{(T, T) \mid T \in \T}, [o] := \set{(T, T) \mid T \ni o}$。图中的保证可以组合在一起，以指定 [15] 中考虑的几个一致性模型：我们在下面给出了一些示例。这些一致性模型中的每一个都允许不同类型的异常：由于篇幅不足，这些在 [17，附录 A] 中进行了说明。</p>
+<h4 id="Causal-Consistency">Causal Consistency</h4>
+<h4 id="Red-Blue-Consistency">Red-Blue Consistency</h4>
+<h4 id="Parallel-Snapshot-Isolation-PSI">Parallel Snapshot Isolation (PSI)</h4>
+<h4 id="Snapshot-Isolation-SI">Snapshot Isolation (SI)</h4>
+<h4 id="Serialisability">Serialisability</h4>
+<h2 id="Dependency-Graphs">Dependency Graphs</h2>
+<p>我们提出了另一种基于依赖图的一致性模型规范样式，该样式在 [1] 中引入。这些结构捕获了访问同一对象的事务之间的数据依赖关系。此类依赖关系在编译时可能被过度近似。因此，它们已在针对在弱一致性模型下运行的程序的静态分析 [7、16、18、19] 中得到使用。</p>
+<blockquote>
+<p>定义 7</p>
+<p>依赖图 $\G = (\T, \WR, \WW, \RW)$。</p>
+</blockquote>
+<h3 id="Specification-of-Consistency-Models-using-Dependency-Graphs">Specification of Consistency Models using Dependency Graphs</h3>
+<h3 id="Examples-of-g-specifications-of-consistency-models">Examples of g-specifications of consistency models.</h3>
+<h2 id="Algebraic-Laws-for-Weak-Consistency">Algebraic Laws for Weak Consistency</h2>
+<h3 id="Weak-Correspondence-Problem">Weak Correspondence Problem</h3>
+<h3 id="Strong-Correspondence-Problem">Strong Correspondence Problem</h3>
+<h3 id="General-Methodology">General Methodology</h3>
+<h3 id="Presentation-of-the-Laws">Presentation of the Laws</h3>
+<h3 id="Applications">Applications</h3>
+<h2 id="Characterisation-of-Simple-Consistency-Models">Characterisation of Simple Consistency Models</h2>
+<h3 id="Characterisation-of-Simple-x-specifications">Characterisation of Simple x-specifications</h3>
+<h2 id="Conclusion">Conclusion</h2>
+<p>我们在代数层面探索了两种不同风格弱一致性模型规范之间的联系。我们提出了几条定律，并应用这些定律设计了一致性模型的几个鲁棒性标准。据我们所知，这是第一个用于证明弱一致性模型鲁棒性的通用证明技术。我们已经证明，对于特定类别的一致性模型，我们的代数方法可以精确地用依赖图来描述一致性模型。</p>
+<h3 id="Related-Work">Related Work</h3>
+<p>Burckhardt 在 [12] 中引入了抽象执行，以模拟最终一致的数据存储的行为；它们已被用来捕获复制数据类型（Gotsman 等人 [13]）、地理复制数据库（Cerone 等人 [15]）和非事务性分布式存储系统（Viotti 等人 [30]）的行为。</p>
+<p>依赖图由 Adya [1] 引入；自那时起，它们就被用来推理在弱一致性模型下运行的程序。Bernardi 等人使用依赖图推导出几个一致性模型的稳健性标准 [7]，包括 PSI 和红蓝；与我们的工作相比，其中包含的证明并不依赖于通用技术。Brutschy 等人将依赖图的概念推广到复制数据类型，并提出了最终一致性的稳健性标准 [10]。</p>
+<p>弱一致性也出现在共享内存系统 [4] 的背景下。Alglave 等人在 [4] 中提出了用于指定弱内存模型的 CAT 语言，该语言还将弱内存模型指定为执行数据依赖关系上的一组非自反关系。Castellan [14] 和 Jeffrey 等人 [21] 提出了通过事件结构对弱内存模型进行不同形式化的方法。检查应用程序稳健性的问题也已在弱内存模型中得到解决 [2, 3, 8]。</p>
+<p>Bouajjani 等人在 [9] 中也强调了强对应问题（第 5 节）：作者强调需要通用技术来识别依赖图等结构中可能出现的所有不良模式。我们在 [16] 中解决了 SI 的强对应问题。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/16557/" rel="prev" title="PODC'16-Analysing Snapshot Isolation">
+      <i class="fa fa-chevron-left"></i> PODC'16-Analysing Snapshot Isolation
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/47505/" rel="next" title="CONCUR'16-Robustness against Consistency Models with Atomic Visibility">
+      CONCUR'16-Robustness against Consistency Models with Atomic Visibility <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Abstract-Executions"><span class="nav-number">2.</span> <span class="nav-text">Abstract Executions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Specification-of-Weak-Consistency-Models"><span class="nav-number">2.1.</span> <span class="nav-text">Specification of Weak Consistency Models</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Examples-of-Consistency-Model-Specifications"><span class="nav-number">2.2.</span> <span class="nav-text">Examples of Consistency Model Specifications</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Causal-Consistency"><span class="nav-number">2.2.1.</span> <span class="nav-text">Causal Consistency</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Red-Blue-Consistency"><span class="nav-number">2.2.2.</span> <span class="nav-text">Red-Blue Consistency</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parallel-Snapshot-Isolation-PSI"><span class="nav-number">2.2.3.</span> <span class="nav-text">Parallel Snapshot Isolation (PSI)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Snapshot-Isolation-SI"><span class="nav-number">2.2.4.</span> <span class="nav-text">Snapshot Isolation (SI)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Serialisability"><span class="nav-number">2.2.5.</span> <span class="nav-text">Serialisability</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dependency-Graphs"><span class="nav-number">3.</span> <span class="nav-text">Dependency Graphs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Specification-of-Consistency-Models-using-Dependency-Graphs"><span class="nav-number">3.1.</span> <span class="nav-text">Specification of Consistency Models using Dependency Graphs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Examples-of-g-specifications-of-consistency-models"><span class="nav-number">3.2.</span> <span class="nav-text">Examples of g-specifications of consistency models.</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Algebraic-Laws-for-Weak-Consistency"><span class="nav-number">4.</span> <span class="nav-text">Algebraic Laws for Weak Consistency</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Weak-Correspondence-Problem"><span class="nav-number">4.1.</span> <span class="nav-text">Weak Correspondence Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Strong-Correspondence-Problem"><span class="nav-number">4.2.</span> <span class="nav-text">Strong Correspondence Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#General-Methodology"><span class="nav-number">4.3.</span> <span class="nav-text">General Methodology</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Presentation-of-the-Laws"><span class="nav-number">4.4.</span> <span class="nav-text">Presentation of the Laws</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Applications"><span class="nav-number">4.5.</span> <span class="nav-text">Applications</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Characterisation-of-Simple-Consistency-Models"><span class="nav-number">5.</span> <span class="nav-text">Characterisation of Simple Consistency Models</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Characterisation-of-Simple-x-specifications"><span class="nav-number">5.1.</span> <span class="nav-text">Characterisation of Simple x-specifications</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">6.</span> <span class="nav-text">Conclusion</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Related-Work"><span class="nav-number">6.1.</span> <span class="nav-text">Related Work</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

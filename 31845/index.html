@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 概述  持续集成（Continuous Integration, CI） 是一种软件开发实践，在实践中项目成员频繁地进行集成，通常每个成员每天都会做集成工作，如此，每天整个项目将会有多次集成。 许多团队都发现这种方法大大地减少了集成问题，并且能够快速地开发出高内聚性的软件。  单次瀑布模型与敏捷软件开发：  单次瀑布模型：软件集成是一个漫长并且无法预测的过程。 敏捷软件开发：每个开发人员离共">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程管理-持续集成">
+<meta property="og:url" content="https://eaglebear2002.github.io/31845/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 概述  持续集成（Continuous Integration, CI） 是一种软件开发实践，在实践中项目成员频繁地进行集成，通常每个成员每天都会做集成工作，如此，每天整个项目将会有多次集成。 许多团队都发现这种方法大大地减少了集成问题，并且能够快速地开发出高内聚性的软件。  单次瀑布模型与敏捷软件开发：  单次瀑布模型：软件集成是一个漫长并且无法预测的过程。 敏捷软件开发：每个开发人员离共">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-06T07:02:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.730Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/31845/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程管理-持续集成 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/31845/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程管理-持续集成
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-01-06 15:02:00" itemprop="dateCreated datePublished" datetime="2025-01-06T15:02:00+08:00">2025-01-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E7%A0%94%E7%A9%B6%E7%94%9F%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院研究生课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E7%A0%94%E7%A9%B6%E7%94%9F%E8%AF%BE%E7%A8%8B/2024Fall-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">2024Fall-软件工程管理</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>摘要</p>
+<h2 id="概述">概述</h2>
+<ul>
+<li>持续集成（Continuous Integration, CI） 是一种软件开发实践，在实践中项目成员频繁地进行集成，通常每个成员每天都会做集成工作，如此，每天整个项目将会有多次集成。</li>
+<li>许多团队都发现这种方法大大地减少了集成问题，并且能够快速地开发出高内聚性的软件。</li>
+</ul>
+<p>单次瀑布模型与敏捷软件开发：</p>
+<ul>
+<li>单次瀑布模型：软件集成是一个漫长并且无法预测的过程。</li>
+<li>敏捷软件开发：每个开发人员离共享的工程状态只有咫尺之遥，并且可以在几分钟之内将自己的代码集成进去。任何集成错误都能被快速地发现并得到快速的修正。</li>
+<li>“持续集成” 源自于极限编程（XP），并且是 XP 最初的 12 种实践之一。</li>
+<li>“持续集成”服务：Jenkins（<a target="_blank" rel="noopener" href="https://jenkins.io/%EF%BC%89">https://jenkins.io/）</a></li>
+</ul>
+<h2 id="简单持续集成实践描述">简单持续集成实践描述</h2>
+<p>假设我们需要向软件添加一点功能，至于是什么样的功能并不重要，我们假定它很小并且可以在几个小时内完成。</p>
+<ol>
+<li>首先我们需要在本地机器上保留一份当前已经处于集成状态的代码的拷贝。通过代码管理系统（GIT、SVN 等）在代码库的主线（mainline）上拉下（check out）一份工作代码拷贝。</li>
+<li>为了完成软件的功能添加，对本地代码进行修改，其中既包括修改产品代码，也包括添加自动化测试。持续集成非常看重测试，并且在软件代码本身中达到了测试自动化——自测试代码，通常使用流行的 XUnit 测试框架的某个版本。</li>
+<li>当完成了功能开发（或者在开发过程的不同阶段），在本地开发机上完成自动化构建。构建过程将编译并链接本地代码，然后跑自动化测试。只有当构建和测试都没有错误时，该次构建才能算是成功的构建。</li>
+<li>有了本地的成功构建，可以考虑将程序员修改的代码提交到代码库了。但是，在提交之前，其他开发人员可能已经向主线提交了他们的修改，所以首先需要将他们的修改更新到本地并且重新构建。如果他人的修改与我的修改有冲突，那么在本地编译或者测试阶段将会发生错误，这种情况下，我需要负责修改本地代码直到与主线代码保持适当同步为止。</li>
+<li>当本地代码与主线代码同步之后，便可以向主线提交自己的修改了（有些公司规定必须通过代码静态检查和 code review），代码库也得以更新。</li>
+<li>然而，单是提交了修改并不表示工作就完成了。程序员需要再次构建，但这次是在一台拥有主线代码的集成机器上进行。只有这次构建成功了才表示任务完成。通常会出现这样的情况：程序员忘了提交本地机器上的一些东西，因此代码库并没有得到适当的更新。只有程序员提交的修改在集成机器上成功构建之后，工作才算完成。这样的集成构建可以由程序员手动完成，也可以由 Jenkins 等工具自动完成。</li>
+<li>当两个开发者的代码有冲突时，通常会在第二个开发者更新本地代码时捕获到，否则，集成构建应该会失败。在这两种途径中，错误都可以被快速地发现。在持续集成环境中，你决不应该使失败的集成构建保留太长时间。一个好的团队每天都应该有许多成功的构建。当然，失败的构建也会时常发生，但需要尽快的修复。</li>
+<li>这样做的结果是，我们总会得到一个稳定并且工作正常的软件。每个人都围绕着一个共享并稳定的基础代码库工作，绝不离基础代码库太远以至于需要很长的时间将自己的修改集成到基础代码库中。如此这般，我们花在找 bug 上的时间减少了，因为 bug 在频繁的集成中经常出现。</li>
+</ol>
+<h2 id="持续集成关键实践">持续集成关键实践</h2>
+<ul>
+<li>维护一个单一的代码库</li>
+<li>使构建自动化</li>
+<li>使构建自测试</li>
+<li>每人每天都向代码库提交代码</li>
+<li>每次提交都应在集成服务器上进行构建</li>
+<li>快速构建</li>
+<li>在与生产环境相同的环境中运行测试</li>
+<li>使任何人都能轻易获得可执行文件</li>
+<li>人人都能看到正在发生什么</li>
+<li>自动化部署</li>
+</ul>
+<h2 id="维护一个单一的代码库">维护一个单一的代码库</h2>
+<ul>
+<li>作为最基本的持续集成实践，请保证你使用一款代码管理系统。</li>
+<li>GIT、SVN……</li>
+<li>当你有了代码管理系统之后，确保每个开发者都能方便地获得到源代码。不应该有人还在问：“foo-whiffle 文件在哪儿？”所有东西都必须在代码库里。</li>
+<li>原则是：在一台新机器上 check out 代码后构建也能构建成功。新机器上的东西应该尽量的少，通常包括很大的，难于安装的，并且稳定的软件，比如操作系统，Java 开发环境或者数据库管理系统等。</li>
+<li>将大家经常操作的东西放进去比如 IDE 配置。构建所需的所有都应该包含在代码库里，包括测试脚本，属性文件，数据库模式文件，安装脚本和第三方库等。</li>
+<li>版本控制系统的一大功能是它允许你创建多个分支，以此来处理不同的“开发流”。这种功能很有用，但却经常被过度使用以至给开发者带来了不少麻烦。所以，你需要将分支的使用最小化，特别建议使用主线，即项目中只有单一的开发分支，并且每人在多数时间里都在“离线”工作。</li>
+<li>不应该将构建的输出放进去。</li>
+</ul>
+<h2 id="使构建自动化">使构建自动化</h2>
+<ul>
+<li>将源代码变成一个能运行的软件系统通常是一个复杂的过程，包括编译，文件搬移，加载数据库模式等等。但其中大多数任务都是可以自动化的，并且也应该被自动化。让人去输入奇怪的命令或点击对话框是非常耗时的，而且从根本上来说也是个错误的做法。</li>
+<li>构建所需的自动化环境对于软件系统来说是一个通用功能。Unix 的 Make 已经诞生好多年了，Java 社区有 Ant，.NET 社区有 Nant，现在又有了 MSBuild。当你用这些工具构建和启动系统时，请确保只使用一个命令完成任务。</li>
+<li>一个常见的错误是，在自动化构建里并没有完全包括构建所需的东西，比如构建过程中应该从代码库里取得数据库模式文件并自动执行之。</li>
+<li>任何人都应该能够在一台新机器上拉下代码库中的代码，并只用一个命令将系统运行起来。</li>
+<li>优秀的构建工具能够分析出哪些地方需要做相应的修改，并将这个分析过程本身做为整个构建过程的一部分。</li>
+<li>根据自己的需要（考虑到集成代价），你可以选择不同的东西进行构建。构建中既可以包括测试，也可以不包括，甚至可以包括不同的测试板块。有些组件可以进行单独构建。构建脚本应该能够允许你针对不同的情形进行不同的构建目标。</li>
+<li>我们大多数都使用 IDE 而多数 IDE 都或多或少地集成了构建管理功能。但是这样构建文件通常是特定于 IDE 的，而且非常脆弱。</li>
+<li>虽然对于开发者个人来说，在 IDE 中做这样的构建配置并无不妥，但对于持续集成服务器来说，一份能够被其它脚本调用的主构建脚本却是至关重要的。</li>
+</ul>
+<h2 id="使构建自测试">使构建自测试</h2>
+<ul>
+<li>传统意义上的构建包括只编译，链接等过程。此时程序也许能运行起来，但这并不意味着系统就能正确地运行。</li>
+<li>一种快速并高效发现 bug 的方法是将自动化测试包含到构建过程中。当然，测试也不见得完美，但的确能发现很多 bug——足够多了。随着极限编程（XP）的流行，测试驱动开发（TDD）也使自测试代码流行起来，越来越多的人开始注意到这种技术的价值所在。</li>
+<li>对于自测试代码而言，你需要一组自动化测试来检测大部分代码库中的 bug。测试能通过一个简单得命令来运行并且具备自检功能。测试的结果应该能指出哪些测试是失败的。对于自测试的构建来说，测试失败应导致构建失败。</li>
+</ul>
+<h2 id="每人每天都向代码库提交代码">每人每天都向代码库提交代码</h2>
+<ul>
+<li>集成首先在于交流，它使其他成员能够看到你所做的修改。在这种频繁的交流下，大家都能很快地知道开发过程中所做的修改。</li>
+<li>在向主线提交代码之前，开发人员必须保证本地构建成功。这当然也包括使测试全部通过。另外，在提交之前需要更新本地代码以匹配主线代码，然后在本地解决主线代码与本地代码之间的冲突，再在本地进行构建。如果构建成功，便可以向主线提交代码了。</li>
+<li>在这种频繁提交下，开发者可以快速地发现自己代码与他人代码之间的冲突。快速解决问题的关键在于快速地发现问题。几个小时的提交间隔使得代码冲突也可以在几个小时内发现，此时大家的修改都不多，冲突也不大，因此解决冲突也很简单。对于好几周都发现不了的冲突，通常是很难解决的。</li>
+<li>基本原则是：每个开发者每天都应当向代码库进行提交。</li>
+</ul>
+<h2 id="每次提交都应在集成服务器上进行构建">每次提交都应在集成服务器上进行构建</h2>
+<ul>
+<li>在实践中，有出错的时候，原因之一在于纪律——有人并没有在提交之前进行本地更新和构建。另外，不同开发机器之间的环境不同也是一个原因。</li>
+<li>应该保证在集成服务器上进行构建，只有当集服务器机上构建成功后，才表明你的任务完成了。由于提交者需要对自己的提交负责，他就得盯着主线上的构建，如果失败，马上修改。</li>
+<li>主线构建：一是手动构建，二是使用持续集成服务器（Jenkins）。</li>
+</ul>
+<h2 id="快速构建">快速构建</h2>
+<ul>
+<li>持续集成的关键在于快速反馈，需要长时间构建的 CI 是极其糟糕的。</li>
+<li>对于多数项目来说，将构建时间维持在 10 分钟之内是合理的，这也是 XP 的方针之一。</li>
+<li>引入阶段性构建---对于企业级应用来说，我们发现构建时间的瓶颈通常发生在测试上，特别是那些需要于外部交互的测试——比如数据库。</li>
+<li>一个简单的例子是将构建分为两个阶段，第一个阶段完成编译，并且跑那些不需要外部交互的单元测试，数据库交互也通过 stub 的方式完全消除掉。</li>
+<li>在这种情况下，通常将第一阶段视为提交构建，并将此做为主要的 CI 周期。第二阶段则可在有必要时才进行，如果这个阶段构建失败，它也不需要像第一阶段那样“停下全部手头的工作”，但也应该得到尽快的修改。</li>
+</ul>
+<h2 id="在与生产环境相同的环境中运行测试">在与生产环境相同的环境中运行测试</h2>
+<ul>
+<li>测试旨在发现可能在生产环境中出现的问题，因此如果你的测试环境与生产环境不同，那么测试很有可能发现不了生产环境中的 bug。</li>
+<li>虚拟化技术 ：虚拟机、Docker（<a target="_blank" rel="noopener" href="https://www.docker.com/%EF%BC%89">https://www.docker.com/）</a></li>
+</ul>
+<h2 id="使任何人都能轻易获得可执行文件">使任何人都能轻易获得可执行文件</h2>
+<ul>
+<li>软件开发最困难的事情之一便是你不能保证所开发的是正确的软件。人们往往很难预知自己究竟想要什么，而相反，对已有的东西进行评判和修改却容易的多。</li>
+<li>项目中的所有成员都应能够获得最新的可执行文件并能成功的运行，目的可以包括做演示，浏览测试或者仅仅看看项目本周有何修改。</li>
+<li>确保一个通用的地方来存放最新</li>
+</ul>
+<h2 id="人人都能看到正在发生什么">人人都能看到正在发生什么</h2>
+<ul>
+<li>持续集成主要在于交流，因此应当保证每人都能轻易看到当前系统的状态和已做的修改。</li>
+<li>CI 服务器：Jenkins</li>
+</ul>
+<h2 id="自动化部署">自动化部署</h2>
+<ul>
+<li>自动化部署脚本，不仅包括测试环境的脚本，也包括针对生产环境的部署脚本。虽然我们不是每天都向生产环境部署，但自动化部署不仅可以加速部署过程，并且能够减少部署错误。</li>
+<li>如果你已经有了生产环境的自动化部署，那么也应该考虑一下相应的自动化回滚。由于失败是时而会发生的事情，在这种情况下，我们希望能快速回滚到失败之前的状态。</li>
+<li>在集群环境中，有每次只向一个节点部署的情况，由此在几个小时之内逐渐完成所有节点的部署。</li>
+<li>对于一些面向公众的 Web 应用，我所了解的另外一种很有趣的部署方式是，先试验性针对一部分用户进行部署，再通过这些用户的试用情况来决定是否向所有用户部署。（灰度发布、A/B 测试）</li>
+</ul>
+<h2 id="持续集成的好处">持续集成的好处</h2>
+<p>降低风险！</p>
+<ul>
+<li>已经处于项目的末期，但是仍然不知道何时才能结束。</li>
+<li>延期集成的缺点在于，很难预测集成到底要花多少时间，更糟的是，你很难了解集成的进展情况。</li>
+<li>持续集成正好解决了这些问题。每次集成的时间都不长，任何时候你都知道自己所处的情况，软件的哪些地方在工作，哪些没有。</li>
+<li>Bug：持续集成并不能消除 bug，却能帮你快速的发现 bug 并予以清除。Bug 也存在积累性，bug 越多，越难清除。部分原因在于 bug 之间存在牵连。另外也存在心理因素，bug 一多，人便没那么多精力去修了——这就是所谓的“Broken Windows 综合征”。</li>
+<li>持续部署：有了持续集成，频繁部署也不是什么难事了。频繁部署的价值在于，你的客户可以快速的享用软件的新功能，并能快速的提出反馈。这将有利于清除客户和开发之间的障碍——我认为这是软件开发最大的障碍。</li>
+</ul>
+<h2 id="引入持续集成">引入持续集成</h2>
+<ol>
+<li>第一步需要将构建自动化，并将你所需的所有东西都放在代码管理系统中，可以通过一个命令来构建整个系统。</li>
+<li>在构建中引入一些自动化测试，试着确定出现问题的主要范围，并用自动化测试去发现这些问题。</li>
+<li>使提交构建快速完成。</li>
+<li>对于新项目，从项目开始就采用持续集成。</li>
+<li>寻找帮助，找有经验的人帮助你。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/22082/" rel="prev" title="软件安全课程实验-第五题-实验报告">
+      <i class="fa fa-chevron-left"></i> 软件安全课程实验-第五题-实验报告
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/26691/" rel="next" title="软件工程管理-工作空间">
+      软件工程管理-工作空间 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E5%AE%9E%E8%B7%B5%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">简单持续集成实践描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E5%85%B3%E9%94%AE%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.</span> <span class="nav-text">持续集成关键实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%B4%E6%8A%A4%E4%B8%80%E4%B8%AA%E5%8D%95%E4%B8%80%E7%9A%84%E4%BB%A3%E7%A0%81%E5%BA%93"><span class="nav-number">4.</span> <span class="nav-text">维护一个单一的代码库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E6%9E%84%E5%BB%BA%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">使构建自动化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E6%9E%84%E5%BB%BA%E8%87%AA%E6%B5%8B%E8%AF%95"><span class="nav-number">6.</span> <span class="nav-text">使构建自测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%8F%E4%BA%BA%E6%AF%8F%E5%A4%A9%E9%83%BD%E5%90%91%E4%BB%A3%E7%A0%81%E5%BA%93%E6%8F%90%E4%BA%A4%E4%BB%A3%E7%A0%81"><span class="nav-number">7.</span> <span class="nav-text">每人每天都向代码库提交代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E6%8F%90%E4%BA%A4%E9%83%BD%E5%BA%94%E5%9C%A8%E9%9B%86%E6%88%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E8%BF%9B%E8%A1%8C%E6%9E%84%E5%BB%BA"><span class="nav-number">8.</span> <span class="nav-text">每次提交都应在集成服务器上进行构建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E6%9E%84%E5%BB%BA"><span class="nav-number">9.</span> <span class="nav-text">快速构建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E4%B8%8E%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%90%8C%E7%9A%84%E7%8E%AF%E5%A2%83%E4%B8%AD%E8%BF%90%E8%A1%8C%E6%B5%8B%E8%AF%95"><span class="nav-number">10.</span> <span class="nav-text">在与生产环境相同的环境中运行测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E4%BB%BB%E4%BD%95%E4%BA%BA%E9%83%BD%E8%83%BD%E8%BD%BB%E6%98%93%E8%8E%B7%E5%BE%97%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6"><span class="nav-number">11.</span> <span class="nav-text">使任何人都能轻易获得可执行文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%BA%E4%BA%BA%E9%83%BD%E8%83%BD%E7%9C%8B%E5%88%B0%E6%AD%A3%E5%9C%A8%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88"><span class="nav-number">12.</span> <span class="nav-text">人人都能看到正在发生什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E9%83%A8%E7%BD%B2"><span class="nav-number">13.</span> <span class="nav-text">自动化部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">14.</span> <span class="nav-text">持续集成的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90"><span class="nav-number">15.</span> <span class="nav-text">引入持续集成</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

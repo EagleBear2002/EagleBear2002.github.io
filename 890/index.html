@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 建模、设计、分析  建模是通过模仿来加深对系统的理解的过程。模型指定系统的功能。 设计是构件的结构化创建，它指定系统如何执行操作。 分析是通过解剖来加深对系统的了解的过程。它指定了系统为什么要执行其工作（或未能执行模型说明的应做的工作）。  什么是建模？  通过模仿获得对系统，流程或工件的见解。 模型是模">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式系统概论-08-嵌入式系统建模">
+<meta property="og:url" content="https://eaglebear2002.github.io/890/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 建模、设计、分析  建模是通过模仿来加深对系统的理解的过程。模型指定系统的功能。 设计是构件的结构化创建，它指定系统如何执行操作。 分析是通过解剖来加深对系统的了解的过程。它指定了系统为什么要执行其工作（或未能执行模型说明的应做的工作）。  什么是建模？  通过模仿获得对系统，流程或工件的见解。 模型是模">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140111159.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140131623.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140432293.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140438391.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140447465.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140454047.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140459867.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140505288.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140510941.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140601081.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140612588.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/14.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140625108.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/16.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140638731.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221101182001421.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140649867.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140655308.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/24.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/25.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/28.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/29.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140734442.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/32.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140748579.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/34.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140802453.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/36.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/37.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140818213.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/39.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/40.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/41.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/42.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/43.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/44.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140843141.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/46.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/47.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/48.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/49.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/50.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/890/image-20221028140855884.png">
+<meta property="article:published_time" content="2022-10-27T15:44:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.549Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/890/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/890/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>嵌入式系统概论-08-嵌入式系统建模 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/890/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式系统概论-08-嵌入式系统建模
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-27 23:44:00" itemprop="dateCreated datePublished" datetime="2022-10-27T23:44:00+08:00">2022-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%AE%BA/" itemprop="url" rel="index"><span itemprop="name">2022Fall-嵌入式系统概论</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="建模、设计、分析">建模、设计、分析</h2>
+<ol>
+<li>建模是通过模仿来加深对系统的理解的过程。模型指定系统的功能。</li>
+<li>设计是构件的结构化创建，它指定系统如何执行操作。</li>
+<li>分析是通过解剖来加深对系统的了解的过程。它指定了系统为什么要执行其工作（或未能执行模型说明的应做的工作）。</li>
+</ol>
+<h3 id="什么是建模？">什么是建模？</h3>
+<ol>
+<li>通过模仿获得对系统，流程或工件的见解。</li>
+<li>模型是模仿目标系统，流程或目标的工件。</li>
+<li>建模，在其最抽象的意义上，是一种方法，其中创建一些表示来描述或传达系统的一个方面，通过系统实现不容易、自然或充分地捕获。</li>
+<li>数学模型是一组定义和数学公式形式的模型。</li>
+</ol>
+<h3 id="一个好的模型">一个好的模型</h3>
+<ol>
+<li>简单</li>
+<li>适合理论发展：定理允许概括和捷径、不应太笼统（定理变得太弱）</li>
+<li>高表现力：紧凑的外观实现更高的生产率</li>
+<li>提供批判性推理能能力</li>
+<li>可执行：模拟/验证</li>
+<li>可综合：通常需要设计正交性（例如编译器）</li>
+<li>不受任何具体实施的偏见：极难实现，但值得。</li>
+<li>适合手头的任务：如果模型不合适，则需要太多工作来使用它</li>
+</ol>
+<h3 id="通用系统模型">通用系统模型</h3>
+<ol>
+<li>状态导向模式：有限状态机（FSM）；</li>
+<li>面向活动的模型：把系统描绘成一组与数据或者执行的相关性有关的活动的集合；</li>
+<li>面向结构的模型：框图、着重强调系统的物理构成；</li>
+<li>面向数据的模型：实体-关系图；</li>
+<li>异构模型：综合前四种模型特征；表达复杂系统的不同视图。</li>
+</ol>
+<h3 id="什么是基于模型的设计？">什么是基于模型的设计？</h3>
+<p>创建嵌入式系统所有部分的数学模型：</p>
+<ol>
+<li>物理世界</li>
+<li>控制系统</li>
+<li>软件环境</li>
+<li>硬件平台</li>
+<li>网络</li>
+<li>传感器和执行器</li>
+</ol>
+<p>根据模型构建实施：</p>
+<ol>
+<li>目标：像编译器一样自动执行此构造</li>
+<li>实际上，只有部分是自动构建的</li>
+</ol>
+<h3 id="建模技术">建模技术</h3>
+<p>模型是系统动力学的抽象（事物随时间变化的方式）</p>
+<p>例子：</p>
+<ol>
+<li>建模物理现象：ODE</li>
+<li>反馈控制系统：时域建模</li>
+<li>模态行为建模：FSM，混合自动机</li>
+<li>传感器和执行器建模：校准，噪声</li>
+<li>建模软件：并发实时模型</li>
+<li>网络建模：延迟，错误率，丢包</li>
+</ol>
+<h3 id="计算分类法">计算分类法</h3>
+<ol>
+<li>“常规”与“事件驱动”：
+<ol>
+<li>常规示例：流应用程序，处理器，…</li>
+<li>事件驱动：“反应性”（因环境变化而触发）</li>
+</ol>
+</li>
+<li>即时的：
+<ol>
+<li>硬期限与软期限</li>
+<li>定期与非定期</li>
+</ol>
+</li>
+<li>控制，数据，通讯：每个多少？</li>
+<li>平行度，地理距离：高度并发与顺序； 分布式系统</li>
+<li>确定性与非确定性：可预测程度</li>
+</ol>
+<h3 id="建模，语言和工具">建模，语言和工具</h3>
+<p>计算模型是用于捕获系统行为的概念性概念，例如：</p>
+<ol>
+<li>一组对象</li>
+<li>组成规则</li>
+<li>执行语义</li>
+</ol>
+<p>语言定义语法以捕获计算模型。</p>
+<p>工具是“编译器”，可以将一种语言捕获的模型转换为另一种语言捕获的模型</p>
+<p><img src="/890/1.png" alt></p>
+<h3 id="建模和语言">建模和语言</h3>
+<ol>
+<li>运算模型描述系统行为，概念，例如配方，顺序程序</li>
+<li>语言捕获模型，具体形式，例如英语，C</li>
+<li>多种语言可以捕获一种模型，例如，顺序程序模型 C，C ++，Java</li>
+<li>一种语言可以捕获多种模型，例如，C++ $\to$ 顺序程序模型，面向对象的模型，状态机模型</li>
+<li>某些语言更擅长捕获某些计算模型</li>
+</ol>
+<p><img src="/890/2.png" alt></p>
+<h3 id="什么时候以及为什么要对嵌入式系统建模？">什么时候以及为什么要对嵌入式系统建模？</h3>
+<ol>
+<li>通过使用现代建模软件工具，您可以在离线仿真中设计并执行初始验证。</li>
+<li>然后，您可以使用模型来构成所有后续开发阶段的基础。</li>
+<li>通过在整个开发过程中执行验证和确认测试，将建模与硬件原型相结合将减少出错的风险并缩短开发周期。</li>
+<li>以系统模型为基础，可以更快，更可靠地进行设计评估和预测。</li>
+<li>这种迭代方法可以在性能和可靠性方面改进设计。</li>
+<li>由于设计团队，设计阶段和各种项目之间模型的可重用性以及对物理原型的依赖性降低，资源成本得以降低。</li>
+<li>通过使用自动代码生成技术，可以减少开发错误和开销。</li>
+</ol>
+<h3 id="软件建模">软件建模</h3>
+<blockquote>
+<p>对于工程和设计任务，尤其是与嵌入式系统有关的任务，通常使用某种形式的软件建模作为粗化或构建整个应用程序设计的初始方法。</p>
+</blockquote>
+<ol>
+<li>一些软件模型是行为模型；</li>
+<li>有些仅仅是用于理解和设计的视觉辅助工具，</li>
+<li>其他被更多地用作框架，以确保相似应用程序之间的一致性或促进工程师团队之间的通信。</li>
+<li>嵌入式系统设计人员面临的挑战是知道哪种类型和级别的建模最适合他们独特的情况和眼前的问题。</li>
+</ol>
+<h4 id="建模语言的核心方面">建模语言的核心方面</h4>
+<p><img src="/890/image-20221028140111159.png" alt></p>
+<h4 id="一种标准的嵌入式控制系统模式">一种标准的嵌入式控制系统模式</h4>
+<p><img src="/890/image-20221028140131623.png" alt="image-20221028140131623"></p>
+<h4 id="建模语言的例子">建模语言的例子</h4>
+<p><img src="/890/image-20221028140432293.png" alt></p>
+<p><img src="/890/image-20221028140438391.png" alt></p>
+<h4 id="C-代码：文本，执行，实现语言">C 代码：文本，执行，实现语言</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp">previous_error = setpoint - process_feedback integral = <span class="hljs-number">0</span><br>start:<br>  <span class="hljs-built_in">wait</span>(dt)<br>  error = setpoint - process_feedback integral = integral + (error*dt) derivative = (error - previous_error)/dt<br>  output = (Kp*error) + (Ki*integral) + (Kd*derivative) previous_error = error<br><span class="hljs-keyword">goto</span> start<br></code></pre></td></tr></table></figure>
+<h4 id="各种图片">各种图片</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/890/image-20221028140447465.png" alt></th>
+<th><img src="/890/image-20221028140454047.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/890/image-20221028140459867.png" alt></td>
+<td><img src="/890/image-20221028140505288.png" alt></td>
+</tr>
+<tr>
+<td><img src="/890/image-20221028140510941.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="为什么要对嵌入式系统建模？">为什么要对嵌入式系统建模？</h3>
+<ol>
+<li>集成良好的建模方法可以大大减少系统文档，设计，测试，和实际实施。</li>
+<li>除了上面列出的主要优点外，对于某些嵌入式系统问题，建模方法还直接带来了额外的效率和准确性。</li>
+</ol>
+<h3 id="什么时候应该对嵌入式系统建模？">什么时候应该对嵌入式系统建模？</h3>
+<ol>
+<li>关键任务和安全关键型应用</li>
+<li>高度复杂的应用程序和系统</li>
+<li>大型开发团队</li>
+<li>如果无法选择原型，则别无选择。</li>
+</ol>
+<h3 id="有限状态机">有限状态机</h3>
+<p>根据维基百科，有限状态机是：</p>
+<ul>
+<li>用于设计计算机程序的行为模型。它由与转换相关联的有限数量的状态组成。转换是一组从一个状态开始并在另一（或相同）状态结束的动作。转换是由触发器启动的，并且触发器可以是事件或条件。</li>
+<li>FSM = { {输入符号}，{输出符号}，{状态}，{初始状态}，过渡关系（输入符号，当前状态到下一个状态的映射）、输出功能（输入符号，当前状态到当前输出符号的映射）}</li>
+<li>通常适用于控制器，协议；</li>
+<li>强大的验证算法</li>
+<li>易于综合，但效率低下</li>
+</ul>
+<h3 id="什么是模型？">什么是模型？</h3>
+<p>系统输入/输出序列建模：</p>
+<ol>
+<li>在给定时间出现的“状态”属性集，“输入”和“输出”是系统的可观察特征</li>
+<li>允许或观察到的“过渡”状态成对排序，从输入/输出序列中推断出状态和转换</li>
+<li>如果输出仅取决于状态 Moore，否则为 Mealy FSM</li>
+</ol>
+<p>关键假设：可用于状态以及输入和输出符号字母的总内存是有限的。</p>
+<h3 id="Application">Application</h3>
+<ol>
+<li>自动售货机</li>
+<li>交通信号灯</li>
+<li>电子游戏</li>
+<li>文本解析</li>
+<li>正则表达式匹配</li>
+<li>CPU 控制器</li>
+<li>协议分析</li>
+<li>自然语言处理</li>
+<li>语音识别，执行，实现语言</li>
+</ol>
+<h2 id="FSM-示例模型">FSM 示例模型</h2>
+<ol>
+<li>非正式规格：如果驾驶员打开钥匙并在 5 秒钟内没有系紧安全带，则发出警报 5 秒钟或直到驾驶员系紧安全带或关闭钥匙</li>
+<li>正式例子：
+<ol>
+<li>输入= {KEY_ON，KEY_OFF，BELT_ON，BELT_OFF，5_SECONDS_UP，10_SECONDS_UP}</li>
+<li>输出= {START_TIMER，ALARM_ON，ALARM_OFF}</li>
+<li>状态= {关闭，等待，报警}</li>
+<li>初始状态=关</li>
+<li>NextState：CurrentState，输入-&gt; NextState</li>
+<li>例如 NextState(WAIT，{KEY_OFF})= OFF</li>
+</ol>
+</li>
+<li>输出：CurrentState，输入-&gt;输出，例如 <code>Outs(OFF, {KEY_ON})= START_TIMER</code></li>
+</ol>
+<p><img src="/890/image-20221028140601081.png" alt></p>
+<p>作业：类似安全带的例子，包含状态机和数学模型</p>
+<h3 id="FSM-在游戏中">FSM 在游戏中</h3>
+<ol>
+<li>可以将角色建模为一系列心理状态；</li>
+<li>世界事件可能会迫使状态发生变化；</li>
+<li>即使对于非程序员，这种心理模型也易于掌握。</li>
+</ol>
+<p><img src="/890/12.png" alt></p>
+<h3 id="吃豆人">吃豆人</h3>
+<ol>
+<li>吃豆人（Pac-Man）要求玩家在迷宫中导航，吃药并避免幽灵追赶他穿过迷宫</li>
+<li>有时，吃豆人可以通过吃强力药丸来在追赶者的桌子上转一转，这临时赋予了他吃鬼的能力</li>
+<li>发生这种情况时，鬼魂的行为发生了变化，他们没有追赶吃豆人，而是试图避开他</li>
+<li>吃豆人中的鬼有四种行为：
+<ol>
+<li>随意迷宫</li>
+<li>追赶吃豆人，只要他在视线内</li>
+<li>吃豆人消耗掉能量颗粒后，逃离吃豆人</li>
+<li>回到中央基地进行再生</li>
+</ol>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/890/image-20221028140612588.png" alt></th>
+<th><img src="/890/14.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="标准-FSM-命名法">标准 FSM 命名法</h3>
+<ol>
+<li>按状态集的属性分类的有限自动机行为，以及转换关系（next_states，输出）= $\phi(状态，事件)$，它描述了事件后可能的下一个状态和输出</li>
+<li>有限自动机分类：
+<ol>
+<li>“确定性”表示 $\phi(S, E)$ 为单值</li>
+<li>“完全指定”是指 $\phi(S, E)$ 对于每个可能的输入都有一个值</li>
+<li>“Moore”表示输出完全由当前状态决定-因此独立于当前事件</li>
+<li>“Mealy”表示输出取决于当前状态和当前事件</li>
+<li>“同步”表示状态仅按时钟间隔更改（对事件进行轮询）</li>
+<li>“异步”表示事件可以随时发生，而 FSM 事件更新</li>
+</ol>
+</li>
+</ol>
+<h3 id="等价">等价</h3>
+<ol>
+<li>两个在所有输入字符串上具有相同输出的 FSM 被认为是等效的</li>
+<li>等效不需要同构（相同形状）：即两个等效的机器不必具有相同的图形甚至是相同数量的状态！</li>
+</ol>
+<p><img src="/890/image-20221028140625108.png" alt></p>
+<h3 id="等效允许优化">等效允许优化</h3>
+<ol>
+<li>在软件中，FSM 的简单程序实现的复杂度与 FSM 中的转换数量成正比</li>
+<li>通常有助于最小化状态数，因此有助于最小化 FSM 的转换数</li>
+<li>如果机器是确定性的并且完全指定，则可以在时间 $O(s^2t)$ 中完成此过程，其中 s 是状态数，t 是 FSM 的状态转换数</li>
+<li>如果不确定性或指定不完全，问题将是 NP-hard 题。</li>
+</ol>
+<h3 id="非确定性-FSM">非确定性 FSM</h3>
+<p>当下一状态或输出函数具有多个值时，FSM 称为不确定性：</p>
+<ol>
+<li>下一个状态是一种关系，但是输出满足：紧凑型（逻辑电路）</li>
+<li>输出不满足：形式上的不确定性（人类语义模型通常需要）</li>
+</ol>
+<p>非确定性允许建模：</p>
+<ol>
+<li>未指明的行为：规格不完整</li>
+<li>未知行为：例如环境模型</li>
+<li>紧凑型：可以完全“确定性”，只是较小的模型</li>
+</ol>
+<h3 id="NFA-和-FSM">NFA 和 FSM</h3>
+<ol>
+<li>通常的 FSM 和 NDA 是等效的（Rabin-Scott 构造，Rabin '59）</li>
+<li>在实践中，NFA 通常更为紧凑（用于确定的指数爆炸）</li>
+</ol>
+<p><img src="/890/16.png" alt></p>
+<ul>
+<li>就是将非确定性的转换为确定性的，两者是等价的</li>
+</ul>
+<h2 id="Mealy-Moore-FSM">Mealy-Moore FSM</h2>
+<p>状态模型是单线程的：任何时候都只有一个状态有效</p>
+<p>Moore 状态模型：所有动作均在进入状态时进行</p>
+<ol>
+<li>无反应（响应延迟一个周期）</li>
+<li>易于撰写（始终清晰定义）</li>
+<li>适用于实施（即良好的电路模拟）</li>
+</ol>
+<p>Mealy 状态模型：所有动作都处于过渡状态</p>
+<ol>
+<li>在软件中，导致更紧凑的代码</li>
+<li>硬件时序和可组合性困难</li>
+</ol>
+<h3 id="常规-FSM-作为模型">常规 FSM 作为模型</h3>
+<ol>
+<li>经常过度指定实施：完全指定了排序（即使不在乎）</li>
+<li>由于缺乏组成比喻的可扩展性差：状态数量可能难以控制</li>
+<li>不支持并发：通常希望推理一个本地子属性复合机，但是如何关联子状态的行为？</li>
+<li>简单的解决方案：介绍要建模的层次结构：听起来并不简单</li>
+</ol>
+<h3 id="并发">并发</h3>
+<p>示例：</p>
+<ol>
+<li>设备可以处于{关闭，启动，运行，错误}状态</li>
+<li>从{待机，电池}运行时</li>
+</ol>
+<p>如何安排这些状态？桩体爆炸</p>
+<table>
+<thead>
+<tr>
+<th><img src="/890/image-20221028140638731.png" alt="状态图解决方案" style="zoom: 80%;"></th>
+<th><img src="/890/image-20221101182001421.png" alt="正交组件"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/890/image-20221028140649867.png" alt="方法一：枚举所有" style="zoom:67%;"></td>
+<td><img src="/890/image-20221028140655308.png" alt="分层（和组合）模型"></td>
+</tr>
+</tbody>
+</table>
+<h2 id="Harel-的-StateCharts：FSM-的层次结构">Harel 的 StateCharts：FSM 的层次结构</h2>
+<p>StateCharts 支持：</p>
+<ol>
+<li>将状态重复分解为 AND / OR 子状态</li>
+<li>嵌套状态，并发，正交组件</li>
+<li>动作（可能有参数）</li>
+<li>活动（状态为活动时执行的功能）</li>
+<li>卫兵</li>
+<li>历史</li>
+<li>同步（瞬时广播）通信机制</li>
+</ol>
+<h3 id="分层-FSM-模型">分层 FSM 模型</h3>
+<ol>
+<li>问题：如何缩小表示的大小？</li>
+<li>Harel 关于 StateCharts（语言）和有限并发性（模型）的经典论文：3 个正交指数约简</li>
+<li>层次结构：
+<ol>
+<li>声明“包围” FSM</li>
+<li>处于活动状态意味着活动中的 FSM</li>
+<li>a 的状态称为 OR 状态</li>
+<li>用于建模抢占和异常</li>
+</ol>
+</li>
+<li>并发：
+<ol>
+<li>两个或多个 FSM 同时处于活动状态</li>
+<li>状态称为 AND 状态</li>
+</ol>
+</li>
+<li>非确定性：用于抽象行为</li>
+</ol>
+<p><img src="/890/24.png" alt></p>
+<h3 id="层次状态划分">层次状态划分</h3>
+<ol>
+<li>FSM 将完全处于 S 的子状态之一</li>
+<li>从子状态到子状态的转换</li>
+<li>初始（默认）</li>
+<li>历史</li>
+</ol>
+<p><img src="/890/25.png" alt></p>
+<h3 id="定义">定义</h3>
+<ol>
+<li>FSM 的当前状态也称为<strong>活动状态</strong>。</li>
+<li>不由其他状态组成的状态称为<strong>基本状态</strong>。</li>
+<li>包含其他状态的状态称为<strong>超级状态</strong>。</li>
+<li>对于每个基本状态 s，包含 s 的超状态称为<strong>祖先状态</strong>。</li>
+<li>如果每当 S 处于活动状态时，恰好 S 的子状态之一处于活动状态，则超级状态 S 称为 OR 超级状态。</li>
+</ol>
+<p><img src="/890/26.png" alt></p>
+<h3 id="默认状态机制">默认状态机制</h3>
+<p>默认状态是为 S 定义默认开始状态的伪状态，不是状态本身</p>
+<p><img src="/890/27.png" alt="图中黑点为 S 的默认状态"></p>
+<h3 id="历史机制">历史机制</h3>
+<ol>
+<li>给定输入 m，S 返回到离开 S 之前的状态（可以是 A，B，C，D 或 E）；</li>
+<li>首次输入 S 时，将应用默认机制；</li>
+<li>历史记录和默认机制可以分层使用。</li>
+</ol>
+<p><img src="/890/28.png" alt></p>
+<h3 id="结合历史和默认状态机制">结合历史和默认状态机制</h3>
+<p><img src="/890/29.png" alt></p>
+<h2 id="并发-2">并发</h2>
+<p>AND 超级状态：</p>
+<ol>
+<li>FSM 处于超级状态的所有（立即）子状态</li>
+<li>与 OR-Supers 不同，它正式需要多个控制点</li>
+</ol>
+<p><img src="/890/image-20221028140734442.png" alt></p>
+<h3 id="进入或离开-AND-超级状态">进入或离开 AND-超级状态</h3>
+<p><img src="/890/31.png" alt></p>
+<h3 id="计时器">计时器</h3>
+<ol>
+<li>由于需要在嵌入式系统中对时间进行建模，因此需要对计时器进行建模。</li>
+<li>在 StateCharts 中，特殊边缘可用于超时。</li>
+</ol>
+<p><img src="/890/32.png" alt></p>
+<h3 id="应答机器计时器">应答机器计时器</h3>
+<p><img src="/890/image-20221028140748579.png" alt></p>
+<h3 id="StateCharts-中的常规边标签">StateCharts 中的常规边标签</h3>
+<p>在 StateChart 中标记过渡的表达式的一般语法为 <code>n[c]/a</code>，其中</p>
+<ol>
+<li>n 是触发过渡的事件</li>
+<li>c 是过渡发生的条件</li>
+<li>a 是在以及何时过渡被采用时执行的操作</li>
+</ol>
+<p>对于每个过渡标签，事件，条件和操作是可选的</p>
+<ol>
+<li>事件可以是值的改变</li>
+<li>允许将标准比较作为条件，将赋值语句作为动作</li>
+</ol>
+<p><img src="/890/34.png" alt></p>
+<h3 id="条件转换">条件转换</h3>
+<p><img src="/890/image-20221028140802453.png" alt></p>
+<h3 id="评估状态图">评估状态图</h3>
+<h4 id="优点：">优点：</h4>
+<ol>
+<li>层次结构允许任意嵌套 AND-super 和 OR-super 状态。</li>
+<li>另一个优点是，StateMate 的语义在足够详细的级别上定义</li>
+<li>可用的大量商业仿真工具（StateMate，StateFlow，BetterState 等）</li>
+<li>可用的“后端”将 StateCharts 转换为 C 或 VHDL，从而实现软件或硬件实现。</li>
+</ol>
+<h4 id="缺点">缺点</h4>
+<ol>
+<li>生成的 C 程序效率低下</li>
+<li>生成的硬件可能更糟</li>
+<li>难以应用于分布式应用程序</li>
+<li>没有结构层次的描述</li>
+</ol>
+<h2 id="示例：可乐机">示例：可乐机</h2>
+<h3 id="v1-0">v1.0</h3>
+<p>假设您有一台汽水机：</p>
+<ul>
+<li>开机时，机器等待付款</li>
+<li>存入一个四分之一时，机器会等待另一个四分之一</li>
+<li>存入第二四分之一时，机器等待选择</li>
+<li>当用户按下“COKE”时，会分配可乐</li>
+<li>当用户拿走瓶子时，机器再次等待</li>
+<li>当用户按下“雪碧”或“健怡可乐”时，会分配雪碧或健怡可乐</li>
+<li>当用户拿走瓶子时，机器再次等待</li>
+</ul>
+<p><img src="/890/36.png" alt></p>
+<h3 id="v1-1">v1.1</h3>
+<p>瓶子可能卡在机器中：</p>
+<ol>
+<li>当瓶子卡住时，自动指示器会通知系统</li>
+<li>发生这种情况时，在清除瓶子之前，机器将不接受任何金钱或发出任何瓶子</li>
+<li>清除瓶子后，机器将再次等待付款</li>
+</ol>
+<p>状态机更改：</p>
+<ol>
+<li>需要多少个新状态？</li>
+<li>多少个新过渡？</li>
+</ol>
+<p><img src="/890/37.png" alt></p>
+<h2 id="分层-FSM">分层 FSM</h2>
+<p>层次结构允许：</p>
+<ol>
+<li>明智的默认活动</li>
+<li>多个地方增强行为：考虑卡住的恢复行为——吞噬您的钱…</li>
+<li>大大减少所需的状态数</li>
+<li>易于添加扩展状态语义</li>
+<li>增强状态和保护措施</li>
+</ol>
+<p>我们如何在软件中进行有效的演绎？HFSM 比 FSM 更复杂且成本更高，但是要权衡表达与复杂性和维护性之间的关系</p>
+<h3 id="定时炸弹的例子">定时炸弹的例子</h3>
+<p><img src="/890/image-20221028140818213.png" alt="定时炸弹的 UI"></p>
+<h3 id="UML-状态图表示定时炸弹状态机">UML 状态图表示定时炸弹状态机</h3>
+<p><img src="/890/39.png" alt></p>
+<h3 id="嵌套交换机-FSM">嵌套交换机 FSM</h3>
+<ol>
+<li>“状态”是静态类型的枚举</li>
+<li>“事件”是一种类型化的信号（也是一个枚举）</li>
+<li>“init”设置计时器并初始化变量</li>
+<li>在每个事件上调用“调度”以将控制权传递给 FSM</li>
+</ol>
+<h3 id="炸弹示例：声明">炸弹示例：声明</h3>
+<p><img src="/890/40.png" alt>
+<img src="/890/41.png" alt>
+<img src="/890/42.png" alt>
+<img src="/890/43.png" alt></p>
+<h3 id="结果">结果</h3>
+<ol>
+<li>很简单。</li>
+<li>它需要枚举信号和状态。</li>
+<li>它具有较小的内存占用量，因为只需要一个小的标量状态变量即可表示状态机的当前状态。</li>
+<li>它不会促进代码重用，因为状态机的所有元素都必须专门针对眼前的问题进行编码。</li>
+<li>整个状态机被编码为一个整体功能，很容易变得太大。</li>
+<li>事件调度时间不是恒定的，而是取决于两个级别的 switch 语句的性能，它们随着案例数的增加而降低（通常为 $O(log n)$，其中 n 为情况数）。</li>
+<li>实现不是分层的。您可以在每个转换中直接直接手动编写进入/退出操作的代码，但是鉴于状态机拓扑的变化，这很容易出错并且难以维护。这主要是因为与一种状态（例如，进入动作）有关的代码将在许多地方（在导致该状态的每个转变上）分布和重复。对于代码合成工具来说，后者属性不是问题，这些代码合成工具通常使用嵌套的 <code>switch</code> 语句类型的实现。</li>
+</ol>
+<h2 id="状态表-FSM">状态表 FSM</h2>
+<ol>
+<li>通用表驱动事件处理器</li>
+<li>应用程序提供：动作功能，表，事件</li>
+<li>状态表是二维的：对于每个事件，说明表具有的状态（动作，下一状态）</li>
+</ol>
+<p><img src="/890/44.png" alt></p>
+<h3 id="基于通用状态表的事件处理器的结构">基于通用状态表的事件处理器的结构</h3>
+<p><img src="/890/image-20221028140843141.png" alt></p>
+<h3 id="表事件处理器：数据结构">表事件处理器：数据结构</h3>
+<p><img src="/890/46.png" alt></p>
+<h3 id="表事件处理器：代码">表事件处理器：代码</h3>
+<p><img src="/890/47.png" alt></p>
+<h3 id="表事件处理器：用户代码-I">表事件处理器：用户代码 I</h3>
+<p><img src="/890/48.png" alt></p>
+<h3 id="表事件处理器：用户代码-II">表事件处理器：用户代码 II</h3>
+<p><img src="/890/49.png" alt></p>
+<h3 id="表事件处理器：用户行为">表事件处理器：用户行为</h3>
+<p><img src="/890/50.png" alt></p>
+<h3 id="表事件处理器：问题">表事件处理器：问题</h3>
+<ol>
+<li>FSM 的常规结构：
+<ol>
+<li>枚举用作索引</li>
+<li>需要“填充物”状态和功能：一些状态，事件对为空</li>
+</ol>
+</li>
+<li>分派是固定时间</li>
+<li>状态表是 ROM 候选者，但稀疏</li>
+<li>更改可能需要重建整个表</li>
+<li>每个动作都需要自己的功能</li>
+<li>不支持状态层次结构</li>
+</ol>
+<h2 id="面向对象设计模式">面向对象设计模式</h2>
+<p><img src="/890/image-20221028140855884.png" alt></p>
+<h3 id="后果">后果</h3>
+<ol>
+<li>它在很大程度上依赖于多态性，并且需要像 C++ 这样的面向对象的语言。</li>
+<li>使状态转换高效（重新分配一个指针）。</li>
+<li>通过后期绑定为事件调度提供了非常好的性能机制（$O(const)$，不考虑动作执行）。</li>
+<li>它允许您自定义每个事件处理程序的签名。事件参数是显式的，语言的类型系统会在编译时验证所有参数的适当类型（例如，<code>onTICK()</code> 接受 <code>uint8_t</code> 类型的参数）。</li>
+<li>实现是内存高效的。</li>
+<li>它不需要枚举状态，枚举事件。</li>
+<li>通过具体状态子类的方法（通过上下文指针）强制间接访问上下文的参数。</li>
+<li>添加状态需要对抽象状态类进行子类化。</li>
+<li>处理新事件需要将事件处理程序添加到抽象状态类接口。</li>
+<li>与状态表方法一样，事件处理程序通常具有良好的粒度。</li>
+<li>模式不是分层的。</li>
+</ol>
+<h3 id="更好的表事件处理器：QEP（萨米克）">更好的表事件处理器：QEP（萨米克）</h3>
+<p>想法：保留表的可扩展概念，但消除 2-d 查找</p>
+<ol>
+<li>使用 <code>switch</code> 语句区分每个状态的事件</li>
+<li>使用指向状态处理程序功能的指针表来区分状态</li>
+</ol>
+<p>好处：</p>
+<ol>
+<li>表分派比嵌套开关快，但是开关只需要分派已处理的事件</li>
+<li>可以轻松添加新状态，也可以轻松添加新事件</li>
+<li>只需要更改直接影响到实施的部分…</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/34422/" rel="prev" title="嵌入式系统概论-05-基于主线的计算系统">
+      <i class="fa fa-chevron-left"></i> 嵌入式系统概论-05-基于主线的计算系统
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/62701/" rel="next" title="自动化测试-02-变异测试">
+      自动化测试-02-变异测试 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E3%80%81%E8%AE%BE%E8%AE%A1%E3%80%81%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">建模、设计、分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BB%BA%E6%A8%A1%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">什么是建模？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E5%A5%BD%E7%9A%84%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">一个好的模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E7%B3%BB%E7%BB%9F%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">通用系统模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%9F%BA%E4%BA%8E%E6%A8%A1%E5%9E%8B%E7%9A%84%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">什么是基于模型的设计？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E6%8A%80%E6%9C%AF"><span class="nav-number">1.5.</span> <span class="nav-text">建模技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%88%86%E7%B1%BB%E6%B3%95"><span class="nav-number">1.6.</span> <span class="nav-text">计算分类法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%EF%BC%8C%E8%AF%AD%E8%A8%80%E5%92%8C%E5%B7%A5%E5%85%B7"><span class="nav-number">1.7.</span> <span class="nav-text">建模，语言和工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E5%92%8C%E8%AF%AD%E8%A8%80"><span class="nav-number">1.8.</span> <span class="nav-text">建模和语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BB%A5%E5%8F%8A%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%AF%B9%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%BB%BA%E6%A8%A1%EF%BC%9F"><span class="nav-number">1.9.</span> <span class="nav-text">什么时候以及为什么要对嵌入式系统建模？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%BB%BA%E6%A8%A1"><span class="nav-number">1.10.</span> <span class="nav-text">软件建模</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80%E7%9A%84%E6%A0%B8%E5%BF%83%E6%96%B9%E9%9D%A2"><span class="nav-number">1.10.1.</span> <span class="nav-text">建模语言的核心方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E7%A7%8D%E6%A0%87%E5%87%86%E7%9A%84%E5%B5%8C%E5%85%A5%E5%BC%8F%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.10.2.</span> <span class="nav-text">一种标准的嵌入式控制系统模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">1.10.3.</span> <span class="nav-text">建模语言的例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C-%E4%BB%A3%E7%A0%81%EF%BC%9A%E6%96%87%E6%9C%AC%EF%BC%8C%E6%89%A7%E8%A1%8C%EF%BC%8C%E5%AE%9E%E7%8E%B0%E8%AF%AD%E8%A8%80"><span class="nav-number">1.10.4.</span> <span class="nav-text">C 代码：文本，执行，实现语言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E5%9B%BE%E7%89%87"><span class="nav-number">1.10.5.</span> <span class="nav-text">各种图片</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%AF%B9%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%BB%BA%E6%A8%A1%EF%BC%9F"><span class="nav-number">1.11.</span> <span class="nav-text">为什么要对嵌入式系统建模？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E5%BA%94%E8%AF%A5%E5%AF%B9%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%B3%BB%E7%BB%9F%E5%BB%BA%E6%A8%A1%EF%BC%9F"><span class="nav-number">1.12.</span> <span class="nav-text">什么时候应该对嵌入式系统建模？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">1.13.</span> <span class="nav-text">有限状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="nav-number">1.14.</span> <span class="nav-text">什么是模型？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Application"><span class="nav-number">1.15.</span> <span class="nav-text">Application</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FSM-%E7%A4%BA%E4%BE%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">FSM 示例模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FSM-%E5%9C%A8%E6%B8%B8%E6%88%8F%E4%B8%AD"><span class="nav-number">2.1.</span> <span class="nav-text">FSM 在游戏中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%83%E8%B1%86%E4%BA%BA"><span class="nav-number">2.2.</span> <span class="nav-text">吃豆人</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86-FSM-%E5%91%BD%E5%90%8D%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">标准 FSM 命名法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E4%BB%B7"><span class="nav-number">2.4.</span> <span class="nav-text">等价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E6%95%88%E5%85%81%E8%AE%B8%E4%BC%98%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">等效允许优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E7%A1%AE%E5%AE%9A%E6%80%A7-FSM"><span class="nav-number">2.6.</span> <span class="nav-text">非确定性 FSM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFA-%E5%92%8C-FSM"><span class="nav-number">2.7.</span> <span class="nav-text">NFA 和 FSM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mealy-Moore-FSM"><span class="nav-number">3.</span> <span class="nav-text">Mealy-Moore FSM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%84-FSM-%E4%BD%9C%E4%B8%BA%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">常规 FSM 作为模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91"><span class="nav-number">3.2.</span> <span class="nav-text">并发</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Harel-%E7%9A%84-StateCharts%EF%BC%9AFSM-%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">Harel 的 StateCharts：FSM 的层次结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B1%82-FSM-%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">分层 FSM 模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E6%AC%A1%E7%8A%B6%E6%80%81%E5%88%92%E5%88%86"><span class="nav-number">4.2.</span> <span class="nav-text">层次状态划分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">4.3.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%8A%B6%E6%80%81%E6%9C%BA%E5%88%B6"><span class="nav-number">4.4.</span> <span class="nav-text">默认状态机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E6%9C%BA%E5%88%B6"><span class="nav-number">4.5.</span> <span class="nav-text">历史机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E5%90%88%E5%8E%86%E5%8F%B2%E5%92%8C%E9%BB%98%E8%AE%A4%E7%8A%B6%E6%80%81%E6%9C%BA%E5%88%B6"><span class="nav-number">4.6.</span> <span class="nav-text">结合历史和默认状态机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91-2"><span class="nav-number">5.</span> <span class="nav-text">并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E6%88%96%E7%A6%BB%E5%BC%80-AND-%E8%B6%85%E7%BA%A7%E7%8A%B6%E6%80%81"><span class="nav-number">5.1.</span> <span class="nav-text">进入或离开 AND-超级状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-number">5.2.</span> <span class="nav-text">计时器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%AD%94%E6%9C%BA%E5%99%A8%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-number">5.3.</span> <span class="nav-text">应答机器计时器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StateCharts-%E4%B8%AD%E7%9A%84%E5%B8%B8%E8%A7%84%E8%BE%B9%E6%A0%87%E7%AD%BE"><span class="nav-number">5.4.</span> <span class="nav-text">StateCharts 中的常规边标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%BD%AC%E6%8D%A2"><span class="nav-number">5.5.</span> <span class="nav-text">条件转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0%E7%8A%B6%E6%80%81%E5%9B%BE"><span class="nav-number">5.6.</span> <span class="nav-text">评估状态图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="nav-number">5.6.1.</span> <span class="nav-text">优点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">5.6.2.</span> <span class="nav-text">缺点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%8F%AF%E4%B9%90%E6%9C%BA"><span class="nav-number">6.</span> <span class="nav-text">示例：可乐机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#v1-0"><span class="nav-number">6.1.</span> <span class="nav-text">v1.0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#v1-1"><span class="nav-number">6.2.</span> <span class="nav-text">v1.1</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B1%82-FSM"><span class="nav-number">7.</span> <span class="nav-text">分层 FSM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E6%97%B6%E7%82%B8%E5%BC%B9%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">7.1.</span> <span class="nav-text">定时炸弹的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UML-%E7%8A%B6%E6%80%81%E5%9B%BE%E8%A1%A8%E7%A4%BA%E5%AE%9A%E6%97%B6%E7%82%B8%E5%BC%B9%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">7.2.</span> <span class="nav-text">UML 状态图表示定时炸弹状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E4%BA%A4%E6%8D%A2%E6%9C%BA-FSM"><span class="nav-number">7.3.</span> <span class="nav-text">嵌套交换机 FSM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B8%E5%BC%B9%E7%A4%BA%E4%BE%8B%EF%BC%9A%E5%A3%B0%E6%98%8E"><span class="nav-number">7.4.</span> <span class="nav-text">炸弹示例：声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number">7.5.</span> <span class="nav-text">结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%A1%A8-FSM"><span class="nav-number">8.</span> <span class="nav-text">状态表 FSM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E9%80%9A%E7%94%A8%E7%8A%B6%E6%80%81%E8%A1%A8%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">8.1.</span> <span class="nav-text">基于通用状态表的事件处理器的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">8.2.</span> <span class="nav-text">表事件处理器：数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E4%BB%A3%E7%A0%81"><span class="nav-number">8.3.</span> <span class="nav-text">表事件处理器：代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E7%94%A8%E6%88%B7%E4%BB%A3%E7%A0%81-I"><span class="nav-number">8.4.</span> <span class="nav-text">表事件处理器：用户代码 I</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E7%94%A8%E6%88%B7%E4%BB%A3%E7%A0%81-II"><span class="nav-number">8.5.</span> <span class="nav-text">表事件处理器：用户代码 II</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA"><span class="nav-number">8.6.</span> <span class="nav-text">表事件处理器：用户行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9A%E9%97%AE%E9%A2%98"><span class="nav-number">8.7.</span> <span class="nav-text">表事件处理器：问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">9.</span> <span class="nav-text">面向对象设计模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E6%9E%9C"><span class="nav-number">9.1.</span> <span class="nav-text">后果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E5%A5%BD%E7%9A%84%E8%A1%A8%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8%EF%BC%9AQEP%EF%BC%88%E8%90%A8%E7%B1%B3%E5%85%8B%EF%BC%89"><span class="nav-number">9.2.</span> <span class="nav-text">更好的表事件处理器：QEP（萨米克）</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

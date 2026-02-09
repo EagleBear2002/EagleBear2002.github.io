@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客换了更清晰的图片并对原文的疏漏做了补充和修正。 本文提供了 pdf 版，以供打印：商务智能-04-数据仓库的设计.pdf。 数据仓库设计的由来 在事务型数据处理中需要作数据库设计，而在分析型数据处理中则需作数据仓库设计，这两者在原理上是一致的。 因此，数据库设计中的很多设计思想与方法都可在数据仓库中得到应用，但是由于事务型与分析型的数据处理的不一致，两者在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="商务智能-04-数据仓库的设计">
+<meta property="og:url" content="https://eaglebear2002.github.io/62073/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客换了更清晰的图片并对原文的疏漏做了补充和修正。 本文提供了 pdf 版，以供打印：商务智能-04-数据仓库的设计.pdf。 数据仓库设计的由来 在事务型数据处理中需要作数据库设计，而在分析型数据处理中则需作数据仓库设计，这两者在原理上是一致的。 因此，数据库设计中的很多设计思想与方法都可在数据仓库中得到应用，但是由于事务型与分析型的数据处理的不一致，两者在">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130505417.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130609459.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130630342.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130641106.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130646052.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130702003.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130713818.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130717962.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130723452.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130746080.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130859310.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131130912049.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131258273.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131331059.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131336199.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131340825.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131345408.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131349705.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131354716.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62073/image-20230131131400061.png">
+<meta property="article:published_time" content="2023-01-31T04:55:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.528Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/62073/image-20230131130505417.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/62073/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>商务智能-04-数据仓库的设计 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/62073/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          商务智能-04-数据仓库的设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-31 12:55:00" itemprop="dateCreated datePublished" datetime="2023-01-31T12:55:00+08:00">2023-01-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%95%86%E5%8A%A1%E6%99%BA%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">2022Fall-商务智能</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<p>本文提供了 pdf 版，以供打印：<a href="https://eaglebear2002.github.io/62073/%E5%95%86%E5%8A%A1%E6%99%BA%E8%83%BD-04-%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%9A%84%E8%AE%BE%E8%AE%A1.pdf">商务智能-04-数据仓库的设计.pdf</a>。</p>
+<h2 id="数据仓库设计的由来">数据仓库设计的由来</h2>
+<p>在事务型数据处理中需要作数据库设计，而在分析型数据处理中则需作数据仓库设计，这两者在原理上是一致的。</p>
+<p>因此，数据库设计中的很多设计思想与方法都可在数据仓库中得到应用，但是由于事务型与分析型的数据处理的不一致，两者在设计中的很多方面也存在着差别</p>
+<p>面向 OLTP 的数据库设计有着明确的应用需求，严格遵循系统生命周期的阶段划分，每个阶段都规定有明确的任务，上一阶段确定的任务完成后，产生一定格式的文档交给下一阶段</p>
+<p>创建数据仓库的重要有两部分：</p>
+<ol>
+<li>与操作型系统接口的设计（ETL）</li>
+<li>数据仓库本身的设计</li>
+</ol>
+<p>数据仓库的需求只有在已装载部分数据并已开始使用时才能完全确定清晰，因此往往无法使用传统的需求驱动的方法进行。</p>
+<h2 id="操作型数据库-vs-数据仓库">操作型数据库 vs. 数据仓库</h2>
+<table>
+<thead>
+<tr>
+<th>方面</th>
+<th>操作型数据库</th>
+<th>数据仓库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>面向的处理类型</td>
+<td>面向应用</td>
+<td>面向分析</td>
+</tr>
+<tr>
+<td>面向的需求</td>
+<td>确定的应用需求</td>
+<td>不确定的分析需求</td>
+</tr>
+<tr>
+<td>系统设计目标</td>
+<td>事务处理性能</td>
+<td>全局一致的数据环境</td>
+</tr>
+<tr>
+<td>数据来源或系统的输入</td>
+<td>事务相关数据</td>
+<td>多种多样</td>
+</tr>
+<tr>
+<td>系统设计的方法和步骤</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/chktsang/article/details/87007831">SDLC（系统生命周期）</a></td>
+<td>CLDS</td>
+</tr>
+</tbody>
+</table>
+<h6 id="SDLC-和-CLDS">SDLC 和 CLDS</h6>
+<img src="/62073/image-20230131130505417.png" style="zoom: 67%;">
+<ol>
+<li>SDLC（Software Development Lifecycle Model）是在最开始做需求分析，CDLS 可以在理解需求的部分进行需求分析。</li>
+<li>变化来源：数据仓库由于外部环境在变更则一定需要变更
+<ol>
+<li>客观变化：外部环境等客观变化</li>
+<li>主观变化：每天的想法不一样</li>
+</ol>
+</li>
+<li>上一个分析人员留下的部分不可能是很客观的</li>
+</ol>
+<h2 id="数据仓库设计的原则">数据仓库设计的原则</h2>
+<p>数据仓库是面向主题的、集成的、非易失、时变的，这些特点决定了数据仓库的系统设计不能采用同开发传统的 OLTP 数据库一样的设计方法，其设计过程必须遵循下述三条原则：</p>
+<ol>
+<li>面向主题原则</li>
+<li>数据驱动原则</li>
+<li>原型法设计原则</li>
+</ol>
+<h3 id="设计原则-1：面向主题原则">设计原则 1：面向主题原则</h3>
+<p>构建数据仓库的目的是面向企业的管理人员，为经营管理提供决策支持信息。因此，数据仓库的组织设计必须以用户决策的需要来确定，即从用户决策的主观需求（主题）开始；</p>
+<p>数据仓库中数据的组织方法：</p>
+<ol>
+<li>为了进行数据分析首先要有分析的主题，以主题为起始点，进行相关数据的设计，最终建立起一个面向主题的分析型环境</li>
+<li>在数据库设计中则是以客体为起始点，即以客观操作需求为设计依据</li>
+</ol>
+<p>例如：“商品销售”主题：</p>
+<ol>
+<li>建立目的：管理人员能够在适当的时候，订购适当的商品，并把它们分发到适当的商店中去销售，以提高商品的销售总金额</li>
+<li>需要执行的分析操作：
+<ol>
+<li>分析什么样的商品，在什么样的时间和商店内畅销，即：分析商品的销售额与商品类型、销售时间及商店位置之间的变化关系</li>
+<li>管理人员将据此决定他们的经营策略</li>
+</ol>
+</li>
+</ol>
+<h3 id="设计原则-2：数据驱动原则">设计原则 2：数据驱动原则</h3>
+<p>数据的来源：</p>
+<ol>
+<li>数据仓库是在现存数据库系统基础上进行开发的，它着眼于有效地提取、综合、集成和挖掘已有数据库中的数据资源，服务于企业高层领导管理决策分析的需要</li>
+<li>因此，数据仓库中的数据必须是从已有的数据源中抽取而来，是已经存在的数据或对已经存在的数据进行加工处理而获得”</li>
+</ol>
+<p>在数据仓库设计中，由于其所有数据均应建立在已有的数据库基础上，即是从已经存在于操作型环境中的数据出发进行数据仓库的设计，这种设计方法被称为“数据驱动”方法：</p>
+<ol>
+<li>从已有的数据库系统出发</li>
+<li>按照分析领域对数据及数据间的联系重新考察</li>
+<li>利用数据模型有效识别原有数据库中的数据和数据仓库中主题的数据的“共同性”</li>
+</ol>
+<img src="/62073/image-20230131130609459.png" style="zoom:67%;">
+<ol>
+<li>数据仓库不能凭空产生</li>
+<li>首先构造操作型数据环境，然后构造分析型数据环境</li>
+<li>实际情况下使用这样的数据驱动模型是比较困难的</li>
+<li>考虑是否要先创建数据模型</li>
+</ol>
+<h3 id="设计原则-3：原型法设计原则">设计原则 3：原型法设计原则</h3>
+<p>不断变化的分析需求：</p>
+<ol>
+<li>数据仓库系统的原始需求不明确，且不断变化与增加，开发者最初并不能确切了解到用户的明确而详细的需求，用户所能提供的无非是需求的大方向或部分需求，更不能较准确地预见到以后的需求</li>
+<li>因此，采用原型法来进行数据仓库的开发是比较合适的，即从构建系统的基本框架着手，不断丰富与完善整个系统</li>
+</ol>
+<p>逐步求精的设计过程：</p>
+<ol>
+<li>数据仓库用户的需求是在设计过程中不断细化明确的。同时，数据仓库系统的开发也是一个经过不断循环、反馈而使系统不断增长与完善的过程</li>
+<li>在数据仓库开发的整个过程中，自始至终要求决策人员和开发者的共同参与和密切合作，不做或尽量少做无效工作与重复工作</li>
+</ol>
+<p>启发方式：</p>
+<ol>
+<li>一个迭代的开发依赖于在上一个迭代所获得的结果</li>
+<li>首先载入一部分数据供 DSS 分析员使用和查看</li>
+<li>然后根据最终用户的反馈，修改数据或添加其他数据。这种反馈过程贯穿于数据仓库的整个开发生命周期之中</li>
+</ol>
+<p>需求预测仍然是十分重要的。实际情况通常介于启发和预测两者之间。</p>
+<h2 id="从操作型数据开始">从操作型数据开始</h2>
+<ol>
+<li>将数据从操作型环境移入到数据仓库环境不是简单的抽取</li>
+</ol>
+<img src="/62073/image-20230131130630342.png" style="zoom: 50%;">
+<p>通常现有的操作型系统中的数据缺乏集成，建立现有的操作型应用时，根本没有考虑过以后可能存在的集成问题。每一个应用都拥有自己特殊的需求，可能会出现下列情况：</p>
+<ol>
+<li>不同名同物：一些相同的数据以不同的名字出现在各个地方</li>
+<li>同名不同物：一些不同的数据在不同的地方以相同的方式标注</li>
+<li>数据不完整：这里的数据不在其他地方出现</li>
+<li>度量单位不同：一些数据用相同的名字存在不同的地方，却使用不同的度量单位</li>
+</ol>
+<img src="/62073/image-20230131130641106.png" style="zoom:50%;">
+<img src="/62073/image-20230131130646052.png" style="zoom:50%;">
+<p>从操作型环境到数据仓库有三种装载工作要做：</p>
+<ol>
+<li>装载档案数据</li>
+<li>装载在操作型系统中目前已有的数据</li>
+<li>将自数据库上次刷新以来在操作型环境中不断发生的变化（更新）从操作型环境中装载到数据仓库中，可以通过以下多种方式来实现：
+<ol>
+<li>时间戳</li>
+<li>DELTA 文件</li>
+<li>建立映象文件</li>
+<li>日志文件</li>
+</ol>
+</li>
+</ol>
+<p>需要考虑存取操作型数据的效率</p>
+<img src="/62073/image-20230131130702003.png" style="zoom:50%;">
+<p>数据量的管理：</p>
+<ol>
+<li>数据集成</li>
+<li>多粒度</li>
+<li>数据转储</li>
+</ol>
+<p>如果没有仔细管理和压缩数据量，那么在数据仓库中聚集的庞大数据量将无法实现仓库的目标。</p>
+<img src="/62073/image-20230131130713818.png" style="zoom:50%;">
+<h3 id="过程或数据模型与设计环境">过程或数据模型与设计环境</h3>
+<ol>
+<li>过程模型（仅仅适合于操作型环境）
+<ol>
+<li>功能分解</li>
+<li>第 0 层上下文图表</li>
+<li>数据流图</li>
+<li>结构图表</li>
+<li>状态转换图</li>
+<li>HIPO 图</li>
+<li>伪代码</li>
+</ol>
+</li>
+<li>数据模型（既适合操作型环境，也适合于分析型环境）</li>
+</ol>
+<img src="/62073/image-20230131130717962.png" style="zoom: 67%;">
+<h3 id="数据模型的性质">数据模型的性质</h3>
+<ol>
+<li>稳定性分析，根据各个数据属性的变化特性将这些属性分组，稳定性和客观世界有关的，比如姓名这个数据的特性决定了其是相对稳定的。
+<ol>
+<li>很少更改：姓名等等</li>
+<li>不时更改：年份等等</li>
+<li>经常更改：库存量等等</li>
+</ol>
+</li>
+<li>根据稳定程度讨论逻辑优化、物理优化及 ETL 设计等；</li>
+<li>变化的频率需要通过人工等方式来确定，在优化的过程中是完全按照可变性进行修改的。</li>
+</ol>
+<img src="/62073/image-20230131130723452.png" style="zoom: 80%;">
+<h3 id="数据模型与迭代开发">数据模型与迭代开发</h3>
+<p>迭代开发的重要性：</p>
+<ol>
+<li>业界成功的记录强烈地建议这样做</li>
+<li>用户在第一遍迭代开发完成以前不能清晰的提出需求</li>
+<li>只有实际结果切实而且明确时，管理部门才会作出充分的承诺。因此，必须能很快地见到可见结果</li>
+</ol>
+<p>数据模型在每一遍开发中都起着路标的作用，在开发结束时，所有遍次的开发结果融合在一起：</p>
+<ol>
+<li>当不同遍次的开发是基于不同的数据模型或没有数据模型时，会产生众多的重复工作，且缺乏一致性</li>
+<li>在某一个时刻必须是确定的，并且需要明晰远景和当前的数据模型的关系。</li>
+<li>最后一定能拼接出一个方形，不多不少不重（如图 3-24 所示）</li>
+<li>重叠可能是某两个开发团队对于某一部分做了两次，难以保证一致性问题</li>
+<li>之前的版本则是只有边界是重复的（如图 3-25 所示）</li>
+<li>数据模型应该是一个蓝本</li>
+</ol>
+<img src="/62073/image-20230131130746080.png" style="zoom: 50%;">
+<h3 id="数据仓库设计的三级数据模型">数据仓库设计的三级数据模型</h3>
+<p>概念模型：</p>
+<ol>
+<li>为一定目标设计系统、收集信息而服务的概念型工具，是客观世界到机器世界的一个中间层次，在这之前是将需求部分转化为概念模型。</li>
+<li>E-R 法</li>
+</ol>
+<p>逻辑模型：</p>
+<ol>
+<li>描述了数据仓库的主题的逻辑实现</li>
+<li>关系模型</li>
+</ol>
+<p>物理模型：</p>
+<ol>
+<li>逻辑模型在数据仓库中的实现</li>
+<li>逻辑模型转换到物理模型不在本课程讨论范围，同样的，从物理模型到逻辑模型也是。</li>
+</ol>
+<blockquote>
+<p>基本上是对应的，但是相对比较少</p>
+</blockquote>
+<ol>
+<li>高级模型：
+<ol>
+<li>对数据的抽象程度最大</li>
+<li>E-R 图</li>
+</ol>
+</li>
+<li>中级模型：
+<ol>
+<li>数据项（dis-data item set）</li>
+<li>dis 是 E-R 图的细分，大体上 E-R 图中的每个实体对应一个 dis</li>
+</ol>
+</li>
+<li>低级模型：物理数据模型</li>
+</ol>
+<h2 id="数据仓库的设计步骤">数据仓库的设计步骤</h2>
+<p>数据仓库设计大致有如下几个步骤：</p>
+<ol>
+<li>系统规划
+<ol>
+<li>明确主题</li>
+<li>技术准备</li>
+</ol>
+</li>
+<li>概念设计</li>
+<li>逻辑设计</li>
+<li>物理设计</li>
+<li>数据仓库生成</li>
+<li>数据仓库的运行与维护</li>
+</ol>
+<h3 id="系统规划">系统规划</h3>
+<h4 id="明确主题">明确主题</h4>
+<p>在数据仓库设计的开始，首先要做的事是有关分析人员需要确定具体领域的分析对象，这个对象就是主题。</p>
+<p>主题是一种较高层次的抽象，对它的认识与表示是一个逐步完善的过程。因此，在开始时不妨先确定一个初步的主题概念以利于设计工作的开始，此后随着设计工作的进一步开展，再逐步扩充与完善（原型设计法）。</p>
+<h4 id="技术准备">技术准备</h4>
+<p>准备具体的技术要求和物理实现环境，包括：</p>
+<ol>
+<li>技术评估，其内容包括数据仓库的性能指标，如：
+<ol>
+<li>数据存取能力（包括管理海量数据的能力）</li>
+<li>模型重组能力</li>
+<li>数据装载能力</li>
+</ol>
+</li>
+<li>技术环境准备：在评估基础上提出数据仓库的软硬件平台要求，包括计算机、网络结构、操作系统、数据库及数据仓库软件的选购要求等</li>
+</ol>
+<h4 id="数据仓库的设计-生成和运维">数据仓库的设计/生成和运维</h4>
+<img src="/62073/image-20230131130859310.png" style="zoom: 33%;">
+<p>概念模型设计：星型模型或雪花模型</p>
+<h3 id="概念模型设计">概念模型设计</h3>
+<ol>
+<li>确定系统边界</li>
+<li>确定主要的主题及其内容</li>
+<li>OLAP 等分析应用的设计：在后续分析和二次分析的过程中是非常重要的</li>
+</ol>
+<h4 id="确定系统边界">确定系统边界</h4>
+<ol>
+<li>要做的决策类型有哪些？</li>
+<li>决策者感兴趣的是什么问题？</li>
+<li>这些问题需要什么样的信息？</li>
+<li>要得到这些信息需要包含哪些数据源？</li>
+</ol>
+<h4 id="确定主要的主题及其内容">确定主要的主题及其内容</h4>
+<p>确定主要的主题：</p>
+<ol>
+<li>明确数据仓库的分析对象，然后对每个主题的内容进行较详细的描述，包括：
+<ol>
+<li>确定主题及其属性信息</li>
+<li>描述每个属性的取值情况：变化情况
+<ol>
+<li>固定不变的</li>
+<li>半固定的</li>
+<li>经常变化的</li>
+</ol>
+</li>
+<li>确定主题的公共码键</li>
+<li>主题之间的关系：主题间联系及其属性</li>
+</ol>
+</li>
+</ol>
+<p>在确定上述内容后，就可以用传统的实体联系模型（E-R 模型）来表示数据仓库的概念数据模型</p>
+<p>商品、顾客和供应商之间的 E-R 图</p>
+<img src="/62073/image-20230131130912049.png" style="zoom:50%;">
+<h3 id="逻辑模型设计">逻辑模型设计</h3>
+<ol>
+<li>将 E-R 图转换成关系数据库的二维表</li>
+<li>定义数据源和数据抽取规则</li>
+<li>在逻辑模型的设计过程中，需要考虑以下一些问题：
+<ol>
+<li>适当的粒度划分</li>
+<li>合理的数据分割策略</li>
+<li>定义合适的数据来源</li>
+</ol>
+</li>
+</ol>
+<h4 id="粒度划分">粒度划分</h4>
+<p>在设计过程中需要考虑数据仓库中数据粒度的划分原则，即数据单元的详细程度和级别：</p>
+<ol>
+<li>数据越详细，粒度越小，级别就越低</li>
+<li>数据综合度越高，粒度越大，级别就越高</li>
+</ol>
+<p>一般将数据划分为：详细数据、轻度总结、高度总结三种粒度，或者采用更多级的粒度划分方法。例如：</p>
+<ol>
+<li>根据时间跨度进行的统计有：天，周，月，季度，年</li>
+<li>对于不适合进行统计的属性值，可以采样获取数据</li>
+</ol>
+<p>粒度的划分将直接影响到数据仓库中的数据量以及所适合的查询类型，粒度划分是否适当是影响数据仓库性能的一个重要方面</p>
+<h5 id="商品销售：“时间”属性的粒度设计">商品销售：“时间”属性的粒度设计</h5>
+<ol>
+<li>商品固有信息：<code>商品表（商品号，商品名，类型，颜色，...）/* 细节数据 */</code></li>
+<li>商品销售信息：<code>（细节数据、天、周、月、季度、年）</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/* 细节数据 */<br>销售表（商品号，顾客号，销售日期，售价，销售量，...）<br>/* 以“天”为时间统计单位的综合数据 */<br>销售表 d1（时间属性_日 ，商品属性，... ，销售总量）<br>/* 以“周”为时间统计单位的综合数据 */<br>销售表 d2（时间属性_周 ，商品属性， ... ，销售总量）<br>/* 以“月”为时间统计单位的综合数据 */<br>销售表 d3（时间属性_月 ，商品属性， ... ，销售总量）<br>/* 以“季度”为时间统计单位的综合数据 */<br>销售表 d4（时间属性_季度，商品属性， ... ，销售总量）<br>/* 以“年”为时间统计单位的综合数据 */<br>销售表 d5（时间属性_年，商品属性， ... ，销售总量）<br></code></pre></td></tr></table></figure>
+<h5 id="商品销售：“商品”属性的粒度设计">商品销售：“商品”属性的粒度设计</h5>
+<ol>
+<li>商品销售信息：商品属性角度的粒度设计补充，细节、商品、小类、大类</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/* 细节数据 */<br>销售表（商品号，顾客号，销售日期，售价，销售量，...）<br>/* 以具体“商品”为商品属性的统计单位的综合数据 */<br>销售表 p1（时间属性_X ，商品属性_商品号，... ，销售总量）<br>/* 以“小类”为商品属性的统计单位的综合数据 */<br>销售表 p2（时间属性_X ，商品属性_小类 ， ... ，销售总量）<br>/* 以“大类”为商品属性的统计单位的综合数据 */<br>销售表 p3（时间属性_X ，商品属性_大类 ， ... ，销售总量）<br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>将时间、商品等属性综合起来考虑，上述的统计表有很多。</li>
+</ol>
+<h5 id="商品库存：“时间”属性的粒度设计">商品库存：“时间”属性的粒度设计</h5>
+<p>商品库存信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/* 细节数据 */<br>库存表（商品号，库房号，库存量，日期，...）<br>/* 样本数据 */<br>库存表 1（商品号，库房号，库存量，取样时间_周，...）<br>库存表 2（商品号，库房号，库存量，取样时间_月，...）<br>库存表 3（商品号，库房号，库存量，取样时间_季度，...）<br>库存表 4（商品号，库房号，库存量，取样时间_年，...）<br></code></pre></td></tr></table></figure>
+<p>数据综合的方式与前面的商品销售主题不同</p>
+<h5 id="用于商场管理者的数据仓库">用于商场管理者的数据仓库</h5>
+<table>
+<thead>
+<tr>
+<th>主题名</th>
+<th>公共码键</th>
+<th>属性信息</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>商品</td>
+<td>商品号</td>
+<td>固有信息：商品号，商品名，类别，颜色等<br>采购信息：商品号，供应商号，供应价，供应日期，供应量等<br>销售信息：商品号，顾客号，售价，销售日期，销售量等<br>库存信息：商品号，库房号，库存量，日期等</td>
+</tr>
+<tr>
+<td>供应商</td>
+<td>供应商号</td>
+<td>固有信息：供应商号，供应商名，地址，电话，供应商类型等<br>供应商品信息：供应商号，商品号，供应价，供应日期，供应量等</td>
+</tr>
+<tr>
+<td>顾客</td>
+<td>顾客号</td>
+<td>固有信息：顾客号，姓名，性别，年龄，文化程度，住址，电话等<br>购物信息：顾客号，商品号，售价，购买日期，购买量等</td>
+</tr>
+</tbody>
+</table>
+<h4 id="数据分割">数据分割</h4>
+<p>数据的分割是指把逻辑上是统一整体的数据分割成较小的、可以独立管理的数据单元进行存储（关系），以便于重构、重组和恢复，以提高创建索引和顺序扫描的效率。</p>
+<p>选择数据分割的因素有：</p>
+<ol>
+<li>数据量的大小</li>
+<li>数据分析处理的对象（主题）</li>
+<li>简单易行的数据分割标准</li>
+<li>数据粒度的划分策略</li>
+</ol>
+<p>通常采用“时间”属性作为数据分割的依据</p>
+<p>数据分割技术类似于数据库中的数据分片技术，其目的是为了提高数据仓库的性能</p>
+<h4 id="定义数据来源及其抽取规则">定义数据来源及其抽取规则</h4>
+<img src="/62073/image-20230131131258273.png" alt="image-20230131131258273" style="zoom:50%;">
+<h3 id="物理模型设计（重要）">物理模型设计（重要）</h3>
+<p>在逻辑模型设计基础上确定数据的存储结构、确定索引策略、确定存储分配及数据存放位置等与物理有关的内容，物理模型设计的具体方法与数据库设计中的大致相似。其目的是为了提高数据仓库系统的访问性能。</p>
+<p>在任务上，数据仓库和数据库没有太大差异。</p>
+<p>常用的一些技术有：</p>
+<ol>
+<li>合并表</li>
+<li>建立数据序列</li>
+<li>引入冗余</li>
+<li>表的物理分割</li>
+<li>生成导出数据</li>
+<li>建立广义索引</li>
+</ol>
+<p>规范化/反规范化</p>
+<h4 id="合并表">合并表</h4>
+<p>在常见的一些分析处理操作中，可能需要执行多表连接操作。为了节省 I/O 开销，可以把这些表中的记录混合存放在一起，以减低表的连接操作的代价。</p>
+<p>合并表技术与传统关系数据库中的集簇（Clustering）技术类似，如下图所示</p>
+<img src="/62073/image-20230131131331059.png" style="zoom: 50%;">
+<ol>
+<li>代码具有一定的随意性</li>
+<li>数据库只能在左上部分和右下部分只能选择一个，否则会导致冗余性</li>
+<li>但是数据仓库中，在持有左上数据的基础上，也可以持有右下的数据</li>
+<li>右下的数据也可以放置在数据集市（狭义数据仓库）中。</li>
+</ol>
+<h4 id="建立数据序列">建立数据序列</h4>
+<p>考虑创建一个数据序列，这样如果数据存放在一行中，那么一次 I/O 就足以检索到了。</p>
+<p>通常当数列中值的数量稳定、数据是按顺序访问的、数据的创建与修改在统计上是以非常有规律的方式进行等条件都满足时，创建一个数据序列才是有意义的。</p>
+<img src="/62073/image-20230131131336199.png" style="zoom:50%;">
+<p>如果目前的存储系统是顺序式的和非顺序式的是有区别的。</p>
+<h4 id="引入冗余">引入冗余</h4>
+<ol>
+<li>在面向某个主题的分析过程中，通常需要访问不同表中的多个属性，而每个属性又可能参与多个不同主题的分析过程。因此可以通过修改关系模式把某些属性复制到多个不同的主题表中去，从而减少一次分析过程需要访问的表的数量；</li>
+<li>采用该种数据组织方法会带来大量的数据冗余存储，数据仓库系统必须保证这些冗余数据的一致性。由于数据仓库中的数据是稳定的，很少执行更新操作，不会因此带来过高的数据更新的代价，但可以有效地提高数据仓库系统的性能，数据稳定性这一点上就是和数据仓库系统有着本质区别。</li>
+</ol>
+<img src="/62073/image-20230131131340825.png" style="zoom:50%;">
+<ol>
+<li>其他表通过外关键字 partno 和原来的表进行关联；</li>
+<li>每一条连接线都是跨表的描述访问，由于跨表访问，导致了部分关键字是冗余存储的；</li>
+<li>一般的数据库不会有过多冗余，因为无法保证备份是一致的：因为不是所有的冗余表对用户应用都是透明的；</li>
+<li>就算执行了冗余存储，和数据库本身也没有关系；</li>
+<li>然而在数据仓库中没有这个问题，因为数据仓库是通过 ETL 进行同步更新的。</li>
+</ol>
+<h4 id="表的物理分割">表的物理分割</h4>
+<ol>
+<li>类似于在逻辑设计阶段的数据分割</li>
+<li>可以根据表中每个属性数据的访问频率和稳定性程度对表的存储结构进行分割
+<ol>
+<li>对于访问频率较高的属性，可以单独考虑其物理存储组织，以便选择合适的索引策略和特定的物理组织方式；</li>
+<li>对于需要频繁更新的属性，也可以单独组织其物理存储，以免因数据更新而带来的空间重组、重构等工作。</li>
+</ol>
+</li>
+<li>分拆方式
+<ol>
+<li>横拆：将元组拆出来</li>
+<li>纵拆：将属性拆出来</li>
+</ol>
+</li>
+<li>ETL 不是对所有的数据都进行检查有无修改，比如姓名就不必经常查看修改；</li>
+<li>表的物理分割对于各种关于更新的属性是比较重要的。</li>
+</ol>
+<img src="/62073/image-20230131131345408.png" style="zoom: 50%;">
+<h4 id="生成导出数据">生成导出数据</h4>
+<p>在原始、细节数据的基础上进行一些统计和计算，生成导出数据，并保存在数据仓库中。</p>
+<p>优点：</p>
+<ol>
+<li>避免在分析过程中执行过多的统计或计算操作，减少输入/出的次数，提高分析操作的性能；</li>
+<li>避免了不同用户进行重复统计操作可能产生的偏差。</li>
+</ol>
+<img src="/62073/image-20230131131349705.png" style="zoom: 67%;">
+<h4 id="建立广义索引">建立广义索引</h4>
+<p>用于记录数据仓库中数据与“最”有关的统计结果的索引被称为“广义索引”。如：</p>
+<ol>
+<li>当月销售额最高的商店？</li>
+<li>当月销售情况最差的商品？</li>
+</ol>
+<p>这样的广义索引的数据量是非常小的，可以在每次进行数据仓库数据加载工作时生成或刷新这样的广义索引。用户可以从已经建立的广义索引里直接获取这些统计信息，而不必对整个数据仓库进行扫描。</p>
+<img src="/62073/image-20230131131354716.png" style="zoom: 50%;">
+<ol>
+<li>广义索引能不能运行在数据库上？不能，因为广义索引会影响到操作型数据环境的效率</li>
+<li>使用冗余仓库，来避免对数据仓库的大量刷新查询操作的发生。</li>
+</ol>
+<h3 id="数据仓库生成">数据仓库生成</h3>
+<ol>
+<li>建立数据模式：根据逻辑设计与物理设计的设计结果建立数据仓库的数据模式</li>
+<li>编制数据抽取程序：根据数据仓库元数据中的定义信息，编制抽取程序，将数据源中的数据作加工以形成数据仓库中的数据</li>
+<li>数据加载：将数据源中的数据，通过数据抽取程序加载到数据仓库的数据模式中去</li>
+</ol>
+<h3 id="数据仓库的使用与维护">数据仓库的使用与维护</h3>
+<ol>
+<li>在数据仓库建立后，就可以建立分析、决策型的应用系统</li>
+<li>在应用系统的使用过程中不断加深理解，改进主题，依照原型法的思想使系统更趋完善</li>
+<li>在系统的运行过程中，随着数据源中数据的不断变化，需要通过数据刷新操作来维护数据仓库中数据的一致性</li>
+</ol>
+<h3 id="数据仓库的生命周期">数据仓库的生命周期</h3>
+<img src="/62073/image-20230131131400061.png" style="zoom: 67%;">
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/14835/" rel="prev" title="商务智能-03-联机分析处理">
+      <i class="fa fa-chevron-left"></i> 商务智能-03-联机分析处理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/48925/" rel="next" title="商务智能-05-多维建模">
+      商务智能-05-多维建模 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%94%B1%E6%9D%A5"><span class="nav-number">1.</span> <span class="nav-text">数据仓库设计的由来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93-vs-%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93"><span class="nav-number">2.</span> <span class="nav-text">操作型数据库 vs. 数据仓库</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#SDLC-%E5%92%8C-CLDS"><span class="nav-number">2.1.</span> <span class="nav-text">SDLC 和 CLDS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%8E%9F%E5%88%99"><span class="nav-number">3.</span> <span class="nav-text">数据仓库设计的原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-1%EF%BC%9A%E9%9D%A2%E5%90%91%E4%B8%BB%E9%A2%98%E5%8E%9F%E5%88%99"><span class="nav-number">3.1.</span> <span class="nav-text">设计原则 1：面向主题原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-2%EF%BC%9A%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%E5%8E%9F%E5%88%99"><span class="nav-number">3.2.</span> <span class="nav-text">设计原则 2：数据驱动原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99-3%EF%BC%9A%E5%8E%9F%E5%9E%8B%E6%B3%95%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">3.3.</span> <span class="nav-text">设计原则 3：原型法设计原则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E6%93%8D%E4%BD%9C%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BC%80%E5%A7%8B"><span class="nav-number">4.</span> <span class="nav-text">从操作型数据开始</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E6%88%96%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E8%AE%BE%E8%AE%A1%E7%8E%AF%E5%A2%83"><span class="nav-number">4.1.</span> <span class="nav-text">过程或数据模型与设计环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%80%A7%E8%B4%A8"><span class="nav-number">4.2.</span> <span class="nav-text">数据模型的性质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%BC%80%E5%8F%91"><span class="nav-number">4.3.</span> <span class="nav-text">数据模型与迭代开发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%B8%89%E7%BA%A7%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.4.</span> <span class="nav-text">数据仓库设计的三级数据模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.</span> <span class="nav-text">数据仓库的设计步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A7%84%E5%88%92"><span class="nav-number">5.1.</span> <span class="nav-text">系统规划</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E4%B8%BB%E9%A2%98"><span class="nav-number">5.1.1.</span> <span class="nav-text">明确主题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%87%86%E5%A4%87"><span class="nav-number">5.1.2.</span> <span class="nav-text">技术准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%9A%84%E8%AE%BE%E8%AE%A1-%E7%94%9F%E6%88%90%E5%92%8C%E8%BF%90%E7%BB%B4"><span class="nav-number">5.1.3.</span> <span class="nav-text">数据仓库的设计&#x2F;生成和运维</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.2.</span> <span class="nav-text">概念模型设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E7%B3%BB%E7%BB%9F%E8%BE%B9%E7%95%8C"><span class="nav-number">5.2.1.</span> <span class="nav-text">确定系统边界</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E4%B8%BB%E8%A6%81%E7%9A%84%E4%B8%BB%E9%A2%98%E5%8F%8A%E5%85%B6%E5%86%85%E5%AE%B9"><span class="nav-number">5.2.2.</span> <span class="nav-text">确定主要的主题及其内容</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.3.</span> <span class="nav-text">逻辑模型设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B2%92%E5%BA%A6%E5%88%92%E5%88%86"><span class="nav-number">5.3.1.</span> <span class="nav-text">粒度划分</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%95%86%E5%93%81%E9%94%80%E5%94%AE%EF%BC%9A%E2%80%9C%E6%97%B6%E9%97%B4%E2%80%9D%E5%B1%9E%E6%80%A7%E7%9A%84%E7%B2%92%E5%BA%A6%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.3.1.1.</span> <span class="nav-text">商品销售：“时间”属性的粒度设计</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%95%86%E5%93%81%E9%94%80%E5%94%AE%EF%BC%9A%E2%80%9C%E5%95%86%E5%93%81%E2%80%9D%E5%B1%9E%E6%80%A7%E7%9A%84%E7%B2%92%E5%BA%A6%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.3.1.2.</span> <span class="nav-text">商品销售：“商品”属性的粒度设计</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%95%86%E5%93%81%E5%BA%93%E5%AD%98%EF%BC%9A%E2%80%9C%E6%97%B6%E9%97%B4%E2%80%9D%E5%B1%9E%E6%80%A7%E7%9A%84%E7%B2%92%E5%BA%A6%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.3.1.3.</span> <span class="nav-text">商品库存：“时间”属性的粒度设计</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%A8%E4%BA%8E%E5%95%86%E5%9C%BA%E7%AE%A1%E7%90%86%E8%80%85%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93"><span class="nav-number">5.3.1.4.</span> <span class="nav-text">用于商场管理者的数据仓库</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%88%86%E5%89%B2"><span class="nav-number">5.3.2.</span> <span class="nav-text">数据分割</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E6%9D%A5%E6%BA%90%E5%8F%8A%E5%85%B6%E6%8A%BD%E5%8F%96%E8%A7%84%E5%88%99"><span class="nav-number">5.3.3.</span> <span class="nav-text">定义数据来源及其抽取规则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">物理模型设计（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%88%E5%B9%B6%E8%A1%A8"><span class="nav-number">5.4.1.</span> <span class="nav-text">合并表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E6%95%B0%E6%8D%AE%E5%BA%8F%E5%88%97"><span class="nav-number">5.4.2.</span> <span class="nav-text">建立数据序列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%E5%86%97%E4%BD%99"><span class="nav-number">5.4.3.</span> <span class="nav-text">引入冗余</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E7%9A%84%E7%89%A9%E7%90%86%E5%88%86%E5%89%B2"><span class="nav-number">5.4.4.</span> <span class="nav-text">表的物理分割</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%AF%BC%E5%87%BA%E6%95%B0%E6%8D%AE"><span class="nav-number">5.4.5.</span> <span class="nav-text">生成导出数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%B9%BF%E4%B9%89%E7%B4%A2%E5%BC%95"><span class="nav-number">5.4.6.</span> <span class="nav-text">建立广义索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%94%9F%E6%88%90"><span class="nav-number">5.5.</span> <span class="nav-text">数据仓库生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%9A%84%E4%BD%BF%E7%94%A8%E4%B8%8E%E7%BB%B4%E6%8A%A4"><span class="nav-number">5.6.</span> <span class="nav-text">数据仓库的使用与维护</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">5.7.</span> <span class="nav-text">数据仓库的生命周期</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

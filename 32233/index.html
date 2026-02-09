@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\vis{\mathsf{\textcolor{orange}{vis}}} \def\ar{\mathsf{\textcolor{pink}{ar}}} \def\RW{\mathsf{RW}} \def\WW{\mathsf{\textcolor{red}{WW}}} \def\WR{\mathsf{\textcolor{blue}{WR}}} \def\visa{\xright">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CONCUR&#39;18-Automated Detection of Serializability Violations Under Weak Consistency">
+<meta property="og:url" content="https://eaglebear2002.github.io/32233/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\vis{\mathsf{\textcolor{orange}{vis}}} \def\ar{\mathsf{\textcolor{pink}{ar}}} \def\RW{\mathsf{RW}} \def\WW{\mathsf{\textcolor{red}{WW}}} \def\WR{\mathsf{\textcolor{blue}{WR}}} \def\visa{\xright">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204100343564.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204101750300.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231124145120224.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127120252724.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127122647541.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127124158002.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127124217853.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127124409212.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204110445159.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127125916847.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127125110436.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212172744330.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212172824772.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231127113036326.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231216182208559.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231218160924496.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231218160905409.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212162523376.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204145952348.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204150007045.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212162013964.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212162001192.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231212162434629.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/32233/image-20231204145940052.png">
+<meta property="article:published_time" content="2023-12-12T06:37:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.759Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/32233/image-20231204100343564.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/32233/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CONCUR'18-Automated Detection of Serializability Violations Under Weak Consistency | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/32233/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CONCUR'18-Automated Detection of Serializability Violations Under Weak Consistency
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-12-12 14:37:00" itemprop="dateCreated datePublished" datetime="2023-12-12T14:37:00+08:00">2023-12-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%AA%8C%E8%AF%81/" itemprop="url" rel="index"><span itemprop="name">客户程序验证</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\vis{\mathsf{\textcolor{orange}{vis}}}
+\def\ar{\mathsf{\textcolor{pink}{ar}}}
+\def\RW{\mathsf{RW}}
+\def\WW{\mathsf{\textcolor{red}{WW}}}
+\def\WR{\mathsf{\textcolor{blue}{WR}}}
+\def\visa{\xrightarrow{\vis}}
+\def\ara{\xrightarrow{\ar}}
+\def\RWa{\xrightarrow{\RW}}
+\def\WWa{\xrightarrow{\WW}}
+\def\WRa{\xrightarrow{\WR}}
+\def\wri{\mathsf{wri}}
+\def\Stmts{\mathtt{Stmts}}
+\def\IF{\mathtt{IF}}
+\def\true{\mathsf{true}}
+\def\AccID{\mathtt{AccID}}
+\def\ID{\mathtt{ID}}
+\def\bal{\mathtt{bal}}
+\def\Amount{\mathtt{Amount}}
+\def\Alive{\mathtt{Alive}}
+\def\Fields{\mathtt{Fields}}
+\def\T{\mathcal{T}}
+\def\R{\mathcal{R}}
+\def\D{\mathcal{D}}
+\def\V{\mathcal{V}}
+\def\bbT{\mathbb{T}}
+\def\bbV{\mathbb{V}}
+\def\bbZ{\mathbb{Z}}
+\def\B{\mathbb{B}}
+\def\v{\mathtt{v}}
+\def\f{\mathtt{f}}
+\def\FOREACH{\texttt{ FOREACH}}
+\def\IN{\texttt{ IN}}
+\def\DO{\texttt{ DO}}
+\def\END{\texttt{ END}}
+\def\NULL{\texttt{ NULL}}
+\def\Vars{\texttt{ Vars}}
+\def\LVar{\texttt{ LVar}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>尽管近年来开发了许多弱一致性机制来提高分布式复制系统的性能并确保可用性，但确保在此类系统上运行的事务应用程序的正确性仍然是一个困难而重要的问题。可串行化是事务性程序的一个众所周知的正确性标准； 然而，了解应用程序在弱一致性环境中执行时是否可序列化仍然是一项具有挑战性的工作。在这项工作中，我们结合了基于依赖图的可串行化特征，并利用<strong>抽象执行框架</strong>来开发一种全自动方法，用于在任何弱一致性模型下静态查找有界可串行化违规。我们将可序列化问题简化为一阶逻辑（FOL）中公式的可满足性问题，这使我们能够利用现有 SMT 求解器的功能。我们提供了从用 SQL 编写的程序（允许循环和条件）<strong>自动构造 FOL 编码的规则</strong>，并将一致性规范表示为 FOL 公式。除了检测有界可串行性违规之外，我们还提供了两种正交方案，通过提供充分的条件（同样以 FOL 公式的形式）来推理无界执行，其可满足性意味着在任何任意执行中都不存在异常。我们已将所提出的技术应用于 TPC-C（一个具有复杂应用程序逻辑的现实数据库程序），并且能够发现并行快照隔离（PSI）下的异常，并验证快照隔离（SI）下无限执行的可串行性，两个远弱于可串行化的一致性机制。</p>
+<blockquote>
+<p>Nagar 与 Jagannathan 在本文中使用一阶谓词逻辑公式对客户程序以及事务一致性模型进行精确建模，利用 SAT/SMT 自动推导出违反该一致性的执行历史的结构，并在客户程序可能产生的所有执行历史中搜索该结构。</p>
+<p>本文的工作是基于<strong>分布式数据一致性</strong>。</p>
+</blockquote>
+<p>TODO：SQL 中的循环是否是必须的？</p>
+<p>作者：Kartik Nagar and Suresh Jagannathan, Purdue University, USA</p>
+<h2 id="Introduction">Introduction</h2>
+<p>我们考虑检测在弱一致的复制分布式数据库中执行的事务程序的可序列化违规的问题。如果此类程序的执行等价于包含程序的事务的串行、顺序执行，则称其是可序列化的。确保此类程序的所有执行都是可序列化的，通过减少对理解顺序执行问题的复杂性，极大地简化了对程序正确性的推理。不幸的是，在不牺牲可用性（低延迟）[18] 的情况下，使用运行时同步机制强制执行可序列化性在地理复制分布式系统中是有问题的。为了获得可序列化性的正确性优势和高可用性的性能和可扩展性优势，我们研究了可以<strong>静态识别</strong>事务程序以始终产生可序列化执行的条件，而不需要全局同步。实现这一目标的挑战源于推理复制状态的复杂性，其中并非所有副本共享它们持有的数据的相同视图。</p>
+<p>为了应对这一挑战，我们提出了一种全自动静态分析，它将程序中的<strong>显着依赖关系</strong>精确地编码为根据特定<strong>弱一致性模型的公理规范</strong>（§4）。然后，分析利用定理证明器系统地搜索这些执行中是否存在与这些依赖关系一致的循环；循环的存在表明可序列化违规（§5.1）。值得注意的是，我们的方法可以应用于任何弱一致性模型，其规范可以在一阶逻辑中表达，这是一个包含我们所知道的所有真实数据存储的类。更具体地说，我们的方法从输入程序构建一个依赖图[2]，其中包含一个循环，然后询问在给定的一致性规范下是否存在有效的执行，这可能导致该图。为此，我们从可能发生依赖关系的事务程序条件中自动提取，并将依赖关系与基于事件的模型中的工件相关联，以找到是否存在与依赖图相对应的有效抽象执行。<strong>这些依赖关系以一阶逻辑公式编码，该公式只有在存在违反可序列化的执行时才可满足。</strong></p>
+<p>给定一个用 SQL 编写的事务程序，我们发现给定弱一致性模型下有界长度（bounded length）的可序列化违规（绑定限制了所考虑的并发事务实例的数量）。我们输出实际异常，包括所涉及的事务及其输入。然后可以使用此输出来加强异常中涉及的事务的一致性（甚至修改事务本身）。由于该方法在一致性策略上是参数化的，它还可以用于确定程序可序列化的最弱一致性策略。与其他用于检测例如并发程序[23]中的错误的有界验证技术一致，我们假设大多数可序列化违规将使用少量事务实例显现。</p>
+<p>我们提供了两种正交方案，以使用无限数量的事务实例对任意长执行进行推理（§5.2、§5.3）。第一个方案形式化了足以检查有界执行中的可序列化违规的论点，通过证明超出该界限的较长违规会导致边界内的违规行为。第二个方案应用归纳参数来检查任意长执行中异常的缺失。我们的方法是 sound，但不是 complete——虽然所有发现的异常都由定理证明者提供的反例证明是 sound，但我们不能排除这两种方案无法识别的无界执行中出现的可序列化违规的可能性。</p>
+<p>作为评估我们方法的适用性的严重案例研究，我们将我们的技术应用于 TPC-C、真实世界的事务程序和课程软件应用程序（§6）。在这两种情况下，我们能够在事件一致性和快照隔离（SI）的较弱变体（称为并行快照隔离 PSI [25]）下检测多个可序列化违规，并验证当使用 SI 进行无界执行时，这些 amoies 不会发生。我们现在使用简单的示例概述我们的方法。</p>
+<h2 id="Overview">Overview</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">withdraw(ID, Amount)<br>    <span class="hljs-keyword">SELECT</span> Balance <span class="hljs-keyword">AS</span> bal <span class="hljs-keyword">WHERE</span> AccID <span class="hljs-operator">=</span> ID<br>    IF bal <span class="hljs-operator">&gt;</span> Amount<br>    	<span class="hljs-keyword">UPDATE</span> <span class="hljs-keyword">SET</span> Balance <span class="hljs-operator">=</span> bal <span class="hljs-operator">-</span> Amount <span class="hljs-keyword">WHERE</span> AccID <span class="hljs-operator">=</span> ID<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>chatPDF 存疑：</p>
+<p>这段代码可以被编码为以下 FOL 公式：</p>
+<p>$$
+\left[(Exists(r, Account(r) \land AccID(r) = ID \land Balance(r) = bal))\right]_t,r \land bal &gt; Amount \land V(\phi, \psi)
+$$</p>
+<p>Account(r) 是一个谓词，表示 r 是一个账户记录。V(ϕ, ψ) 是一个评估函数，其中 ϕ 选择任意一个包含 $\withdraw$ 操作的循环的迭代，ψ 是 IF 语句的条件 bal &gt; Amount 的值。如果 bal &gt; Amount 为真，则更新 Balance 字段的值为 bal - Amount。</p>
+<p>在上述公式中，更新操作并没有直接体现出来。这是因为在本文中，更新操作是通过对数据库状态进行修改来实现的，而不是通过修改 FOL 公式来实现的。在这种情况下，更新操作的效果可以通过修改数据库状态来实现，而不需要在 FOL 公式中显式地表示出来。因此，上述公式中只包含了 SELECT 语句和 IF 语句的条件，而没有包含 UPDATE 语句的具体实现。</p>
+</blockquote>
+<p>在本节中，我们将展示如何发现可序列化违规，以及我们的分析的输出如何用于使用选择性同步修复违规。考虑一个简单的银行应用程序，它维护表帐户中多个帐户的余额，该帐户使用主密钥 AccID 进行索引，并包含字段平衡。考虑一个用 SQL 风格的语言编写的 $\withdraw$ 操作（如图 1 所示），它以 ID 和 amount 作为输入，如果余额足够，则从帐户数量 ID 中减去数量。假设应用程序部署在分布式复制环境中，这允许在可能不同的副本上并发调用 $\withdraw$ 操作，唯一保证提供最终一致性——最终，所有副本都将见证对 Balance 字段的所有更新。在最终一致性下，应用程序显然是不可序列化的，因为并发 $\withdraw$ 操作到同一个帐户——其总 $\withdraw$ 量超过帐户的平衡——都可以成功，这在可序列化的执行中是不可能的。</p>
+<p>在这种情况下表达执行的一种方便方法是使用基于公理事件的表示。在这个框架中，<strong>抽象执行</strong>表示为元组 $(T, \vis, \ar)$，其中：</p>
+<ul>
+<li>$T$ 是事务调用的集合，</li>
+<li>$\vis \subseteq T \times T$ 是一个可见性关系，使得如果 $t \visa t'$，那么 t 的更新对 t' 可见；</li>
+<li>$\ar \subseteq T \times T$ 是一个仲裁关系，它完全对所有写入相同的位置进行排序，并确保最终的一致性[9]。</li>
+</ul>
+<p>例如，如果 $t_1 = \withdraw(1,50), t_2 = \withdraw(1,60)$，则 $E = (\set{t_1, t_2}, \set{}, \set{(t_1, t_2)})$ 是一个抽象执行，不可序列化，因为帐户编号 1 中的余额的最终值将仅反映（reflect） $\withdraw$ 操作 $t_2$（假设 AccID 1 中的初始余额为 100），因为这两个操作之间没有强制执行可见性约束。这是丢失更新（lost update） [5] 异常的示例。我们的目标是自动构建这种异常执行。</p>
+<p>检测序列化性违规的一种有用技术是从抽象执行中构建依赖图，然后在依赖图中搜索循环。依赖关系图的节点是调用，边表示它们之间的依赖关系。与可序列化性检测相关的依赖关系有三种类型：</p>
+<ul>
+<li>$t_1 \WRa t_2$ 是读依赖关系，这意味着 $t_2$ 读取由 $t_1$ 写入的值；</li>
+<li>$t_1 \WWa t_2$ 是写依赖关系，这意味着 $t_1$ 和 $t_2$ 都写入相同的位置，$t_2$ 的写入在 $t_1$ 之后仲裁；</li>
+<li>$t_1 \RWa t_2$ 是反依赖关系，这意味着 $t_1$ 不读取由 $t_2$ 写入的值，而是读取旧版本。例如，上面描述的异常执行 E 的依赖图如图 2 所示。</li>
+</ul>
+<img src="/32233/image-20231204100343564.png" style="zoom:50%;">
+<p>在我们的方法中，我们从包含循环的依赖关系图开始，然后询问与依赖关系图对应的执行是否可能。从事务代码中，我们自动提取在事务调用之间可以显示依赖边的条件。在我们正在运行的示例中，两个 $\withdraw$ 调用之间的依赖边（任何类型）只有在使用相同的帐户 ID 调用时才能显示。此外，我们将依赖边与相应抽象执行的关系 $\vis, \ar$联系起来。例如，$t_1 \RWa t_2 \Rightarrow \lnot(t_2 \visa t_1)$，因为否则，$t_1$ 将读取 $t_2$ 写入的值。这很有用，因为不同的一致性方案可以通过在 $\vis$ 和 $\ar$ 关系上设置约束来直观地表达。</p>
+<p>为了防止在我们的运行示例中出现异常执行，我们可以使用并行快照隔离[25]，它确保如果两个调用写入同一位置，则它们不能并发。虽然 PSI 是使用复杂的分布式协议来实现的，但在我们的抽象框架中，它可以简单地用以下约束来表示：</p>
+<p>$\forall t, t'.t \WWa t' \Rightarrow t \visa t'$</p>
+<p>现在，反常执行 $E$ 是不可能的，因为 $t_1 \WWa t_2 \Rightarrow t_1 \visa t_2$ 与 $t_2 \RWa t_1$ 相矛盾。</p>
+<p>综上所述，以下是我们在 PSI 下为上述应用生成的公式的相关部分：</p>
+<p>$$
+\forall t, t' t \RWa t' \Rightarrow (\exists r.\AccID(r) = \ID(t) \land \AccID(r) = \ID(t') \land \bal(t') &gt; \Amount(t')) \tag{1}
+$$</p>
+<p>$$
+\forall t, t', r.(\AccID(r) = \ID(t) \land \bal(t) &gt; \Amount(t) \land \AccID(r) = \ID(t') \land \bal(t') &gt; \Amount(t') \land t \ara t') \Rightarrow t \WWa t'  \tag{2}
+$$</p>
+<p>$$
+\forall t, t'.t \RWa t' \Rightarrow \lnot(t' \visa t)   \tag{3}
+$$</p>
+<p>$$
+\forall t, t'.t \WWa t' \Rightarrow t \visa t'   \tag{4}
+$$</p>
+<p>我们使用 $t, t'$ 表示事务的调用，$r$ 表示数据库中的记录。我们定义了 $\AccID$ 函数来访问记录的主键。类似地，$\ID, \Amount$ 等是将调用映射到其参数和局部变量的函数。两个调用之间的依赖关系的存在强制两个调用都必须访问的记录存在，以及执行访问所需的局部变量的条件（公式 1）。另一方面，如果两个调用保证写入相同的位置，它们之间必须存在 $\WW$ 依赖关系（公式 2。现在，不可能有调用 $t_1$ 和 $t_2$，遵守公式 2。(1)-(4)使得 $t_1 \WWa t_2$ 和 $t_2 \RWa t_1$ 是引起循环的必要条件，从而表现出串行性违反。</p>
+<p>事实上，在 PSI 下，这个应用程序的依赖关系图中不可能有任意长度的循环。为了显示这一点，我们使用以下观察结果：由上述应用程序生成的依赖图中的任何长路径都将包含弦（chord），从而导致更短的路径。事实上，可以证明，<strong>在应用程序的任何依赖关系图中，任意两个调用之间的最短路径（如果存在路径）将始终小于或等于 3</strong>。这可以通过使用上述约束 (1)-(4)（并为 WR 边添加类似的约束），然后实例化长度为 4 的路径，使得路径中涉及的任何节点之间都没有弦，然后显示这种编码的不满意性来显示。因为一个循环也是一个路径，现在只检查长度为 3 的循环就足够了，因为任何更长的循环必然会产生一个长度小于或等于 3 的循环。</p>
+<p>直观地说，这是在银行应用程序中发生的，因为两个节点之间存在任何依赖边意味着两个调用都必须访问同一个帐户，并且其中至少有一个必须执行写入。此外，任何两次写入总是通过 $\WW$ 边相关。现在，如图 3 所示，在依赖项中长度为 4 的任何路径图中，$t_1$ 或 $t_2$ 之一和 $t_4$ 或 $t_5$ 之一必须是一个 write，这意味着两个 write 之间的弦。因此，在 $t_1$ 和 $t_5$ 之间总是存在长度小于或等于 3 的较短路径。</p>
+<p><img src="/32233/image-20231204101750300.png" alt></p>
+<blockquote>
+<p>如果一个事务只有一个操作，那么这一结论总是成立的。这对工程上的优化有指导意义。</p>
+</blockquote>
+<h2 id="Preliminaries">Preliminaries</h2>
+<h3 id="Input-Language-and-Database-Mode">Input Language and Database Mode</h3>
+<p><img src="/32233/image-20231124145120224.png" alt></p>
+<p>$\T$ 是事务程序，有一个在调用时被实例化的参数列表 $vlist$，和一组用于存储来自数据库的中间值的局部变量（通常作为 SELECT 查询的输出）。$\Stmts(\T)$ 表示 $\T$ 中的 SQL 语句（即 $\mathtt{INSERT, DELETE, DELECT, UPDATE}$）集合。</p>
+<ul>
+<li>$e_d$ 相当于 term；</li>
+<li>$\phi_d$ 是 SELECT 筛选记录的谓词，允许字段和值之间比较谓词的所有布尔组合；</li>
+<li>$\phi_c$ 是 SELECT 筛选变量用于 IF 判断的谓词，<strong>只允许使用局部变量和参数</strong>；</li>
+<li>新增一列 $\Alive$ 表示当前记录是否在数据库表内。</li>
+</ul>
+<p>为了简化演示，我们将假设只有一个表，并且每条记录都是由集合 $\Fields$ 索引的一组值。此外，所有 $\Fields$ 都存储<strong>整数值</strong>。$\mathtt{FOREACH}$ 循环在 $\v_2$ 中的一组记录上进行迭代，并在每次迭代期间将 $\v_1$ 分配给单个记录。我们将 $\v_2$ 称为循环变量。设 $\D(\v)$ 表示 $\v$ 的嵌套深度，如果 $\v$ 在任何循环之外被赋予一个值（或是一个参数变量），则嵌套深度为 0，否则为封闭循环的数量。对于在循环内分配值的变量 $\v$，对于所有 $1 \le i \le \D(\v)$,设 $\mathtt{LVar}(\v，i)$ 表示深度 i 处的循环变量。</p>
+<p>SQL 语句使用谓词 $\phi _d$ 来选择将被访问/修改的记录，其中 $\phi _d$ 允许字段和值之间比较谓词的所有布尔组合。IF 语句 $\phi _c$ 中使用的条件<strong>只允许使用局部变量和参数</strong>。为了检查 SELECT 查询的输出是否为空，我们使用条件表达式 $\v = \NULL$，其中 $\v$ 存储查询的输出。</p>
+<p>我们假设一个固定的非空字段子集是主键 PK。任何两条记录都必须在其至少一个 PK 字段中具有不同的值。假设有一个称为 $\Alive \in \Fields$ 的特殊字段，如果记录在数据库中，则值为 1，否则为 0。最初，所有记录都非 $\Alive$ 的。当将记录插入数据库中时，它变为 $\Alive$，当记录被删除时，它再次变为非 $\Alive$。</p>
+<blockquote>
+<p>chatPDF，存疑：</p>
+<p>这篇文章中提到了 SQL 语句的编码方式。SQL 语句使用<strong>谓词</strong>来选择将被访问/修改的记录，其中谓词允许在字段和值之间使用比较谓词的所有布尔组合。在 IF 语句中使用的条件语句（$\phi_c$ ）只允许使用局部变量和参数。为了检查 SELECT 查询的输出是否为空，我们使用条件表达式 v = NULL，其中 v 存储查询的输出。对于 WHERE 子句的编码，使用类似的过程。由于 WHERE 子句在记录上进行评估，因此编码专门针对记录和事务实例进行了优化。编码将字段访问替换为应用于记录 r 上的相应字段投影函数。请注意，字段投影函数仅用于在 WHERE 子句中访问的主键字段（表示为 $F \sube PK$）。所有类型条件和 WHERE 子句的完整编码可以在[24]的附录 A 中找到。</p>
+<p>编码示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> my_table <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br><span class="hljs-keyword">INSERT INTO</span> my_table (id, name) <span class="hljs-keyword">VALUES</span> (<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;John&#x27;</span>);<br><span class="hljs-keyword">UPDATE</span> my_table <span class="hljs-keyword">SET</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Jane&#x27;</span> <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> my_table <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+<p>$$
+\left[Exists(x, my_table(x) \land id(x) = 1)\right]_t,r\
+\left[Exists(x, my_table(x) \land id(x) = 1 \land name(x) = 'John' \land Alive(x) = 1)\right]_t,r\
+\left[Exists(x, my_table(x) \land id(x) = 1 \land name(x) = 'Jane' \land Alive(x) = 1)\right]_t,r\
+\left[Exists(x, my_table(x) \land id(x) = 1 \land Alive(x) = 0)\right]_t,r
+$$</p>
+</blockquote>
+<h3 id="Abstract-Executions">Abstract Executions</h3>
+<p>在我们的框架中，事务程序的执行使用基于[5]中使用的方法的事件结构来表示。事务实例的执行由事件组成，这些事件是数据库操作。数据库操作是对记录的字段的读取或写入。</p>
+<p>$\mathcal{R} = \mathup{PK} \rightarrow \mathbb{Z}$ 是所有主键的集合。</p>
+<p>所有数据库操作的集合表示为：</p>
+<p>$$
+\mathcal{O}=\set{\wri(r,f,n)|r \in \mathcal{R}, f\in \Fields \setminus PK, n \in \mathbb{Z}} \cup \set{\mathup{rd}(r,f,n)|r \in \mathcal{R}, f\in \Fields , n \in \mathbb{Z}}
+$$</p>
+<p>为了简化表示，<strong>我们假设事务最多从记录的字段读取（写入）一次，并且不读取它写入、插入或删除的任何记录</strong>。这些假设允许我们忽略单个事务实例的事件之间的顺序。如果不满足这些假设，我们的方法可以很容易地进行调整。</p>
+<blockquote>
+<p>这一假设过于简单，我们要处理的绝大多数数据库事务都是一个事务有多个事件。</p>
+</blockquote>
+<h4 id="Transaction">Transaction</h4>
+<p><img src="/32233/image-20231127120252724.png" alt></p>
+<p>在这项工作中，我们将假设事务是在保证原子性和隔离性（也称为原子可见性[12]）的环境中执行的。也就是说，要么事务的所有事件对其他事务可见，要么没有，并且同一组事务对事务中的所有事件可见。原子性和隔离性是事务程序的关键特性，两者都可以在复制的分布式环境中有效实现[9，3]。请注意，原子性和隔离并不能保证可序列化性，如§2 中的示例所示，我们的目标是在这种弱一致性的情况下探索可序列化性。</p>
+<h4 id="Abstract-Execution">Abstract Execution</h4>
+<p><img src="/32233/image-20231127122647541.png" alt></p>
+<ul>
+<li>$\sigma \visa \sigma'$ 表示前者的所有操作对后者可见；</li>
+<li>$\sigma \vdash o$ 表示前者执行了（包括了）后者。</li>
+</ul>
+<h4 id="Dependency-Graph">Dependency Graph</h4>
+<p><img src="/32233/image-20231127124158002.png" alt></p>
+<p>以上的三个语义是显然的。</p>
+<p><img src="/32233/image-20231127124217853.png" alt></p>
+<p>以上的三个语义是显然的。</p>
+<h4 id="Weak-Isolation-Models">Weak Isolation Models</h4>
+<p>不同的弱一致性和弱隔离模型可以通过对与抽象执行相关联的 vis 和 ar 关系施加约束来表达。这就产生了在特定模型下有效抽象执行的概念，即满足与这些模型相关联的约束的执行。下面，我们提供了几个已知的弱一致性和弱隔离模型的示例：</p>
+<p><img src="/32233/image-20231127124409212.png" alt></p>
+<p>不同的模型也可以组合在一起以创建混合模型。例如，$\Psi_{\mathup{PSI}} \land \Psi_{\mathup{PC}}$ 等效于集中式数据库中的快照隔离 SI[4]。下面，我们在我们的设置中形式化了冲突可序列化性[6]的经典概念，然后将其与依赖图中循环的存在联系起来。</p>
+<p><img src="/32233/image-20231204110445159.png" alt></p>
+<h3 id="Operational-Semantics">Operational Semantics</h3>
+<p>我们现在提出了一种操作语义，用于在一致性规范下从事务程序生成抽象执行。操作语义的目的是将 SQL 语句与抽象数据库操作联系起来，并证明我们在 FOL 中编码的合理性。在这里，我们只提供了一个非正式的概述，完整的操作语义可以在附录 B 中找到。</p>
+<ul>
+<li>$\mathcal{S}_{\mathbb{T, \Psi}}  = (\Delta, \rightarrow)$ 是转换系统（transition system）；</li>
+<li>$\Delta$ 是状态集，每个元素状态 $\delta \in \Delta$ 是以 $(\Sigma, \vis, \ar, \mathcal{P})$ 的形式存储的。</li>
+<li>$\Sigma$ 是已提交的事务实例；</li>
+<li>$\mathcal{P}$ 是事务实例的运行池。</li>
+</ul>
+<p>转换有两种类型：</p>
+<ol>
+<li>生成事务程序 $\T \in \bbT$ 的新实例，或者</li>
+<li>在运行池中执行事务实例的语句。</li>
+</ol>
+<p>当事务实例的新执行开始时，$\Sigma$ 的子集被非决定性地选择为对新实例可见。基于可见事务集和 ar 关系为新实例构建数据库视图（确保最后一个写入者获胜策略），并在此视图的基础上回答事务实例的所有查询。在任何时候，来自 $\mathcal{P}$ 的任何事务实例都可以被非决定性地选择用于执行其下一条语句。在事务实例执行期间生成的任何新事件都存储在运行池中。最后，当事务实例想要提交时，如果该实例要提交，则检查一致性规范（$\Psi$）是否满足，如果满足，则将其添加到 $\Sigma$。我们现在可以根据转换系统的轨迹来定义<strong>有效的抽象执行</strong>：</p>
+<p><img src="/32233/image-20231127125916847.png" alt></p>
+<p>Extended Version 附录 B 的操作语义（部分）：这部分还没看懂。</p>
+<img src="/32233/image-20231127125110436.png" style="zoom:50%;">
+<h2 id="FOL-Encoding">FOL Encoding</h2>
+<h3 id="Vocabulary">Vocabulary</h3>
+<p>给定一组事务程序 $\bbT$ 和一致性规范 $\Psi$，我们现在展示如何在 FOL 中构造一个公式，使得 $\Psi$ 下 $\bbT$ 的任何有效抽象执行 $\chi$ 及其依赖图 $G_\chi$ 是符合公式的模型。编码以 $\bbT$ 和 $\Psi$ 作为参数。我们首先描述编码的词汇。我们定义了两个未解释的<strong>排序（sort）</strong> $\tau$ 和 $R$，使得 $\tau$ 的成员是<strong>事务实例</strong>，$R$ 的成员是<strong>记录</strong>。此外，我们还定义了一个包含事务类型的有限排序 $\bbT$，其中每种类型都是一个事务程序。</p>
+<blockquote>
+<p>TODO：什么是排序？排序是指有序的集合吗？</p>
+</blockquote>
+<p>函数 $\Gamma : \tau \to \bbT$ 将每个<strong>事务实例</strong>与其<strong>类型</strong>相关联。对于每个事务程序 $\T \in \bbT$ 和每个变量 $\v \in \Vars(\T)$，变量投影函数 $\rho_\v$ 给出事务实例中 $\v$ 的值。$\rho_\v$ 的签名取决于变量的类型以及它是否在循环中分配（赋值）。首先，让我们考虑在任何循环之外分配值的变量。在我们的框架中，变量有两种类型：值或一组值。此外，该值可以是整数（例如 $\withdraw$ 事务的参数 $\ID$）或记录。令 $\bbV = \bbZ \cup R$ 表示变量 $\v$ 的<strong>取值集合</strong>。如果 $\v$ 是<strong>一个</strong>值，$\rho_\v$ 具有签名 $\tau \to \bbV$，（即，$\rho_\v(t)$ 表示变量 $\v$ 在某个特定的事务实例 $t$ 中的值）。如果 $\v$ 是<strong>一组</strong>值，则 $\rho_\v$ 是一个谓词，其签名为 $\bbV \times \tau \to \B$，使得如果 $r$ 在事务实例 $t$ 中属于 $\v$，则 $\rho_\v(r, t)$ 为真。</p>
+<p>考虑一个循环的形式：$\FOREACH \v_1 \IN \v_2 \DO c \END$。循环体（包括 $\v_1$）内赋值的所有局部变量都将由集合 $\v_2$ 中的值索引。因此，如果一个局部变量 $\v_3$ 在循环中被赋值，它是<strong>一个</strong>值，那么 $\rho_{\v_3}$ 将具有签名 $\bbV \times \tau \to \bbV$。另一方面，如果 $\v_3$ 存储<strong>一组</strong>值，则 $\rho_{\v_3}$ 将具有签名 $\bbV \times \bbV \times \tau \to \B$，并且解释如果 $\v_3$ 在 $\v_1$ 是 $r_1 \in \v_2$ 的迭代中包含 $r_2$，则 $\rho_{\v_3}(r_1, r_2, t)$ 为真。类似地，嵌套循环将具有由所有封闭循环中的记录索引的局部变量。</p>
+<p>综上所述，$\rho_\v$ 的签名要么是 $\bbV^{\D(\v)} × τ \to \bbV$，要么是 $\bbV^{\D(\v) + 1} × τ \to \B$。与变量投影函数类似，为每个字段 $\f \in \Fields$ 定义字段投影函数 $\rho_\f : \R \to \bbZ$，使得 $\rho_\f(r)$ 给出记录 $r$ 中 $\f$ 的值。</p>
+<p>我们定义谓词 $\WR, \WW, \RW$ 所有类型都是 $\tau \times \tau \to \B$，它们分别指定事务实例之间的读取、写入和反依赖关系。我们还定义了谓词 $\WR^R、\RW^R、\WW^R$ 所有类型都是 $\R \times \Fields \times \tau \times \tau \to \B$，它们通过指定导致依赖关系的记录和字段来提供更多上下文。谓词 $\vis, \ar$ 的类型都是 $\tau \times \tau \to \B$，指定事务实例之间的可见性和仲裁关系。谓词 $\Alive : \R \times \tau \to \B$ 表示记录在某事务实例中是否存活（存在）。</p>
+<h3 id="Relating-Dependences-with-Abstract-Executions">Relating Dependences with Abstract Executions</h3>
+<p>通过引理 4，在任何抽象执行中，两个事务实例之间的依赖边的存在强制对两个实例之间的 $\vis$ 和/或 $\ar$ 关系的约束。以下公式将此以及对 $\vis$ 和 $\ar$ 满足的基本约束进行编码：</p>
+<p><img src="/32233/image-20231212172744330.png" alt></p>
+<blockquote>
+<p>$\varphi_{basic}$ 中的规则都是显然的。</p>
+</blockquote>
+<p>以下公式编码了一个基本的约束，涉及同一记录同一字段的依赖关系，因为最后一个写者赢得了数据库的性质：</p>
+<p><img src="/32233/image-20231212172824772.png" alt></p>
+<p>最后，一致性规范 $\Psi$ 可以使用词汇表中定义的关系和函数直接编码（我们用 $\varphi_\Psi$ 表示这个公式）。</p>
+<h3 id="Relating-dependences-with-transactional-programs">Relating dependences with transactional programs</h3>
+<p>两个事务实例之间的依赖边的存在对生成实例及其参数的事务程序类型施加了约束。为了自动推断这些约束，我们使用以下策略：如果两个实例之间存在依赖边，那么事务必须存在两个访问公共记录的 SQL 语句。</p>
+<p>为了对这一点进行编码，我们首先提取可以执行事务程序中 SQL 语句的条件。通过对事务 T 的代码执行简单的句法分析，我们从 $\Stmts(\T)$ 中的每个 SQL 语句中获得映射 $\Lambda_T$ 到封闭 $\IF$ 条件的结合（完整的算法可以在附录 A 中找到）。</p>
+<p>通过将变量和字段分别替换为相应的<strong>变量投影和字段投影函数</strong>来构建程序中所有条件和 SQL 语句中的所有 WHERE 子句的 FOL 编码。这种编码的代表性规则集如图 4 所示。对于 IF 语句中使用的条件 $\varphi$，我们使用符号 $[\varphi]_t$ 来描述专门用于事务实例 t 的 FOL 编码。解释是，只有当条件 $\varphi$ 在事务实例 t 中为真时，$[\varphi]_t$ 才是可满足的。如果 $\varphi$ 在循环中，则如果 $\varphi$ 在 t 中的封闭循环的任何任意迭代中为真，则 $[\varphi]_t$ 一定是可满足的。出于这个原因，$[\varphi]_t$ 实际上表示为一个元组 $(\varphi, \psi)$，其中 $\varphi$ 选择任何任意的封闭循环迭代，公式 $\psi$ 是该迭代中条件的值。我们定义了一个评估函数 $\V(\varphi, \psi) = \varphi \land \psi$，它给出了最终的 FOL 编码。</p>
+<p><img src="/32233/image-20231127113036326.png" alt></p>
+<p>公式 $\varphi$ 通过实例化属于所有封闭循环的循环变量的记录来选择迭代。例如，考虑 $\v = \NULL$ 的编码。在这里，$\varphi$ 实例化为属于 $\v$ 的每个包围循环的循环变量的记录（编码为 $\V([r_i \in \LVar(\v, i)]<em>t)$)，$ψ$ 编码所选迭代中 $\rho</em>\v$ 对每个记录都是假的。类似地，在 $[r \in  \v]<em>t$ 的编码中，$\rho</em>\v$ 在记录 $r$ 中必为真。在 $[\v_1 \in  \v_2]_t$ 的编码中，我们首先获得 $\v_1$ 的值（元组 $[\v_1]_t$ 中的第二项），然后检查它是否存在于 $\v_2$ 中。</p>
+<p>类似的过程用于获取 SQL 语句中使用的 WHERE 子句的编码。由于 WHERE 子句在记录上进行评估，因此编码专门用于记录和事务实例，为此我们使用符号 $[\varphi]<em>{t,r}$。解释是，只有当记录 $r$ 上的事务实例 $t$ 为真时，$[\varphi]</em>{t,r}$ 才是可满足的。编码将字段访问替换为应用于 $r$ 的相应字段投影函数。请注意，场投影函数仅用于 WHERE 子句中访问的主要关键字段（表示为 $F \subseteq PK$）。所有类型的条件和 WHERE 子句的完整编码可以在附录 A 中找到。</p>
+<p>如前所述，我们的策略是根据访问公共记录来编码依赖边的必要条件。对于每对事务类型 $\T_1, \T_2 \in \bbT$，每个依赖类型 $\R \in \set{\WR, \RW, \WW}$，每对 SQL 语句 $\c_1 \in \Stmts(\T_1), \c_2 \in \Stmts(\T_2)$，由于语句 $\c_1$ 和 $\c_2$，我们计算依赖 $R$ 的必要条件 $\eta ^{\R\to,\T_1,\T_2 }_{\c_1,\c_2} (t_1, t_2)$ 对于依赖 $\R$ 存在于类型 $\T_1$ 和 $\T_2$ 的实例 $t_1$ 和 $t_2$ 之间。以下公式编码了两个事务实例之间的依赖关系可能是由于这些事务中任意两个 SQL 语句之间的依赖关系引起的这一事实：</p>
+<p><img src="/32233/image-20231216182208559.png" alt></p>
+<h2 id="Applications">Applications</h2>
+<h3 id="Bounded-Anomaly-Detection">Bounded Anomaly Detection</h3>
+<h3 id="Verifying-Serializability-The-Shortest-Path-Approach">Verifying Serializability : The Shortest Path Approach</h3>
+<h3 id="Verifying-Serializability-An-Inductive-Approach">Verifying Serializability : An Inductive Approach</h3>
+<h2 id="Case-Studies">Case Studies</h2>
+<p>我们开发了一个名为 Anode 的工具，它采用第 3.1 节中介绍的语言编写的一组程序和一致性规范，并使用第 4 节中介绍的编码规则自动生成 FOL 编码。我们使用 Z3 SMT 求解器来确定生成公式的满足性。为了评估我们方法的有效性，我们将所提出的技术应用于 TPC-C [1]，这是一种著名的在线事务处理 (OLTP) 基准，广泛用于数据库社区，以及一个课程软件应用程序（用于 [19]），它是大学使用的课程注册系统的代表。</p>
+<p>TPC-C：TPC-C 具有复杂数据库模式，具有 9 个表，在其 5 个事务中有复杂的应用程序逻辑。事务包含循环和条件，具有多个参数，并且根据参数值的行为不同；它们还使用复杂的查询，例如 SELECT MIN 和 SELECT MAX。据我们所知，这是第一个在弱一致性下验证 TPC-C 可序列化性的自动化静态分析。</p>
+<p>在最终一致性下，TPC-C 有许多“丢失更新”异常，类似于第 2 节中描述的银行应用程序中的异常。这些异常的长度很小，并使用第 5.1 节中介绍的编码自动检测（k = 2）。为了摆脱这些异常，我们将一致性规范升级为 PSI[25]。在 PSI 下，我们没有发现 k = 2 或 k = 3 的任何异常，但对于 k = 4，发现了涉及 New-Order、支付和 Order-Status 事务的“长叉”异常，如图 5 所示。</p>
+<p><img src="/32233/image-20231218160924496.png" alt></p>
+<p>这种异常的发生是因为 New-Order 和 Payment 事务更新两个不同的表（Order 和 Customer 表 resp.），而 Order-Statustransaction 读取这两个表。由于 New-Order 和 Payment 事务之间没有同步，Order-Status1 有可能看到 New-Order 的更新，而不是 Payment 的更新，Order-Status2 则相反。我们还发现了一个类似的异常，涉及 New-Order 的两个实例和 Stock-level 事务的两个实例。</p>
+<p>为了摆脱这些异常，我们进一步将一致性级别升级为快照隔离 (SI)，之后我们没有发现 k = 4 的任何异常。然后，我们将注意力转向验证 SI 下 TPC-C 的可序列化性。我们首先尝试了最短路径方法（适用于银行应用程序），但我们能够在没有任何和弦的情况下发现长路径（可以任意扩展）。接下来，我们尝试了归纳方法，该方法成功地证明了 TPC-C 的可序列化性。具体来说，对于 T′ ={New-Order, Payment}，公式 φInductive,T′ 显示为 UNSAT，其余 3 个事务 φInductive,{Delivery} 是 UNSAT。剩下的两个事务之间没有它们之间的任何依赖关系，这意味着 SI 下 TPC-C 的所有执行都是可序列化的。</p>
+<p>Courserware：Courseware 应用程序维护课程和学生的数据库，并提供添加/删除学生和课程的功能，并将学生注册到课程容量的课程中。在 EC 下，我们的编码发现了以下异常：（1）两个并发的 Enroll 事务可能会注册超出课程容量的学生，（2）两个具有相同名称或两个具有相同名称的学生课程可以注册，(3) 学生可以注册一个同时删除的课程，或者学生同时被删除。请注意，所有这些异常都是为 k = 2 发现的。</p>
+<p>为了删除这些违规行为，我们以多种方式升级一致性模型：Enroll 事务升级为 PSI，而选择性可序列化性用于 AddCourse 和 AddStudent 的两个实例，以及 Enroll 和 RemCourse、Enroll 和 RemStudent 的实例。虽然这些升级处理了上述异常，但我们发现了一个新的长分叉异常（对于 k = 4)，如图 6 所示。在这里，两个试图将学生（s）注册到课程（c）中的注册事务看到数据库的冲突视图，一个 Enroll 见证学生，而不是课程，反之亦然。我们注意到，虽然这是一个实际的可序列化违规，但它是完全无害的，因为见证不一致数据库状态的注册事务都将失败，因此最终的数据库状态与在执行结束时表现相同，其中两个注册都没有发生。这是我们分析的局限性，因为它没有提供任何方法来忽略无害的可序列化违规。我们计划在未来的工作中解决这个问题。</p>
+<p>为了消除这种违规，我们将 Enroll 的一致性级别升级为 SI，之后我们没有发现任何异常。接下来，我们转向验证，在这里我们成功地能够使用最短路径方法，并证明长度大于或等于 8 的 Courserware 应用程序的任何依赖图中不存在最短路径。除了不存在长度小于或等于 8 的任何周期之外，这意味着应用程序的任何执行都是可序列化的。请注意，在所有情况下，求解器都在几个 (&lt; 10) 秒中产生其输出。</p>
+<p><img src="/32233/image-20231218160905409.png" alt></p>
+<h2 id="Related-Work-and-Conclusion">Related Work and Conclusion</h2>
+<p>序列化是数据库社区中一个经过充分研究的问题，但缺乏静态自动化技术来检查数据库应用程序的可序列化性。Fekete 等人的早期工作。al.[17]和 Jorwekar 等人。al.[20]提出了轻量级句法分析，通过寻找应用程序静态依赖图中的危险结构来检查集中数据库中 SI 下的可序列化性（这是所有可能动态依赖图的过度近似）。最近的几项工作 [5, 12, 13, 14, 29, 27] 沿着这条线继续，方法是在不同的弱一致性机制下推导出依赖图中不同类型的危险结构，然后在静态依赖图上检查这些结构。</p>
+<p>然而，静态依赖图是实际执行的高度不精确的表示，并且任何依赖于这些图的分析都可能产生大量的误报。事实上，一些作品 [5, 13, 14] 认识到这一点并提出了复杂的条件来减少特定一致性机制的误报，但这些工作没有提供任何自动化方法来检查实际程序上的这些条件。此外，应用程序逻辑可以防止这些有害的结构在实际执行中表现出来，例如在 TPC-C 中，它在 SI 下的静态依赖图中具有有害的结构，但没有出现在任何动态依赖图中。在我们的工作中，我们使用 FOL 精确建模应用程序逻辑和一致性规范，以便求解器会自动推导出在给定一致性规范下可能出现的有害结构，并在考虑应用程序逻辑的实际依赖图中搜索它们。</p>
+<p>[8] 通过使用 FOL 编码构建具有循环的实际依赖图，提出了因果一致性下可序列化性的静态分析。虽然这项工作在精神上与我们的相似，但有几个关键点的差异：它们的可序列化性概念比我们的更强，因为它们允许事务在会话中组合在一起，串行顺序被迫适应会话顺序。虽然这简化了验证无界执行可序列化性的任务，但它也会导致大量无害的可序列化违规（为此他们提出了各种临时过滤方法）。此外，他们的重点是在高级数据类型而不是 SQL 程序上运行的程序，并且它们的分析不适用于一致性规范。</p>
+<p>也有动态异常检测技术[28,11,7]，这些技术要么在运行时构建依赖图并检查循环，要么分析执行后事件的跟踪。这些方法没有提供任何保证所有异常都将被检测到，即使对于有界执行也是如此。最近提出了许多方法[24,19,21,15]，试图验证高级应用程序不变量在弱一致性下被保留。这些方法也是一致性规范的参数，但它们并不完全自动化，因为它们需要用户不变量形式的正确条件，并且它们不处理可序列化性。</p>
+<p>总而言之，在本文中，我们迈出了第一步，为弱一致性下数据库应用程序的可串行化构建精确、全自动的静态分析。我们利用基于非循环依赖图的可序列化性和抽象执行框架来开发基于 FOL 的分析，该分析根据一致性规范进行参数化。我们展示了我们的方法如何用于检测有界异常，并在无界执行的特定条件下验证可序列化性。我们通过成功将其应用于真实世界的数据库基准来展示我们方法的实用性。</p>
+<h2 id="Appendix-A-Complete-FOL-Encoding">Appendix A: Complete FOL Encoding</h2>
+<p><img src="/32233/image-20231212162523376.png" alt></p>
+<p>过程 ExtractConds 获取事务程序 T 的代码，并填充从 $\Stmts(\T)$ 中的每个 SQL 语句到封闭 $\IF$ 条件中的公式的映射 $\Lambda_\T$。该过程是用所有初始谓词为 $\varphi = \true$ 的事务程序的代码调用的。</p>
+<p><img src="/32233/image-20231204145952348.png" alt></p>
+<p><img src="/32233/image-20231204150007045.png" alt></p>
+<p>图 7 和图 8 显示了条件和 WHERE 子句的完整编码。请注意，field 投影函数仅用于 WHERE 子句中访问的主要关键字段。可以修改其他领域，因此这些领域中包含的值是记录和事务实例的函数，我们没有对其进行建模。这不会影响方法的 soundness，并且由于数据库事务中的大多数查询只使用主密钥字段，因此对精度的影响最小。作为优化，我们还发现在任何事务中从未修改过的只读字段（RO），并以与 PK 中的字段相同的方式处理 RO 中的字段。下面，我们将展示在我们的词汇表中可以编码几个已知的弱一致性规范：</p>
+<p><img src="/32233/image-20231212162013964.png" alt></p>
+<p><img src="/32233/image-20231212162001192.png" alt></p>
+<p>我们现在介绍所有计算规则 $\eta ^{\R \to, \T_1,\T_2}_{c_1, c_2}$：</p>
+<p><img src="/32233/image-20231212162434629.png" alt></p>
+<p>图 7 和图 8 显示了条件语句和 WHERE 子句的完整编码。请注意，字段投影函数仅用于在 WHERE 子句中访问的主键字段。其他字段可以修改，因此这些字段中包含的值是记录和事务实例的函数，我们不对其进行建模。这不会影响该方法的可靠性，而且由于数据库事务中的大多数查询只使用主键字段，因此对精度的影响很小。作为一种优化，我们还发现了在任何事务中从未修改过的只读字段（RO），并以与 PK 中的字段相同的方式处理 RO 中的字段。</p>
+<p><img src="/32233/image-20231204145940052.png" alt></p>
+<p>下面，我们将展示如何在我们的词汇表中编码几个已知的弱一致性规范：</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/35365/" rel="prev" title="软件质量管理-03-团队动力学">
+      <i class="fa fa-chevron-left"></i> 软件质量管理-03-团队动力学
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/30498/" rel="next" title="SQL 编码文献梳理">
+      SQL 编码文献梳理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">2.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Preliminaries"><span class="nav-number">3.</span> <span class="nav-text">Preliminaries</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-Language-and-Database-Mode"><span class="nav-number">3.1.</span> <span class="nav-text">Input Language and Database Mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Abstract-Executions"><span class="nav-number">3.2.</span> <span class="nav-text">Abstract Executions</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Transaction"><span class="nav-number">3.2.1.</span> <span class="nav-text">Transaction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Abstract-Execution"><span class="nav-number">3.2.2.</span> <span class="nav-text">Abstract Execution</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Dependency-Graph"><span class="nav-number">3.2.3.</span> <span class="nav-text">Dependency Graph</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Weak-Isolation-Models"><span class="nav-number">3.2.4.</span> <span class="nav-text">Weak Isolation Models</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Operational-Semantics"><span class="nav-number">3.3.</span> <span class="nav-text">Operational Semantics</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FOL-Encoding"><span class="nav-number">4.</span> <span class="nav-text">FOL Encoding</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Vocabulary"><span class="nav-number">4.1.</span> <span class="nav-text">Vocabulary</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Relating-Dependences-with-Abstract-Executions"><span class="nav-number">4.2.</span> <span class="nav-text">Relating Dependences with Abstract Executions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Relating-dependences-with-transactional-programs"><span class="nav-number">4.3.</span> <span class="nav-text">Relating dependences with transactional programs</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Applications"><span class="nav-number">5.</span> <span class="nav-text">Applications</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Bounded-Anomaly-Detection"><span class="nav-number">5.1.</span> <span class="nav-text">Bounded Anomaly Detection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Verifying-Serializability-The-Shortest-Path-Approach"><span class="nav-number">5.2.</span> <span class="nav-text">Verifying Serializability : The Shortest Path Approach</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Verifying-Serializability-An-Inductive-Approach"><span class="nav-number">5.3.</span> <span class="nav-text">Verifying Serializability : An Inductive Approach</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-Studies"><span class="nav-number">6.</span> <span class="nav-text">Case Studies</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Related-Work-and-Conclusion"><span class="nav-number">7.</span> <span class="nav-text">Related Work and Conclusion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Appendix-A-Complete-FOL-Encoding"><span class="nav-number">8.</span> <span class="nav-text">Appendix A: Complete FOL Encoding</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

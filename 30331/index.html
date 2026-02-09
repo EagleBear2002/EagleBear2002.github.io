@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Openstack 是什么？ OpenStack 是开源云计算平台（云操作系统），可控制整个数据中心的大型计算，存储和网络资源池。 管理员能够通过 Web 界面、命令行或 API 接口控制、配置资源；用户可以通过 Web 界面使用资源。  自身不提供虚拟化技术 调用多种技术实现多资源池管理 对外提供统一管理接口 环境隔离，资源复用 降低隔离损耗，提升运行效率 提供高级虚拟化特性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云计算-05-OpenStack">
+<meta property="og:url" content="https://eaglebear2002.github.io/30331/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="Openstack 是什么？ OpenStack 是开源云计算平台（云操作系统），可控制整个数据中心的大型计算，存储和网络资源池。 管理员能够通过 Web 界面、命令行或 API 接口控制、配置资源；用户可以通过 Web 界面使用资源。  自身不提供虚拟化技术 调用多种技术实现多资源池管理 对外提供统一管理接口 环境隔离，资源复用 降低隔离损耗，提升运行效率 提供高级虚拟化特性">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027094516337.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027094746305.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027094807698.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027094836711.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027095400249.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027095922982.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027095934099.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027095956655.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027100134992.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027100146337.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027100252705.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027100301866.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027102038415.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027102115769.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027102138055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027102522631.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027102714144.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027103037155.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/5-OpenStack%E5%BC%80%E6%BA%90%E4%BA%91%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%8F%B0.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027103542522.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027103709318.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/5-OpenStack%E5%BC%80%E6%BA%90%E4%BA%91%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%8F%B0-1666838360954-4.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221027104013896.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091218443.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091423376.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091646011.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091743924.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091929330.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091934018.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091940010.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029091947406.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092124351.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092131175.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092251517.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092257508.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092325484.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092423517.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092506687.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092512734.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30331/image-20221029092526405.png">
+<meta property="article:published_time" content="2022-10-27T01:37:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.519Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/30331/image-20221027094516337.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/30331/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>云计算-05-OpenStack | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/30331/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          云计算-05-OpenStack
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-27 09:37:00" itemprop="dateCreated datePublished" datetime="2022-10-27T09:37:00+08:00">2022-10-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E4%BA%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Fall-云计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Openstack-是什么？">Openstack 是什么？</h2>
+<p>OpenStack 是开源云计算平台（云操作系统），可控制整个数据中心的大型计算，存储和网络资源池。</p>
+<p>管理员能够通过 Web 界面、命令行或 API 接口控制、配置资源；用户可以通过 Web 界面使用资源。</p>
+<ul>
+<li>自身不提供虚拟化技术</li>
+<li>调用多种技术实现多资源池管理</li>
+<li>对外提供统一管理接口</li>
+<li>环境隔离，资源复用</li>
+<li>降低隔离损耗，提升运行效率</li>
+<li>提供高级虚拟化特性</li>
+</ul>
+<p><img src="/30331/image-20221027094516337.png" alt></p>
+<h2 id="Openstack——云计算操作系统">Openstack——云计算操作系统</h2>
+<p>概念：云操作系统指构架于服务器、存储、网络等基础硬件资源和单机操作系统、中间件、数据库等基础软件之上，管理海量的基础硬件、软件资源的云平台综合管理系统。</p>
+<ul>
+<li>管理和驱动海量服务器、存储等基础硬件，将数据中心的硬件资源逻辑上整合成一台服务器</li>
+<li>为云应用软件提供统一的、标准的接口</li>
+<li>管理海量的计算任务以及资源调配和迁移</li>
+</ul>
+<p>特点：</p>
+<ul>
+<li>网络化：将用户计算需求作为任务通过网络发送给各个处于不同地理位置的服务器处理，通过网络返回结果</li>
+<li>安全：采用多种多样的安全保障措施保证数据安全。内存安全、数据传输安全（加密）、持久存储安全（冗余、备份）</li>
+<li>计算的可扩充性：动态申请网络硬件资源为用户服务——本地硬件资源无需扩展</li>
+</ul>
+<p><img src="/30331/image-20221027094746305.png" alt></p>
+<p><img src="/30331/image-20221027094807698.png" alt="云计算-云操作系统-虚拟化"></p>
+<p>除了云操作系统 OpenStack，构建云计算还需要很多其他东西：底层驱动+上层应用程序</p>
+<p><img src="/30331/image-20221027094836711.png" alt></p>
+<h2 id="简介">简介</h2>
+<h3 id="概述">概述</h3>
+<p>既是一个开源软件，也是一个项目，还是一个社区，提供了一个部署云的操作平台或工具集。用 OpenStack 易于构建虚拟计算或存储服务的云，既可以为公有云、私有云，也可以为大云、小云提供
+可扩展、灵活的云计算。</p>
+<p>OpenStack 是一个管理计算、存储和网络资源的数据中心云计算开放平台，通过一个仪表板，为管理
+员提供了所有的管理控制，同时通过 Web 界面为其用户提供资源。</p>
+<p>Rackspace 公司的“云文件”平台 Swift+美国宇航局 NASA“星云”平台 Nova</p>
+<ul>
+<li>计算资源管理：OpenStack 可以规划并管理大量虚拟机，从而允许企业或服务提供商按需提供计算资源</li>
+<li>存储资源管理：OpenStack 可以为云服务或云应用提供所需的对象及块存储资源</li>
+<li>网络资源管理：IP 地址的数量、路由配置、安全规则将爆炸式增长；传统的网络管理技术无法真正高扩展、高自动化地管理下一代网络</li>
+</ul>
+<h3 id="设计理念">设计理念</h3>
+<ul>
+<li>开放：任何个人、企业、组织、政府机构，只要遵循相关开源协议，都可以使用、拿到源代码</li>
+<li>灵活：带来可以定制的好处，每一个类型组建都有多个替代品，不会因为某一个组件的原因受到限制</li>
+<li>可扩展：各个组件是相互独立的项目，各个组件可以从内部解决可扩展的问题，而不影响其他组件</li>
+</ul>
+<p><img src="/30331/image-20221027095400249.png" alt="设计理念"></p>
+<h3 id="参考架构：虚拟机创建过程">参考架构：虚拟机创建过程</h3>
+<p>最开始的时候：核心部件：Nova（Nebula），Swift，Glance</p>
+<p>逐步发展：其他部件</p>
+<ul>
+<li>认证管理服务 Keystone：用户或服务的验证或授权</li>
+<li>块存储服务 Cinder</li>
+<li>文件共享存储服务 Manila</li>
+<li>网络服务 Neutron：提供网络即服务的功能</li>
+<li>计量服务 Telemetry：计量租户资源使用率</li>
+<li>编排服务 Heat：openstack 开发者</li>
+<li>仪表盘服务 Horizon：无状态无数据的 web 应用</li>
+<li>消息队列：中心化的消息交换器</li>
+<li>数据库：构建时和运行时状态信息</li>
+</ul>
+<p><img src="/30331/image-20221027095922982.png" alt></p>
+<p><img src="/30331/image-20221027095934099.png" alt="分层后的组件"></p>
+<p><img src="/30331/image-20221027095956655.png" alt="计算和存储、网络、镜像服务关系"></p>
+<h3 id="虚拟机创建过程">虚拟机创建过程</h3>
+<p>资源准备：</p>
+<ul>
+<li>通过 Keystone 进行用户身份认证，通过认证后，用户即可与 Openstack API 节点通信，触发创建请求</li>
+<li>通过调度器获得启动虚拟机的最佳位置：通过工作守护进程获得物理节点上的资源状态；Nova-scheduler</li>
+</ul>
+<p>创建流程：</p>
+<ul>
+<li>调用身份认证进行身份验证</li>
+<li>生成用于后续调用的令牌</li>
+<li>访问镜像服务以获取镜像列表，并获取目标基础镜像</li>
+<li>处理计算服务 API 请求</li>
+<li>处理计算服务对安全组和密钥调用的请求</li>
+<li>调用网络服务 API 确定可用网络</li>
+<li>通过计算节点调度程序选择 Hypervisor 节点</li>
+<li>调用块存储服务 API 为实例分配卷</li>
+<li>通过计算服务 API 调用在 Hypervisor 节点启动实例</li>
+<li>调用网络服务 API 为实例分配网络资源</li>
+</ul>
+<p><img src="/30331/image-20221027100134992.png" alt></p>
+<p><img src="/30331/image-20221027100146337.png" alt></p>
+<h3 id="从架构设计">从架构设计</h3>
+<p><img src="/30331/image-20221027100252705.png" alt></p>
+<p><img src="/30331/image-20221027100301866.png" alt></p>
+<ul>
+<li>概念模型设计：各个功能模块的功能及其之间的交互</li>
+<li>逻辑模型设计：控制节点中封装了大量的 Openstack 的服务</li>
+</ul>
+<p>核心服务之间的依赖关系</p>
+<p>运行 Openstack 服务的节点：</p>
+<ul>
+<li>云控制器：控制所有服务的节点</li>
+<li>网络节点：运行网络服务的节点</li>
+<li>计算节点：运行虚拟机的节点（也可以运行网络服务）</li>
+</ul>
+<p>存储设计：有哪些数据需要存储？虚拟机快照备份的存储要求是什么？需要文件共享系统吗？是否需要虚拟机之间实现存储共享？系统运行时数据、系统持久存储、虚拟机快照、系统镜像、用户信息。</p>
+<p>网络设计：</p>
+<ul>
+<li>网络服务是 Openstack 服务中最复杂的</li>
+<li>使用隔离的物理网络处理不同类型的网络流量
+<ul>
+<li>租户数据网络：为租户创建的虚拟网络提供物理路径</li>
+<li>管理和 API 网络：Openstack 服务之间的通信，可细分</li>
+<li>存储网络：虚拟机和存储节点之间的物理连接</li>
+</ul>
+</li>
+<li>虚拟网络类型
+<ul>
+<li>外部网络：全局互联并使用可路由的 IP 寻址；SNAT 虚拟机访问外网；DNAT 外网访问虚拟机</li>
+<li>租户网络：虚拟机之间专用网络；私有 IP 空间；租户流量隔离</li>
+</ul>
+</li>
+</ul>
+<p><img src="/30331/image-20221027102038415.png" alt></p>
+<h3 id="物理部署">物理部署</h3>
+<p>五种节点：部署各个系统的不同组件</p>
+<p>三种网络：不同的使用目的；OpenStack 内部网络、外部网络、虚机网络</p>
+<p><img src="/30331/image-20221027102115769.png" alt></p>
+<p><img src="/30331/image-20221027102138055.png" alt="四种节点"></p>
+<h3 id="物理部署模型-估算硬件容量">物理部署模型-估算硬件容量</h3>
+<p>例如：在 Openstack 环境中运行 200 个虚拟机</p>
+<ul>
+<li>CPU 评估
+<ul>
+<li>逻辑 CPU 数：物理 CPU _ 核数 _ 超线程数；一个逻辑 CPU 对应一个虚拟 CPU；一个虚拟 CPU 支持多个虚拟机【影响性能；可以使用频数计算】；一个虚拟机可以使用多个虚拟 CPU，但不能多于逻辑 CPU 数；</li>
+<li>可以超额分配，但是不能超额执行；超分：单台物理机中虚拟机个数 * 频数&gt;物理频数</li>
+</ul>
+</li>
+<li>内存评估：单台物理机虚拟机个数 * 虚拟机最大动态分配内存 + 主机内存用量</li>
+<li>网络评估：网卡带宽&gt;单个虚拟机带宽*虚拟机个数；公共 IP 地址个数；浮动 IP 地址个数</li>
+<li>存储评估：虚拟机的临时存储+永久存储；存储节点的对象存储、块存储和文件共享存储</li>
+</ul>
+<p>最佳实践：分析需求、考虑需求增长情况、持续跟踪每一个服务单元、丢弃和替换服务单元；按需调整</p>
+<h2 id="部署">部署</h2>
+<h3 id="DevOps">DevOps</h3>
+<p>矛盾：对于运维来说，稳定压倒一切，新 Feature 越少越好。而对于研发来说，却希望能开发更多的功能。</p>
+<p>DevOps 的理念：让研发（Development）和运维（Operations）一体化，让团队从业务需求出发，向着同一个目标前进。</p>
+<p>DevOps 是一种软件研发管理的思想，方法论，追求的是一种没有隔阂的理想的研发协作的状态，可能涉及到的角色有开发、测试、产品、项目管理、运维等等。</p>
+<p>DevOps（Development 和 Operations 的组合）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。</p>
+<p><img src="/30331/image-20221027102522631.png" alt="DevOps"></p>
+<h3 id="OpenStack-和-DevOps">OpenStack 和 DevOps</h3>
+<p>要求开发人员、网络工程师和运维人员必须相互协作，来部署、运维和维护 OpenStack 云基础架构。</p>
+<p>OpenStack 和 DevOps 结合：</p>
+<ul>
+<li>
+<p>要求：OpenStack 软件和部署云基础架构的持续增长的复杂性必须被简化</p>
+</li>
+<li>
+<p>方式：基础架构中的所有内容都必须自动化；将 OpenStack 分解为多个部分</p>
+</li>
+<li>
+<p>要点：</p>
+<ul>
+<li>简化和模块化 OpenStack 服务；像开发构建模块一样开发 OpenStack 服务</li>
+<li>在不影响整个系统的情况下，促进服务的定制和改进</li>
+<li>使用正确的工具来构建服务，确保服务在相同输入情况下输出相同结果</li>
+<li>将服务愿景从如何做切换到要做什么</li>
+</ul>
+<p><img src="/30331/image-20221027102714144.png" alt="基础架构代码生命周期管理"></p>
+</li>
+</ul>
+<h3 id="Ansible">Ansible</h3>
+<p>基础架构自动化引擎：安装 Ansible 自身部署系统和管理的目标系统</p>
+<ul>
+<li>模块：封装系统资源或操作的组件，对资源及其属性进行建模；通过执行模块改变目标系统状态；执行后清除</li>
+<li>变量：代表更新中的动态部分，可用于修改模块行为；可以用户自定义，作为模块一部分</li>
+<li>清单：由 Ansible 管理的主机列表；支持将主机分类到多个组中；同一个主机可以出现在多个分段中</li>
+<li>角色：表示在一组主机上配置服务时必须执行的任务集合；封装了在主机上部署服务所需的任务、变量、处理程序和其他相关功能；在 Web 服务器集群中为主机分配角色：Web 服务器，数据库服务器，负载平衡器等</li>
+</ul>
+<p>Playbook：Ansible 的主要配置文件；描述了完整的系统部署计划，由一系列任务组成；用 YAML 编写：Yet Another Markup Language</p>
+<p><img src="/30331/image-20221027103037155.png" alt></p>
+<h3 id="OpenStack-Ansible">OpenStack Ansible</h3>
+<p>自动化部署 OpenStack</p>
+<p>聚焦于提供多个角色和 playbook，用于部署可扩展的、可理解投入生产的 OpenStack 环境</p>
+<p><img src="/30331/5-OpenStack%E5%BC%80%E6%BA%90%E4%BA%91%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%8F%B0.jpg" alt></p>
+<p><img src="/30331/image-20221027103542522.png" alt="Map of OpenStack Projects"></p>
+<h2 id="云控制器">云控制器</h2>
+<p>集群：提供高可用性</p>
+<ul>
+<li>两台或多台服务器的能力聚合就是服务器集群，通过堆积机器即可实现这种聚合
+<ul>
+<li>向上扩展（垂直扩展）：向服务器添加更多的 CPU 和内存</li>
+<li>向下扩展（水平扩展）：增加更多的标准商用服务器</li>
+</ul>
+</li>
+<li>非对称集群：备服务器只有在主服务器发生故障时才接管系统，处于高可用目的，包含故障切换配置</li>
+<li>对称集群：所有节点都是活动的，共享工作负载，可视为负载均衡集群</li>
+</ul>
+<p>OpenStack 的功能被广泛分布到多个服务中，包含了基础架构服务和 OpenStack 服务</p>
+<ul>
+<li>基础架构服务：
+<ul>
+<li>不属于 OpenStack 对外提供的公共服务，但被多个 Openstack 组件使用</li>
+<li>消息队列：必须是集群式的；RabbitMQ，ZeroMQ，Qpid</li>
+<li>整合数据库：OpenStack 的环境数据，使用数据等；MySQL 和 MongoDB</li>
+</ul>
+</li>
+<li>OpenStack 服务：身份、镜像、计算、网络、存储等</li>
+</ul>
+<h3 id="物理部署-2">物理部署</h3>
+<ul>
+<li>无中心结构</li>
+<li>节点无本地状态</li>
+<li>多控制器：请求聚合+负载均衡</li>
+<li>水平可扩展：控制节点、计算节点</li>
+</ul>
+<p><img src="/30331/image-20221027103709318.png" alt="image-20221027103709318"></p>
+<h3 id="Keystone">Keystone</h3>
+<p>身份认证和服务目录（所有其他服务需向 Keystone 注册 API 端点）</p>
+<p>由多个 Provider 组成：</p>
+<ul>
+<li>身份提供者 Identity Provider：服务用户、管理员用户、终端用户</li>
+<li>资源提供者 resource Provider：project、domain</li>
+<li>认证提供者 Authorization Provider：用户和用户组和他们角色之间的关系</li>
+<li>令牌提供者 Token Provider：访问 openstack 服务需要一个有效的令牌，通过身份提供者的认证后获得令牌</li>
+<li>目录提供者 Catalog Provider：维护服务和 API 端点的目录</li>
+<li>策略提供者 Policy Provider：策略由多条规则组成，每条规则定义了哪些用户和角色被允许访问哪些资源</li>
+</ul>
+<p>高级特性：</p>
+<ul>
+<li>联邦 keystone：使用外部身份提供者提供的身份服务访问服务提供商可用资源的机制</li>
+<li>Fernet 令牌：解决原生令牌提供者带来的性能问题</li>
+</ul>
+<p><img src="/30331/5-OpenStack%E5%BC%80%E6%BA%90%E4%BA%91%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%8F%B0-1666838360954-4.jpg" alt></p>
+<h3 id="Nova-管理组件及-API">Nova 管理组件及 API</h3>
+<p>Nova 是 Openstack 中提供计算资源服务的项目，是 OpenStack 最核心的项目</p>
+<p>负责：</p>
+<ul>
+<li>虚拟机生命周期管理</li>
+<li>其他计算资源的生命周期管理</li>
+</ul>
+<p>不负责：</p>
+<ul>
+<li>承载虚拟机的物理机自身的管理</li>
+<li>全面的系统状态监控</li>
+</ul>
+<p><img src="/30331/image-20221027104013896.png" alt></p>
+<p>运行在云控制器上的组件：</p>
+<ul>
+<li>Nova-api：云控制器中的编排引擎；通过 API 将消息写入数据库和消息队列向其他守护进程传递消息</li>
+<li>Nova-conductor：代表计算节点上 nova-compute 执行数据库操作，提供数据库访问隔离；将来自计算节点请求并行化</li>
+<li>Nova-scheduler：
+<ul>
+<li>专门的调度算法；确定虚拟机创建的最佳放置位置；支持过滤器检查计算节点上资源可用性，通过加权机制过滤出计算节点列表，再确定启动虚拟机的最佳位置；支持自定义度量标准和策略考量配置</li>
+<li>在生产环境下，配置单独的存储主机，其调度器运行在存储主机上</li>
+</ul>
+</li>
+<li>Nova-compute 则运行在计算节点上</li>
+<li>Nova-network 则可以被 Neutron 替代</li>
+<li>API 服务：类似 Nova-api，也将身份、镜像、网络和存储 API 都放在云控制器上运行</li>
+</ul>
+<h3 id="其他服务">其他服务</h3>
+<p>云控制器托管用于镜像管理的 Glance 服务</p>
+<ul>
+<li>Glance API 提供外部 REST 接口，用于查询虚拟机镜像及相关元数据</li>
+<li>Glance registry 将镜像元数据存储在数据库中，并利用存储后端实际存储镜像
+<ul>
+<li>例如使用 Swift 对象存储作为镜像存储后端</li>
+</ul>
+</li>
+<li>网络服务采用类似 Nova 的部署概念：网络 API 驻留在云控制器中，独立配置网络服务器节点</li>
+<li>仪表盘服务：运行在 Apache Web 服务器后端，可以将其运行在可以访问 API 端点的单独节点上，降低云控制器负载</li>
+<li>计量服务：跟踪资源使用情况，计算资源利用率；多种使用目的：计费、容量规划、按需求和吞吐量的虚拟基础架构自动扩展等</li>
+</ul>
+<h2 id="计算节点">计算节点</h2>
+<h3 id="计算节点-Hypervisor">计算节点 Hypervisor</h3>
+<p>计算节点运行 nova-compute 服务，负责启动和终止虚拟机，通过消息总线监听虚拟机相关请求。</p>
+<p>Hypervisor 是计算节点的核心，又称 VMM。Openstack 中虚拟机管理程序能够支持各种 VMM 以及 Docker。</p>
+<p>虚拟化技术</p>
+<p>Docker 容器</p>
+<p>Nova Docker：类似虚拟机实例启动和管理容器生命周期，然而一个应用或服务往往需要容器组构建。</p>
+<p>Magnum：</p>
+<ul>
+<li>使用容器编排引擎（COE）管理连接着的容器组</li>
+<li>COE 节点部署为 Nova 实例</li>
+<li>Heat 用于编排 COE 虚拟基础架构</li>
+</ul>
+<p><img src="/30331/image-20221029091218443.png" alt></p>
+<h3 id="计算节点-Magnum">计算节点 Magnum</h3>
+<p>Bay 是一组运行 COE 软件的节点，表示一个容器集群。</p>
+<p>Pod 是 COE 最基本的部署调度单元，逻辑上对应一个服务实例，运行一组容器，必须有一个作为网络路由。</p>
+<p><img src="/30331/image-20221029091423376.png" alt></p>
+<h3 id="Nova-相关概念">Nova 相关概念</h3>
+<p>Nova 中对主机有一个层级划分——高于一台物理主机：</p>
+<ul>
+<li>Region：地理区域</li>
+<li>Availability Zone：对某个地理区域的用户而言的可用区域</li>
+<li>Host Aggregate 类型将物理主机放到一起：按照组成区域</li>
+<li>Host：具体的物理主机</li>
+</ul>
+<p><img src="/30331/image-20221029091646011.png" alt></p>
+<p><img src="/30331/image-20221029091743924.png" alt></p>
+<h3 id="Nova-单元">Nova 单元</h3>
+<ul>
+<li>按照计算节点为最小单位的管理视角——Nova 单元</li>
+<li>所有计算节点都需要与消息总线和数据库服务器通信，随着计算节点增多，使得消息队列和数据库过载，因此产生 Nova 计算单元</li>
+</ul>
+<p>由多个计算节点组成一个单元。</p>
+<ul>
+<li>API 单元：作为树根，使用基于消息队列的 RPC 调用和计算节点交互</li>
+<li>计算单元：每个单元有自己的消息队列和数据库</li>
+</ul>
+<p><img src="/30331/image-20221029091929330.png" alt></p>
+<p><img src="/30331/image-20221029091934018.png" alt></p>
+<p><img src="/30331/image-20221029091940010.png" alt></p>
+<p><img src="/30331/image-20221029091947406.png" alt></p>
+<h2 id="存储节点">存储节点</h2>
+<h3 id="存储节点：Swift">存储节点：Swift</h3>
+<ul>
+<li>数据与其副本作为二进制大对象存储在对象存储服务器上</li>
+<li>对象存储没有文件存储的层次结构，对象存储在扁平的命名空间——一种特殊的文件系统</li>
+<li>使用 REST 或 SOAP 等 API 访问对象存储，而不是文件协议</li>
+<li>不适用于高性能要求以及经常更改的机构化数据，例如数据库</li>
+</ul>
+<p>服务器分类：</p>
+<ul>
+<li>账户服务器：租户、身份认证</li>
+<li>代理服务器：运行 API</li>
+<li>容器服务器：“桶”，一人多桶，一桶多对象</li>
+<li>对象服务器：一个对象只能在一个桶中</li>
+</ul>
+<p><img src="/30331/image-20221029092124351.png" alt></p>
+<p><img src="/30331/image-20221029092131175.png" alt></p>
+<h3 id="存储节点：Cinder">存储节点：Cinder</h3>
+<ul>
+<li>为云平台提供统一接口，按需分配的，持久化的块存储服务</li>
+<li>核心功能是对卷的管理，允许对卷、卷的类型、卷的快照、卷备份进行操作</li>
+<li>为后端不同的存储设备提供了统一的接口，不同的块设备服务厂商在 Cinder 中实现其驱动支持以与 OpenStack 进行整合</li>
+</ul>
+<blockquote>
+<p>块存储作为虚拟机硬盘使用时，必须先分区、创建文件系统，再挂载到虚拟机文件
+系统层次结构中。</p>
+</blockquote>
+<p><img src="/30331/image-20221029092251517.png" alt="计算节点和 Cinder 的网络连接"></p>
+<p><img src="/30331/image-20221029092257508.png" alt="Cinder 内部架构"></p>
+<p><img src="/30331/image-20221029092325484.png" alt></p>
+<h2 id="网络节点">网络节点</h2>
+<h3 id="网络节点-Neutron">网络节点-Neutron</h3>
+<p>使得运营商能够构建和管理具有所有必要元素的完整网络拓扑：网络、子网、路由器、负载均衡器、防火墙和端口。</p>
+<p>API 服务器：运行在云控制器上</p>
+<ul>
+<li>基于插件的架构</li>
+<li>API 服务将请求转发到特定插件，插件通过代理和设备交互或者控制资源</li>
+<li>提供了基于开源技术的插件和代理参考实现</li>
+<li>网络节点提供资源实现网络服务：路由、防火墙、负载均衡器和 VPN</li>
+</ul>
+<p>核心插件：创建和管理网络、端口和子网</p>
+<p>服务插件：实现高阶网络服务，路由、防火墙等</p>
+<p>代理：部署在计算和网络节点上，通过消息总线上的 RPC 和服务器交互</p>
+<ul>
+<li>L2 代理：运行在计算和网络基点上，将虚拟机和网络设备连接到二层网络上</li>
+<li>DHCP 代理、L3 代理和 VPN 代理</li>
+</ul>
+<p><img src="/30331/image-20221029092423517.png" alt></p>
+<h3 id="虚拟网络-VLAN-实现">虚拟网络 VLAN 实现</h3>
+<p>核心插件处理虚拟网络和端口的创建</p>
+<p>虚拟网络的创建方式：</p>
+<ul>
+<li>VLAN 方式：编排连接计算节点和网络节点的物理交换机路径</li>
+<li>隧道网络：将二层数据包封装在 IP 数据包中；IP 网络是已经封装的网络流量传输者</li>
+</ul>
+<p><img src="/30331/image-20221029092506687.png" alt="物理网络连接和虚拟网络连接的关系"></p>
+<p><img src="/30331/image-20221029092512734.png" alt></p>
+<p>计算节点上的 L2 代理：</p>
+<p><img src="/30331/image-20221029092526405.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/24450/" rel="prev" title="云计算-04-虚拟化技术">
+      <i class="fa fa-chevron-left"></i> 云计算-04-虚拟化技术
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/12112/" rel="next" title="云计算-06-分布式计算">
+      云计算-06-分布式计算 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Openstack-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">Openstack 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Openstack%E2%80%94%E2%80%94%E4%BA%91%E8%AE%A1%E7%AE%97%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.</span> <span class="nav-text">Openstack——云计算操作系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">3.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">3.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%90%86%E5%BF%B5"><span class="nav-number">3.2.</span> <span class="nav-text">设计理念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%9E%B6%E6%9E%84%EF%BC%9A%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">参考架构：虚拟机创建过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%88%9B%E5%BB%BA%E8%BF%87%E7%A8%8B"><span class="nav-number">3.4.</span> <span class="nav-text">虚拟机创建过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.5.</span> <span class="nav-text">从架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E9%83%A8%E7%BD%B2"><span class="nav-number">3.6.</span> <span class="nav-text">物理部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B-%E4%BC%B0%E7%AE%97%E7%A1%AC%E4%BB%B6%E5%AE%B9%E9%87%8F"><span class="nav-number">3.7.</span> <span class="nav-text">物理部署模型-估算硬件容量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DevOps"><span class="nav-number">4.1.</span> <span class="nav-text">DevOps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenStack-%E5%92%8C-DevOps"><span class="nav-number">4.2.</span> <span class="nav-text">OpenStack 和 DevOps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ansible"><span class="nav-number">4.3.</span> <span class="nav-text">Ansible</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OpenStack-Ansible"><span class="nav-number">4.4.</span> <span class="nav-text">OpenStack Ansible</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%91%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">云控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E9%83%A8%E7%BD%B2-2"><span class="nav-number">5.1.</span> <span class="nav-text">物理部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Keystone"><span class="nav-number">5.2.</span> <span class="nav-text">Keystone</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nova-%E7%AE%A1%E7%90%86%E7%BB%84%E4%BB%B6%E5%8F%8A-API"><span class="nav-number">5.3.</span> <span class="nav-text">Nova 管理组件及 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.4.</span> <span class="nav-text">其他服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E8%8A%82%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">计算节点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E8%8A%82%E7%82%B9-Hypervisor"><span class="nav-number">6.1.</span> <span class="nav-text">计算节点 Hypervisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E8%8A%82%E7%82%B9-Magnum"><span class="nav-number">6.2.</span> <span class="nav-text">计算节点 Magnum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nova-%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="nav-number">6.3.</span> <span class="nav-text">Nova 相关概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nova-%E5%8D%95%E5%85%83"><span class="nav-number">6.4.</span> <span class="nav-text">Nova 单元</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%8A%82%E7%82%B9"><span class="nav-number">7.</span> <span class="nav-text">存储节点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%8A%82%E7%82%B9%EF%BC%9ASwift"><span class="nav-number">7.1.</span> <span class="nav-text">存储节点：Swift</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E8%8A%82%E7%82%B9%EF%BC%9ACinder"><span class="nav-number">7.2.</span> <span class="nav-text">存储节点：Cinder</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E8%8A%82%E7%82%B9"><span class="nav-number">8.</span> <span class="nav-text">网络节点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E8%8A%82%E7%82%B9-Neutron"><span class="nav-number">8.1.</span> <span class="nav-text">网络节点-Neutron</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%BD%91%E7%BB%9C-VLAN-%E5%AE%9E%E7%8E%B0"><span class="nav-number">8.2.</span> <span class="nav-text">虚拟网络 VLAN 实现</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

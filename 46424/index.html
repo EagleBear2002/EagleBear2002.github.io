@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="起源与发展 模糊测试的诞生 出发点：提升 UNIX 操作系统的可靠性 技术构想：  核心组件：一组用于产生随机字符的程序 中心思想：以随机字符串作为输入，运行操作系统组件（Utilities），观察是否崩溃 最终结果：保留能够产生崩溃的字符串输入，分析崩溃的类型，对崩溃进行分类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自动化测试-03-模糊测试">
+<meta property="og:url" content="https://eaglebear2002.github.io/46424/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="起源与发展 模糊测试的诞生 出发点：提升 UNIX 操作系统的可靠性 技术构想：  核心组件：一组用于产生随机字符的程序 中心思想：以随机字符串作为输入，运行操作系统组件（Utilities），观察是否崩溃 最终结果：保留能够产生崩溃的字符串输入，分析崩溃的类型，对崩溃进行分类">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029183803070.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029183835623.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184216602.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184400792.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184430535.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184505672.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184511037.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029184955901.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029190121710.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029190240874-1667041363580-1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029191744232.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46424/image-20221029191858506.png">
+<meta property="article:published_time" content="2022-10-29T09:18:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.560Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/46424/image-20221029183803070.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/46424/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>自动化测试-03-模糊测试 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/46424/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          自动化测试-03-模糊测试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-29 17:18:00" itemprop="dateCreated datePublished" datetime="2022-10-29T17:18:00+08:00">2022-10-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">2022Fall-自动化测试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="起源与发展">起源与发展</h2>
+<h3 id="模糊测试的诞生">模糊测试的诞生</h3>
+<p>出发点：提升 UNIX 操作系统的可靠性</p>
+<p>技术构想：</p>
+<ul>
+<li>核心组件：一组用于产生随机字符的程序</li>
+<li>中心思想：以随机字符串作为输入，运行操作系统组件（Utilities），观察是否崩溃</li>
+<li>最终结果：保留能够产生崩溃的字符串输入，分析崩溃的类型，对崩溃进行分类</li>
+</ul>
+<p>结果：在 22 个（总 90 个）组件程序（Utility Program）上触发崩溃</p>
+<h2 id="概念与框架">概念与框架</h2>
+<h3 id="初始构想">初始构想</h3>
+<p>三要素：一个（套）工具、一个目标、一个循环</p>
+<ul>
+<li>工具：模糊器（Fuzzer）</li>
+<li>目标：待测程序（PUT）</li>
+<li>循环：执行程序 $\leftrightharpoons $ 崩溃分派（Crash Triage）</li>
+</ul>
+<h3 id="相关术语">相关术语</h3>
+<h4 id="模糊（Fuzzing）与模糊测试（Fuzz-Testing）">模糊（Fuzzing）与模糊测试（Fuzz Testing）</h4>
+<p>模糊（Fuzzing）与模糊测试（Fuzz Testing）</p>
+<p>模糊是指使用从输入空间（模糊输入空间）采样得到的输入来执行待测程序（PUT，Program Under Test）的过程。该模糊输入空间代表着测试人员针对待测程序定义的预期输入。</p>
+<p>模糊测试是一种应用模糊（过程）来验证待测程序是否违反正确性策略（Correctness Policy）的测试技术。</p>
+<p>在文献中一般可互换。</p>
+<h4 id="模糊器（Fuzzer）">模糊器（Fuzzer）</h4>
+<p>模糊器是一个（组）用于实现模糊测试的程序 $\to$ 核心组件</p>
+<h4 id="模糊运动（Fuzzing-Campaign）">模糊运动（Fuzzing Campaign）</h4>
+<p>模糊运动是指一个模糊器按照一组特定的正确性政策在一个给定待测程序上的一次具体的执行。$ \to &lt; fuzzer, program&gt;$</p>
+<h4 id="缺陷预言（Bug-Oracle）">缺陷预言（Bug Oracle）</h4>
+<p>一个用于确定一次给定执行是否违反具体正确性策略的程序，通常作为模糊器的一部分出现。</p>
+<h4 id="模糊配置（Fuzz-Configuration）">模糊配置（Fuzz Configuration）</h4>
+<p>一组控制和描述模糊（测试）算法的数据和约束</p>
+<h4 id="测试输入（Test-Input）、测试用例（Test-Case）与种子输入（Seed-Input）">测试输入（Test Input）、测试用例（Test Case）与种子输入（Seed Input）</h4>
+<ul>
+<li>测试输入是一组用于驱动待测程序执行的数据</li>
+<li>测试用例是一组用于确定应用软件或软件系统是否能够正确工作的条件或变量 $\to$ 输入+ 逻辑（调用序列）+ 预言</li>
+<li>种子输入是一个或一组在模糊测试过程中为输入生成（Input Generation）提供基准的测试输入，简称种子（Seed）</li>
+</ul>
+<h3 id="模糊测试框架">模糊测试框架</h3>
+<p><img src="/46424/image-20221029183803070.png" alt></p>
+<p><img src="/46424/image-20221029183835623.png" alt></p>
+<h2 id="家族与分类">家族与分类</h2>
+<p>根据基础 Fuzzer 划分家族：</p>
+<ul>
+<li>AFL 家族（C/C++）：AFL、AFLFast、AFLSmart、AFLNet、AFLGo、AFLIoT、FairFuzz、Mopt.、Neuzz</li>
+<li>LibFuzzer 家族（C/C++）：LibFuzzer、Entropic</li>
+<li>JQF 家族（Java）：JQF、BeDivFuzz、CONFETTI</li>
+<li>其他（Rust、Python 等）：Angora、DeepXplore</li>
+</ul>
+<p>根据组件核心或技术贡献进行分类：</p>
+<ul>
+<li>按照采用的运行时信息：黑盒、灰盒、白盒</li>
+<li>按照输入生成的策略：Mutation-based, Generation-based</li>
+<li>按照引导过程：Search-based（一些启发式算法），Gradientbased（梯度下降）</li>
+<li>按照测试的目的：定向、非定向、某一类缺陷</li>
+<li>按照应用领域：网络协议、Compiler、DNN、IoT、内核</li>
+<li>按照优化角度：种子调度、变异策略、能量调度、过程建模</li>
+</ul>
+<h3 id="按照运行时信息分类">按照运行时信息分类</h3>
+<h4 id="黑盒（Blackbox）模糊测试">黑盒（Blackbox）模糊测试</h4>
+<p>特点：不监控执行过程，也不使用执行过程中产生的任何信息，仅从输入和输出端入手优化模糊测试</p>
+<p>引导方式：利用输入格式或输出状态引导测试执行</p>
+<p>优缺点：效率高，但引导的有效性上面有所欠缺</p>
+<p>代表性工作：KIF 、IoTFuzzer 、CodeAlchemist</p>
+<h4 id="白盒（Whitebox）模糊测试">白盒（Whitebox）模糊测试</h4>
+<p>特点：使用混合执行、污点分析（Taint Analysis）等比较昂贵的白盒分析技术优化模糊测试过程</p>
+<p>引导方式：利用详细的程序分析结果引导测试执行</p>
+<p>优缺点：反馈更加有效，但是效率不高、适配性较差</p>
+<p>代表性工作：Driller2、QSYM3、CONFETTI4</p>
+<h4 id="灰盒（Greybox）模糊测试">灰盒（Greybox）模糊测试</h4>
+<p>Coverage-based Greybox Fuzzing, CGF</p>
+<p>特点：采用轻量级插装对程序进行监控，在执行过程中收集各类信息，如分支覆盖、线程执行、堆栈状态等</p>
+<p>引导方式：利用收集到的执行信息（内部状态）引导测试执行</p>
+<p>代表性工作：AFL、AFLGo、EcoFuzz、Zest、BeDivFuzz</p>
+<p><img src="/46424/image-20221029184216602.png" alt="CGF 伪代码"></p>
+<h3 id="按照生成策略分类">按照生成策略分类</h3>
+<p>按照输入生成的策略：</p>
+<ul>
+<li>Input Generator、Mutation Strategies</li>
+<li>Mutation-based：基于随机或启发式变异策略</li>
+<li>Generation-based：基于一定的文法规则/结构信息</li>
+</ul>
+<h4 id="Mutation-based：基于随机变异或启发式变异策略">Mutation-based：基于随机变异或启发式变异策略</h4>
+<p>本质：将种子输入转换为比特串（Bits），对比特串进行变换</p>
+<p>优点：可拓展性强，易于泛化，理论上可用于任意输入（图片、文本、音视频）</p>
+<p>缺点：容易破坏输入的结构、产生无效无效输入（Invalid Input）；生成的大部分输入都无法通过语义检查（Semantic Checking），很难探测深层次的程序状态和程序元素（Program Elements）</p>
+<h4 id="Mutation-based：AFL">Mutation-based：AFL</h4>
+<p>AFL 变异算子</p>
+<ul>
+<li>bitflip L/S ：以 S 为增量，每次翻转 L 位</li>
+<li>arith L/8：加/减长度为 L 的小整数</li>
+<li>interest L/8：翻转“有趣”字节位</li>
+<li>havoc：对输入进行大肆破坏</li>
+<li>splice：随机拼接两个种子输入</li>
+</ul>
+<p><img src="/46424/image-20221029184400792.png" alt="Fuzzing a Picture"></p>
+<h4 id="Mutation-based：SLF（ICSE-19）">Mutation-based：SLF（ICSE'19）</h4>
+<p>思想：分析程序中的语义检查、识别比特串中与影响语义检查的域（Field）、根据两者之间的关系制定变异策略</p>
+<p><img src="/46424/image-20221029184430535.png" alt="一个合法 Zip 文件的比特串"></p>
+<table>
+<thead>
+<tr>
+<th><img src="/46424/image-20221029184505672.png" alt="字节分组"></th>
+<th><img src="/46424/image-20221029184511037.png" alt="类型推断与关系建立"></th>
+</tr>
+</thead>
+</table>
+<p><img src="/46424/image-20221029184955901.png" alt></p>
+<h4 id="Generation-based：基于一定的文法规则-结构信息">Generation-based：基于一定的文法规则/结构信息</h4>
+<p>本质：利用给定的、或者挖掘/学习得到的文法规则，来构建能够通过（语法）检查的结构化输入</p>
+<p>优点：容易生成合法、有效输入（Valid Inputs），适用于对输入结构性要求较高的场景，如针对解析器（Parser）、解释器（Interpreter）以及编译器（Compiler）的测试</p>
+<p>缺点：需要人工赋予一定的领域知识。在没有人工指定文法的情况下，很难得到完整的文法规则</p>
+<h4 id="Generation-based：Inputs-from-Hell-TSE-19">Generation-based：Inputs from Hell (TSE'19)</h4>
+<p>思想：挖掘已有的测试输入，得到现有的测试输入分布。根据该分布进行输入生成以得到预期的测试输入</p>
+<ul>
+<li>表示输入的分布：概率文法（Probabilistic Grammar）</li>
+<li>预期输入：
+<ul>
+<li>与概率文法相同：生成与文法表示的输入相似的测试输入</li>
+<li>与概率文法相反：生成与文法表示的输入互补的测试输入</li>
+</ul>
+</li>
+</ul>
+<h3 id="按照引导方式分类">按照引导方式分类</h3>
+<ul>
+<li>Test Execution、Output Analysis</li>
+<li>Search-based：将测试转化为搜索问题，以代码覆盖率作为指示器、以启发式算法（类遗传算法）为核心，将测试导向更高覆盖的方向 $\to$ CGF</li>
+<li>Gradient-based：将测试转化为优化问题，以最大化缺陷发掘输入为目标构建目标函数，迭代求最优解 $\to$ 退而求覆盖率</li>
+<li>模糊测试中的马太效应（Matthew effect）：好的种子输入能够演化产生品质良好的子代测试输入</li>
+</ul>
+<h4 id="基于搜索的模糊测试">基于搜索的模糊测试</h4>
+<h5 id="Search-based：Fuzzing-as-Search-Problem">Search-based：Fuzzing as Search Problem</h5>
+<ul>
+<li>核心：将模糊测试过程建模为搜索问题，根据模型构造启发式算法（Heuristic）解决问题</li>
+<li>启发式：遗传算法-AFL、马尔科夫链-AFLFast、信息熵-Entropic、多臂老虎机问题-EcoFuzz</li>
+</ul>
+<h5 id="Search-based：AFL，基于插装的遗传算法">Search-based：AFL，基于插装的遗传算法</h5>
+<h4 id="基于梯度的模糊测试">基于梯度的模糊测试</h4>
+<h5 id="Gradient-based：Fuzzing-as-Optimization-Problem">Gradient-based：Fuzzing as Optimization Problem</h5>
+<ul>
+<li>核心：将模糊测试过程建模为优化问题，问题的目标是最大化缺陷发掘数量，利用梯度下降算法持续求解最优解</li>
+<li>目标退阶：缺陷离散分布且无法预知 $\to$ 替换为代码覆盖</li>
+<li>应用 DL 技术-Neuzz &amp; MTFuzz；利用梯度下降取代符号执行的约束求解过程-Angora</li>
+</ul>
+<h5 id="Gradient-based：Neuzz1">Gradient-based：Neuzz1</h5>
+<p>核心思路：将模糊测试建模为无约束优化问题，利用梯度下降算法优化模糊测试过程</p>
+<p>动机：Gradient Descend &gt; Evolutionary Algorithm</p>
+<p><img src="/46424/image-20221029190121710.png" alt="梯度下降和演进算法在高阶优化问题上面的表现"></p>
+<p>挑战：</p>
+<ul>
+<li>如何计算反馈 $\to$ 如何计算梯度</li>
+<li>优化目标（缺陷发现数目或覆盖率）是不连续的，无法直接适配梯度下降算法 $\to$ 引入程序平滑（Program Smoothing）技术</li>
+</ul>
+<p>程序平滑（Neural Program Smoothing）：消除目标函数中的不连续性</p>
+<ul>
+<li>黑盒程序平滑：简单易用，但是会产生较大的近似错误</li>
+<li>白盒程序平滑：依赖符号执行（Symbolic Execution）和抽象解释技术（Abstract），会产生较大的额外开销</li>
+<li>神经程序平滑（Neural Program Smoothing）：利用 NN 模型模拟程序行为</li>
+</ul>
+<p><img src="/46424/image-20221029190240874-1667041363580-1.png" alt="Neuzz 神经程序平滑"></p>
+<h3 id="按照测试目的分类">按照测试目的分类</h3>
+<p>非定向模糊测试：Wider and Deeper</p>
+<ul>
+<li>目标：验证程序的正确性，检测程序中潜在的缺陷</li>
+</ul>
+<p>定向模糊测试：Directed and Targeted</p>
+<ul>
+<li>目标：针对程序中的某个目标位置进行快而有效的测试</li>
+<li>场景：缺陷复现、补丁检验、静态分析报告验证</li>
+<li>分类：白盒、灰盒</li>
+</ul>
+<h4 id="定向灰盒模糊测试">定向灰盒模糊测试</h4>
+<p>AFLGo：定向灰盒模糊测试</p>
+<ul>
+<li>基本思路：Distance + Annealing-based Scheduling，为更靠近目标位置的种子分配更多的能量</li>
+</ul>
+<h2 id="iSE-模糊测试">iSE 模糊测试</h2>
+<ul>
+<li>Predoo：基于模糊测试的深度学习算子精度测试，ISSTA'21</li>
+<li>Duo：基于差分测试的深度学习算子精度测试，TR'21</li>
+<li>Gandalf：基于生成的深度学习框架模糊测试，TBD</li>
+<li>QATest：问答系统模糊测试框架，ASE'22</li>
+<li>探索如何利用变异测试优化模糊测试，Internetware'22</li>
+<li>AFLFun：利用函数重要度优化灰盒模糊测试，TBD</li>
+</ul>
+<h3 id="变异测试-模糊测试">变异测试+模糊测试</h3>
+<p>Investigating Coverage Guided Fuzzing with Mutation Testing， Internetware'22</p>
+<p>动机 1：现有 CGF 技术存在不足：</p>
+<ul>
+<li>现有的（灰盒）覆盖率引导的模糊测试往往只关注如何提升代码覆盖率</li>
+<li>覆盖更多的代码并不意味着能触发更多的 Bug $\to$ PIE 模型</li>
+<li>仅关注分支覆盖可能使得 Fuzzer 错过能够发现缺陷的输入，从而会损害技术的有效性</li>
+</ul>
+<p>动机 2：变异测试的优势：</p>
+<ul>
+<li>变异测试/分析技术能够从缺陷的角度出发对测试输入进行评估，能够帮助 Fuzzer 识别具有缺陷暴露（Fault-revealing）能力的测试输入</li>
+<li>借助马太效应我们可以在模糊测试过程中演化生成具有更强缺陷暴露能力的测试输入</li>
+</ul>
+<p>挑战：变异测试和模糊测试存在天然的冲突</p>
+<ul>
+<li>问题 1：如何保证执行的效率？$\to$ 变异体筛选+ 并行执行</li>
+<li>问题 2：如何判断变异杀死？$\to$ 差分测试</li>
+</ul>
+<p>差分测试：为变异测试提供测试预言</p>
+<h3 id="函数重要度-模糊测试">函数重要度+模糊测试</h3>
+<p>AFLFun：利用函数重要度增强灰盒模糊测试</p>
+<ul>
+<li>动机：待测函数亦有差距！不同待测函数的重要度不同</li>
+<li>挑战：量化函数重要度，为执行重要函数的种子分配更多资源</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><img src="/46424/image-20221029191744232.png" alt="Mjs 项目中存在的调用关系不均衡现象"></th>
+<th><img src="/46424/image-20221029191858506.png" alt="重要度感知的函数调用图"></th>
+</tr>
+</thead>
+</table>
+<p>AFLFun：计算重要度（FS，Function Significance）</p>
+<ul>
+<li>动静态结合：采用静态函数距离和动态调用概率描述函数关系</li>
+<li>中心度分析：采用 PageRank 算法推动重要度流向处于中心函数</li>
+</ul>
+<p>AFLFun：能量调度</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/839/" rel="prev" title="自动化测试-04-05-智能软件测试">
+      <i class="fa fa-chevron-left"></i> 自动化测试-04-05-智能软件测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/19778/" rel="next" title="云计算-07-复习">
+      云计算-07-复习 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%B7%E6%BA%90%E4%B8%8E%E5%8F%91%E5%B1%95"><span class="nav-number">1.</span> <span class="nav-text">起源与发展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95%E7%9A%84%E8%AF%9E%E7%94%9F"><span class="nav-number">1.1.</span> <span class="nav-text">模糊测试的诞生</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E4%B8%8E%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">概念与框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E6%9E%84%E6%83%B3"><span class="nav-number">2.1.</span> <span class="nav-text">初始构想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%9C%AF%E8%AF%AD"><span class="nav-number">2.2.</span> <span class="nav-text">相关术语</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%EF%BC%88Fuzzing%EF%BC%89%E4%B8%8E%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95%EF%BC%88Fuzz-Testing%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">模糊（Fuzzing）与模糊测试（Fuzz Testing）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E5%99%A8%EF%BC%88Fuzzer%EF%BC%89"><span class="nav-number">2.2.2.</span> <span class="nav-text">模糊器（Fuzzer）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E8%BF%90%E5%8A%A8%EF%BC%88Fuzzing-Campaign%EF%BC%89"><span class="nav-number">2.2.3.</span> <span class="nav-text">模糊运动（Fuzzing Campaign）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E9%99%B7%E9%A2%84%E8%A8%80%EF%BC%88Bug-Oracle%EF%BC%89"><span class="nav-number">2.2.4.</span> <span class="nav-text">缺陷预言（Bug Oracle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E9%85%8D%E7%BD%AE%EF%BC%88Fuzz-Configuration%EF%BC%89"><span class="nav-number">2.2.5.</span> <span class="nav-text">模糊配置（Fuzz Configuration）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%BE%93%E5%85%A5%EF%BC%88Test-Input%EF%BC%89%E3%80%81%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%EF%BC%88Test-Case%EF%BC%89%E4%B8%8E%E7%A7%8D%E5%AD%90%E8%BE%93%E5%85%A5%EF%BC%88Seed-Input%EF%BC%89"><span class="nav-number">2.2.6.</span> <span class="nav-text">测试输入（Test Input）、测试用例（Test Case）与种子输入（Seed Input）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95%E6%A1%86%E6%9E%B6"><span class="nav-number">2.3.</span> <span class="nav-text">模糊测试框架</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B6%E6%97%8F%E4%B8%8E%E5%88%86%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">家族与分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E8%BF%90%E8%A1%8C%E6%97%B6%E4%BF%A1%E6%81%AF%E5%88%86%E7%B1%BB"><span class="nav-number">3.1.</span> <span class="nav-text">按照运行时信息分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%91%E7%9B%92%EF%BC%88Blackbox%EF%BC%89%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.1.1.</span> <span class="nav-text">黑盒（Blackbox）模糊测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%99%BD%E7%9B%92%EF%BC%88Whitebox%EF%BC%89%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.1.2.</span> <span class="nav-text">白盒（Whitebox）模糊测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%81%B0%E7%9B%92%EF%BC%88Greybox%EF%BC%89%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.1.3.</span> <span class="nav-text">灰盒（Greybox）模糊测试</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E7%94%9F%E6%88%90%E7%AD%96%E7%95%A5%E5%88%86%E7%B1%BB"><span class="nav-number">3.2.</span> <span class="nav-text">按照生成策略分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Mutation-based%EF%BC%9A%E5%9F%BA%E4%BA%8E%E9%9A%8F%E6%9C%BA%E5%8F%98%E5%BC%82%E6%88%96%E5%90%AF%E5%8F%91%E5%BC%8F%E5%8F%98%E5%BC%82%E7%AD%96%E7%95%A5"><span class="nav-number">3.2.1.</span> <span class="nav-text">Mutation-based：基于随机变异或启发式变异策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mutation-based%EF%BC%9AAFL"><span class="nav-number">3.2.2.</span> <span class="nav-text">Mutation-based：AFL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Mutation-based%EF%BC%9ASLF%EF%BC%88ICSE-19%EF%BC%89"><span class="nav-number">3.2.3.</span> <span class="nav-text">Mutation-based：SLF（ICSE&#39;19）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Generation-based%EF%BC%9A%E5%9F%BA%E4%BA%8E%E4%B8%80%E5%AE%9A%E7%9A%84%E6%96%87%E6%B3%95%E8%A7%84%E5%88%99-%E7%BB%93%E6%9E%84%E4%BF%A1%E6%81%AF"><span class="nav-number">3.2.4.</span> <span class="nav-text">Generation-based：基于一定的文法规则&#x2F;结构信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Generation-based%EF%BC%9AInputs-from-Hell-TSE-19"><span class="nav-number">3.2.5.</span> <span class="nav-text">Generation-based：Inputs from Hell (TSE&#39;19)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E5%BC%95%E5%AF%BC%E6%96%B9%E5%BC%8F%E5%88%86%E7%B1%BB"><span class="nav-number">3.3.</span> <span class="nav-text">按照引导方式分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%90%9C%E7%B4%A2%E7%9A%84%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.3.1.</span> <span class="nav-text">基于搜索的模糊测试</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Search-based%EF%BC%9AFuzzing-as-Search-Problem"><span class="nav-number">3.3.1.1.</span> <span class="nav-text">Search-based：Fuzzing as Search Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Search-based%EF%BC%9AAFL%EF%BC%8C%E5%9F%BA%E4%BA%8E%E6%8F%92%E8%A3%85%E7%9A%84%E9%81%97%E4%BC%A0%E7%AE%97%E6%B3%95"><span class="nav-number">3.3.1.2.</span> <span class="nav-text">Search-based：AFL，基于插装的遗传算法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%A2%AF%E5%BA%A6%E7%9A%84%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.3.2.</span> <span class="nav-text">基于梯度的模糊测试</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Gradient-based%EF%BC%9AFuzzing-as-Optimization-Problem"><span class="nav-number">3.3.2.1.</span> <span class="nav-text">Gradient-based：Fuzzing as Optimization Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gradient-based%EF%BC%9ANeuzz1"><span class="nav-number">3.3.2.2.</span> <span class="nav-text">Gradient-based：Neuzz1</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%85%A7%E6%B5%8B%E8%AF%95%E7%9B%AE%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">3.4.</span> <span class="nav-text">按照测试目的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E5%90%91%E7%81%B0%E7%9B%92%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">3.4.1.</span> <span class="nav-text">定向灰盒模糊测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iSE-%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">iSE 模糊测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E5%BC%82%E6%B5%8B%E8%AF%95-%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">4.1.</span> <span class="nav-text">变异测试+模糊测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E9%87%8D%E8%A6%81%E5%BA%A6-%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95"><span class="nav-number">4.2.</span> <span class="nav-text">函数重要度+模糊测试</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

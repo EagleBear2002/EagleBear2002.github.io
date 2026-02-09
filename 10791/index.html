@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 体系结构设计过程（简略步骤） 重要  分析关键需求和项目约束：分析用例文档和需求规格说明书（包含需求规格和项目约束）。注意既要考虑功能性需求，又要考虑非功能性需求，甚至很大意义上体系结构设计是为了满足非功能性需求。 通过选择体系结构风格：选择分层风格（信息系统、并行开发、非 web 应用），进行评审。 进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-10-软件体系结构设计与构建">
+<meta property="og:url" content="https://eaglebear2002.github.io/10791/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 体系结构设计过程（简略步骤） 重要  分析关键需求和项目约束：分析用例文档和需求规格说明书（包含需求规格和项目约束）。注意既要考虑功能性需求，又要考虑非功能性需求，甚至很大意义上体系结构设计是为了满足非功能性需求。 通过选择体系结构风格：选择分层风格（信息系统、并行开发、非 web 应用），进行评审。 进">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151130548.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151119936.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151058848.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/1-1676529138970-1351.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151143640.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151157028.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151203610.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151209556.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151216792.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151235460.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/9-1676529138971-1358.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/10-1676529138971-1359.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/11-1676529138971-1360.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/12-1676529138971-1361.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151305749.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151311003.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151316082.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151321596.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151326089.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/11-%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E5%BB%BA.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/19-1676529138972-1368.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151401761.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151405975.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151457375.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151501113.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151504725.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151508179.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151514094.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151518582.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151531163.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/31-1676529138973-1380.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151559067.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151618746.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151623533.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151634708.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151639315.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151719906.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151727485.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151731023.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151736262.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151740207.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151838439.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151844235.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/42-1676529138974-1389.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/10791/image-20230706151920066.png">
+<meta property="article:published_time" content="2022-05-31T06:56:19.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.627Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/10791/image-20230706151130548.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/10791/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-10-软件体系结构设计与构建 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/10791/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-10-软件体系结构设计与构建
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 14:56:19" itemprop="dateCreated datePublished" datetime="2022-05-31T14:56:19+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="体系结构设计过程（简略步骤）-重要">体系结构设计过程（简略步骤） 重要</h2>
+<ol>
+<li>分析关键需求和项目约束：分析用例文档和需求规格说明书（包含需求规格和项目约束）。注意既要考虑功能性需求，又要考虑非功能性需求，甚至很大意义上体系结构设计是为了满足非功能性需求。</li>
+<li>通过选择体系结构风格：选择分层风格（信息系统、并行开发、非 web 应用），进行评审。</li>
+<li>进行软件体系结构逻辑（抽象）设计：产生逻辑包图</li>
+<li>依赖逻辑设计进行软件体系结构（实现）设计：产生物理类图</li>
+<li>完善体系结构设计：关键类图，持久化数据格式的定义等</li>
+<li>添加构件接口：包、重要文件的创建，定义接口</li>
+<li>迭代过程 3-6</li>
+</ol>
+<blockquote>
+<ol>
+<li>步骤 1-3 是逻辑设计，步骤 4-7 是物理设计</li>
+<li>本文接下来的部分将要按照这个思路进行下去</li>
+</ol>
+</blockquote>
+<h2 id="第一步：分析关键需求和项目约束">第一步：分析关键需求和项目约束</h2>
+<ol>
+<li>一般来说，体系结构设计的输入要素主要由两个来源：
+<ol>
+<li>软件需求规格说明</li>
+<li>项目约束</li>
+</ol>
+</li>
+<li>体系结构设计必须落实所有的功能性需求和非功能性需求</li>
+</ol>
+<h3 id="系统结构需求">系统结构需求</h3>
+<p><img src="/10791/image-20230706151130548.png" alt></p>
+<h3 id="实践案例">实践案例</h3>
+<p><img src="/10791/image-20230706151119936.png" alt></p>
+<ol>
+<li>需求
+<ul>
+<li>a 概要功能需求：10 个功能</li>
+<li>b 非功能性需求
+<ul>
+<li>安全需求：Security1~3</li>
+<li>约束：IC2</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>项目约束
+<ul>
+<li>a 开发技术：Java</li>
+<li>b 时间较为紧张</li>
+<li>c 开发人员：不熟悉 Web 技术</li>
+</ul>
+</li>
+</ol>
+<h2 id="第二步：通过选择体系结构风格">第二步：通过选择体系结构风格</h2>
+<h3 id="实践案例-2">实践案例</h3>
+<p><img src="/10791/image-20230706151058848.png" alt></p>
+<ol>
+<li>分层风格
+<ol>
+<li>协议不变情况下易于修改</li>
+<li>能够促进并行开发：只需要界定好层与层之间的接口</li>
+</ol>
+</li>
+</ol>
+<h2 id="第三步：进行软件体系结构逻辑（抽象）设计">第三步：进行软件体系结构逻辑（抽象）设计</h2>
+<h3 id="依据概要功能需求与体系结构风格建立初始设计">依据概要功能需求与体系结构风格建立初始设计</h3>
+<p><img src="/10791/1-1676529138970-1351.png" alt></p>
+<ol>
+<li>将需求分配到子系统和模块
+<ol>
+<li>考虑功能的相同性：不同任务，但是相同功能</li>
+<li>考虑可复用性：结构、数据、行为的可复用性</li>
+</ol>
+</li>
+<li>实践案例
+<ol>
+<li>销售与退货</li>
+<li>产品调整、入库、出库与库存分析</li>
+<li>会员发展与礼品赠送</li>
+<li>销售策略</li>
+</ol>
+</li>
+<li>基本功能
+<ol>
+<li>销售</li>
+<li>库存</li>
+<li>会员</li>
+<li>销售策略</li>
+<li>用户</li>
+</ol>
+</li>
+</ol>
+<p><img src="/10791/image-20230706151143640.png" alt></p>
+<ol start="4">
+<li>销售是否只用到 Sale 的数据：下图中的显示部分用 UI 后缀，持久层用 Data 后缀（指包名）</li>
+</ol>
+<p><img src="/10791/image-20230706151157028.png" alt></p>
+<ol start="5">
+<li>连锁超市管理系统的改进概要功能设计</li>
+</ol>
+<p><img src="/10791/image-20230706151203610.png" alt></p>
+<ol start="6">
+<li>初步设计方案一：</li>
+</ol>
+<p><img src="/10791/image-20230706151209556.png" alt></p>
+<ol start="7">
+<li>初步设计方案二：
+<ol>
+<li>层与层之间就是一一对应了。</li>
+<li>逻辑层对象进行一一交互，只要互相对应的进行通知即可。</li>
+<li>进一步将业务层的功能进行切割划分</li>
+</ol>
+</li>
+</ol>
+<p><img src="/10791/image-20230706151216792.png" alt></p>
+<h3 id="使用非功能性需求与项目约束评价和改进初始设计">使用非功能性需求与项目约束评价和改进初始设计</h3>
+<h4 id="初步设计的分析">初步设计的分析</h4>
+<ol>
+<li>能够满足项目约束：
+<ol>
+<li>分层风格能促进并行开发,从而缩短开发时间;</li>
+<li>分层风格可以使用 Java 技术,而不使用 Web 技术。</li>
+</ol>
+</li>
+<li>无法满足安全需求（Security1~3）网络分布约束（IC2),所以需要改进：
+<ol>
+<li>为使其满足安全需求,可以增加<strong>用户登录与验证功能</strong>,可以建立专门的三个模块 (Presentation、Logic、 Data),也可以将该功能并入用户管理功能,即为 userui, user, userdata 三个模块增加新的职责。</li>
+<li>为满足网络分布约束,需要将模块分布到<strong>客户端和服务器</strong>组成的网络上。</li>
+<li>可以将 Prensentation 层模块部署在客户端,将 Logic 层和 Data 层的模块部署在服务器端。</li>
+<li>也可将 Prensentation 层和 Logic 层模块部署在客户端,将 Data 层的模块部署在服务器端。</li>
+<li>一旦相邻两层被部署到网络两端,那么它们之间的交互就无法通过程序调用来完成,可以考虑将简单的程序调用转化为远程方法调用 RMI（Remote Methods Invocation）者 HTTP。</li>
+</ol>
+</li>
+<li>连锁超市管理系统最终的软件体系结构逻辑设计方案</li>
+</ol>
+<p><img src="/10791/image-20230706151235460.png" alt></p>
+<p><img src="/10791/9-1676529138971-1358.png" alt></p>
+<h2 id="Package-Design-Principles-包设计原则">Package Design Principles 包设计原则</h2>
+<ol>
+<li>重用发布等价原则（REP）：重用的粒度就是发布的粒度</li>
+<li>共同封闭原则（CCP）：包中所有类对于同一类性质的变化应该是共同封闭的，一个变化若对一个包产生影响，则对该包中的所有类产生影响，而对于其他包不造成任何影响。</li>
+<li>共同重用原理（CRP）：一个包中的所有类应该是能够共同重用的。</li>
+<li>无环依赖原则（ADP）：在包的依赖关系图中不能存在环。</li>
+<li>稳定依赖原则（SDP）：朝着稳定的方向进行依赖</li>
+<li>稳定抽象原则（SAP）：包的抽象程度应该和其稳定程度一致</li>
+<li>前三条描述的是依赖性，后三条描述的是耦合性</li>
+</ol>
+<p><img src="/10791/10-1676529138971-1359.png" alt></p>
+<h3 id="Common-Closure-Principle-CCP-共同封闭原则">Common Closure Principle (CCP) 共同封闭原则</h3>
+<ol>
+<li><strong>一起修改的类应该放在一起</strong></li>
+<li>最小化修改对程序员的影响</li>
+<li>当需要更改时，对程序员有利</li>
+<li>如果更改由于编译和链接时间以及重新验证而影响了尽可能少的软件包</li>
+<li>示例</li>
+</ol>
+<p><img src="/10791/11-1676529138971-1360.png" alt></p>
+<ol start="6">
+<li>总结
+<ol>
+<li>将具有相似闭包的类分组</li>
+<li>面向可以预期的变更封闭包</li>
+<li>将更改限制为几个软件包</li>
+<li>降低包装释放频率</li>
+<li>减少程序员的工作量</li>
+<li>只对可预测的变更有作用，不可预测的变更会为系统带来极大的破坏能力，并且无法进行预测。</li>
+</ol>
+</li>
+</ol>
+<h3 id="Common-Reuse-Principle-CRP-共同重用原则">Common Reuse Principle (CRP) 共同重用原则</h3>
+<ol>
+<li><strong>一起被重用的应该在一起</strong></li>
+<li>包应重点突出，用户应使用包中的所有类</li>
+<li>总结
+<ol>
+<li>根据常见重用对类进行分组：避免给用户不必要的依赖</li>
+<li>遵循 CRP 通常会导致软件包拆分：获得更多，更小，更专注的包</li>
+<li>减少重新使用者的工作</li>
+</ol>
+</li>
+</ol>
+<h3 id="共同封闭原则和共同重用的原则的折衷">共同封闭原则和共同重用的原则的折衷</h3>
+<ol>
+<li>CCP 和 CRP 原则是<strong>互斥</strong>的，即不能同时满足它们。</li>
+<li>CRP 使重用者的生活更加轻松，而 CCP 使维护者的生活更加轻松。</li>
+<li>CCP 致力于使包装尽可能大，而 CRP 则尝试使包装很小。</li>
+<li>在项目的早期，架构师可以设置包结构，使 CCP 占主导地位，并协助开发和维护。后来，随着体系结构的稳定，架构师可以重构程序包结构，以使<strong>外部重用程序的 CRP 最大化</strong>。</li>
+<li>也就是说在软件开发的不同阶段 CCP 和 CRP 的重视重用程度时不同的，要根据项目进展来进行不同程度的学习。</li>
+</ol>
+<h3 id="Reuse-Release-Equivalency-Principle-REP-重用发布等价原则">Reuse-Release Equivalency Principle (REP) 重用发布等价原则</h3>
+<ol>
+<li><strong>重用的单位是发布单位</strong></li>
+<li>关于重用软件</li>
+<li>可重用软件是外部软件，您可以使用它，但其他人可以维护它。</li>
+<li>商业和非商业外部软件之间的重用没有区别。</li>
+<li>例子</li>
+</ol>
+<p><img src="/10791/12-1676529138971-1361.png" alt></p>
+<ol start="6">
+<li>总结
+<ol>
+<li>为重用器分组组件（类）</li>
+<li>单个类通常是不可重用的：几个协作类组成一个包</li>
+<li>包中的类应构成可重用和可释放的模块：模块提供一致的功能</li>
+<li>减少重新使用者的工作</li>
+<li>和相关联的类一起发布，而不是单独进行发布</li>
+</ol>
+</li>
+</ol>
+<h3 id="The-Acyclic-Dependencies-Principle-ADP-无环依赖原则">The Acyclic Dependencies Principle (ADP) 无环依赖原则</h3>
+<ol>
+<li>程序包的依赖关系结构必须是有向非循环图（DAG)</li>
+<li>稳定并分批发布项目</li>
+<li>以自上而下的层次结构组织程序包依赖关系</li>
+<li>一旦形成环就可能会形成无限的修改（环中的包的修改会导致大量的修改的发生）</li>
+</ol>
+<h4 id="Dependencies-are-a-DAG">Dependencies are a DAG</h4>
+<p><img src="/10791/image-20230706151305749.png" alt></p>
+<ol>
+<li>左侧这个树就形成了环状结构</li>
+</ol>
+<h4 id="依赖循环打破循环：第一种方式：">依赖循环打破循环：第一种方式：</h4>
+<ol>
+<li>这种情况是单向依赖产生的闭环</li>
+<li>一种解决方案，将 Common error 依赖的一个 GUI 中的一个包，就可以避免循环依赖的出现了。</li>
+</ol>
+<p><img src="/10791/image-20230706151311003.png" alt></p>
+<h4 id="依赖循环打破循环：第二种方式：">依赖循环打破循环：第二种方式：</h4>
+<ol>
+<li>另一情况，这种情况是互相依赖产生的闭环，A 依赖于 X,Y 依赖于 B</li>
+<li>解决方案：从 Y 提供一个接口（这个接口被 B 实现，被 Y 持有）
+<ol>
+<li>B 实现 BY：B 依赖于 BY</li>
+</ol>
+</li>
+</ol>
+<p><img src="/10791/image-20230706151316082.png" alt></p>
+<h4 id="无环依赖原则的应用场景">无环依赖原则的应用场景</h4>
+<ol>
+<li>层次式风格和主程序/子程序风格通常不会产生</li>
+<li>面向对象式风格<strong>尤其</strong>要注意</li>
+<li>C/S 的 MVC 风格可能会发生</li>
+<li>基于数据流、事件/消息、数据共享进行交互的体系结构风格通常不会发生</li>
+</ol>
+<h3 id="Stable-Dependencies-Principle-SDP-稳定依赖原则">Stable Dependencies Principle (SDP) 稳定依赖原则</h3>
+<ol>
+<li><strong>依赖应当指向一个稳定的方向（更改他所需要付出的努力）</strong></li>
+<li>稳定性：对应于更换包装所需的时间</li>
+<li>稳定的软件包：项目内难以更改</li>
+<li>稳定性可以量化</li>
+</ol>
+<h4 id="稳定依赖原则">稳定依赖原则</h4>
+<p><img src="/10791/image-20230706151321596.png" alt></p>
+<ol>
+<li>为什么 X 是稳定的，而 Y 是不稳定的（别人变化不会影响到我）</li>
+</ol>
+<p><img src="/10791/image-20230706151326089.png" alt></p>
+<h3 id="包的稳定性度量">包的稳定性度量</h3>
+<ol>
+<li>一种方法是<strong>计算进、出该包的依赖关系的数目</strong>。可以使用这些数值来计算该包的位置稳定性（positional stability)。</li>
+<li>（Ca）入耦合度（Aﬀerent Coupling）：指处于该包的外部并依赖于该包内的类的类的数目。</li>
+<li>（Ce）出耦合度（Eﬀerent Coupling）：指处于该包的内部并依赖于该包外的类的类的数目。</li>
+<li>（不稳定性 I）I = Ce / (Ca + Ce)</li>
+<li>该度量的取值范围是[0,1]。I=0 表示该包具有<strong>大的稳定性</strong>。I=1 表示该包具有<strong>大的不稳定性</strong>。通过计算和一个包内的类有依赖关系的包外的类的数目，就可以计算出实体 Ca 和 Ce 。</li>
+<li>当一个包的 I 度量值为 1 时，就意味着没有任何其他的包依赖于该包（Ca = 0)；而该包却依赖于其他的包（Ce&gt;0)。这是一个包不稳定的状态：它是不承担责任且有依赖性的。因为没有包依赖于它，所以它就没有不改变理由，而它所依赖的包会给它提供丰富的更改理由。</li>
+<li>另一方面，当一个包的 I 度量值为 0 时，就意味着其他包会依赖于该包（Ca &gt; 0)，但是该包却不依赖于任何其他的包（Ce = 0)。它是负有责任且无依赖性的。这种包达到了大程度的稳定性。它的依赖者使其难以更改，而且没有任何依赖关系会迫使它去改变</li>
+</ol>
+<h3 id="Stable-Abstractions-Principle-SAP-稳定抽象原则">Stable Abstractions Principle (SAP) 稳定抽象原则</h3>
+<ol>
+<li><strong>稳定的包应该是抽象的包（接口）</strong></li>
+<li><strong>不稳定的包应该是具体的包</strong></li>
+<li>稳定的包装包含高层的设计。</li>
+<li>使它们成为抽象可以打开它们进行扩展，但可以关闭它们进行修改（OCP)。</li>
+<li>稳定的难以更改的包装中保留了一些灵活性。</li>
+</ol>
+<h4 id="抽象性度量">抽象性度量</h4>
+<ol>
+<li>包的抽象性用抽象类的数目和包中所有类的数目进行计算。</li>
+<li>假如说包中类的总数是 Nc,  抽象类的数目是 Na,那么抽象度 A = Na / Nc</li>
+</ol>
+<img src="/10791/11-%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E6%9E%84%E5%BB%BA.jpg" style="zoom:150%;">
+<ol>
+<li>String 类（Instability、Abstraction 原点）</li>
+<li>String 类就是尴尬的处于原点的一个包，导致任何对 String 的修改都有可能导致之前开发的 java 程序无法运行。</li>
+</ol>
+<h4 id="例子">例子</h4>
+<p><img src="/10791/19-1676529138972-1368.png" alt></p>
+<h3 id="包设计的过程">包设计的过程</h3>
+<ol>
+<li>迭代的过程：先用 CCP  原则对把可能一同变化的类组织成包进行发布</li>
+<li>随着系统的不断增长,我们开始关注创建可重用的元素,于是开始使用  CRP  和  REP  来指导包的组合。</li>
+<li>后使用  ADP、SDP、SAP  对包图进行度量，去掉不好的依赖。（修改设计）</li>
+</ol>
+<h2 id="第四步：依赖逻辑设计进行软件体系结构（实现）设计；">第四步：依赖逻辑设计进行软件体系结构（实现）设计；</h2>
+<ol>
+<li>开发包（构件）设计</li>
+<li>运行时的进程</li>
+<li>物理部署</li>
+</ol>
+<h3 id="初始物理包">初始物理包</h3>
+<p><img src="/10791/image-20230706151401761.png" alt></p>
+<h3 id="细节考虑">细节考虑</h3>
+<p><img src="/10791/image-20230706151405975.png" alt></p>
+<ol>
+<li>Presentation 层与 Logic 层被置于客户端,Data 层被置于服务器端,那么 Logic 层的开发包依赖于 Data 层的开发包是不可能的。
+<ol>
+<li>可以考虑使用 RMI 技术,RMI 技术会将 Data 层开发包分解为置于客户端的 dataservice 接口包和置于服务器的 data 开发包。这样一来,Logic 层开发包依赖于 dataservice 包,dataservice 和 data 层的开发包都依赖于 RMI 类库包。</li>
+</ol>
+</li>
+<li>所有的 Data 层开发包都需要进行数据持久化（例如读写数据库、读写文件等）,所以它们会有一些重复代码,可以将重复代码独立为新的开发包然后所有的 Data 层开发包都依赖于 databaseutility,databaseutility 会依赖于 JDBC 类库包或者 IO 类库包。</li>
+<li>所有的 Presentation 层开发包都需要使用图形类型建立界面,都要依赖于图形界面类库包。</li>
+<li>此外,Presentation 层实现时,由 mainui 包负责整个页面之间的跳转逻辑。其它各包负责各自页面自身的功能。</li>
+<li>在分层风格的典型设计中,不希望高层直接依赖于低层,而是为低层建立接口包, 实现依赖倒置原则（参见 15.2.3）, 所以应该调整为：各 Prensentatin 层开发包（调用）依赖于 Logic 层接口包 businesslogicaservice 包,Logic 层开发包（实现）依赖于 Logic 层接口包 businesslogicaservice 包。</li>
+<li>在分层风格的典型设计中,Presentation 层与 Logic 层之间、Logic 层与 Data 层之间可能会传递复杂数据对象,那么相邻两层都需要使用数据对象声明,所以需要将数据对象声明单独独立为开发包（VO 包与 PO 包）,或者将数据对象声明放入接口包（VO 包放入 Logic 接口包,PO 包独立）。</li>
+<li>开发包的循环依赖现象需要消除,对此可以使用依赖倒置原则（参见 15.2.3）循环依赖变为单向依赖：
+<ol>
+<li>Sales 与 Commodity：将部分 Commodity 类抽象接口 commodityInfoService 置入 Sales 包, 这样 Commodity 单向依赖于 Sales（实现接口+调用）。</li>
+<li>Sales 与 Member：将部分 Member 类抽象接口置入 Sales 包,这样 Member 单向依赖于 Sales（实现接口+调用）。</li>
+</ol>
+</li>
+<li>在 Logic 层中,一些关于初始化和业务逻辑层上下文的工作被分配到 utilitybl 包中去。</li>
+</ol>
+<h3 id="连锁超市管理系统开发包图">连锁超市管理系统开发包图</h3>
+<ol>
+<li>客户端</li>
+</ol>
+<p><img src="/10791/image-20230706151457375.png" alt></p>
+<ol start="2">
+<li>服务器端</li>
+</ol>
+<p><img src="/10791/image-20230706151501113.png" alt></p>
+<h3 id="进程图">进程图</h3>
+<ol>
+<li>进程图主要是表明运行时的进程，以及个进程间如何进行通信的。</li>
+</ol>
+<p><img src="/10791/image-20230706151504725.png" alt></p>
+<h3 id="部署图">部署图</h3>
+<ol>
+<li>UML 部署图描述了一个运行时的物理节点，以及在这个节点上运行的软件构建的静态视图。</li>
+</ol>
+<p><img src="/10791/image-20230706151508179.png" alt></p>
+<h2 id="第五步：完善体系结构设计">第五步：完善体系结构设计</h2>
+<ol>
+<li>完善软件体系结构设计</li>
+<li>细化软件体系结构设计</li>
+</ol>
+<h3 id="完善启动和网络链接">完善启动和网络链接</h3>
+<p><img src="/10791/image-20230706151514094.png" alt></p>
+<p><img src="/10791/image-20230706151518582.png" alt></p>
+<ol>
+<li>失败业务的现场保护问题</li>
+<li>网络连接断开的恢复问题</li>
+<li>除了细化职责建立关键类图之后，模块传递的数据对象也需要被明确定义，因为他们是模块建接口的重要部分，必须严格、准确。</li>
+</ol>
+<h3 id="细化-salesbl-模块">细化 salesbl 模块</h3>
+<p><img src="/10791/image-20230706151531163.png" alt></p>
+<h3 id="数据定义">数据定义</h3>
+<ol>
+<li>接口的数据对象</li>
+<li>关键类的重要数据结构</li>
+<li>Value Object (VO)</li>
+<li>Persistent Object(PO)
+<ol>
+<li>用 POJO 实现</li>
+</ol>
+</li>
+</ol>
+<h4 id="Java-实体">Java 实体</h4>
+<ol>
+<li>实体是一个可以代表一个临时的业务实体的对象，比如一个账单或者用户</li>
+<li>没有逻辑业务方法（行为）</li>
+<li>实体必须在使用它们的会话或事务之间持久存在。</li>
+<li>实体是存储在文件或者数据库中的</li>
+<li>实体是一个 Beans
+<ol>
+<li>Simple or EJB.</li>
+</ol>
+</li>
+</ol>
+<h4 id="POJO-Plain-Old-Java-Objects-Simple-Java-Entities">POJO(Plain Old Java Objects)= Simple Java Entities</h4>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Entity</span> &#123;<br>   <span class="hljs-keyword">private</span> String fisrst;<br>   <span class="hljs-keyword">private</span> String last;<br>   <span class="hljs-keyword">private</span> Address address;<br>   <span class="hljs-keyword">private</span> Phone phone;<br>   <span class="hljs-keyword">public</span> Phone <span class="hljs-title function_">getPhone</span><span class="hljs-params">()</span> &#123; <span class="hljs-keyword">return</span> phone; &#125;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setPhone</span><span class="hljs-params">(Phone p)</span> &#123; phone = p; &#125;<br>   <span class="hljs-comment">// etc</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="Value-Objects（逻辑层向展示层传递数据）">Value Objects（逻辑层向展示层传递数据）</h4>
+<ol>
+<li>价值对象（VO）含一个或多个公共领域中实体的属性。</li>
+<li>在层之间传递值对象，而不是实体。</li>
+<li><strong>应该考虑实现 Serializable</strong></li>
+<li>值对象可以更新和创建实体。</li>
+<li>实体可以创建价值对象。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PersonVO</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ValueObject</span> &#123;<br>   <span class="hljs-keyword">public</span> String first;<br>   <span class="hljs-keyword">public</span> String last;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> addressOid;<br>   <span class="hljs-keyword">public</span> String street;<br>   <span class="hljs-keyword">public</span> String apartment;<br>   <span class="hljs-keyword">public</span> String city;<br>   <span class="hljs-keyword">public</span> String state;<br>   <span class="hljs-keyword">public</span> String zip;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> phoneOid;<br>   <span class="hljs-keyword">public</span> String phone;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">update</span><span class="hljs-params">(Person per)</span> &#123; ... &#125;<br>   <span class="hljs-keyword">public</span> Person <span class="hljs-title function_">makePerson</span><span class="hljs-params">()</span> &#123; ... &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="图书地址业务实体">图书地址业务实体</h4>
+<p><img src="/10791/31-1676529138973-1380.png" alt></p>
+<ol>
+<li>可以是多个实体的集合</li>
+</ol>
+<h3 id="项目实践">项目实践</h3>
+<ol>
+<li>VO： View 层与 Logic 之间的数据传递
+<ol>
+<li>Customer(VIP)VO、CommodityVO、SaleLineItemVO、PaymentVO、 GiftVO…</li>
+</ol>
+</li>
+<li>PO：Logic 与 Data 层之间的数据传递
+<ol>
+<li>SalesPO、SaleLineItemPO、CustomerPO、CommodityPO、 PaymentPO、GiftPO…</li>
+</ol>
+</li>
+</ol>
+<h3 id="持久化对象-UserPO-的细化">持久化对象 UserPO 的细化</h3>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserPO</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;<br>   <span class="hljs-type">int</span> id;<br>   String name;<br>   String password;<br>   UserRole role;<br>   <span class="hljs-keyword">public</span> <span class="hljs-title function_">UserPO</span><span class="hljs-params">(<span class="hljs-type">int</span> i, String n, String p, UserRole r)</span>&#123;<br>      id = i;<br>      name = n;<br>      password = p;<br>      role = r;<br>   &#125;<br>   <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getName</span><span class="hljs-params">()</span>&#123;<br>      <span class="hljs-keyword">return</span> name;<br>   &#125;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getID</span><span class="hljs-params">()</span>&#123;<br>      <span class="hljs-keyword">return</span> id;<br>   &#125;<br>   <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getPassword</span><span class="hljs-params">()</span>&#123;<br>      <span class="hljs-keyword">return</span> password;<br>   &#125;<br>   <span class="hljs-keyword">public</span> UserRole <span class="hljs-title function_">getRole</span><span class="hljs-params">()</span>&#123;<br>      <span class="hljs-keyword">return</span> role;<br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="数据持久化的细化">数据持久化的细化</h3>
+<p><img src="/10791/image-20230706151559067.png" alt></p>
+<h2 id="第六步：添加构件接口">第六步：添加构件接口</h2>
+<h3 id="构件初步设计">构件初步设计</h3>
+<ol>
+<li>根据分配的需求确定模块对外接口</li>
+<li>初步设计关键类</li>
+<li>编写接口规范</li>
+</ol>
+<h3 id="确定模块对外接口">确定模块对外接口</h3>
+<p><img src="/10791/image-20230706151618746.png" alt></p>
+<ol>
+<li>有的接口是面向业务的</li>
+</ol>
+<h3 id="编写接口规范">编写接口规范</h3>
+<p><img src="/10791/image-20230706151623533.png" alt></p>
+<ol>
+<li>规范的书写</li>
+</ol>
+<h2 id="体系结构的原型构建">体系结构的原型构建</h2>
+<h3 id="包的创建">包的创建</h3>
+<ol>
+<li>包用于将系统组织成有层次结构的机制，可以根据构件的设计来创建项目的包。</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/10791/image-20230706151634708.png" alt></th>
+<th><img src="/10791/image-20230706151639315.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="重要文件的创建">重要文件的创建</h3>
+<ol>
+<li>可选</li>
+<li>数据文件</li>
+<li>系统文件</li>
+<li>配置文件</li>
+</ol>
+<h4 id="文件列表">文件列表</h4>
+<p><img src="/10791/image-20230706151719906.png" alt></p>
+<ol>
+<li>SalesBLService 的定义</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">SalesBLService</span> &#123;<br>   <span class="hljs-comment">//销售界面得到商品和商品促销的信息</span><br>   <span class="hljs-keyword">public</span> CommodityVO <span class="hljs-title function_">getCommodityByID</span><span class="hljs-params">(<span class="hljs-type">int</span> id)</span>;<br>   <span class="hljs-keyword">public</span> ArrayList&lt;CommodityPromotionVO&gt;  <span class="hljs-title function_">getCommodityPromotionListByID</span><span class="hljs-params">(intcommodityID)</span>;<br>   <span class="hljs-comment">//销售界面得到会员的信息</span><br>   <span class="hljs-keyword">public</span> MemberVO <span class="hljs-title function_">getMember</span> <span class="hljs-params">()</span>;<br>   <span class="hljs-comment">//销售的步骤</span><br>   <span class="hljs-keyword">public</span> ResultMessage <span class="hljs-title function_">addMember</span><span class="hljs-params">(<span class="hljs-type">int</span> id)</span>;<br>   <span class="hljs-keyword">public</span> ResultMessage <span class="hljs-title function_">addCommodity</span><span class="hljs-params">(<span class="hljs-type">int</span> id, <span class="hljs-type">int</span> quantity)</span>;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getTotal</span><span class="hljs-params">(<span class="hljs-type">int</span> mode)</span>;<br>   <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getChange</span><span class="hljs-params">(<span class="hljs-type">double</span> payment)</span>;<br>   <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">endSales</span><span class="hljs-params">()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="定义构件之间的接口">定义构件之间的接口</h3>
+<ol>
+<li>在包和文件定义之后，我们可以着力开始定义构件之间的接口</li>
+</ol>
+<h3 id="关键需求的实现">关键需求的实现</h3>
+<ol>
+<li>实现一些关键<strong>功能需求</strong>。
+<ol>
+<li>比如连锁超市系统中销售用例就是一个关键的用例。它所覆盖的面广,如果销售用例可以实现的话,其它用例的实现就比较有信心了。而且这个需求需要做到端到端的实现。</li>
+<li>比如,连锁超市系统中存在客户端和服务器端。那么我们就需要在客户端通过 GUI 界面发出指令,通过客户端的业务逻辑处理,访问服务器端的数据,对数据进行修改。只有这样才能表明当前的体系结构可以胜任功能性需求。</li>
+</ol>
+</li>
+<li>对原型的<strong>非功能性指标</strong>进行估算和验证。如果出现不符合非功能性需求和项目约束的情况,我们还需要重新对体系结构设计进行调整。
+<ol>
+<li>比如,连锁超市系统中我们用问难来保存数据,而当数据越来越多,特别是<strong>销售记录要保存 1 年</strong>。这时候,客户端跨网络对服务器上文件的查找就比较慢,可能会使得我们不满足实时性的要求。</li>
+<li>这时候,可能我们就要调整体系结构中数据存储的方案,比如换成数据库。或者在客户端的逻辑层和数据层之间,加设数据映射层。在客户端运行初始化时,将数据从服务器端载入到客户端的内存中去。</li>
+</ol>
+</li>
+</ol>
+<h2 id="体系结构集成与测试">体系结构集成与测试</h2>
+<h3 id="集成的策略">集成的策略</h3>
+<ol>
+<li>当体系结构中原型各个模块的代码都编写完成并经过单元测试之后,需要将所有模块组合起来形成整个软件原型系统, 这就是集成。</li>
+<li>集成的<strong>目的</strong>是为了逐步让各个模块合成为一个系统来工作,从而验证整个系统的功能、性能、可靠性等需求。对于被集成起来的系统一般主要是通过其暴露出来的接口,伪装一定的参数和输入,进行黑盒测试。</li>
+<li>根据从模块之间集成的先后顺序,一般有下列几种常见的集成策略：
+<ol>
+<li>大爆炸式（所有放在一起，看能不能过）</li>
+<li>增量式
+<ol>
+<li>自顶向下式</li>
+<li>自底向上式</li>
+<li>三明治式</li>
+<li>持续集成</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>模块开发完成后我们进行开发集成测试用例</li>
+</ol>
+<h4 id="大爆炸集成">大爆炸集成</h4>
+<ol>
+<li>大爆炸集成：将所有模块一次性组合在一起。</li>
+<li>优点：可以在短时间内迅速完成集成</li>
+<li>缺点：一次运行成功可能性不高，不容易发现 bug</li>
+</ol>
+<h4 id="自顶向下集成">自顶向下集成</h4>
+<ol>
+<li>自顶向下集成是对分层次的架构，先集成和测试上层的测模块，下层的模块用伪装的具体接口的桩程序。</li>
+<li>自顶向下集成的优点：
+<ol>
+<li>按深度优先可以首先实现和验证一个完整的功能需求;</li>
+<li>只需顶端一个驱动（Driver);</li>
+<li>利于故障定位。</li>
+</ol>
+</li>
+<li>自顶向下集成的缺点：
+<ol>
+<li>桩的开发量大;</li>
+<li>底层验证被推迟,且底层组件测试不充分。</li>
+<li>但是一般会带来比较好的顶层设计的优势。</li>
+</ol>
+</li>
+<li>自顶向下基层适用于控制结构比较清晰和稳定、高层接口变化较小、底层接口未定义或经常被修改、控制组件有具有较大的技术风险的软件系统。</li>
+</ol>
+<p><img src="/10791/image-20230706151727485.png" alt></p>
+<ol start="3">
+<li>测试 M1 的时候，我们使用假的 M2、M3、M4 来进行代替（简单的代替这个模块）（被叫做 Stub)</li>
+</ol>
+<h4 id="自底向上集成">自底向上集成</h4>
+<p><img src="/10791/image-20230706151731023.png" alt></p>
+<ol>
+<li>高层设计的错误不会被很快的发现</li>
+<li>而这往往被我们认为会带来比较致命的问题</li>
+<li>优点：
+<ol>
+<li>对底层组件较早进行验证</li>
+<li>底层组件开发可以并行</li>
+<li>桩的工作量少</li>
+</ol>
+</li>
+<li>缺点：
+<ol>
+<li>驱动的开发作用量大</li>
+<li>对高层的设计被推迟，设计上的高层错误并不能被及时发现</li>
+</ol>
+</li>
+</ol>
+<h4 id="持续集成">持续集成</h4>
+<ol>
+<li>一种增量集成方法,但它提倡<strong>尽早集成和频繁集成</strong>。</li>
+<li>尽早集成是指不需要总是等待一个模块开发完成才把它集成起来,而是在开发之初就利用 Stub 集成起来。</li>
+<li>频繁集成是指开发者每次完成一些开发任务之后,就可以用开发结果替换 Stub 中的相应组件,进行集成与测试。一般来说,每人每天至少集成一次,也可以多次。</li>
+<li>结合尽早集成和频繁集成的办法,持续集成可以做到：
+<ol>
+<li>防止软件开发中出现无法集成与发布的情况。因为软件项目在任何时刻都是可以集成和发布的。</li>
+<li>有利于检查和发现集成缺陷。因为早的版本主要集成了简单的 Stub,比较容易做到没有错误。后续代码逐渐开发完成后,频繁集成又使得即使出现集成问题也能够尽快发现、尽快解决。</li>
+</ol>
+</li>
+<li>持续集成的频率很高,所以手动改的集成对软件工程师来说是无法接受的,必须利用版本控制工具和持续集成工具。如果程序员可以仅仅使用一条命令就完成一次完整的集成,开发团队才有动力并且能够坚持进行频繁的集成。</li>
+<li>如果你们的团队选择，白天进行代码开发，晚上进行代码测试，如果晚上你的代码出现比较严重的问题的时候，有可能会叫醒你来修改代码，以避免第二天浪费更多的时间。</li>
+</ol>
+<h3 id="依据模块接口建立桩程序-Stub">依据模块接口建立桩程序 Stub</h3>
+<ol>
+<li>Stub 桩程序
+<ol>
+<li>为了完成程序的编译和连接而使用的暂时代码</li>
+<li>对外模拟和代替承担模块接口的关键类</li>
+<li>比真实程序简单的多，使用为<strong>简单</strong>的逻辑：比如简单的替代 DAO 层。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/10791/image-20230706151736262.png" alt></p>
+<h3 id="Stub-定义">Stub 定义</h3>
+<p><img src="/10791/image-20230706151740207.png" alt></p>
+<h3 id="Stub-使用">Stub 使用</h3>
+<p><img src="/10791/image-20230706151838439.png" alt></p>
+<h3 id="Driver-定义">Driver 定义</h3>
+<p><img src="/10791/image-20230706151844235.png" alt></p>
+<h3 id="集成与构建">集成与构建</h3>
+<ol>
+<li>集成
+<ol>
+<li>使用桩程序辅助集成</li>
+<li>编译与链接</li>
+</ol>
+</li>
+<li>持续集成
+<ol>
+<li>逐步编写各个模块内部程序，替换相应的<strong>桩程序</strong></li>
+<li>真实程序不仅实现业务逻辑，而且会使用其他模块的接口程序（真实程序或者桩程序）</li>
+<li>每次替换之后都进行集成与测试</li>
+</ol>
+</li>
+</ol>
+<p><img src="/10791/42-1676529138974-1389.png" alt></p>
+<h3 id="项目实践-2">项目实践</h3>
+<ol>
+<li>客户端
+<ol>
+<li>View 层：HCI 特殊测试，需要模拟 logic 的 stub</li>
+<li>Logical 层：
+<ol>
+<li>驱动模拟来自 View 层的请求</li>
+<li>桩程序模拟远程 Data</li>
+<li>需要模拟同层调用的 driver 和 stub</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>服务器端（Data 层）
+<ol>
+<li>驱动模拟来自客户端的请求</li>
+<li>桩程序模拟未完成的 Data 模块接口</li>
+</ol>
+</li>
+</ol>
+<h2 id="体系结构文档化">体系结构文档化</h2>
+<h3 id="体系结构设计文档模版-IEEE1471-2000">体系结构设计文档模版 IEEE1471-2000</h3>
+<p><img src="/10791/image-20230706151920066.png" alt></p>
+<h2 id="体系结构评审">体系结构评审</h2>
+<h3 id="评审的角度">评审的角度</h3>
+<ol>
+<li>设计方案正确性、先进性、可行性;</li>
+<li>系统组成、系统要求及接口协调的合理性;</li>
+<li>对于功能模块的输入参数、输出参数的定义是否明确;</li>
+<li>系统性能、可靠性、安全性要求是否合理;</li>
+<li>文档的描述是否清晰、明确。</li>
+</ol>
+<h3 id="体系结构评审的方法">体系结构评审的方法</h3>
+<ol>
+<li>对结果的评审：Checklist（动态更新的）</li>
+<li>对设计决策的评审</li>
+</ol>
+<h3 id="软件体系结构设计文档的-Checklist">软件体系结构设计文档的 Checklist</h3>
+<ol>
+<li>体系结构设计是否为后续开发提供了一个足够的视角？</li>
+<li>是否所有的功能都被分配给了具体模块？</li>
+<li>是否所有的非功能属性都得到了满足？</li>
+<li>是否所有的项目约束都得到了满足？</li>
+<li>体系结构设计是否为后继设计提供了简洁的概述、背景信息、限制条件和清晰的组织结构？</li>
+<li>体系结构设计是否能应对可能发生的变更？</li>
+<li>体系结构设计是否关注点在详细设计和用户接口的层次之上？</li>
+<li>不同的体系结构设计视角的依赖是否一致？</li>
+<li>系统环境是否定义,包括硬件、软件、和外部系统？</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/6228/" rel="prev" title="软件工程与计算II-09-软件体系结构基础">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-09-软件体系结构基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/61526/" rel="next" title="软件工程与计算II-11-人机交互设计">
+      软件工程与计算II-11-人机交互设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E8%BF%87%E7%A8%8B%EF%BC%88%E7%AE%80%E7%95%A5%E6%AD%A5%E9%AA%A4%EF%BC%89-%E9%87%8D%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">体系结构设计过程（简略步骤） 重要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%88%86%E6%9E%90%E5%85%B3%E9%94%AE%E9%9C%80%E6%B1%82%E5%92%8C%E9%A1%B9%E7%9B%AE%E7%BA%A6%E6%9D%9F"><span class="nav-number">2.</span> <span class="nav-text">第一步：分析关键需求和项目约束</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84%E9%9C%80%E6%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">系统结构需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5%E6%A1%88%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">实践案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E9%80%9A%E8%BF%87%E9%80%89%E6%8B%A9%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%A3%8E%E6%A0%BC"><span class="nav-number">3.</span> <span class="nav-text">第二步：通过选择体系结构风格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5%E6%A1%88%E4%BE%8B-2"><span class="nav-number">3.1.</span> <span class="nav-text">实践案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%BF%9B%E8%A1%8C%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%80%BB%E8%BE%91%EF%BC%88%E6%8A%BD%E8%B1%A1%EF%BC%89%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">第三步：进行软件体系结构逻辑（抽象）设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E6%8D%AE%E6%A6%82%E8%A6%81%E5%8A%9F%E8%83%BD%E9%9C%80%E6%B1%82%E4%B8%8E%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%A3%8E%E6%A0%BC%E5%BB%BA%E7%AB%8B%E5%88%9D%E5%A7%8B%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.1.</span> <span class="nav-text">依据概要功能需求与体系结构风格建立初始设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%9D%9E%E5%8A%9F%E8%83%BD%E6%80%A7%E9%9C%80%E6%B1%82%E4%B8%8E%E9%A1%B9%E7%9B%AE%E7%BA%A6%E6%9D%9F%E8%AF%84%E4%BB%B7%E5%92%8C%E6%94%B9%E8%BF%9B%E5%88%9D%E5%A7%8B%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.2.</span> <span class="nav-text">使用非功能性需求与项目约束评价和改进初始设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E6%AD%A5%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%88%86%E6%9E%90"><span class="nav-number">4.2.1.</span> <span class="nav-text">初步设计的分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Package-Design-Principles-%E5%8C%85%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">5.</span> <span class="nav-text">Package Design Principles 包设计原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Common-Closure-Principle-CCP-%E5%85%B1%E5%90%8C%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="nav-number">5.1.</span> <span class="nav-text">Common Closure Principle (CCP) 共同封闭原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Common-Reuse-Principle-CRP-%E5%85%B1%E5%90%8C%E9%87%8D%E7%94%A8%E5%8E%9F%E5%88%99"><span class="nav-number">5.2.</span> <span class="nav-text">Common Reuse Principle (CRP) 共同重用原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E5%90%8C%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99%E5%92%8C%E5%85%B1%E5%90%8C%E9%87%8D%E7%94%A8%E7%9A%84%E5%8E%9F%E5%88%99%E7%9A%84%E6%8A%98%E8%A1%B7"><span class="nav-number">5.3.</span> <span class="nav-text">共同封闭原则和共同重用的原则的折衷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reuse-Release-Equivalency-Principle-REP-%E9%87%8D%E7%94%A8%E5%8F%91%E5%B8%83%E7%AD%89%E4%BB%B7%E5%8E%9F%E5%88%99"><span class="nav-number">5.4.</span> <span class="nav-text">Reuse-Release Equivalency Principle (REP) 重用发布等价原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Acyclic-Dependencies-Principle-ADP-%E6%97%A0%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99"><span class="nav-number">5.5.</span> <span class="nav-text">The Acyclic Dependencies Principle (ADP) 无环依赖原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Dependencies-are-a-DAG"><span class="nav-number">5.5.1.</span> <span class="nav-text">Dependencies are a DAG</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E5%BE%AA%E7%8E%AF%E6%89%93%E7%A0%B4%E5%BE%AA%E7%8E%AF%EF%BC%9A%E7%AC%AC%E4%B8%80%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%9A"><span class="nav-number">5.5.2.</span> <span class="nav-text">依赖循环打破循环：第一种方式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E5%BE%AA%E7%8E%AF%E6%89%93%E7%A0%B4%E5%BE%AA%E7%8E%AF%EF%BC%9A%E7%AC%AC%E4%BA%8C%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%9A"><span class="nav-number">5.5.3.</span> <span class="nav-text">依赖循环打破循环：第二种方式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%8E%AF%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">5.5.4.</span> <span class="nav-text">无环依赖原则的应用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stable-Dependencies-Principle-SDP-%E7%A8%B3%E5%AE%9A%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99"><span class="nav-number">5.6.</span> <span class="nav-text">Stable Dependencies Principle (SDP) 稳定依赖原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E4%BE%9D%E8%B5%96%E5%8E%9F%E5%88%99"><span class="nav-number">5.6.1.</span> <span class="nav-text">稳定依赖原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">5.7.</span> <span class="nav-text">包的稳定性度量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stable-Abstractions-Principle-SAP-%E7%A8%B3%E5%AE%9A%E6%8A%BD%E8%B1%A1%E5%8E%9F%E5%88%99"><span class="nav-number">5.8.</span> <span class="nav-text">Stable Abstractions Principle (SAP) 稳定抽象原则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E6%80%A7%E5%BA%A6%E9%87%8F"><span class="nav-number">5.8.1.</span> <span class="nav-text">抽象性度量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">5.8.2.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">5.9.</span> <span class="nav-text">包设计的过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E4%BE%9D%E8%B5%96%E9%80%BB%E8%BE%91%E8%AE%BE%E8%AE%A1%E8%BF%9B%E8%A1%8C%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%EF%BC%88%E5%AE%9E%E7%8E%B0%EF%BC%89%E8%AE%BE%E8%AE%A1%EF%BC%9B"><span class="nav-number">6.</span> <span class="nav-text">第四步：依赖逻辑设计进行软件体系结构（实现）设计；</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E7%89%A9%E7%90%86%E5%8C%85"><span class="nav-number">6.1.</span> <span class="nav-text">初始物理包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%E8%80%83%E8%99%91"><span class="nav-number">6.2.</span> <span class="nav-text">细节考虑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9E%E9%94%81%E8%B6%85%E5%B8%82%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E5%BC%80%E5%8F%91%E5%8C%85%E5%9B%BE"><span class="nav-number">6.3.</span> <span class="nav-text">连锁超市管理系统开发包图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%9B%BE"><span class="nav-number">6.4.</span> <span class="nav-text">进程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%9B%BE"><span class="nav-number">6.5.</span> <span class="nav-text">部署图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E5%AE%8C%E5%96%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.</span> <span class="nav-text">第五步：完善体系结构设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E5%90%AF%E5%8A%A8%E5%92%8C%E7%BD%91%E7%BB%9C%E9%93%BE%E6%8E%A5"><span class="nav-number">7.1.</span> <span class="nav-text">完善启动和网络链接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%86%E5%8C%96-salesbl-%E6%A8%A1%E5%9D%97"><span class="nav-number">7.2.</span> <span class="nav-text">细化 salesbl 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89"><span class="nav-number">7.3.</span> <span class="nav-text">数据定义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-%E5%AE%9E%E4%BD%93"><span class="nav-number">7.3.1.</span> <span class="nav-text">Java 实体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#POJO-Plain-Old-Java-Objects-Simple-Java-Entities"><span class="nav-number">7.3.2.</span> <span class="nav-text">POJO(Plain Old Java Objects)&#x3D; Simple Java Entities</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Value-Objects%EF%BC%88%E9%80%BB%E8%BE%91%E5%B1%82%E5%90%91%E5%B1%95%E7%A4%BA%E5%B1%82%E4%BC%A0%E9%80%92%E6%95%B0%E6%8D%AE%EF%BC%89"><span class="nav-number">7.3.3.</span> <span class="nav-text">Value Objects（逻辑层向展示层传递数据）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BE%E4%B9%A6%E5%9C%B0%E5%9D%80%E4%B8%9A%E5%8A%A1%E5%AE%9E%E4%BD%93"><span class="nav-number">7.3.4.</span> <span class="nav-text">图书地址业务实体</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5"><span class="nav-number">7.4.</span> <span class="nav-text">项目实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%AF%B9%E8%B1%A1-UserPO-%E7%9A%84%E7%BB%86%E5%8C%96"><span class="nav-number">7.5.</span> <span class="nav-text">持久化对象 UserPO 的细化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96%E7%9A%84%E7%BB%86%E5%8C%96"><span class="nav-number">7.6.</span> <span class="nav-text">数据持久化的细化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A%E6%B7%BB%E5%8A%A0%E6%9E%84%E4%BB%B6%E6%8E%A5%E5%8F%A3"><span class="nav-number">8.</span> <span class="nav-text">第六步：添加构件接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E4%BB%B6%E5%88%9D%E6%AD%A5%E8%AE%BE%E8%AE%A1"><span class="nav-number">8.1.</span> <span class="nav-text">构件初步设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E6%A8%A1%E5%9D%97%E5%AF%B9%E5%A4%96%E6%8E%A5%E5%8F%A3"><span class="nav-number">8.2.</span> <span class="nav-text">确定模块对外接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E6%8E%A5%E5%8F%A3%E8%A7%84%E8%8C%83"><span class="nav-number">8.3.</span> <span class="nav-text">编写接口规范</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%9A%84%E5%8E%9F%E5%9E%8B%E6%9E%84%E5%BB%BA"><span class="nav-number">9.</span> <span class="nav-text">体系结构的原型构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">9.1.</span> <span class="nav-text">包的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%96%87%E4%BB%B6%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">9.2.</span> <span class="nav-text">重要文件的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%88%97%E8%A1%A8"><span class="nav-number">9.2.1.</span> <span class="nav-text">文件列表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%9E%84%E4%BB%B6%E4%B9%8B%E9%97%B4%E7%9A%84%E6%8E%A5%E5%8F%A3"><span class="nav-number">9.3.</span> <span class="nav-text">定义构件之间的接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E9%9C%80%E6%B1%82%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">9.4.</span> <span class="nav-text">关键需求的实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%9B%86%E6%88%90%E4%B8%8E%E6%B5%8B%E8%AF%95"><span class="nav-number">10.</span> <span class="nav-text">体系结构集成与测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E7%9A%84%E7%AD%96%E7%95%A5"><span class="nav-number">10.1.</span> <span class="nav-text">集成的策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%A7%E7%88%86%E7%82%B8%E9%9B%86%E6%88%90"><span class="nav-number">10.1.1.</span> <span class="nav-text">大爆炸集成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E9%A1%B6%E5%90%91%E4%B8%8B%E9%9B%86%E6%88%90"><span class="nav-number">10.1.2.</span> <span class="nav-text">自顶向下集成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%BA%95%E5%90%91%E4%B8%8A%E9%9B%86%E6%88%90"><span class="nav-number">10.1.3.</span> <span class="nav-text">自底向上集成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90"><span class="nav-number">10.1.4.</span> <span class="nav-text">持续集成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E6%8D%AE%E6%A8%A1%E5%9D%97%E6%8E%A5%E5%8F%A3%E5%BB%BA%E7%AB%8B%E6%A1%A9%E7%A8%8B%E5%BA%8F-Stub"><span class="nav-number">10.2.</span> <span class="nav-text">依据模块接口建立桩程序 Stub</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stub-%E5%AE%9A%E4%B9%89"><span class="nav-number">10.3.</span> <span class="nav-text">Stub 定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stub-%E4%BD%BF%E7%94%A8"><span class="nav-number">10.4.</span> <span class="nav-text">Stub 使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Driver-%E5%AE%9A%E4%B9%89"><span class="nav-number">10.5.</span> <span class="nav-text">Driver 定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E4%B8%8E%E6%9E%84%E5%BB%BA"><span class="nav-number">10.6.</span> <span class="nav-text">集成与构建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5-2"><span class="nav-number">10.7.</span> <span class="nav-text">项目实践</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%96%87%E6%A1%A3%E5%8C%96"><span class="nav-number">11.</span> <span class="nav-text">体系结构文档化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3%E6%A8%A1%E7%89%88-IEEE1471-2000"><span class="nav-number">11.1.</span> <span class="nav-text">体系结构设计文档模版 IEEE1471-2000</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AF%84%E5%AE%A1"><span class="nav-number">12.</span> <span class="nav-text">体系结构评审</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%84%E5%AE%A1%E7%9A%84%E8%A7%92%E5%BA%A6"><span class="nav-number">12.1.</span> <span class="nav-text">评审的角度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AF%84%E5%AE%A1%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">12.2.</span> <span class="nav-text">体系结构评审的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3%E7%9A%84-Checklist"><span class="nav-number">12.3.</span> <span class="nav-text">软件体系结构设计文档的 Checklist</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

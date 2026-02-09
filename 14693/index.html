@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="新型数据：图数据     社交网络 媒体网络         信息网络 信息网络       技术网络         图数据形态的网络 Web 表示为有向图">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-04-链接分析">
+<meta property="og:url" content="https://eaglebear2002.github.io/14693/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="新型数据：图数据     社交网络 媒体网络         信息网络 信息网络       技术网络         图数据形态的网络 Web 表示为有向图">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/1-1676530517437-91.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/image-20221102195927753.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/image-20221102195910847.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/image-20221102195937220.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/image-20221102195954208.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/image-20221102200607096.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/8.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/9.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/10.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/19.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/11.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/17.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/13.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/16-1676530517439-92.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/21.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/22.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/18.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/20.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/28.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/23.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/24.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/25.png">
+<meta property="og:image" content="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14693/29.png">
+<meta property="article:published_time" content="2022-11-02T11:58:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.534Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/14693/1-1676530517437-91.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/14693/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-04-链接分析 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/14693/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-04-链接分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-02 19:58:00" itemprop="dateCreated datePublished" datetime="2022-11-02T19:58:00+08:00">2022-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="新型数据：图数据">新型数据：图数据</h2>
+<p><img src="/14693/1-1676530517437-91.png" alt></p>
+<table>
+<thead>
+<tr>
+<th>社交网络</th>
+<th>媒体网络</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/14693/image-20221102195927753.png" alt="Facebook 社交图谱"></td>
+<td><img src="/14693/image-20221102195910847.png" alt="政治博客的关联"></td>
+</tr>
+<tr>
+<td>信息网络</td>
+<td>信息网络</td>
+</tr>
+<tr>
+<td><img src="/14693/image-20221102195937220.png" alt="Citation networks and Maps of science"></td>
+<td><img src="/14693/5.png" alt></td>
+</tr>
+<tr>
+<td>技术网络</td>
+<td></td>
+</tr>
+<tr>
+<td><img src="/14693/image-20221102195954208.png" alt="Seven Bridges of Königsberg"></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="图数据形态的网络">图数据形态的网络</h2>
+<h3 id="Web-表示为有向图">Web 表示为有向图</h3>
+<table>
+<thead>
+<tr>
+<th>图形</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>节点</td>
+<td>网页</td>
+</tr>
+<tr>
+<td>边</td>
+<td>超链接</td>
+</tr>
+</tbody>
+</table>
+<h3 id="如何组织网络">如何组织网络</h3>
+<h4 id="方式一：网页索引（人工编辑）">方式一：网页索引（人工编辑）</h4>
+<p>Yahoo、DMOZ、LookSmart</p>
+<h4 id="方式二：网络搜索">方式二：网络搜索</h4>
+<p>信息检索调查：在一个小而可信的集合中找到相关文档</p>
+<p>被搜索集合：新闻报纸、文章、引用等等。</p>
+<p>缺陷：网络是巨大的，充满不可信、过时和随机的东西</p>
+<p>网络搜索中的挑战：</p>
+<ol>
+<li>网络中存在多个来源的数据，那么我们相信哪一个来源的数据呢？Trick：可信的网页彼此互相引用和连接</li>
+<li>查询数据的最佳回答是什么？没有单个的最佳答案，实际关于数据的页面往往指向许多“数据”</li>
+</ol>
+<h5 id="在图中作节点排序">在图中作节点排序</h5>
+<p>所有的网页的重要性不是“平等”的。在网络图节点的连接中有极高的多变性，我们通过链接结构来对页面进行排序。</p>
+<p><img src="/14693/image-20221102200607096.png" alt></p>
+<h5 id="链接分析算法">链接分析算法</h5>
+<p>我们将要集中介绍一下三种链接分析方法来计算图中节点的重要性：</p>
+<ol>
+<li>Page Rank 算法</li>
+<li>Topic-Specific (Personalized) Page Rank 算法</li>
+<li>Web Spam Detection Algorithms 算法</li>
+</ol>
+<h5 id="链接投票">链接投票</h5>
+<p>解决方法：链接投票，页面拥有的入链权重和越大越重要，来自重要（高权重）的链接权重更大，地推问题</p>
+<p>考虑来自外部网站的链接：</p>
+<ol>
+<li><code>www.stanford.edu</code>有 23400 个链接</li>
+<li><code>www.joe-schmoe.com</code>有 1 个链接</li>
+</ol>
+<p>所有入链都是等权重的吗？不是，来自重要的链接权重更大，递推问题</p>
+<h2 id="Page-Rank-算法">Page Rank 算法</h2>
+<p><img src="/14693/7.png" alt="Page Rank 算法示意图"></p>
+<h3 id="Page-Rank-的简单递推公式">Page Rank 的简单递推公式</h3>
+<ol>
+<li>所有链接的投票权重与其源网页的<strong>权重</strong>成比例</li>
+<li>页面 j 的权重为 $r_j$，拥有 n 个出链，则每个出链有的投票权重为：$r_{j_{out}} = \frac{r_j}{n}$</li>
+<li>页面 j 自身的权重 $r_j$ 为其入链权重之和</li>
+</ol>
+<p>Page Rank 网络局部示意：</p>
+<p><img src="/14693/8.png" alt></p>
+<h3 id="Page-Rank：“流”模型">Page Rank：“流”模型</h3>
+<ol>
+<li>来自<strong>重要页面</strong>的连接权重较大</li>
+<li>被其他页面指向的页面是相对重要的的</li>
+<li>为页面 j 定义“rank”：$r_{j}$</li>
+</ol>
+<p>$$
+r_{j} = \sum\limits\limits_{i \to j} \frac{r_i}{d_i}\ d_i 是节点 i 的出度
+$$</p>
+<table>
+<thead>
+<tr>
+<th>图示意</th>
+<th>本式没有特解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/14693/9.png" style="zoom:67%;"></td>
+<td><img src="/14693/10.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="简单流等式的求解">简单流等式的求解</h3>
+<p>上面的右图的式子没有特解，附加约束条件：</p>
+<ol>
+<li>求解流等式：$r_y + r_a + r_m = 1$</li>
+<li>得到结果为：$r_y = \frac{2}{5}, r_a = \frac{2}{5}, r_m = \frac{1}{5}$</li>
+</ol>
+<p>高斯法消去只适用于小规模的例子，我们需要其他方法来应对大规模的 Web 图</p>
+<h3 id="PageRank-的矩阵等式（核心）">PageRank 的矩阵等式（核心）</h3>
+<blockquote>
+<p>$r^{(0)}$：给定四个网页的初始的 PR 值</p>
+</blockquote>
+<h4 id="随机邻接矩阵-M">随机邻接矩阵 M</h4>
+<ol>
+<li>页面 i 有 $d_i$ 个出链</li>
+<li>如果 $i \to j$，则 $M_{ji} = \frac{i}{d_i}$，不然 $M_{ji} = 0$，列所有元素和为 1</li>
+</ol>
+<h4 id="排序向量-r">排序向量 r</h4>
+<p>每一页有一个条目的向量。</p>
+<p>$r_i$ 是页面 i 的出链权重，$d_i$ 是出链的个数</p>
+<p>$$
+\sum\limits_{i}r_i = 1 \
+r_j = \sum\limits_{i-&gt;j}\frac{r_i}{d_i} \
+流等式:r = M * r
+$$</p>
+<p><img src="/14693/19.png" alt></p>
+<h4 id="特征向量等式">特征向量等式</h4>
+<p>由上式可知，排序向量 r 是随机邻接矩阵 M 的特征向量</p>
+<ol>
+<li>其第一个或主要特征向量，对应的特征值为 1</li>
+<li>M 的最大特征值为 1，因为 M 为列随机（非负项）</li>
+<li>我们知道 r 是单位长度，并且每一列和为 1，$Mr \le 1$</li>
+<li>我们可以高效解出 r，这种方法叫 Power iteration</li>
+</ol>
+<p><img src="/14693/11.png" alt></p>
+<h3 id="Power-iteraion-方法">Power iteraion 方法</h3>
+<ol>
+<li>如果给定一个有 n 个节点的网络图（节点是页，边是超链接）</li>
+<li>Power iteration 算法描述
+<ol>
+<li>假设这里有 N 个网络节点</li>
+<li>初始化：$r^{(0)} = [\frac{1}{N}, ..., \frac{1}{N}]^{T}$</li>
+<li>计算：$r^{(t + 1)} = M * r^{(t)}$，重复操作直到满足停止条件</li>
+<li>停止条件：$|r^{(t + 1)} - r^{(t)}| &lt; \varepsilon$</li>
+</ol>
+</li>
+</ol>
+<h4 id="使用-power-iteration-方法求解之前的例子">使用 power iteration 方法求解之前的例子</h4>
+<p><img src="/14693/12.png" alt></p>
+<h4 id="Power-Iteration-方法原理">Power Iteration 方法原理</h4>
+<p>查找主要特征向量（对应于最大特征值的向量）的方法</p>
+<p>$$
+r^{(1)} = M \cdot r ^{(0)} \
+r^{(2)} = M^{2} \cdot r ^{(0)} \
+r^{(3)} = M^{3} \cdot r ^{(0)} \
+\dots \
+r^{(n)} = M^{n} \cdot r ^{(0)} \
+$$</p>
+<p>证明：序列：$M \cdot r ^{(0)}, M^{2} \cdot r ^{(0)}, M^{3} \cdot r ^{(0)}, \dots , M^{k} \cdot r ^{(0)}$ 接近 M 的主要特征向量</p>
+<ol>
+<li>
+<p>假设矩阵 M 有 n 个线性独立特征变量 $x_1, x_2, \dots, x_n$，对应的特征变量为 $\lambda_1,\lambda_2,\dots,\lambda_n$，并且 $\lambda_1&gt;\lambda_2&gt;\dots&gt;\lambda_n$</p>
+</li>
+<li>
+<p>向量 $x_1,x_2,\dots,x_n$ 构成一组基向量，所以我们可以写成 $r ^{(0)} = c_1 * x_1 + c_2 * x_2 + \dots + c_n * x_n$</p>
+</li>
+<li>
+<p>所以我们进行计算可得：$M^k * r ^{(0)} = c_1 * \lambda^k_1 * x_1 + c_2 * \lambda^k_2* x_2 + \dots + c_n * \lambda^k_n* x_n$</p>
+</li>
+<li>
+<p>提出 $\lambda^k_1$：$M^k * r ^{(0)} =\lambda^k_1 * ( c_1 * x_1 + c_2 * (\frac{\lambda_2}{\lambda_1})^k * x_2 + \dots + c_n * (\frac{\lambda_n}{\lambda_1})^k * x_n)$</p>
+</li>
+<li>
+<p>由于之前的假设，可知 $\frac{\lambda_2}{\lambda_1,\frac{\lambda_3}{\lambda_1},\dots &lt; 1}$</p>
+</li>
+<li>
+<p>$\lim\limits_{k\to\infty}\frac{\lambda_i}{\lambda_1}^k = 0$</p>
+</li>
+<li>
+<p>$M^{k} * r ^{(0)} \approx c_1 * \lambda^k_1 *  x_1$</p>
+</li>
+<li>
+<p>从上面证明的最后结论我们可以知道，如果 c1 等于 0，那么这个方法不能收敛</p>
+</li>
+</ol>
+<h3 id="Random-Walk-算法">Random Walk 算法</h3>
+<p>假设我们有一个随机网络游标：</p>
+<ol>
+<li>在任何时间 t，游标在第 i 个节点上</li>
+<li>在时间 t+1，游标移动到 i 的随机一个外链上</li>
+<li>最终结束到连接 i 节点的 j 节点上</li>
+<li>重复以上的过程</li>
+</ol>
+<p>$p(t)$ 是页面上的概率分布</p>
+<h4 id="平稳分布">平稳分布</h4>
+<ol>
+<li>时间上满足等式：$p(t+1) = M * p(t)$</li>
+<li>当满足等式：$p(t+1) = M * p(t) = p(t)$ 的时候 $p(t)$ 是 Random Walk 的一个平稳分布</li>
+<li>结合之前矩阵形式的等式，我们可以知道 r 就是 Random Walk 的平稳分布</li>
+</ol>
+<h4 id="存在性和唯一性">存在性和唯一性</h4>
+<p>随机游走理论（又称马尔可夫过程）的主要结果是：对于满足某些条件的图，平稳分布是唯一的，并且无论在时间 t = 0 时的初始概率分布如何，最终都会达到平稳分布</p>
+<h3 id="PageRank-的问题">PageRank 的问题</h3>
+<ol>
+<li>PageRank 是否收敛？</li>
+<li>PageRank 是否按照我们设想的方式收敛了？</li>
+<li>结果是否有效可信？</li>
+<li>有些点是死胡同？</li>
+<li>有的网络拓扑形成了图结构（爬虫陷阱）？</li>
+</ol>
+<p><img src="/14693/17.png" alt></p>
+<h4 id="收敛判定">收敛判定</h4>
+<p><img src="/14693/13.png" alt></p>
+<h4 id="是否收敛至期待水平">是否收敛至期待水平</h4>
+<p><img src="/14693/16-1676530517439-92.png" alt></p>
+<h4 id="死胡同（Dead-end）">死胡同（Dead end）</h4>
+<ol>
+<li>随意漫步“无处可去”，这些页面导致权重被泄露</li>
+<li>归根结底：该矩阵不是列随机的，因此无法满足我们的初始假设</li>
+</ol>
+<p><img src="/14693/21.png" alt></p>
+<p>解决方案：使用 Teleport</p>
+<p>当无处可去时，总是通过传送使矩阵列成为随机的，调整 dead-ends 的权重，使其有随机的概率到图上的任意一个点。</p>
+<p><img src="/14693/22.png" alt></p>
+<blockquote>
+<p>另一种解决方案（裁剪方案，考试使用）</p>
+</blockquote>
+<p><img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/27.png" alt></p>
+<h4 id="爬虫陷阱">爬虫陷阱</h4>
+<ol>
+<li>所有的出链形成了一个环状结构，随机游走将被困在环中</li>
+<li>这个不是一个问题，但是不是我们想要的结果：这个环吸收走了模型的所有的重要性</li>
+</ol>
+<p><img src="/14693/18.png" alt></p>
+<h3 id="爬虫陷阱的解决方案：Teleports">爬虫陷阱的解决方案：Teleports</h3>
+<p>Google 针对 Spider Traps 的解决方案：在每个时间步，随机冲浪者都有两个选择</p>
+<ol>
+<li>对于概率 $\beta$：选择随机一个出链行走</li>
+<li>对于概率 $1 - \beta$：选择随机一个点行走</li>
+<li>概率 $\beta$ 往往在 0.8-0.9 之间进行选择，经验上会选择 0.85，但是我们可以通过神经网络学习来确定 $\beta$ 的值</li>
+</ol>
+<p>冲浪者将在几步之内将其传送出 Spider Traps</p>
+<p><img src="/14693/20.png" alt>
+<img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/28.png" alt></p>
+<h3 id="整体的解决方案：Random-Teleports">整体的解决方案：Random Teleports</h3>
+<p>Google 的解决方案是对于所有情况，每一步，随机冲浪者都有两个选择：</p>
+<ol>
+<li>对于概率 $\beta$：选择随机一个出链行走</li>
+<li>对于概率 $1 - \beta$：选择随机一个点行走</li>
+</ol>
+<p>PageRank 等式的修正：</p>
+<p>$$
+r_j = \sum\limits\limits_{i-j} \beta * \frac{r_i}{d_i} + (1 - \beta) * \frac{1}{N}
+$$</p>
+<p>该公式假定/没有 dead ends。 我们可以预处理矩阵/删除所有 dead ends，也可以从 dead ends 中以概率 1.0 显式地跟随随机传送链接。</p>
+<p>$A = \beta M + (1 - \beta)[\frac{1}{N}]_{N * N}$</p>
+<p>然后我们求解一个递归问题：$r = A * r$</p>
+<p>Power Iteration 方法仍然适用</p>
+<p>Random Teleports 例子（$\beta = 0.8$）</p>
+<p><img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/23.png" alt></p>
+<h3 id="问题：大规模网络计算会导致内存不足">问题：大规模网络计算会导致内存不足</h3>
+<p>假设 N = 1,000,000，我们很直观的可以感受到需要存储的数据数量极大</p>
+<h4 id="矩阵公式（Random-Teleport-的等价形式）">矩阵公式（Random Teleport 的等价形式）</h4>
+<ol>
+<li>从 i 到每隔一页添加一个传送链接并将传送概率设置为 $\frac{1 - \beta}{N}$</li>
+<li>降低跟踪每个出站链接的可能性从$\frac{1}{|d_i|}$到$\frac{\beta}{|d_i|}$</li>
+<li>等价于对每一个节点的权乘以$(1- \beta)$，然后均匀地重新分配</li>
+</ol>
+<h4 id="方程式重排">方程式重排</h4>
+<p>$$
+r = A * r \
+A_{ji} = \beta<em>M_{ji} + \frac{1 - \beta}{N} \
+r_j = \sum\limits_{i = 1}\limits^{N}[\beta</em>M_{ji} + \frac{1 - \beta}{N}] * r_i \
+r_j = \sum\limits_{i = 1}\limits^{N}\beta * M_{ji}* r_i + \frac{1 - \beta}{N} * \sum\limits_{i = 1}\limits^{N}r_i \
+r_j = \sum\limits_{i = 1}\limits^{N}\beta * M_{ji}* r_i + \frac{1 - \beta}{N} \
+$$</p>
+<p>所以：$r = \beta<em>M</em>r + [\frac{1-\beta}{N}]_N$</p>
+<h4 id="稀疏矩阵公式">稀疏矩阵公式</h4>
+<p>$$
+r = \beta<em>M</em>r + [\frac{1-\beta}{N}]_N
+$$</p>
+<ol>
+<li>$[\frac{1-\beta}{N}]_N$ 是一个 N 维 $\frac{1-\beta}{N}$ 的列向量（常量）</li>
+<li>M 是一个<strong>稀疏矩阵</strong></li>
+<li>过程我们可以规划为如下
+<ol>
+<li>计算 $r^{new} = \beta * M * r^{old}$</li>
+<li>$r^{new} = r^{new} + [\frac{1-\beta}{N}]_N$</li>
+</ol>
+</li>
+<li>注意在上面这个过程中，如果 $\sum\limits_{j}r_{j}^{new} &lt; 1$，我们需要对 $r^{new}$ 进行格式化，使其和为 1（这种情况是 M 包含 dead-ends）</li>
+</ol>
+<h4 id="稀疏矩阵编码">稀疏矩阵编码</h4>
+<ol>
+<li>仅使用非零条目对稀疏矩阵进行编码</li>
+<li>假设有 1,000,000 条数据，4 _ 10 _ 1 billion = 40GB 对于内存是不现实的，但是对于磁盘是可以的</li>
+</ol>
+<p><img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/24.png" alt></p>
+<h4 id="稀疏矩阵算法">稀疏矩阵算法</h4>
+<p>我们假设 RAM 可以将 $r^{new}$ 载入到磁盘，存储 $r^{old}$ 和矩阵 M 在磁盘中。</p>
+<p>power-iteration 的一个步骤：</p>
+<ol>
+<li>初始化：$r^{new} = \frac{1-\beta}{N}$</li>
+<li>对于页面 i（出度为$d_i$）
+<ol>
+<li>从内存中加载：$i,d_i,dest_1,...,dest_{d_i},r^{old}(i)$</li>
+<li>对于$j = 1 ... d_i$
+<ul>
+<li>$r^{new}(dest_j) += \frac{\beta r^{old}}{d_i}(i)$</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="基于块更新的算法">基于块更新的算法</h4>
+<p>进一步减少空间消耗，将 $r^{new}$ 重新切分成 k 块，来适配内存，为每一块扫描 M 和$r^{old}$</p>
+<p><img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/25.png" alt></p>
+<p>块更新消耗：</p>
+<ol>
+<li>k 次扫描 M 和 $r^{old}$</li>
+<li>每次 Power iteration 的消耗：$k(|M| + |r|) + |r| = k|M| + (k+1)|r|$</li>
+</ol>
+<p>我们有没有做的更好了呢?</p>
+<ol>
+<li>M 相对于 r 更加大（大约有 10-20x），所以我们可以避免每一个迭代读 k 次</li>
+</ol>
+<p><img src="https://spricoder.oss-cn-shanghai.aliyuncs.com/2020-Big-data-analysis/img/lec4/26.png" alt></p>
+<h3 id="PageRank-完整算法">PageRank 完整算法</h3>
+<p>输入：</p>
+<ol>
+<li>一个有向图 G，可以有 Spider Traps 和 Dead ends</li>
+<li>参数$\beta$</li>
+</ol>
+<p>输出：PageRank vector $r^{new}$</p>
+<p>过程：</p>
+<ol>
+<li>初始化：$r_{j}^{old} = \frac{1}{N}$</li>
+<li>重复以下步骤直到收敛：$\sum\limits_{j}|r_j^{new} - r_j^{old}| &gt; \varepsilon$
+<ol>
+<li>$\forall j: r_j^{'new} = \sum\limits_{i-&gt;j}\beta\frac{r_i^{old}}{d_i}$</li>
+<li>$\forall j: r_j^{'new} = 0$，if in-degree of j is 0</li>
+<li>现在，重新插入的 PageRank：
+<ol>
+<li>$\forall j: r_j^{new} = r_j^{'new} + \frac{1 - S}{N}\ where\ S = \sum\limits_jr_{j}^{'new}$</li>
+</ol>
+</li>
+<li>$r^{old} = r^{new}$</li>
+</ol>
+</li>
+</ol>
+<p>如果图形没有死角，则泄漏的 PageRank 数量为 $1-\beta$。 但是因为我们有死胡同，PageRank 的泄漏量可能更大。 我们必须通过计算 S 来明确说明这一点。</p>
+<p>一次迭代的消耗：2|r| + |M|</p>
+<h2 id="Topic-Sensitive-PageRank">Topic-Sensitive PageRank</h2>
+<p>其实上面的讨论我们回避了一个事实，那就是“网页重要性”其实没一个标准答案，对于不同的用户，甚至有很大的差别。例如，当搜索“苹果”时，一个数码爱好者可能是想要看 iphone 的信息，一个果农可能是想看苹果的价格走势和种植技巧，而一个小朋友可能在找苹果的简笔画。理想情况下，应该为每个用户维护一套专用向量，但面对海量用户这种方法显然不可行。所以搜索引擎一般会选择一种称为 Topic-Sensitive 的折中方案。Topic-Sensitive PageRank 的做法是预定义几个话题类别，例如体育、娱乐、科技等等，为每个话题单独维护一个向量，然后想办法关联用户的话题倾向，根据用户的话题倾向排序结果。</p>
+<h3 id="算法步骤">算法步骤</h3>
+<h4 id="确定话题分类">确定话题分类</h4>
+<p>一般来说，可以参考 Open Directory（DMOZ）的一级话题类别作为 topic。目前 DMOZ 的一级 topic 有：Arts（艺术）、Business（商务）、Computers（计算机）、Games（游戏）、Health（医疗健康）、Home（居家）、Kids and Teens（儿童）、News（新闻）、Recreation（娱乐修养）、Reference（参考）、Regional（地域）、Science（科技）、Shopping（购物）、Society（人文社会）、Sports（体育）。</p>
+<h4 id="网页-topic-归属">网页 topic 归属</h4>
+<p>这一步需要将每个页面归入最合适的分类，具体归类有很多算法，例如可以使用 TF-IDF 基于词素归类，也可以聚类后人工归类，具体不再展开。这一步最终的结果是每个网页被归到其中一个 topic。</p>
+<h4 id="分-topic-向量计算">分 topic 向量计算</h4>
+<ol>
+<li>在 Topic-Sensitive PageRank 中，向量迭代公式为
+$$
+v' = (1- \beta)Mv + s\frac{\beta}{|s|}
+$$</li>
+<li>首先是单位向量 e 变为了 s。s 是这样一个向量：对于某 topic 的 s，如果网页 k 在此 topic 中，则 s 中第 k 个元素为 1，否则为 0。注意对于每一个 topic 都有一个不同的 s。而|s|表示 s 中 1 的数量。</li>
+<li>还是以上面的四张页面为例，假设页面 A 归为 Arts，B 归为 Computers，C 归为 Computers，D 归为 Sports。那么对于 Computers 这个 topic，s 就是：
+$$
+s = \begin{bmatrix}
+0 \
+1 \
+1 \
+0 \
+\end{bmatrix}
+$$</li>
+</ol>
+<ul>
+<li>而 lsl=2，因此，迭代公式为</li>
+</ul>
+<p><img src="/14693/29.png" alt></p>
+<h2 id="针对-PageRank-的-Spam-攻击与反作弊">针对 PageRank 的 Spam 攻击与反作弊</h2>
+<p>Link Spam：造出来很多空页来提高自己的页的 rank 值</p>
+<p>反作弊：</p>
+<ol>
+<li>检测拓扑</li>
+<li>TrustRank：如果比可信网站的 rank 高太多那么有理由认为是有问题的</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/10927/" rel="prev" title="大数据分析-02-大数据平台">
+      <i class="fa fa-chevron-left"></i> 大数据分析-02-大数据平台
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/29085/" rel="next" title="大数据分析-06-分类">
+      大数据分析-06-分类 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E5%9E%8B%E6%95%B0%E6%8D%AE%EF%BC%9A%E5%9B%BE%E6%95%B0%E6%8D%AE"><span class="nav-number">1.</span> <span class="nav-text">新型数据：图数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E6%95%B0%E6%8D%AE%E5%BD%A2%E6%80%81%E7%9A%84%E7%BD%91%E7%BB%9C"><span class="nav-number">2.</span> <span class="nav-text">图数据形态的网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-%E8%A1%A8%E7%A4%BA%E4%B8%BA%E6%9C%89%E5%90%91%E5%9B%BE"><span class="nav-number">2.1.</span> <span class="nav-text">Web 表示为有向图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%BB%84%E7%BB%87%E7%BD%91%E7%BB%9C"><span class="nav-number">2.2.</span> <span class="nav-text">如何组织网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E7%BD%91%E9%A1%B5%E7%B4%A2%E5%BC%95%EF%BC%88%E4%BA%BA%E5%B7%A5%E7%BC%96%E8%BE%91%EF%BC%89"><span class="nav-number">2.2.1.</span> <span class="nav-text">方式一：网页索引（人工编辑）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E7%BD%91%E7%BB%9C%E6%90%9C%E7%B4%A2"><span class="nav-number">2.2.2.</span> <span class="nav-text">方式二：网络搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%A8%E5%9B%BE%E4%B8%AD%E4%BD%9C%E8%8A%82%E7%82%B9%E6%8E%92%E5%BA%8F"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">在图中作节点排序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E5%88%86%E6%9E%90%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">链接分析算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E6%8A%95%E7%A5%A8"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">链接投票</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Page-Rank-%E7%AE%97%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">Page Rank 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Rank-%E7%9A%84%E7%AE%80%E5%8D%95%E9%80%92%E6%8E%A8%E5%85%AC%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">Page Rank 的简单递推公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Rank%EF%BC%9A%E2%80%9C%E6%B5%81%E2%80%9D%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.</span> <span class="nav-text">Page Rank：“流”模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E6%B5%81%E7%AD%89%E5%BC%8F%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-number">3.3.</span> <span class="nav-text">简单流等式的求解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PageRank-%E7%9A%84%E7%9F%A9%E9%98%B5%E7%AD%89%E5%BC%8F%EF%BC%88%E6%A0%B8%E5%BF%83%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">PageRank 的矩阵等式（核心）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E9%82%BB%E6%8E%A5%E7%9F%A9%E9%98%B5-M"><span class="nav-number">3.4.1.</span> <span class="nav-text">随机邻接矩阵 M</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E5%90%91%E9%87%8F-r"><span class="nav-number">3.4.2.</span> <span class="nav-text">排序向量 r</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F%E7%AD%89%E5%BC%8F"><span class="nav-number">3.4.3.</span> <span class="nav-text">特征向量等式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Power-iteraion-%E6%96%B9%E6%B3%95"><span class="nav-number">3.5.</span> <span class="nav-text">Power iteraion 方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-power-iteration-%E6%96%B9%E6%B3%95%E6%B1%82%E8%A7%A3%E4%B9%8B%E5%89%8D%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">3.5.1.</span> <span class="nav-text">使用 power iteration 方法求解之前的例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Power-Iteration-%E6%96%B9%E6%B3%95%E5%8E%9F%E7%90%86"><span class="nav-number">3.5.2.</span> <span class="nav-text">Power Iteration 方法原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Random-Walk-%E7%AE%97%E6%B3%95"><span class="nav-number">3.6.</span> <span class="nav-text">Random Walk 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B3%E7%A8%B3%E5%88%86%E5%B8%83"><span class="nav-number">3.6.1.</span> <span class="nav-text">平稳分布</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%9C%A8%E6%80%A7%E5%92%8C%E5%94%AF%E4%B8%80%E6%80%A7"><span class="nav-number">3.6.2.</span> <span class="nav-text">存在性和唯一性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PageRank-%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.7.</span> <span class="nav-text">PageRank 的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B6%E6%95%9B%E5%88%A4%E5%AE%9A"><span class="nav-number">3.7.1.</span> <span class="nav-text">收敛判定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E6%94%B6%E6%95%9B%E8%87%B3%E6%9C%9F%E5%BE%85%E6%B0%B4%E5%B9%B3"><span class="nav-number">3.7.2.</span> <span class="nav-text">是否收敛至期待水平</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%BB%E8%83%A1%E5%90%8C%EF%BC%88Dead-end%EF%BC%89"><span class="nav-number">3.7.3.</span> <span class="nav-text">死胡同（Dead end）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%88%AC%E8%99%AB%E9%99%B7%E9%98%B1"><span class="nav-number">3.7.4.</span> <span class="nav-text">爬虫陷阱</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%88%AC%E8%99%AB%E9%99%B7%E9%98%B1%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9ATeleports"><span class="nav-number">3.8.</span> <span class="nav-text">爬虫陷阱的解决方案：Teleports</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9ARandom-Teleports"><span class="nav-number">3.9.</span> <span class="nav-text">整体的解决方案：Random Teleports</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%EF%BC%9A%E5%A4%A7%E8%A7%84%E6%A8%A1%E7%BD%91%E7%BB%9C%E8%AE%A1%E7%AE%97%E4%BC%9A%E5%AF%BC%E8%87%B4%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3"><span class="nav-number">3.10.</span> <span class="nav-text">问题：大规模网络计算会导致内存不足</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9F%A9%E9%98%B5%E5%85%AC%E5%BC%8F%EF%BC%88Random-Teleport-%E7%9A%84%E7%AD%89%E4%BB%B7%E5%BD%A2%E5%BC%8F%EF%BC%89"><span class="nav-number">3.10.1.</span> <span class="nav-text">矩阵公式（Random Teleport 的等价形式）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B9%E7%A8%8B%E5%BC%8F%E9%87%8D%E6%8E%92"><span class="nav-number">3.10.2.</span> <span class="nav-text">方程式重排</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E5%85%AC%E5%BC%8F"><span class="nav-number">3.10.3.</span> <span class="nav-text">稀疏矩阵公式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E7%BC%96%E7%A0%81"><span class="nav-number">3.10.4.</span> <span class="nav-text">稀疏矩阵编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E7%AE%97%E6%B3%95"><span class="nav-number">3.10.5.</span> <span class="nav-text">稀疏矩阵算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%9D%97%E6%9B%B4%E6%96%B0%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-number">3.10.6.</span> <span class="nav-text">基于块更新的算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PageRank-%E5%AE%8C%E6%95%B4%E7%AE%97%E6%B3%95"><span class="nav-number">3.11.</span> <span class="nav-text">PageRank 完整算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Topic-Sensitive-PageRank"><span class="nav-number">4.</span> <span class="nav-text">Topic-Sensitive PageRank</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%AD%A5%E9%AA%A4"><span class="nav-number">4.1.</span> <span class="nav-text">算法步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E8%AF%9D%E9%A2%98%E5%88%86%E7%B1%BB"><span class="nav-number">4.1.1.</span> <span class="nav-text">确定话题分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E9%A1%B5-topic-%E5%BD%92%E5%B1%9E"><span class="nav-number">4.1.2.</span> <span class="nav-text">网页 topic 归属</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86-topic-%E5%90%91%E9%87%8F%E8%AE%A1%E7%AE%97"><span class="nav-number">4.1.3.</span> <span class="nav-text">分 topic 向量计算</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%92%88%E5%AF%B9-PageRank-%E7%9A%84-Spam-%E6%94%BB%E5%87%BB%E4%B8%8E%E5%8F%8D%E4%BD%9C%E5%BC%8A"><span class="nav-number">5.</span> <span class="nav-text">针对 PageRank 的 Spam 攻击与反作弊</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="面各项服务的计算架构 中间层计算架构、B&#x2F;S 架构、混合计算架构都可为云计算提供一定的伸缩能力 共性：基于无状态连接【http 请求】和基于服务的访问【而非过程调用】 Service-oriented Architecture 面向服务的体系结构   每个程序只做本职工作，将服务暴露出来供其他程序使用   多个程序通过一个统一的界面协调工作——控制复杂性，更容易管理   区别于“分布式对象”  J">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云计算-02-云计算架构">
+<meta property="og:url" content="https://eaglebear2002.github.io/55187/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="面各项服务的计算架构 中间层计算架构、B&#x2F;S 架构、混合计算架构都可为云计算提供一定的伸缩能力 共性：基于无状态连接【http 请求】和基于服务的访问【而非过程调用】 Service-oriented Architecture 面向服务的体系结构   每个程序只做本职工作，将服务暴露出来供其他程序使用   多个程序通过一个统一的界面协调工作——控制复杂性，更容易管理   区别于“分布式对象”  J">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221027220150735.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221024173310528.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221024174419675.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221024174604819.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221025105837181.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026142734067.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026142958647.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/2-%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026144134533.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026144431845.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026144436953.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026144514410.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/55187/image-20221026144637909.png">
+<meta property="article:published_time" content="2022-10-24T09:29:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.512Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/55187/image-20221027220150735.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/55187/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>云计算-02-云计算架构 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/55187/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          云计算-02-云计算架构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-24 17:29:00" itemprop="dateCreated datePublished" datetime="2022-10-24T17:29:00+08:00">2022-10-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E4%BA%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Fall-云计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="面各项服务的计算架构">面各项服务的计算架构</h2>
+<p>中间层计算架构、B/S 架构、混合计算架构都可为云计算提供一定的伸缩能力</p>
+<p>共性：基于无状态连接【http 请求】和基于服务的访问【而非过程调用】</p>
+<p>Service-oriented Architecture 面向服务的体系结构</p>
+<ul>
+<li>
+<p>每个程序只做本职工作，将服务暴露出来供其他程序使用</p>
+</li>
+<li>
+<p>多个程序通过一个统一的界面协调工作——控制复杂性，更容易管理</p>
+</li>
+<li>
+<p>区别于“分布式对象”</p>
+<ul>
+<li>Java：Java 对象、RMI（Remote Method Invocation，远程方法调用）</li>
+<li>CORBA：CORBA 分布式对象、IDL（Interface Definition Language，接口定义语言）</li>
+<li>通过 RPC（Remote Procedure Call，远程过程调用）连接</li>
+</ul>
+<p><img src="/55187/image-20221027220150735.png" alt></p>
+</li>
+</ul>
+<h2 id="计算架构和云计算架构的二维视角">计算架构和云计算架构的二维视角</h2>
+<p>从不同的角度看，云计算架构的复杂性有一定的差异</p>
+<p>最易于理解的二维视角：基础设施 + 应用程序； 两者分别视为： 前端 + 后端</p>
+<ul>
+<li>基础架构——云内部，后端
+<ul>
+<li>硬件：服务器、存储器、网络交换机等</li>
+<li>管理软件：服务的高可用性、可恢复性，数据一致性，应用伸缩性、可预测性，云安全等</li>
+</ul>
+</li>
+<li>应用程序——云对外，前端
+<ul>
+<li>并发性、协调性、容错性、开放的 API 格式、开放的数据格式、承载数据密集型计算</li>
+</ul>
+</li>
+</ul>
+<p><img src="/55187/image-20221024173310528.png" alt></p>
+<h3 id="基础架构的进一步分层结构">基础架构的进一步分层结构</h3>
+<ul>
+<li>虚拟化层：将硬件转换为统一的 IT 资源【可灵活拆分、统一计量、统一管理、软件定义的】，可以在不同的抽象层实现：应用层、操作系统层、体系结构层、硬件层等</li>
+<li>Web 服务层：将云资源提供给客户的一种最方便的方式，解决大部分客户无法直接使用虚拟机的问题；支持面广、对客户端要求低，只需要浏览器就可以访问；所有提供的服务均可以通过 API 访问，该类 API 为“表征状态转移”Representational State Transfer, REST</li>
+<li>服务总线层：即中间件层，封装计算服务、数据存储、消息传递；分离用户与虚拟化层、连接用户与 Web 服务层</li>
+<li>客户机用户界面：Web 门户，将各种服务混搭集成在一个页面；基于 Ajax，Javascript，趋势是使用功能完善的组件；如 JavaBeans/Applets，Silvedight/.NET 等；可下载和安装在客户机上</li>
+</ul>
+<h3 id="云应用程序的结构">云应用程序的结构</h3>
+<p>云应用程序与传统操作系统上的应用程序结构有所不同</p>
+<ul>
+<li>传统操作系统上的应用程序：进程、线程、服务、shell（应用程序的控制接口）
+<ul>
+<li>进程就是最终产品，每一个进程可运行多个指令序列（线程），一个线程对应一种服务</li>
+</ul>
+</li>
+<li>云环境中的应用程序：应用程序本身、应用实例、服务、云命令行界面（控制端）
+<ul>
+<li>应用程序是云应用最终的样子，由多个同时运行的实例支撑</li>
+<li>不同的应用实例运行在不同的服务器上，每一个应用实例提供一种或多种服务</li>
+<li>服务之间是相互独立的（微服务架构）</li>
+</ul>
+</li>
+</ul>
+<h2 id="云计算逻辑架构">云计算逻辑架构</h2>
+<p>云体：是云计算的物质基础，是云计算使用的资源集合，是构成云计算的软硬件环境，例如网络、服务器、存储器、交换机等。广义的云体包括数据中心机器辅助设施如电力、空调、机架、冷却等系统。目前可以认为：云体就是数据中心。</p>
+<p>云计算：是利用云体和云平台所进行的计算或处理——云计算可以在云体上直接进行，也可以在云平台上进行。无论在哪个层面开展，只要符合“按量计费、资源可伸缩”就是云计算。</p>
+<ul>
+<li>云存储、云服务、在云上运行自己的软件或算法，都是云计算。</li>
+<li>云计算是人们利用云体和云平台所从事的活动。</li>
+</ul>
+<p>云栈：又称云平台，是在云上建造的运行环境。它能够支持应用程序的发布、运行、监控、调度、伸缩，并为应用程序提供辅助服务机制，如访问控制、权限管理等。</p>
+<h2 id="逻辑云栈">逻辑云栈</h2>
+<p>云栈——提供的服务多种多样，规模巨大，需要简历规则才能便于管理，即层次架构。</p>
+<p>云计算也遵循分层规则，组织为多个层次，相互叠加：</p>
+<ul>
+<li>每一层都提供一种抽象，最下为物理硬件层</li>
+<li>每往上一层，易用性就增加一分</li>
+<li>到底应该分几层没有明确的规定或准则</li>
+<li>不同的厂商有不同分法：三层、四层、五层…</li>
+</ul>
+<p><img src="/55187/image-20221024174419675.png" alt></p>
+<h3 id="云栈的三层模式">云栈的三层模式</h3>
+<ul>
+<li>基础设施即服务层：不仅包括硬件设施，还包括虚拟化，因为各种硬件规格、性能、质量不统一，无法在其上直接建造云平台。虚拟化可以将各种硬件变为统一的标准件。</li>
+<li>平台即服务层：在虚拟化的 IT 资源上构建起应用程序的运行环境，对外提供的产品包括计算环境、云存储库、通信机制、控制调度机制，统称为云计算平台或云解决方案栈。消费的是云基础设施服务，支持的是上层的云应用程序。</li>
+<li>应用程序层-软件即服务层：
+<ul>
+<li>基于网络进行远程访问的商用软件</li>
+<li>集中式管理，而非分散在每个用户站点</li>
+<li>单个实例多个租户架构——一对多模型</li>
+<li>按照用量计费（实际应用中按月或其他时间周期计费）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/55187/image-20221024174604819.png" alt></p>
+<p>从管理角度看，与云栈分层架构对应的是云计算技术体系结构——如何实现三层服务。不同供应商提供了不同的解决方案，没有统一的技术体系结构。综合不同厂商，构造如下参考体系结构：</p>
+<p><img src="/55187/image-20221025105837181.png" alt></p>
+<h3 id="云计算技术体系结构">云计算技术体系结构</h3>
+<p><img src="/55187/image-20221026142734067.png" alt="各层内涵"></p>
+<h3 id="IaaS-实现机制">IaaS 实现机制</h3>
+<p>用户交互接口向应用以 Web Services 方式提供访问接口，获取用户需求。</p>
+<p>服务目录是用户可以访问的服务清单。</p>
+<p>系统管理模块负责管理和分配所有可用的资源，其核心是负载均衡。</p>
+<p>配置工具负责在分配的节点上准备任务运行环境。</p>
+<p>监视统计模块负责监视节点的运行状态，并完成用户使用节点情况的统计。</p>
+<p><img src="/55187/image-20221026142958647.png" alt></p>
+<h2 id="物理云栈：OpenStack">物理云栈：OpenStack</h2>
+<p>OpenStack 是一个管理云计算中计算、存储和网络，甚至是应用的通用平台，其提供 Web 界面、命令行工具和应用程序接口（API）等使用接口。</p>
+<p>官方描述：</p>
+<blockquote>
+<p>The Most Widely Deployed Open Source Cloud Software in the World</p>
+<p>OpenStack is a cloud operating system that controls large pools of compute, storage, and networking resources throughout a datacenter, all managed and provisioned through APIs with common authentication mechanisms.</p>
+</blockquote>
+<p>平台管理员：位于各厂商特定资源之上的云计算资源管理层</p>
+<p>开发者：通过其为应用提供基础设施和相应软件依赖；云编排平台：基于应用模板部署可扩展应用</p>
+<p>最终用户：每一个最终用户被定义为一个租户，为租户提供自助服务的基础设施和应用管理系统</p>
+<p><img src="/55187/2-%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84.jpg" alt></p>
+<p>本质上 OpenStack 通过抽象和一个通用的 API 接口控制不同厂商提供的硬件和软件资源，是对计算系统的更高层次的抽象。</p>
+<p><img src="/55187/image-20221026144134533.png" alt></p>
+<h2 id="逻辑云体">逻辑云体</h2>
+<p>云栈是从纵向角度看云计算的整体架构，那么云体则主要是从横向角度看其架构模式</p>
+<p>类比传统操作系统横向切面：运行时环境 + 应用本身（程序+数据）</p>
+<ul>
+<li>环境：进程/线程/内存管理 + 文件系统 + 进程间通信/网络</li>
+<li>云应用程序：类似传统应用</li>
+<li>云运行时环境：计算资源（服务器或 CPU + 本地存储）、持久存储、通信（消息队列+网络）</li>
+</ul>
+<p><img src="/55187/image-20221026144431845.png" alt></p>
+<p><img src="/55187/image-20221026144436953.png" alt="s"></p>
+<h2 id="物理云体：云数据中心">物理云体：云数据中心</h2>
+<p>数据中心是数据集中存储、计算、交换的中心，其发展与计算机（包括存储和网络设备）的发展紧密联系在一起。</p>
+<ul>
+<li>20 世纪 60 年代：商用计算机应用推广， IBM Mainframe 系列主机，几十吨、占地数百平方米主机机房：只有一台主机，没有网络、专门的存储节点</li>
+<li>20 世纪 80 年代：随着大规模集成电路的发展（我国台湾），微型计算机开始出现与普及，数据存储和计算开始了分散的趋势</li>
+<li>90 年代大量微型机开始扮演客户端角色，大型任务如数据库查询被迁移到服务器端，著名的客户端服务器模式大行其道，推动了数据中心发展</li>
+<li>21 世纪随着互联网成为发展主角，几乎所有公司都需要接入互联网并持续运行业务；但不需要每个公司都有一套完备的基础设施，于是 IDC（Internet Data Center）应运而生</li>
+</ul>
+<p><img src="/55187/image-20221026144514410.png" alt></p>
+<ul>
+<li>传统数据中心暴露的问题：
+<ul>
+<li>过多的机器</li>
+<li>机器利用率过低</li>
+<li>应用迁移太困难</li>
+<li>存储需求增长太快</li>
+</ul>
+</li>
+<li>软件定义的数据中心</li>
+<li>重新重视虚拟化，以提高资源利用率
+<ul>
+<li>不仅应用到计算节点，复制到存储、网络、安全等方方面面</li>
+<li>软件定义计算：计算节点的虚拟化：虚拟机成为计算调度和管理的单位，不中断服务的前提下动态迁移。</li>
+<li>软件定义存储：分离管理接口与数据读写；统一的管理接口与上层管理软件交互；数据读写可以兼容各种不同的链接方式。</li>
+<li>软件定义网络：数据平面（数据转发）和控制平面（转发表的设置等）分离；集中控制，分布式转发。</li>
+</ul>
+</li>
+</ul>
+<p><img src="/55187/image-20221026144637909.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/27793/" rel="prev" title="IEEEAccess2022-Static Code Analysis Alarms Filtering Reloaded A New Real-World Dataset and Its ML-Based Utilization">
+      <i class="fa fa-chevron-left"></i> IEEEAccess2022-Static Code Analysis Alarms Filtering Reloaded A New Real-World Dataset and Its ML-Based Utilization
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/45407/" rel="next" title="需求与商业模式创新-08-商业模式战略-SWOT 分析">
+      需求与商业模式创新-08-商业模式战略-SWOT 分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%84%E9%A1%B9%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">面各项服务的计算架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84%E5%92%8C%E4%BA%91%E8%AE%A1%E7%AE%97%E6%9E%B6%E6%9E%84%E7%9A%84%E4%BA%8C%E7%BB%B4%E8%A7%86%E8%A7%92"><span class="nav-number">2.</span> <span class="nav-text">计算架构和云计算架构的二维视角</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%E7%9A%84%E8%BF%9B%E4%B8%80%E6%AD%A5%E5%88%86%E5%B1%82%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">基础架构的进一步分层结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">云应用程序的结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%91%E8%AE%A1%E7%AE%97%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">云计算逻辑架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E4%BA%91%E6%A0%88"><span class="nav-number">4.</span> <span class="nav-text">逻辑云栈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E6%A0%88%E7%9A%84%E4%B8%89%E5%B1%82%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.1.</span> <span class="nav-text">云栈的三层模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E8%AE%A1%E7%AE%97%E6%8A%80%E6%9C%AF%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">云计算技术体系结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IaaS-%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="nav-number">4.3.</span> <span class="nav-text">IaaS 实现机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E4%BA%91%E6%A0%88%EF%BC%9AOpenStack"><span class="nav-number">5.</span> <span class="nav-text">物理云栈：OpenStack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E4%BA%91%E4%BD%93"><span class="nav-number">6.</span> <span class="nav-text">逻辑云体</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E4%BA%91%E4%BD%93%EF%BC%9A%E4%BA%91%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%83"><span class="nav-number">7.</span> <span class="nav-text">物理云体：云数据中心</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

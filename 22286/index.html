@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}} \def\rw{\mathsf{\textcolor{blue}{rw}}} \def\C{\mathsf{C}} \def\A{\mathcal{A}} \def\T{\mathcal{T}} \def\P{\mathcal{P}} \d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="arXiv&#39;25-Using Read Promotion and Mixed Isolation Levels for Performant">
+<meta property="og:url" content="https://eaglebear2002.github.io/22286/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\wr{\mathsf{\textcolor{teal}{wr}}} \def\ww{\mathsf{\textcolor{red}{ww}}} \def\rw{\mathsf{\textcolor{blue}{rw}}} \def\C{\mathsf{C}} \def\A{\mathcal{A}} \def\T{\mathcal{T}} \def\P{\mathcal{P}} \d">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/22286/image-20250226164620903.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22286/image-20250226164602044.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/22286/image-20250226164636232.png">
+<meta property="article:published_time" content="2025-02-12T14:43:20.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.771Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/22286/image-20250226164620903.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/22286/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>arXiv'25-Using Read Promotion and Mixed Isolation Levels for Performant | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/22286/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          arXiv'25-Using Read Promotion and Mixed Isolation Levels for Performant
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-02-12 22:43:20" itemprop="dateCreated datePublished" datetime="2025-02-12T22:43:20+08:00">2025-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\wr{\mathsf{\textcolor{teal}{wr}}}
+\def\ww{\mathsf{\textcolor{red}{ww}}}
+\def\rw{\mathsf{\textcolor{blue}{rw}}}
+\def\C{\mathsf{C}}
+\def\A{\mathcal{A}}
+\def\T{\mathcal{T}}
+\def\P{\mathcal{P}}
+\def\D{\mathrm{D}}
+\def\RC{\mathrm{RC}}
+\def\SI{\mathrm{SI}}
+\def\SSI{\mathrm{SSI}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>我们提出一种理论方法，能够为应用程序中的每个事务程序分配最低可行的隔离级别（在多隔离级别混合设置下），从而保证所有执行均可序列化，进而维护所有完整性约束（包括未显式声明的约束）。该理论扩展了先前针对完全已知事务的研究，以应对实际场景中事务由运行时参数化程序动态生成的挑战。基于此理论，我们提出一种优化方法——读提升与混合隔离级别分配（RePMILA），在确保执行可序列化的同时实现高吞吐量。该方法通过语义保持的代码修改（将部分读操作“提升”为无实际数据变更的写操作以获取排他锁），并结合隔离级别分配优化，探索性能最佳的实现方案。我们以 SmallBank 基准测试为例，展示了该方法在 PostgreSQL 上的性能表现：某些读提升策略的鲁棒分配方案，其吞吐量可与未修改程序在默认非鲁棒的“读已提交（Read Committed）”隔离级别下的性能相媲美，同时仍保证可序列化；相较于所有事务使用“可序列化快照隔离（SSI）”的方案，吞吐量可提升两倍。</p>
+<p>作者：</p>
+<ul>
+<li>Brecht Vandevoort, UHasselt, Data Science Institute, ACSL, Belgium</li>
+<li>Alan Fekete, University of Sydney</li>
+<li>Bas Ketsman, Vrije Universiteit Brussel, Belgium</li>
+<li>Frank Neven, UHasselt, Data Science Institute, ACSL, Belgium</li>
+<li>Stijn Vansummeren, UHasselt, Data Science Institute</li>
+</ul>
+<h2 id="Introduction">Introduction</h2>
+<p>事务管理是数据库管理系统的核心能力之一。虽然研究仍在持续探索提高性能的方法，特别是利用新型硬件[9, 12, 18, 19, 24–26, 29–32, 35]，但是大多数应用软件运行在流行的平台上，这些平台的并发控制机制已经存在了几十年，且众所周知在事务冲突时会遇到瓶颈，导致可序列化事务在竞争激烈时表现不佳[37, 43]。基于许多应用程序在领域特定的原因下不需要完美的序列化，这些平台为应用程序员提供了隔离级别的选择。因此，程序员可以选择较弱的隔离级别，例如平台默认的 <code>READ COMMITTED</code> 级别[6]，以在适当时提高性能。然而，目前还没有一个成熟的方法来帮助程序员判断何时接受非序列化隔离级别是合理的。</p>
+<h3 id="Robustness-of-transactions-to-guarantee-serializability">Robustness of transactions to guarantee serializability</h3>
+<p>近年来，理论研究提供了算法，能够分析应用程序中的事务集合，并为每个事务在混合隔离级别设置下选择隔离级别，同时仍能保证应用程序的健壮性[41]。也就是说，应用程序的每一次执行都会是可序列化的，即使其中一些事务并未使用可序列化的隔离级别执行。这项任务被称为“分配问题”[20]，需要对平台使用的并发控制机制进行一定的特征化。特别是，使用传统共享锁和独占锁操作单版本数据的系统得出的结论，将与允许读取已被覆盖数据版本（因此不阻塞读取）的多版本系统得出的结论不同[20, 28]。</p>
+<p>然而，当前用于解决分配问题的理论假设，所有事务在分配时是完全已知的，包括所有将要读取和写入的项。这在实际中并不现实：实际上，应用程序执行时的事务是通过运行时参数生成的，这些参数在分配之后才会提供。例如，一个学生注册系统可能会有一个程序将学生注册到特定的课程，而具体的学生ID和课程代码直到程序执行时才由最终用户提供。</p>
+<h3 id="Robustness-of-transaction-templates">Robustness of transaction templates</h3>
+<p>本文的一个关键技术进展是提出了一个算法，能够确定在一组模板中为每个模板分配的最低隔离级别，其中模板是一个抽象，旨在捕获基于某些变量确定其读写集的事务。该算法返回的分配保证在如 PostgreSQL 这类提供多版本并发控制机制的平台上是健壮的。也就是说，任何实例化这些模板的事务集的执行都会是可序列化的。</p>
+<h3 id="Optimization-via-read-promotion-and-mixed-isolation-level-allocation">Optimization via read promotion and mixed-isolation level allocation</h3>
+<p>我们提出的分配算法能够找到一种方法，在保证事务执行可序列化的同时，提升应用程序的性能（即保持所有数据约束的完整性，包括那些数据库中未显式声明的数据约束），而不会比将每个事务都执行在可序列化级别下的性能更差。我们建议考虑通过“提升”某些读取操作[21]的方式来修改应用程序代码，这些操作会被视为身份更新，并设置独占锁。在每个提升选择下，我们使用我们的分配算法来确定最低的隔离级别。对于每个提升选择和确定的健壮分配，我们可以通过实验测量其性能；性能最优的提升选择将是应用程序应采用的编码方式。我们称这种优化方法为读取提升与混合隔离级别分配（RePMILA）。</p>
+<p>我们用著名的 SmallBank 基准测试[3]来说明 RePMILA，并探索在不同工作负载参数下，在 PostgreSQL 上获得的性能。我们发现，一些提升选择的健壮分配，其吞吐量与所有事务都使用 <code>READ COMMITTED</code> 时的吞吐量相当，但不同于后者，这些健壮分配仍然保证了序列化执行。此外，健壮分配下的吞吐量可以是将所有事务在平台的可序列化隔离级别下运行时吞吐量的两倍。</p>
+<h3 id="Contributions">Contributions</h3>
+<p>本文的贡献包括理论与实验结果，我们还为从业者提供了指导。在理论方面，我们提供了一种证明技术，能够展示多版本隔离级别分配对事务模板的健壮性，并提出了一种多项式时间算法，能够生成唯一的最低健壮分配。我们为 SmallBank 应用提供了实验演示，证明了一些提升选择能够实现接近默认非健壮分配的性能（远好于所有事务都使用可序列化隔离级别时的情况）。我们认为，在这种背景下，RePMILA 对从业者非常有用，因为它在保证序列化执行的同时提升了性能。</p>
+<h3 id="Organization">Organization</h3>
+<p>本文的其余部分结构如下：第二节展示了 RePMILA 如何应用于 SmallBank，介绍了每个程序如何抽象为模板，分配算法如何为这些模板确定隔离级别，如何生成不同的提升选择，以及为每个提升选择生成的分配；第三节展示了不同提升选择的实测性能，并与所有程序都在可序列化隔离级别下运行的基准情况进行对比，也与所有程序都在默认的 <code>READ COMMITTED</code> 隔离级别下运行的基准情况进行对比；第四节介绍了理论部分，并详细介绍了分配算法；第五节讨论了相关工作；第六节讨论了本文工作的影响与局限，并指出了未来的研究方向。</p>
+<h2 id="READ-PROMOTION-AND-MIXED-ISOLATION-LEVEL-ALLOCATION-REPMILA">READ PROMOTION AND MIXED ISOLATION LEVEL ALLOCATION (REPMILA)</h2>
+<p>为了说明我们的方法，我们通过著名的 SmallBank 基准应用[3]来进行演示。虽然它不是一个真实的例子，但它具备足够的特性来展示如何识别一个高效且健壮的分配，并且它足够简单，适合用于会议论文中。</p>
+<h3 id="SmallBank-benchmark">SmallBank benchmark</h3>
+<p><img src="/22286/image-20250226164620903.png" alt></p>
+<p>SmallBank[3]模式包含以下表：<code>Account(Name, CustomerID)</code>，<code>Savings(CustomerID, Balance)</code> 和 <code>Checking(CustomerID, Balance)</code>（关键属性下划线标出）。<code>Account</code> 表将客户名称与客户ID关联。其他表存储客户的储蓄账户和支票账户余额（通过其ID进行标识）。应用程序代码通过事务程序与数据库交互：</p>
+<ul>
+<li><code>Balance(N)</code> 返回客户名称为 <code>N</code> 的总余额（包括储蓄和支票账户余额）。</li>
+<li><code>DepositChecking(N, V)</code> 向客户 <code>N</code> 的支票账户存入金额 <code>V</code>（见图 1）。</li>
+<li><code>TransactSavings(N, V)</code> 向客户 <code>N</code> 的储蓄账户存入或提取金额 <code>V</code>。</li>
+<li><code>Amalgamate(N1, N2)</code> 将客户 <code>N1</code> 的所有资金转账到客户 <code>N2</code>。</li>
+<li>最后，<code>WriteCheck(N, V)</code> 向客户 <code>N</code> 的账户开具支票，若账户透支则扣款。</li>
+</ul>
+<h3 id="Transaction-templates">Transaction templates</h3>
+<p><img src="/22286/image-20250226164602044.png" alt></p>
+<p>我们通过事务模板来抽象事务程序，如图 2 所示。相应的 SQL 代码在附录 A.1 中提供。事务模板由一系列读取（R）、写入（W）和更新（U）操作组成，每个操作访问一个元组。例如，<code>R [X : Account{N, C}]</code> 表示对 <code>Account</code> 表中 <code>Name</code> 和 <code>CustomerID</code> 属性的元组 <code>X</code> 执行读取操作。为了节省空间，我们将属性名称缩写为首字母。集合 <code>{N, C}</code> 是读取操作的读取集。类似地，<code>W</code> 和 <code>U</code> 表示写入和更新操作，操作对象是特定关系中的元组。写入操作具有与之相关的写入集，而更新操作包含一个读取集和一个写入集，例如 <code>U [Z : DepositChecking{C, B}{B}]</code>，首先读取元组 <code>Z</code> 的 <code>CustomerID</code> 和 <code>Balance</code>，然后写入 <code>Balance</code> 属性。<code>U</code> 操作是原子更新，首先读取元组，然后再写入它。模板作为事务程序的抽象，表示无数可能的工作负载。例如，假设 <code>x</code>、<code>y</code>、<code>z</code>（及其带有引号的版本）是具体的数据库对象，作为变量 <code>X</code>、<code>Y</code> 和 <code>Z</code> 的解释。那么，不考虑属性集的情况下，<code>{R [x] R [y] R [z] U [z], R [x'] R [y'] R [z'] U [z'] , R [x] U [z]}</code> 就是与 SmallBank 模板一致的一个工作负载，它包含了两次 <code>WriteCheck</code> 的实例化和一次 <code>DepositChecking</code> 的实例化。需要注意的是，<code>{R [x] R [y] R [z] U [z']}</code> 是一个无效工作负载，因为在 <code>WriteCheck</code> 中，最后两个操作应该作用于相同的对象。</p>
+<p>事务模板没有捕获程序中的所有约束，因此可能会过度估计在实际程序执行时可能发生的事务。例如，工作负载 <code>{R [t] U [q], R [t] U [q']}</code> 与 SmallBank 模板一致（两次 <code>DepositChecking</code> 的实例化），但在实际中无法发生，因为假设每个客户只能有一个支票账户。</p>
+<h3 id="Lowest-robust-allocation">Lowest robust allocation</h3>
+<p>我们感兴趣的是确定每个模板的最低隔离级别分配，以确保所有执行都将是可序列化的。我们将这种分配称为健壮分配。我们考虑 PostgreSQL 的隔离级别：<code>Read Committed</code>（RC）、<code>Snapshot Isolation</code>（SI）和 <code>Serializable Snapshot Isolation</code>（SSI），并按从低到高的顺序将它们排列：<code>RC &lt; SI &lt; SSI</code>，假设当隔离级别降低时，吞吐量增加。我们在第 4 节中描述的分配算法发现，将 <code>DepositChecking</code> 映射到 <code>RC</code>，将所有其他模板映射到 <code>SSI</code> 是健壮的，并且从优化的角度来看是最优的，因为没有任何隔离级别可以降低而不破坏健壮性。</p>
+<h3 id="Read-promotion-choices">Read promotion choices</h3>
+<img src="/22286/image-20250226164636232.png" style="zoom:50%;">
+<p>所考虑的任何隔离级别都不允许脏写。这迫使一个事务在覆盖之前事务所做的更改时，必须等到之前的事务提交或中止。因此，如果我们将一个读取操作提升为更新操作（即一个读取操作将观察到的值写回去），事务的语义不会受到影响，但最低健壮分配可能会有所不同。忽略 <code>Account</code> 表中只读的读取操作，SmallBank 基准中包含了 4 个可以提升的读取操作，这些操作位于 <code>Savings</code> 和 <code>Checking</code> 关系中，共计 16 种可能的提升选择。对于每种提升选择，我们运行算法来检测最低的健壮分配。生成的分配总结见表 1。我们通过提升的读取操作来表示每种提升选择。例如，<code>Bal: S, WC: C</code> 表示在 <code>Balance</code> 程序中提升 <code>Savings</code> 关系的读取操作，在 <code>WriteCheck</code> 程序中提升 <code>Checking</code> 关系的读取操作。为了方便起见，这些提升选择按其最低的健壮分配进行分组。请注意，没有提升的情况下，如前所述，只有五个程序中的一个（即 <code>DepositChecking</code>）可以在低于 <code>SSI</code> 的隔离级别下执行，而不放弃序列化性。此外，稍微提升一些读取操作就能很快得出健壮分配，在这种分配中几乎所有程序都在 <code>RC</code> 下执行。然而，最佳的提升选择不一定是允许最多程序在 <code>RC</code> 下运行的选择，原因很简单：新引入的写操作可能会对总体性能产生负面影响。因此，需要通过吞吐量实验来确定最佳的提升选择，我们将在下一节中进行讨论。</p>
+<h2 id="EVALUATING-REPMILA-OVER-SMALLBANK">EVALUATING REPMILA OVER SMALLBANK</h2>
+<h2 id="ALLOCATION-ALGORITHM">ALLOCATION ALGORITHM</h2>
+<h3 id="Transactions-and-Schedules">Transactions and Schedules</h3>
+<h3 id="Conflict-Serializability">Conflict-Serializability</h3>
+<h3 id="Isolation-Levels">Isolation Levels</h3>
+<blockquote>
+<p>定义 4.3</p>
+<p>调度 $s$ 中的事务 $T_i$ 在 RC 下允许，当且仅当：</p>
+<ul>
+<li>$T_i$ 中的每个写操作遵守 $s$ 的 commit order；</li>
+<li>每个读操作 $b_i \in T_i$ 都读到了 $b_i$ 在 $s$ 中的上一个相关写（read-last-committed）；</li>
+<li>$T_i$ 在 $s$ 中不产生脏写。</li>
+</ul>
+<p>调度 $s$ 中的事务 $T_i$ 在 SI 下允许，当且仅当：</p>
+<ul>
+<li>$T_i$ 中的每个写操作遵守 $s$ 的 commit order；</li>
+<li>每个 $T_i$ 中的读操作都读到了 $first(T_i)$ 在 $s$ 中的上一个相关写（read-last-committed）；</li>
+<li>$T_i$ 在 $s$ 中不产生并发写。</li>
+</ul>
+<p>RC 与 Gotsman 体系的对比：</p>
+<ol>
+<li>RLC 与 Ext 不同，两者并无包含关系，可能导致不同的读结果；</li>
+<li>调度分析承认（非分布式系统）单调时间戳，本身保证了 TranVis 和 Prefix；</li>
+</ol>
+<p>因此，把 RC 的 RLC 换成 Ext 公理，则 RC 达到了 PC 的水平。</p>
+</blockquote>
+<p>调度 $s$ 中的危险结构 $T_1 \to T_2 \to T_3$ 是：</p>
+<ul>
+<li>$T_1 \xrightarrow{\rw} T_2 \land T_2 \xrightarrow{\rw} T_3$；</li>
+<li>$T_1$ 和 $T_2$ 在 $s$ 中并发；</li>
+<li>$T_2$ 和 $T_3$ 在 $s$ 中并发；</li>
+<li>$\C_3 \le_s \C_1 \land \C_3 &lt;_s \C_2$；</li>
+<li>如果 $T_1$ 是只读，则 $\C_3 &lt;_S first(T_1)$。</li>
+</ul>
+<p>本文中的 dangerous structure 定义比 [Fekete SIGMOD'08] 中的更强，Fekete 的定义仅要求两个连续的 $\rw$ 边。</p>
+<blockquote>
+<p>定义 4.5</p>
+<p>事务集合 $\T$ 在其上的分配 $\A$ 下被允许，当且仅当：</p>
+<ul>
+<li>$\forall T_i \in \T. \A(T_i) = \RC \implies T_i \models \RC$；</li>
+<li>$\forall T_i \in \T. \A(T_i) \in \set{\SI, \SSI} \implies T_i \models \SI$；</li>
+<li>不存在三个 $\SSI$ 事务（不一定是不同事务）构成的危险结构 $T_i \rightarrow T_j \rightarrow T_k$。</li>
+</ul>
+</blockquote>
+<h3 id="Transaction-Templates">Transaction Templates</h3>
+<h3 id="Transaction-and-Template-Robustness">Transaction and Template Robustness</h3>
+<h3 id="Deciding-Template-Robustness">Deciding Template Robustness</h3>
+<h3 id="Finding-Lowest-Robust-Allocations">Finding Lowest Robust Allocations</h3>
+<blockquote>
+<p>定义 4.10</p>
+</blockquote>
+<blockquote>
+<p>命题 4.12</p>
+</blockquote>
+<h2 id="RELATED-WORK">RELATED WORK</h2>
+<h2 id="CONCLUSIONS">CONCLUSIONS</h2>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/16029/" rel="prev" title="Chatbox+第三方 Deepseek API 调用">
+      <i class="fa fa-chevron-left"></i> Chatbox+第三方 Deepseek API 调用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/22651/" rel="next" title="AI 职业替代风险评估矩阵">
+      AI 职业替代风险评估矩阵 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Robustness-of-transactions-to-guarantee-serializability"><span class="nav-number">1.1.</span> <span class="nav-text">Robustness of transactions to guarantee serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Robustness-of-transaction-templates"><span class="nav-number">1.2.</span> <span class="nav-text">Robustness of transaction templates</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optimization-via-read-promotion-and-mixed-isolation-level-allocation"><span class="nav-number">1.3.</span> <span class="nav-text">Optimization via read promotion and mixed-isolation level allocation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Contributions"><span class="nav-number">1.4.</span> <span class="nav-text">Contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Organization"><span class="nav-number">1.5.</span> <span class="nav-text">Organization</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#READ-PROMOTION-AND-MIXED-ISOLATION-LEVEL-ALLOCATION-REPMILA"><span class="nav-number">2.</span> <span class="nav-text">READ PROMOTION AND MIXED ISOLATION LEVEL ALLOCATION (REPMILA)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SmallBank-benchmark"><span class="nav-number">2.1.</span> <span class="nav-text">SmallBank benchmark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction-templates"><span class="nav-number">2.2.</span> <span class="nav-text">Transaction templates</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lowest-robust-allocation"><span class="nav-number">2.3.</span> <span class="nav-text">Lowest robust allocation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Read-promotion-choices"><span class="nav-number">2.4.</span> <span class="nav-text">Read promotion choices</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EVALUATING-REPMILA-OVER-SMALLBANK"><span class="nav-number">3.</span> <span class="nav-text">EVALUATING REPMILA OVER SMALLBANK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ALLOCATION-ALGORITHM"><span class="nav-number">4.</span> <span class="nav-text">ALLOCATION ALGORITHM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Transactions-and-Schedules"><span class="nav-number">4.1.</span> <span class="nav-text">Transactions and Schedules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conflict-Serializability"><span class="nav-number">4.2.</span> <span class="nav-text">Conflict-Serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Isolation-Levels"><span class="nav-number">4.3.</span> <span class="nav-text">Isolation Levels</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction-Templates"><span class="nav-number">4.4.</span> <span class="nav-text">Transaction Templates</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transaction-and-Template-Robustness"><span class="nav-number">4.5.</span> <span class="nav-text">Transaction and Template Robustness</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deciding-Template-Robustness"><span class="nav-number">4.6.</span> <span class="nav-text">Deciding Template Robustness</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Finding-Lowest-Robust-Allocations"><span class="nav-number">4.7.</span> <span class="nav-text">Finding Lowest Robust Allocations</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RELATED-WORK"><span class="nav-number">5.</span> <span class="nav-text">RELATED WORK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CONCLUSIONS"><span class="nav-number">6.</span> <span class="nav-text">CONCLUSIONS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

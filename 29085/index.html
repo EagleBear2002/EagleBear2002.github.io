@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="分类 在分类问题中，可以将某个域中的每个实体置于一组离散的类别中的一个中：是&#x2F;否，朋友&#x2F;敌人，好&#x2F;坏&#x2F;无所谓，蓝色&#x2F;红色&#x2F;绿色等。 给定一个带有标签的实体的训练集，制定一个将标签分配给测试集中的实体的规则。 分类引入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据分析-06-分类">
+<meta property="og:url" content="https://eaglebear2002.github.io/29085/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="分类 在分类问题中，可以将某个域中的每个实体置于一组离散的类别中的一个中：是&#x2F;否，朋友&#x2F;敌人，好&#x2F;坏&#x2F;无所谓，蓝色&#x2F;红色&#x2F;绿色等。 给定一个带有标签的实体的训练集，制定一个将标签分配给测试集中的实体的规则。 分类引入">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/2-1676530560158-213.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102213414070.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/1-1676530560158-214.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/51.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/52.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102215342586.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102215551219.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/006-%E5%88%86%E7%B1%BB.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102215654598.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102215701774.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/12-1676530560158-215.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/11-1676530560159-216.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/13-1676530560159-217.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220032793.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220048582.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220040263.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/17-1676530560159-218.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220129330.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220132891.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220137053.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220436573.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/image-20221102220433784.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/48.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/49-1667397970867-203.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/23-1676530560159-219.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/24-1676530560159-220.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/25-1667397988251-206.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/26-1676530560159-221.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/27-1676530560159-222.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/28.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/50-1667398196172-209.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/29-1676530560160-223.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/30-1676530560160-224.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/53.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/31-1676530560160-225.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/32-1676530560160-226.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/33-1667398234005-212.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/34-1667398237296-215.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/35.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/36.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/37.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/38.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/39.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/40.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/41.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/42.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/43.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/44.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/45.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/46.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/47.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/56.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/55-1667398297841-218.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/54.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/57.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/58.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/59.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/61.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/60.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/62.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/63.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/29085/64-1667398311414-221.png">
+<meta property="article:published_time" content="2022-11-02T13:26:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.536Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/29085/2-1676530560158-213.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/29085/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>大数据分析-06-分类 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/29085/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大数据分析-06-分类
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-02 21:26:00" itemprop="dateCreated datePublished" datetime="2022-11-02T21:26:00+08:00">2022-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">2022Fall-大数据分析</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>20k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>18 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="分类">分类</h2>
+<p>在分类问题中，可以将某个域中的每个实体置于一组离散的类别中的一个中：是/否，朋友/敌人，好/坏/无所谓，蓝色/红色/绿色等。</p>
+<p>给定一个带有标签的实体的训练集，制定一个将标签分配给测试集中的实体的规则。</p>
+<h3 id="分类引入">分类引入</h3>
+<p><img src="/29085/2-1676530560158-213.png" alt></p>
+<ol>
+<li>可能有一个简单的分隔符（例如，二维的直线或一般的超平面），也可能没有</li>
+<li>可能存在各种“噪音”</li>
+<li>可能有“数据重叠”</li>
+<li>不应被低维的几何直觉所欺骗</li>
+<li>一些分类器显式表示分隔符（例如，直线），而对于其他分类器，隐式完成分隔</li>
+<li>一些分类器只是决定一个对象在哪个类中</li>
+</ol>
+<h3 id="物体的表示">物体的表示</h3>
+<p>每个要分类的对象都表示为一对（x，y）：</p>
+<ol>
+<li>其中 x 是对象的描述（请参见以下幻灯片中的数据类型示例）</li>
+<li>其中 y 是一个标签（现在假定为二分类）</li>
+</ol>
+<p>机器学习分类器的成功或失败通常取决于选择正确的对象描述：</p>
+<ol>
+<li>描述的选择也可以看作是学习中的问题，实际上，我们将在以后的讲座中讨论选择描述的自动化过程</li>
+<li>但是这里经常需要良好的直觉</li>
+</ol>
+<h3 id="数据类型">数据类型</h3>
+<p>数据处理方式：向量化数据</p>
+<ol>
+<li>物理特征</li>
+<li>行为特征：文字、发布信息的情况</li>
+<li>上下文：你所在的环境</li>
+<li>历史：过去的印迹（足迹）</li>
+</ol>
+<p>我们现在假设这样的向量在表中明确表示，之后我们将使用这种假设</p>
+<p>数据表现的形式：</p>
+<ol>
+<li>文本和超文本</li>
+<li>邮件</li>
+<li>蛋白质序列</li>
+<li>Unix 系统调用的顺序</li>
+<li>网络层：图</li>
+<li>图片：识别目标物</li>
+</ol>
+<h3 id="训练和验证">训练和验证</h3>
+<p>数据集（标签样本）会被划分为三部分：</p>
+<ol>
+<li>训练集</li>
+<li>验证集</li>
+<li>测试集</li>
+</ol>
+<h4 id="训练">训练</h4>
+<ol>
+<li>估计训练集上的参数</li>
+<li>调整验证集上的超参数</li>
+<li>在训练集上报告结果</li>
+<li>缺少任何这些都会导致过拟合的产生</li>
+</ol>
+<p><img src="/29085/image-20221102213414070.png" alt></p>
+<h4 id="统计问题">统计问题</h4>
+<ol>
+<li>想要一个对测试数据表现良好的分类器</li>
+<li>过度拟合：非常紧密地拟合训练数据，但不能很好地概括</li>
+<li>误差线：想要对准确性进行现实（保守）的估计</li>
+</ol>
+<h3 id="分类的实例">分类的实例</h3>
+<h4 id="Spam-Filter-垃圾邮件识别器">Spam Filter 垃圾邮件识别器</h4>
+<ol>
+<li>输入：email</li>
+<li>输出：垃圾邮件/不是垃圾邮件</li>
+<li>初始化：
+<ol>
+<li>获得很多的样例邮件，已经被标记为 spam 或者是 ham</li>
+<li>想要去预测一个新的未来的邮件是不是垃圾邮件</li>
+</ol>
+</li>
+<li>特点：以下的属性被用来区分邮件是不是垃圾邮件
+<ol>
+<li>词：FREE!</li>
+<li>文本模式：$dd，CAPS</li>
+<li>非文本：发送方</li>
+</ol>
+</li>
+</ol>
+<p><img src="/29085/1-1676530560158-214.png" alt></p>
+<h4 id="数字识别">数字识别</h4>
+<p>输入：图片或者像素网格</p>
+<p>输出：数字 0-9</p>
+<p>初始化：</p>
+<ol>
+<li>获得很多的样例图片，每一个被标记为一个数字</li>
+<li>想要去预测一个新的未来的数字图片中的数字</li>
+</ol>
+<p>特点：以下的属性被用来区分当前图片中的数字</p>
+<ol>
+<li>像素：(6,8）是 ON</li>
+<li>形状模式：数字组成、纵横比、循环检测数字</li>
+</ol>
+<p>当前状态：和人相似</p>
+<p>分类是提前设置好的，有限的，目标明确的。</p>
+<h3 id="实际分类任务的其他示例">实际分类任务的其他示例</h3>
+<ol>
+<li>欺诈检测（输入：帐户活动，类别：欺诈/无欺诈）</li>
+<li>网页垃圾邮件检测（输入：HTML /渲染页面，类别：垃圾邮件/火腿）</li>
+<li>语音识别和说话者识别（输入：波形，类别：音素或单词）</li>
+<li>医学诊断（输入：症状，类别：疾病）</li>
+<li>自动作文评分器（输入：文档，课程：成绩）</li>
+<li>客户服务电子邮件路由和文件夹</li>
+<li>社交网络中的链接预测</li>
+<li>药物设计中的催化活性</li>
+</ol>
+<h3 id="分类的应用领域">分类的应用领域</h3>
+<ol>
+<li>二分类问题</li>
+<li>多分类问题（Eg. 兔子，老虎，牛）
+<ol>
+<li>直接分类</li>
+<li>划分为多个并列的二分类问题合并（Eg. 兔子和虎、虎和牛、兔子和牛）</li>
+<li>划分为多个串行的二分类问题（Eg.非虎，非兔）</li>
+</ol>
+</li>
+<li>非专属类别</li>
+<li>排位</li>
+</ol>
+<h3 id="分类效果的评价标准">分类效果的评价标准</h3>
+<h4 id="分类准确率">分类准确率</h4>
+<p>指模型正确地预测新的或先前未见过的数据的类标号的能力，通常分类算法寻找的是分类准确率高的分类模型，分类准确率在一般情况下可以满足分类器模型的比较</p>
+<h4 id="计算复杂度">计算复杂度</h4>
+<p>计算复杂度决定着算法执行的速度和占用的资源，它依赖于具体的实现细节和软硬件环境。</p>
+<p>由于数据挖掘中的操作对象是海量的数据库，因而空间和时间的复杂度是非常重要的问题</p>
+<h4 id="可解释性">可解释性</h4>
+<p>分类结果只有可解释性好，容易理解，才能更好地用于决策支持，结果的可解释性越好，算法受欢迎的程度越高</p>
+<h4 id="可伸缩性">可伸缩性</h4>
+<p>一个模型是可伸缩的，是指在给定内存和磁盘空间等可用的系统资源的前提下，算法的运行时间应当随数据库大小线性增加。</p>
+<h4 id="强壮性或鲁棒性">强壮性或鲁棒性</h4>
+<p>指在数据集中含有噪声和缺失值的情况下，分类器正确分类数据的能力。</p>
+<h4 id="累积增益图">累积增益图</h4>
+<p>累积增益图会在给定的类别中显示通过把个案总数的百分比作为目标而增益的个案总数的百分比。对角线是“基线”曲线，曲线离基线的上方越远，增益越大。</p>
+<p>累积增益图通过选择对应于大量收益的百分比选择分类标准值，然后将百分比与适当分界值映射。</p>
+<p><img src="/29085/51.png" alt></p>
+<h4 id="不平衡数据分类">不平衡数据分类</h4>
+<p>不平衡数据是指训练样本数量在类间分布不平衡，具体地说就是在同一数据集中某些类的样本数远大于其他类的样本数。</p>
+<ol>
+<li>样本数少的类为少数类（正类）</li>
+<li>样本数多的类为多数类（负类）</li>
+</ol>
+<p>具有不平衡类分布的数据集出现在很多的实际应用中，很多重要信息隐藏在少数类中</p>
+<p>在这种类中，少数类的正确分类比多数类的正确分类更有价值，比如 1% 的的信用卡交易是欺诈。</p>
+<h4 id="使用混淆系数矩阵">使用混淆系数矩阵</h4>
+<p><img src="/29085/52.png" alt></p>
+<ul>
+<li>不平衡数据分类问题中，我们不关注正确分类的负例</li>
+<li>实际正例数 P = TP + FN</li>
+<li>实际负例数 N = FP + TN</li>
+<li>实例总数 C = P + N</li>
+</ul>
+<ol>
+<li>分类准确率，对测试集分类时，分类正确样本的百分比：</li>
+</ol>
+<p>$$
+Accuracy = \frac{正确预测数}{样本总数} = \frac{TP + TN}{C}
+$$</p>
+<ol start="2">
+<li>错误率，对测试集分类时，错误分类的样本占样本总数的百分比：</li>
+</ol>
+<p>$$
+Errorrate = 1- Accuracy = 1 - \frac{TP + TN}{C} = \frac{FN + FP}{C}
+$$</p>
+<ol start="3">
+<li>精度（真负率），为正确分类的正例占分类结果为正例的样本个数的比例</li>
+</ol>
+<p>$$
+p = \frac{TP}{TP + FP}
+$$</p>
+<ol start="4">
+<li>召回率（真正率），为正确分类的正例个数占实际正例个数的比例</li>
+</ol>
+<p>$$
+r = \frac{被正确分类的正例样本个数}{实际正例样本个数} = \frac{TP}{TP+FN}
+$$</p>
+<ol start="5">
+<li>$F_1$ 度量，表示精度或召回率的调和平均值：$F_1 = \frac{2rp}{r+p}$，$F_1$ 度量趋向于接近精度或召回率中的较小者。</li>
+<li>精度和召回率是评价不平衡数据分类模型的两个常用度量，可以构造一个为基线模型，最大化其中一个度量，发现精度高，容易导致召回率低，召回率高容易导致精度低，而 $F_1$ 度量平衡了这两个部分的效果。</li>
+</ol>
+<h2 id="分类算法">分类算法</h2>
+<ul>
+<li>Bayes</li>
+<li>Decision Tree</li>
+<li>SVM：支持向量机，最受工业认可</li>
+<li>KNN</li>
+<li>Logistic Regression</li>
+<li>判别分析</li>
+<li>感知机</li>
+<li>增强和其他评估方</li>
+<li>BPNN（BP 神经网络）</li>
+<li>深度学习</li>
+<li>随机森林</li>
+<li>集成学习：比如有 100 个算法模型，然后投票决定是什么</li>
+</ul>
+<h2 id="朴素贝叶斯">朴素贝叶斯</h2>
+<h3 id="条件概率">条件概率</h3>
+<p>指在事件 B 发生的情况下，事件 A 发生的概率，用 $P(A|B)$ 表示，读作在 B 条件下的 A 的概率</p>
+<h3 id="全概率公式">全概率公式</h3>
+<p>$P(A) = P(A|B_1) + P(A|B_2) + ... + P(A|B_N)$</p>
+<h3 id="贝叶斯公式">贝叶斯公式</h3>
+<ol>
+<li>后验概率 = 先验概率 * 调整因子</li>
+<li>$P(A|B)=P(A)*\frac{P(B|A)}{P(B)}$</li>
+</ol>
+<p><img src="/29085/image-20221102215342586.png" alt></p>
+<h3 id="贝叶斯的例子">贝叶斯的例子</h3>
+<blockquote>
+<p>假设某种疾病的发病率为 0.001（1000 个人中会有一个人得病），现有一种试剂在患者确实得病的情况下，有 99% 的几率呈现为阳性，而在患者没有得病的情况下，它有 5% 的几率呈现为阳性（也就是假阳性），如有一位病人的检验成果为阳性，那么他的得病概率是多少呢？</p>
+</blockquote>
+<p><img src="/29085/image-20221102215551219.png" alt></p>
+<h3 id="朴素贝叶斯的概率模型">朴素贝叶斯的概率模型</h3>
+<ol>
+<li>一个待分类项：$X = f_1, f_2, f_3,..., f_n$</li>
+<li>类别集合：$C_1, C_2, ...,C_m$</li>
+<li>需要计算：$P(C_1|X), P(C_2|X), ...,P(C_m|X)$</li>
+<li>$P(f_1|C_1), P(f_2|C_1),..., P(f_n|C_1), P(f_1|C_2), ...,P(f1|C_m),...,P(f_n|C_m)$</li>
+<li>如果 $P(C_k|X) = max(P(C_1|X), P(C_2|X), ...,P(C_m|X))$，则$X \in C_k, P(C_i|X) = \frac{P(X|C_i) * P(C_i)}{P(X)}$</li>
+<li>$P(X|C_i)P(C_i) = P(f_1|C_i)*P(f_2|C_i),...,P(f_n|C_i)P(C_i) = P(C_i)\prod\limits_{j=1}\limits^nP(f_i|C_i)$</li>
+</ol>
+<h3 id="朴素贝叶斯流程">朴素贝叶斯流程</h3>
+<p><img src="/29085/006-%E5%88%86%E7%B1%BB.jpg" alt></p>
+<h2 id="决策树">决策树</h2>
+<ol>
+<li>决策树节点和有向边组成</li>
+<li>节点有内部节点和叶节点两种类型</li>
+<li>内部节点表示一个特征，叶节点表示一个类</li>
+</ol>
+<h3 id="决策树的示例">决策树的示例</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/image-20221102215654598.png" alt></th>
+<th><img src="/29085/image-20221102215701774.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="决策树之-ID3-算法">决策树之 ID3 算法</h3>
+<h4 id="信息熵">信息熵</h4>
+<p>对于有 k 个类别的分类问题，假定样本集合 D 中第 k 类样本所占的比例是 $p_k (k=1, 2, 3, \dots ,k)$，则样本集合 D 的信息熵为：</p>
+<p>$$
+Ent(D) = -\sum\limits^k\limits_{k=1}p_k*\log_2 p_k
+$$</p>
+<p>是刻画系统整体的混乱程度的量，信息熵越大，系统越混乱。</p>
+<h4 id="信息增益">信息增益</h4>
+<p>在决策树的分类问题中，信息增益是针对一个特征 T，计算原有数据的信息熵与引用特征后的信息熵之差，信息增益的定义为：</p>
+<p>$$
+Gain(D, a) = Ent(D) - \sum\limits^V\limits_{v=1} \frac{|D^k|}{|D|} * Ent(D^v)
+$$</p>
+<h4 id="信息熵和信息增益的计算示例">信息熵和信息增益的计算示例</h4>
+<p>根节点的信息熵</p>
+<p><img src="/29085/12-1676530560158-215.png" alt>
+<img src="/29085/11-1676530560159-216.png" alt></p>
+<p>部分特征的信息增益：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/13-1676530560159-217.png" alt></th>
+<th><img src="/29085/image-20221102220032793.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/29085/image-20221102220048582.png" alt="属性色泽的信息增益"></td>
+<td><img src="/29085/image-20221102220040263.png" alt="其它属性的信息增益"></td>
+</tr>
+<tr>
+<td><img src="/29085/17-1676530560159-218.png" alt></td>
+<td><img src="/29085/image-20221102220129330.png" alt></td>
+</tr>
+</tbody>
+</table>
+<p>最终计算结果：使用信息增益最大的特征作为本节点，其取值作为其他几个子节点</p>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/image-20221102220132891.png" alt></th>
+<th><img src="/29085/image-20221102220137053.png" alt></th>
+</tr>
+</thead>
+</table>
+<h4 id="ID3-算法过程描述">ID3 算法过程描述</h4>
+<ol>
+<li>计算给定样本分类所需的信息熵</li>
+<li>计算每个特征的信息熵、信息增益</li>
+<li>从所有特征列中选出信息增益最大的特征作为根节点或者内部节点-划分节点，其子节点分别为该特征的可能取值</li>
+<li>根据划分节点的不同取值来查分数据集为对应子节点，然后删去当前的特征列，在计算剩余列的信息熵，如果有信息增益就重复第二步直到划分结束</li>
+<li>划分结束的标志：子集只有一个类别标签，停止划分。</li>
+</ol>
+<h4 id="ID3-算法的不足">ID3 算法的不足</h4>
+<ol>
+<li>ID3 没考虑连续特征，比如长度、密度都是连续值，无法在 ID3 运用。</li>
+<li>ID3 用信息增益作为标准容易偏向取值较多的特征。然而在相同条件下，取值比较多的特征比取值少的特征信息增益大。比如一个变量有 2 个值，各为 1/2，另一个变量为 3 个值，各为 1/3，其实他们都是完全不确定的变量，但是取 3 个值比取 2 个值的信息增益大。如何校正这个问题？</li>
+<li>ID3 算法没考虑缺失值问题。</li>
+<li>没考虑过拟合问题。</li>
+</ol>
+<h3 id="C4-5-算法">C4.5 算法</h3>
+<p>C4.5 算法是 ID3 算法的改进，C4.5 克服了 ID3 的两个缺点</p>
+<ol>
+<li>不能处理连续特征</li>
+<li>用信息增益选择属性时偏向于选择分支较多的特征值，即取值多的特征</li>
+</ol>
+<p>C4.5 算法实例：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zjsghww/article/details/51638126">https://blog.csdn.net/zjsghww/article/details/51638126</a></p>
+<h4 id="将连续的特征离散化">将连续的特征离散化</h4>
+<ol>
+<li>将 n 个连续的样本按值从小到大排列，得到数据 $a_1, a_2, \dots, a_n$</li>
+<li>取相邻两样本值的平均数，会得到 $n-1$ 个划分点，其中第 i 个划分点 $T_i = \frac{a_i + a_{i+1}}{2}$</li>
+<li>对这 n-1 个点，分别计算每一个点作为二元分类点时的信息增益，选择信息增益最大的点作为该连续特征的二元离散分类点</li>
+<li>用信息增益比选择最佳划分</li>
+<li>注意这里还不使用信息增益率</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/image-20221102220436573.png" alt></th>
+<th><img src="/29085/image-20221102220433784.png" alt></th>
+</tr>
+</thead>
+</table>
+<h4 id="信息增益率">信息增益率</h4>
+<p>信息增益率是信息增益与特征熵的比，特征数越多的特征对应的特征熵越大。</p>
+<p>$$
+\begin{array}{l}
+Gain(D,a) = Ent(D) - \sum\limits^k\limits_{v=1}Ent(D^v) \
+Gain_{ratio}(D,a) = \frac{Gain(D,a)}{Iv(a)} \
+IV(a) = -\sum\limits^V\limits_{v=1}\frac{|D^v|}{|D|}\log_2\frac{|D^V|}{|D|}
+\end{array}
+$$</p>
+<h4 id="对于缺失值处理的问题">对于缺失值处理的问题</h4>
+<p>主要解决两个问题：</p>
+<ol>
+<li>样本某些特征缺失的情况下选择划分的属性</li>
+<li>选定了划分属性，对于在该属性上缺失特征的样本的处理</li>
+</ol>
+<p>第一个问题：C4.5 的想法是将数据分为两部分，每一个部分都设置权重（初始为 1），然后划分数据，一部分有特征 A 的 D1，一部分没有特征 A 的数据 D2，然后对于没有确实特征 A 的数据集 D1 来和对应 A 特征的各个特征值一起计算加权重后的信息增益比，最后乘以一个系数（系数=无特征 A 缺失的样本加权后所占加权总样本的比例）</p>
+<p>第二个问题：可以将缺失特征的样本同时划分入所有的子节点，不过该样本的权重按照各个子样本的数量比例来分类，比如缺失特征 A 的样本 a 之前权重为 1，特征有 3 个特征值 A1，A2，A3，分别对应的无 A 特征的样本个数为 2，3，4，则 a 同时划入 A1，A2，A3，对应权重调节为 2/9、3/9、4/9</p>
+<h4 id="C4-5-算法的不足与改进">C4.5 算法的不足与改进</h4>
+<ol>
+<li>决策树算法很容易过拟合，所以决策树需要剪枝，而 C4.5 的剪枝方法有优化空间：
+<ol>
+<li>预剪枝：生成决策树的时候决定是否剪枝</li>
+<li>后剪枝：生成决策树，再通过交叉检验进行剪枝</li>
+</ol>
+</li>
+<li>生成多叉树，不如二叉树计算快</li>
+<li>只能用于分类</li>
+<li>使用了熵模型，对于连续属性还有大量排序，如果为了检查模型并不希望牺牲太多准确性，使用基尼系数代替熵模型。</li>
+</ol>
+<h3 id="CART-算法">CART 算法</h3>
+<ol>
+<li>Classification And Regression Tree，即分类回归树算法，简称 CART 算法，使用基尼系数代替信息增益比</li>
+<li>基尼系数代表了模型的不纯度，基尼系数越小，不纯度越低，特征越好，和信息增益率相反</li>
+<li>步骤：
+<ol>
+<li>用样本递归划分进行建树过程</li>
+<li>用验证数据进行剪枝</li>
+</ol>
+</li>
+<li>找出信息增益大于平均水平的，然后再找信息增益率最大的。</li>
+</ol>
+<h4 id="GINI-指数">GINI 指数</h4>
+<ul>
+<li>假设有 n 个类别，第 k 个类别的概率为$p_k$，概率分布的基尼系数表达式：</li>
+</ul>
+<p>$$
+\begin{array}{l}
+Gini(p) = \sum\limits^{n}\limits_{k=1}p_k(1-p_k) \
+= 1 - \sum\limits^{n}\limits_{k=1}p_k^2 \
+\end{array}
+$$</p>
+<ul>
+<li>如果是二分类问题，第一个样本输出概率为 p，概率分布的基尼系数表达式特化为 $Gini(p) = 2p(1-p)$</li>
+<li>对于样本 D，个数为|D|，假设有 n 个类别，第 k 个类别的数量为$|C_k|$，则样本 D 的基尼系数表达式</li>
+</ul>
+<p>$$
+Gini(D) = 1 - \sum\limits_{k=1}\limits^{K}(\frac{|C_k|}{|D|})^2
+$$</p>
+<ul>
+<li>对于样本 D，个数为|D|，根据特征 A 的某个值 a，把 D 分为$|D_1|$和$|D_2|$，在特征 A 的条件下，样本 D 的基尼系数表达式为</li>
+</ul>
+<p>$$
+Gini(D, A) = \frac{|D_1|}{|D|}Gini(D_1) + \frac{|D2|}{|D|}Gini(D_2)
+$$</p>
+<h4 id="算法具体流程">算法具体流程</h4>
+<p>输入：训练集 D，基尼系数的阈值，样本个数阈值</p>
+<p>输出：决策树 T</p>
+<p>算法步骤：</p>
+<ol>
+<li>对当前节点的数据集 D，如果样本容量小于阈值或没有特征，则返回决策子树，当前节点停止递归</li>
+<li>计算样本集 D 的基尼系数，如果基尼系数小于阈值，则返回决策子树，当前节点停止递归</li>
+<li>计算当前节点现有的各个特征的各个特征值对数据集 D 的基尼系数。</li>
+<li>计算出来的各个特征的各个特征值对数据集 D 的基尼系数中，选择基尼系数最小的特征 A 和对应的特征值 a，根据这个最优特征和最优特征值，把数据集划分为两部分$D_1$和$D_2$，同时建立当前节点的左右节点，左节点的数据集为$D_1$，右节点的数据集为$D_2$</li>
+<li>对左右的字节点递归调用 1-4 步骤</li>
+</ol>
+<h4 id="CART-例子一">CART 例子一</h4>
+<p><img src="/29085/48.png" alt>
+<img src="/29085/49-1667397970867-203.png" alt></p>
+<ul>
+<li>注意上面公式的最后一个</li>
+</ul>
+<h4 id="连续特征的处理">连续特征的处理</h4>
+<ol>
+<li>思想和 C4.5 完全一致的，都是将连续的特征离散化，只是将信息增益率替换成了 Gini 指数</li>
+<li>和 ID3、C4.5 的不同的是，如果当前节点为连续属性，则该属性在后面还可以参与节点的产生选择过程。</li>
+</ol>
+<h4 id="离散数据的处理">离散数据的处理</h4>
+<ol>
+<li>大致思路是不断二分类</li>
+<li>比如</li>
+</ol>
+<p>$$
+\begin{array}{l}
+A \to \set{A1},\set{A2,A3} \
+A \to \set{A2},\set{A1,A3} \
+A \to \set{A3},\set{A1,A2} \
+\end{array}
+$$</p>
+<ol start="3">
+<li>然后找到上面的基尼系数最小的组合，建立二叉树节点，然后继续划分剩下的特征</li>
+</ol>
+<h4 id="CART-例子二">CART 例子二</h4>
+<p><img src="/29085/23-1676530560159-219.png" alt></p>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/24-1676530560159-220.png" alt></th>
+<th><img src="/29085/25-1667397988251-206.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/29085/26-1676530560159-221.png" alt></td>
+<td><img src="/29085/27-1676530560159-222.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="剪枝">剪枝</h3>
+<ol>
+<li>CART 树的剪枝：用验证数据集对生成的树进行剪枝并选择最优子树，损失函数最小作为剪枝的标准</li>
+<li>CART 分类树的剪枝策略是在度量损失的时候用基尼系数</li>
+<li>（了解）CART 回归树的剪枝策略是在度量损失的时候使用均方差</li>
+<li>剪枝后的 CART 树，通过交叉检验验证剪枝的效果，选择泛化能力最好的剪枝策略。</li>
+</ol>
+<h4 id="剪枝损失函数">剪枝损失函数</h4>
+<p>$C_a(T_i)=C(T_t) +\alpha|T_t|$</p>
+<ul>
+<li>$\alpha$ 是正则化参数，$C(T_t)$ 是训练数据的预测误差，$|T_t|$ 是树 T 的子节点个数
+<ul>
+<li>当 $\alpha = 0$ 时，生成的 CART 树记为最优子树</li>
+<li>当 $\alpha \to \infty$ 时，正则化强度最大</li>
+</ul>
+</li>
+<li>$\alpha$ 固定，最后的子树固定</li>
+</ul>
+<h4 id="剪枝思路">剪枝思路</h4>
+<ol>
+<li>对于位于节点 t 的任意一棵子树
+<ol>
+<li>如果没有剪枝，损失函数为$C_a(T_i)=C(T_t) +\alpha|T_t|$</li>
+<li>如果剪枝后，仅保留根节点，则损失函数为$C_a(T_i)=C(T_t) +\alpha$</li>
+</ol>
+</li>
+<li>当$\alpha=0$或者很小的时候，$C_a(T_i) &lt; C_a(T)$</li>
+<li>当$\alpha$增大一定程度时，$C_a(T_i) = C_a(T)$</li>
+<li>当$\alpha$继续增大时，则满足$\alpha = \frac{C(T) -C(T_i)}{|T_i|-1}$</li>
+<li>$T_i$和 T 有相同的损失函数，但 T 节点更少，因此可以对子树 T_t 进行剪枝，也就是将它的子节点全部剪掉，变成叶子节点 T</li>
+</ol>
+<h4 id="交叉验证策略">交叉验证策略</h4>
+<p>如果我们将所有节点是否剪枝的值$\alpha$计算出来，然后针对不同$\alpha$剪枝后的最优子树做交叉验证，得到最好的$\alpha$，用对应的最优子树作为最终结果</p>
+<h4 id="剪枝算法过程">剪枝算法过程</h4>
+<ol>
+<li>输入：原始决策树 T</li>
+<li>输出：最优决策树$T_{\alpha}$</li>
+<li>算法过程
+<ol>
+<li>初始化$\alpha_{min} = \infty$，最优子树集合$w = {T}$</li>
+<li>从叶节点开始自上而下计算内部节点 t 的训练误差损失函数$C_a(T_t)$（回归树为均方差，分类树为基尼系数），叶节点树$|T_t|$，以及正则化阈值$\alpha = \min\set{\frac{C(T) -C(T_i)}{|T_i|-1}, \alpha_{\min}}$</li>
+<li>得到所有节点的$\alpha$值为集合 M</li>
+<li>从 M 中选择最大的值$\alpha_k$，自上而下的访问子树 t 的内部节点，如果$\frac{C(T) -C(T_i)}{|T_i|-1} \leq a_k$时，进行剪枝，并决定叶节点的 t 的值，对于分类树，这就是概率最高的类别</li>
+<li>最优子树集合$w=w \cup T_k，M = M - {a_k}$</li>
+<li>如果 M 不为空，则回到步骤 4，否则就已经得到了所有的可选最优子树集合 w</li>
+<li>采用交叉验证在 w 选择最优子树$T_a$</li>
+</ol>
+</li>
+</ol>
+<h2 id="KNN-算法">KNN 算法</h2>
+<ul>
+<li>KNN 算法又被称为最近邻算法</li>
+<li>算法思想：一个样本与数据集中的 k 个样本最相似，如果这 k 个样本中大多数属于一个类别，那么这个样本也属于这个类别</li>
+</ul>
+<p><img src="/29085/28.png" alt></p>
+<h3 id="距离度量">距离度量</h3>
+<ol>
+<li>选择两个实例相似性时，一般使用的是欧氏距离，Lp 距离定义$L_p(x_i, x_j) = (\sum\limits_{l=1}\limits^n|x_{i}^{(l)} - x_j^{(l)}|^p)^{\frac{1}{p}}$</li>
+<li>其中$x_i\in R^n, x_j \in R^n$，其中$L_{\infty}$定义为$L\infty(x_i, x_j) = max_{l}|x_i^{(l)}-x_j^{(l)}|$，其中 p 是一个变参数
+<ol>
+<li>$p=1$，就是曼哈顿距离（对应 L1 范数）</li>
+<li>$p=2$，就是欧式距离（对应 L2 范数）</li>
+<li>$p \to \infty$，就是切比雪夫距离</li>
+</ol>
+</li>
+</ol>
+<p>$$
+L_1 定义为|x|=\sum\limits_{i=1}\limits^n|x_i|，其中 x=\begin{bmatrix}
+x_1 \ x_2 \ . \ . \ . \ x_n
+\end{bmatrix} \in R^n
+$$</p>
+<p>$$
+L_2 定义为|x|=\sqrt{\sum\limits_{i=1}\limits^{n}x_i^2}，其中 x=\begin{bmatrix}
+x_1 \ x_2 \ . \ . \ . \ x_n
+\end{bmatrix} \in R^n
+$$</p>
+<p>$$
+\begin{array}{l}
+n 维空间点 a(x_{11},x_{12},...x_{1n}) b(x_{21}, x_{22}, ..., x_{2n}) \
+d_{12} = \max(|x_{1i}-x_{2i}|)
+\end{array}
+$$</p>
+<h3 id="K-值的选择">K 值的选择</h3>
+<p>近似误差：对现有训练集的训练误差</p>
+<p>估计误差：对测试集的测试误差，估计误差小，说明对未知数据的预测能力好</p>
+<p>K 值较小，则是在较小的邻域中的训练实例进行预测，容易导致过拟合。</p>
+<ol>
+<li>学习的近似误差会减小：只有输入实例较近的训练实例才会对预测结果起作用</li>
+<li>学习的估计误差会增大：预测结果会对紧邻的实例点敏感，但是如果是噪声会导致预测出错</li>
+</ol>
+<p>K 值较大，则是在较大的邻域中的训练实例进行预测</p>
+<ol>
+<li>学习的估计误差会减小</li>
+<li>学习的近似误差会增大</li>
+</ol>
+<p>K 值一般选择样本数量的平方根</p>
+<h3 id="算法描述">算法描述</h3>
+<ol>
+<li>计算已知类别数据集中点与当前点之间的距离</li>
+<li>按照距离增次序排序</li>
+<li>选取与当前点距离最小的 k 个点</li>
+<li>统计前 k 个点所在的类别出现的频率</li>
+<li>返回前 k 个点出现频率最高的类别作为当前点的预测分类
+<ol>
+<li>投票法：可以选择 K 个点出现频率最高的类别作为预测结果</li>
+<li>平均法：可以计算 K 个点的实值输出标记的平均值作为预测结果</li>
+<li>加权平均法：根据距离远近完成加权平均等方法</li>
+</ol>
+</li>
+</ol>
+<h3 id="算法优点">算法优点</h3>
+<ol>
+<li>简单有效</li>
+<li>重新训练代价低</li>
+<li>算法复杂度低</li>
+<li>适合类域交叉样本</li>
+<li>适用大样本自动分类</li>
+</ol>
+<h3 id="算法缺点">算法缺点</h3>
+<ol>
+<li>惰性学习</li>
+<li>类别分类不标准化</li>
+<li>输出可解释性不强</li>
+<li>不均衡性</li>
+<li>计算量较大</li>
+</ol>
+<h3 id="KNN-算法的-Sklearn-实现">KNN 算法的 Sklearn 实现</h3>
+<p>Sklearn KNN 声明</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs py"><span class="hljs-keyword">def</span> <span class="hljs-title function_">KNeighborsClassifier</span>(<span class="hljs-params">n_neighbors = <span class="hljs-number">5</span>,</span><br><span class="hljs-params">                       weights=<span class="hljs-string">&#x27;uniform&#x27;</span>,</span><br><span class="hljs-params">                       algorithm = <span class="hljs-string">&#x27;&#x27;</span>,</span><br><span class="hljs-params">                       leaf_size = <span class="hljs-string">&#x27;30&#x27;</span>,</span><br><span class="hljs-params">                       p = <span class="hljs-number">2</span>,</span><br><span class="hljs-params">                       metric = <span class="hljs-string">&#x27;minkowski&#x27;</span>,</span><br><span class="hljs-params">                       metric_params = <span class="hljs-literal">None</span>,</span><br><span class="hljs-params">                       n_jobs = <span class="hljs-literal">None</span></span><br><span class="hljs-params">                       </span>)<br></code></pre></td></tr></table></figure>
+<p>n_neighbors：KNN 中的&quot;K&quot;，一般默认值为 5。</p>
+<ol>
+<li>K 值较小，就相当于用较小的领域中的训练实例进行预测，训练误差近似误差小（偏差小），泛化误差会增大（方差大），换句话说，K 值较小就意味着整体模型变得复杂，容易发生过拟合；</li>
+<li>K 值较大，就相当于用较大领域中的训练实例进行预测，泛化误差小（方差小），但缺点是近似误差大（偏差大），换句话说，K 值较大就意味着整体模型变得简单，容易发生欠拟合；一个极端是 K 等于样本数 m，则完全没有分类，此时无论输入实例是什么，都只是简单的预测它属于在训练实例中最多的类，模型过于简单。</li>
+</ol>
+<p>weights（权重）：最普遍的 KNN 算法无论距离如何，权重都一样，但有时候我们想搞点特殊化，比如距离更近的点让它更加重要。这时候就需要 weight 这个参数了，这个参数有三个可选参数的值，决定了如何分配权重。参数选项如下</p>
+<ol>
+<li>uniform：不管远近权重都一样，就是最普通的 KNN 算法的形式。</li>
+<li>distance：权重和距离成反比，距离预测目标越近具有越高的权重。</li>
+<li>自定义函数：自定义一个函数，根据输入的坐标值返回对应的权重，达到自定义权重的目的。</li>
+</ol>
+<p>leaf_size：这个值控制了使用 kd 树或者球树时，停止建子树的叶子节点数量的阈值。</p>
+<ol>
+<li>值越小，生成的 kd 树和球树越大，层数越深，建树时间越长。随着样本的数量增加，这个值也在增加，但是过大可能会过拟合，需要通过交叉检验来选择。</li>
+<li>默认值为 30</li>
+</ol>
+<p>algorithm：在 sklearn 中，要构建 KNN 模型有三种构建方式，而当 KD 树也比较慢的时候，则可以试试球树来构建 KNN。参数选项如下：</p>
+<ol>
+<li>brute：蛮力实现直接计算距离比较，适用于小数据集</li>
+<li>kd_tree：使用 KD 树构建 KNN 模型，适用于比较大数据集</li>
+<li>ball_tree：使用球树实现 KNN，适用于 KD 树解决起来更复杂</li>
+<li>auto：默认参数，自动选择合适的方法构建模型.不过当数据较小或比较稀疏时，无论选择哪个最后都会使用 'brute'</li>
+</ol>
+<p>p：和 metric 结合使用的，当 metric 参数是&quot;minkowski&quot;的时候，p=1 为曼哈顿距离， p=2 为欧式距离。默认为 p=2。</p>
+<p>metric：指定距离度量方法，一般都是使用欧式距离。</p>
+<ol>
+<li>euclidean：欧式距离，$p=2$</li>
+<li>manhattan：曼哈顿距离，$p=1$</li>
+<li>chebyshev：切比雪夫距离，$p=\infty，D(x, y) = \max|x_i - y_i|(i = 1, 2, ..., n)$</li>
+<li>minkowski：闵可夫斯基距离，默认参数，$\sqrt[q]{\sum\limits_{i=1}\limits^n(|x_i-y_i|)^p}$</li>
+</ol>
+<p>n_jobs：指定多少个 CPU 进行运算，默认是-1，也就是全部都算。</p>
+<p>radius：限定半径，默认为 1，半径的选择与样本分布有关，可以通过交叉检验来选择一个比较小的半径</p>
+<p>outlier_labe：int 类型，主要用于预测时，如果目标点半径内没有任何训练集的样本点时，应该标记的类别，不建议选择默认值 None,因为这样遇到异常点会报错。一般设置为训练集里最多样本的类别。</p>
+<h4 id="KNN-进行鸢尾花数据集分类">KNN 进行鸢尾花数据集分类</h4>
+<p>通过对比效果来找到合适的 K 值。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs py"><span class="hljs-keyword">from</span> sklearn.datasets <span class="hljs-keyword">import</span> load_iris<br><span class="hljs-keyword">from</span> sklearn.model_selection  <span class="hljs-keyword">import</span> cross_val_score<br><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><span class="hljs-keyword">from</span> sklearn.neighbors <span class="hljs-keyword">import</span> KNeighborsClassifier<br><br><span class="hljs-comment">#读取鸢尾花数据集</span><br>iris = load_iris()<br>x = iris.data<br>y = iris.target<br>k_range = <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">31</span>)<br>k_error = []<br><span class="hljs-comment">#循环，取 k=1 到 k=31，查看误差效果</span><br><span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> k_range:<br>    knn = KNeighborsClassifier(n_neighbors=k)<br>    <span class="hljs-comment">#cv 参数决定数据集划分比例，这里是按照 5:1 划分训练集和测试集</span><br>    scores = cross_val_score(knn, x, y, cv=<span class="hljs-number">6</span>, scoring=<span class="hljs-string">&#x27;accuracy&#x27;</span>)<br>    k_error.append(<span class="hljs-number">1</span> - scores.mean())<br><br><span class="hljs-comment">#画图，x 轴为 k 值，y 值为误差值</span><br>plt.plot(k_range, k_error)<br>plt.xlabel(<span class="hljs-string">&#x27;Value of K for KNN&#x27;</span>)<br>plt.ylabel(<span class="hljs-string">&#x27;Error&#x27;</span>)<br>plt.show()<br></code></pre></td></tr></table></figure>
+<p>执行 KNN 算法</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs py"><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><span class="hljs-keyword">from</span> numpy <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">from</span> matplotlib.colors <span class="hljs-keyword">import</span> ListedColormap<br><span class="hljs-keyword">from</span> sklearn <span class="hljs-keyword">import</span> neighbors, datasets<br><br>n_neighbors = <span class="hljs-number">11</span><br><br><span class="hljs-comment"># 导入一些要玩的数据</span><br>iris = datasets.load_iris()<br>x = iris.data[:, :<span class="hljs-number">2</span>]  <span class="hljs-comment"># 我们只采用前两个 feature,方便画图在二维平面显示</span><br>y = iris.target<br><br><br>h = <span class="hljs-number">.02</span>  <span class="hljs-comment"># 网格中的步长</span><br><br><span class="hljs-comment"># 创建彩色的图</span><br>cmap_light = ListedColormap([<span class="hljs-string">&#x27;#FFAAAA&#x27;</span>, <span class="hljs-string">&#x27;#AAFFAA&#x27;</span>, <span class="hljs-string">&#x27;#AAAAFF&#x27;</span>])<br>cmap_bold = ListedColormap([<span class="hljs-string">&#x27;#FF0000&#x27;</span>, <span class="hljs-string">&#x27;#00FF00&#x27;</span>, <span class="hljs-string">&#x27;#0000FF&#x27;</span>])<br><br><br><span class="hljs-comment">#weights 是 KNN 模型中的一个参数，上述参数介绍中有介绍，这里绘制两种权重参数下 KNN 的效果图</span><br><span class="hljs-keyword">for</span> weights <span class="hljs-keyword">in</span> [<span class="hljs-string">&#x27;uniform&#x27;</span>, <span class="hljs-string">&#x27;distance&#x27;</span>]:<br>    <span class="hljs-comment"># 创建了一个 knn 分类器的实例，并拟合数据。</span><br>    clf = neighbors.KNeighborsClassifier(n_neighbors, weights=weights)<br>    clf.fit(x, y)<br><br>    <span class="hljs-comment"># 绘制决策边界。为此，我们将为每个分配一个颜色</span><br>    <span class="hljs-comment"># 来绘制网格中的点 [x_min, x_max]x[y_min, y_max].</span><br>    x_min, x_max = x[:, <span class="hljs-number">0</span>].<span class="hljs-built_in">min</span>() - <span class="hljs-number">1</span>, x[:, <span class="hljs-number">0</span>].<span class="hljs-built_in">max</span>() + <span class="hljs-number">1</span><br>    y_min, y_max = x[:, <span class="hljs-number">1</span>].<span class="hljs-built_in">min</span>() - <span class="hljs-number">1</span>, x[:, <span class="hljs-number">1</span>].<span class="hljs-built_in">max</span>() + <span class="hljs-number">1</span><br>    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),<br>                         np.arange(y_min, y_max, h))<br>    Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])<br><br>    <span class="hljs-comment"># 将结果放入一个彩色图中</span><br>    Z = Z.reshape(xx.shape)<br>    plt.figure()<br>    plt.pcolormesh(xx, yy, Z, cmap=cmap_light)<br><br>    <span class="hljs-comment"># 绘制训练点</span><br>    plt.scatter(x[:, <span class="hljs-number">0</span>], x[:, <span class="hljs-number">1</span>], c=y, cmap=cmap_bold)<br>    plt.xlim(xx.<span class="hljs-built_in">min</span>(), xx.<span class="hljs-built_in">max</span>())<br>    plt.ylim(yy.<span class="hljs-built_in">min</span>(), yy.<span class="hljs-built_in">max</span>())<br>    plt.title(<span class="hljs-string">&quot;3-Class classification (k = %i, weights = &#x27;%s&#x27;)&quot;</span><br>              % (n_neighbors, weights))<br><br>plt.show()<br></code></pre></td></tr></table></figure>
+<h2 id="集成学习">集成学习</h2>
+<p>集成学习并不是简单地将数据集在多个不同分类器上重复训练，而是对数据集进行扰动</p>
+<p>一个分类训练中的错误还可以被下一个分类器进行利用</p>
+<p>分类器预测错误的原因是未知的实例与学习的实例的分布有区别，通过扰动，分类器可以学习到更加一般的模型，从而消除单个分类器产生的偏差，而得到更为精准的模型。</p>
+<h3 id="什么是集成学习法（Ensemble-learning）">什么是集成学习法（Ensemble learning）</h3>
+<ol>
+<li>集成学习法通过多个分类学习方法聚集一起来提高分类准确率，提高模型的稳定性</li>
+<li>通常情况下，一个集成分类器的分类型能要好于单个分类器</li>
+<li>集成学习法由训练数据构建一组基分类器（base classifier），然后通过对每个基分类器的预测进行投票来实现分类。</li>
+<li>在构建分类器的过程中，一般有两种集成方法
+<ol>
+<li>一种是使用训练集的不同自己训练得到不同的基分类器</li>
+<li>另一种方法是使用同一个训练集的不同属性子集训练得到不同的基分类器</li>
+</ol>
+</li>
+</ol>
+<h3 id="集成学习的基本思想">集成学习的基本思想</h3>
+<p>在原始数据集上构建多个分类器，然后在分类未知样本时聚集它们的预测结果。</p>
+<h3 id="构建集成分类器的过程描述">构建集成分类器的过程描述</h3>
+<p><img src="/29085/50-1667398196172-209.png" alt="集成学习法的逻辑结构图"></p>
+<h3 id="构建集成分类器的方法">构建集成分类器的方法</h3>
+<h4 id="通过处理训练数据集">通过处理训练数据集</h4>
+<ol>
+<li>它根据某种抽样分布，通过对原始数据进行再抽样来得到多个训练集然后使用特定的学习算法为每个训练集建立一个分类器。</li>
+<li>典型的处理训练数据集的组合方法有装袋（bagging）和提升（boosting）</li>
+</ol>
+<h4 id="通过处理输入特征">通过处理输入特征</h4>
+<ol>
+<li>在这种方法中，通过选择输入特征的自己来形成每个训练集。一些研究表明，对那些含有大量冗余特征的数据集，这种方法的性能非常好。</li>
+<li>随机森林（Random forest）就是一种处理输入特征的组合方法</li>
+</ol>
+<h4 id="通过处理类标号">通过处理类标号</h4>
+<ol>
+<li>这种方法适用于类数足够多的情况。通过将类标号随机划分成两个不相交的子集 A0 和 A1，把训练数据变换为二类问题，类标号属于子集 A0 的训练样本指派到类 0，而那些类标号属于子集 A1 的训练样本指派到类 1。</li>
+<li>然后使用重新标记过的数据来训练一个基分类器，重复重新标记类和构建模型步骤多次，就得到一组基分类器</li>
+<li>当遇到一个检验样本时，使用每个基分类器 Ci 预测它的类标号。
+<ol>
+<li>如果被预测为类 0，则所有属于 A0 的类都得到一票</li>
+<li>如果被预测为类 1，则所有属于 A1 的类都得到一票</li>
+</ol>
+</li>
+<li>最后统计选票，将检验样本指派到得票最高的类。</li>
+</ol>
+<h4 id="通过处理学习算法">通过处理学习算法</h4>
+<ol>
+<li>在同一个训练集上执行不同算法而得到不同的模型。</li>
+</ol>
+<h3 id="集成分类器方法的优缺点">集成分类器方法的优缺点</h3>
+<ol>
+<li>优点：集成分类器的应用，克服了单一分类器的诸多缺点，比如对样本的敏感性，难以提高分类精度等</li>
+<li>缺点：集成分类器的性能优于单个分类器，必须满足基分类器之间完全独立，但时间上很难保证基分类器之间完全独立</li>
+</ol>
+<h2 id="SVM-支持向量机">SVM 支持向量机</h2>
+<h3 id="线性划分和非线性划分">线性划分和非线性划分</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/29085/29-1676530560160-223.png" alt></th>
+<th><img src="/29085/30-1676530560160-224.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="分类标注的起源：逻辑回归">分类标注的起源：逻辑回归</h3>
+<ol>
+<li>逻辑回归的目的是从特征学习出一个 0/1 分类模型，而这个模型是将特征的线性组合作为自变量，由于自变量的取值范围是负无穷到正无穷，因此我们使用 sigmoid 函数将自变量映射到（0, 1）上，映射后的值被认为是属于 y=1 的规律。</li>
+</ol>
+<p>$$
+\begin{array}{l}
+sigmoid(x) = \frac{1}{ 1 + e^{-x}} \
+h_\theta(x) = g(\theta^Tx) = \frac{1}{1+e^{-\theta^Tx}}
+\end{array}
+$$</p>
+<ol start="2">
+<li>$h_\theta(x)$ 只和 $\theta^Tx$ 有关，如果$\theta^Tx&gt;0.5$，则$h_\theta(x)&gt;0.5$</li>
+<li>希望模型达到的目标就是让训练集中 y=1 的特征$\theta^Tx&gt;&gt;0$，而 y=0 的特征$\theta^Tx&lt;&lt;0$</li>
+<li>对于更高维的情况，我们可以得到下式$\theta^Tx = w^Tx + b$</li>
+</ol>
+<h3 id="函数间隔（Functional-margin）与几何间隔（Geometrical-margin）">函数间隔（Functional margin）与几何间隔（Geometrical margin）</h3>
+<h4 id="函数间隔">函数间隔</h4>
+<ol>
+<li>函数间隔$\hat{\gamma} = y(w^Tx+b) = yf(x)$</li>
+<li>超平面（w, b）关于 T 中所有样本点的最小函数间隔即为超平面（w, b）关于训练数据集 T 的函数间隔</li>
+</ol>
+<p>$$
+\hat{\gamma} = \min\hat{\gamma},(i = 1, ..., n)
+$$</p>
+<ol start="3">
+<li>函数间隔存在问题，如果成比例修改 w 和 b 会导致函数间隔的值 f(x)为原来 2 倍。</li>
+</ol>
+<h4 id="几何间隔">几何间隔</h4>
+<ol>
+<li>我们对于点 x，令其垂直投影到超平面上的点$x_0$，w 是垂直于超平面的向量，$\gamma$是样本 x 到分类间隔的距离</li>
+</ol>
+<p><img src="/29085/53.png" alt></p>
+<ol start="2">
+<li>有$x = x_0 + \gamma\frac{w}{||w||}$，其中||w||是范数</li>
+<li>又因为$x_0$在平面上，所以$f(x_0)=0$，代入超平面的方程可以计算出</li>
+</ol>
+<p>$$
+\gamma = \frac{f(x)}{||w||}
+$$</p>
+<ol start="4">
+<li>为了获取$\gamma$的绝对值，使其乘以其类别，得到几何间隔</li>
+</ol>
+<p>$$
+\hat{\gamma} = y\gamma = \frac{\hat{\gamma}}{||w||}
+$$</p>
+<h3 id="最大分离器-Maximum-Margin-Classifier-的定义">最大分离器 Maximum Margin Classifier 的定义</h3>
+<ol>
+<li>最大间隔分类器的目标函数为$\max\hat{\gamma}$</li>
+<li>其他满足条件：$y_i(w^Tx_i + b) = \hat{\gamma_i}\geq\hat{\gamma}, i = 1,...,n$</li>
+<li>如果函数间隔$\hat{\gamma}$为 1，上述目标函数在转化为</li>
+</ol>
+<p>$$
+\max\frac{1}{||w||}, s.t.\ y_i(w^Tx_i + b) \geq 1, i = 1, ..., n
+$$</p>
+<h3 id="如何寻找到最优超平面">如何寻找到最优超平面</h3>
+<ol>
+<li>最大化距离：最大化距离可以为模型带来比较好的泛化能力</li>
+</ol>
+<p><img src="/29085/31-1676530560160-225.png" alt></p>
+<ol start="2">
+<li>支持向量的图形化表示</li>
+</ol>
+<p><img src="/29085/32-1676530560160-226.png" alt></p>
+<ol start="3">
+<li>
+<p>最初优化问题：我们选择最大间距作为这个优化问题的最优解，也就是使得$\frac{2}{||w||}$的值最大，并且满足一下两个约束条件</p>
+<ol>
+<li>$(wx+b) \geq 1, \forall$ x in class 1</li>
+<li>$(wx+b) \leq -1, \forall$ x in class 2</li>
+</ol>
+</li>
+<li>
+<p>线性分类器</p>
+<ol>
+<li>$w^Tx + b = 0$</li>
+<li>$f(x) = w^Tx +b$</li>
+</ol>
+</li>
+</ol>
+<h3 id="决策边界">决策边界</h3>
+<h4 id="线性分类边界">线性分类边界</h4>
+<p><img src="/29085/33-1667398234005-212.png" alt></p>
+<h4 id="非线性分类边界">非线性分类边界</h4>
+<p><img src="/29085/34-1667398237296-215.png" alt></p>
+<blockquote>
+<p>使用二次曲线进行划分</p>
+</blockquote>
+<h3 id="支持向量机">支持向量机</h3>
+<ol>
+<li>我们想要通过一条尽可能好的直线（超平面）将两类不同的物体分开。</li>
+<li>数据：
+<ol>
+<li>训练集：$(x_1,y_1),...,(x_n,y_n)$</li>
+<li>对于每一个例 i：
+<ol>
+<li>$x_i = \set{x_i^{(1)}, ... , x_i^{(d)}}$，$x_i^{(j)}是实数$</li>
+<li>$y_i \in \set{-1, +1}$</li>
+</ol>
+</li>
+<li>向量内积：$w*x = \sum\limits_{j=1}\limits^{d}w^{(j)}*x^{(j)}$</li>
+<li>什么是被$w$定义的最佳的线性分类器?</li>
+</ol>
+</li>
+</ol>
+<h4 id="最大距离">最大距离</h4>
+<ol>
+<li>距分离超平面的距离对应于预测的“置信度”</li>
+<li>在下图中，我们认为 A 和 B 是左侧类的概率比 C 大。</li>
+</ol>
+<p><img src="/29085/35.png" alt></p>
+<ol start="3">
+<li>Margin $\gamma$：距离分类直线或超平面最近的一个点的距离。</li>
+</ol>
+<p><img src="/29085/36.png" alt></p>
+<ol start="3">
+<li>之所以以这种方式定义边距，是因为理论上的边界以及依赖于边距值的泛化误差范围的存在。</li>
+</ol>
+<h4 id="为什么最大距离是好的">为什么最大距离是好的</h4>
+<ol>
+<li>点积：$A * B = ||A|| * ||B|| * \cos \theta$</li>
+</ol>
+<p><img src="/29085/37.png" alt></p>
+<ol start="2">
+<li>$\gamma$和间距是线性正相关，所以是可以的</li>
+</ol>
+<h4 id="距离如何表示">距离如何表示</h4>
+<p><img src="/29085/38.png" alt></p>
+<h4 id="最大距离的求解">最大距离的求解</h4>
+<ol>
+<li>预测值 = $sign(w*x+b)$</li>
+<li>置信度（Confidence）= $(w*x + b)y$</li>
+<li>对于第 i 个数据点：$\gamma_i = (w*x_i + b)y_i$</li>
+<li>解决的问题：$\max\limits_w\min\limits_i\gamma_i$</li>
+<li>重新解释为：求解$\max\limits_{w,\gamma}\gamma s.t.\forall i, y_i(w*x_i + b) \geq \gamma$</li>
+</ol>
+<p><img src="/29085/39.png" alt></p>
+<h3 id="规范超平面">规范超平面</h3>
+<ol>
+<li>转化问题：$(2wx + 2b)y = 2\gamma$</li>
+<li>一般化 w：$\gamma = (\frac{w}{||w||} * x + b) y$</li>
+<li>当然提供<strong>支持向量</strong>$x_j$在差平面上被定义为$w*x_j + b = \pm 1$</li>
+</ol>
+<p><img src="/29085/40.png" alt></p>
+<ul>
+<li>前提条件</li>
+</ul>
+<p>$$
+\begin{array}{l}
+x_1 = x_2 + 2 \gamma\frac{w}{||w||} \
+\ \
+w * x_1 + b = +1 \
+w * x_2 + b = -1 \
+\end{array}
+$$</p>
+<ul>
+<li>计算$\gamma$</li>
+</ul>
+<p>$$
+\begin{array}{l}
+w * x_1 + b = + 1 \
+w (x_2 + 2\gamma\frac{w}{||w||}) + b = + 1 \
+\ \
+w * x_2 + b + 2\gamma\frac{w}{||w||} = + 1 \
+\ \
+\gamma = \frac{||w||}{w * w} = \frac{1}{||w||} \
+\end{array}
+$$</p>
+<h3 id="通过上述化简后最大距离">通过上述化简后最大距离</h3>
+<p>$$
+\arg \max\gamma = arg \arg\min\frac{1}{||w||} = \arg\min\frac{1}{2}||w||^2
+$$</p>
+<ul>
+<li>支持向量机的强约束条件：</li>
+</ul>
+<p>$$
+\min\limits_w\frac{1}{2}||w||^2 \
+s.t. \forall i, y_i(w * x_i + b) \geq 1
+$$</p>
+<h3 id="非线性分析">非线性分析</h3>
+<ol>
+<li>如果数据不是线性可分的，那么我们需要添加惩罚项 C</li>
+</ol>
+<p>$$
+\min\limits_w\frac{1}{2}||w||^2 + C \
+\ \
+s.t. \forall i, y_i(w * x_i + b) \geq 1
+$$</p>
+<ol start="2">
+<li>通过交叉检验法确定 C 的值</li>
+<li>所有的错误并不是一样的坏</li>
+<li>引入宽松量$\xi_i$</li>
+</ol>
+<p>$$
+\min\limits_{w,b,\xi_i \geq 0} \frac{1}{2} * ||w||^2 + C*\sum\limits_{i=1}\limits^{n}\xi_i \
+\ \
+s.t. \forall i, y_i(w*x_i + b) \geq 1 - \xi_i
+$$</p>
+<ol start="5">
+<li>如果$x_i$位于错误的一边，那么他将会有惩罚项$\xi_i$</li>
+</ol>
+<p><img src="/29085/41.png" alt></p>
+<h4 id="Slack-Penalty-C">Slack Penalty C</h4>
+<ol>
+<li>当 C 是无穷时，我们只希望通过 w 和 b 来分开数据</li>
+<li>当 C 是 0 时，我们无论设置$\xi_i$是多少，w 都是 0，也就是忽略了数据</li>
+</ol>
+<p><img src="/29085/42.png" alt></p>
+<h4 id="支持向量机的自然形式">支持向量机的自然形式</h4>
+<p>$$
+\arg\min\limits_{w,b}\frac{1}{2}w<em>w + C</em>\sum_{i=1}^{n}\max\set{0,1-y_i(w*x_i+b)}
+$$</p>
+<ul>
+<li>$w * w$：距离</li>
+<li>$C$：正则化参数</li>
+<li>$\sum_{i=1}^{n}\max\set{0,1-y_i(w*x_i+b)}$：经验损失 L（我们如何拟合训练数据）</li>
+<li>SVM 使用&quot;Hinge Loss&quot;：max{0, 1-z}</li>
+</ul>
+<p><img src="/29085/43.png" alt></p>
+<h3 id="如何计算距离">如何计算距离</h3>
+<p>$$
+\min\limits_{w,b}\frac{1}{2}w<em>w + C</em>\sum_{i=1}^{n}\xi_i \
+s.t.
+\forall i,y_i*(x_i * w + b) \geq 1 - \xi_i
+$$</p>
+<ul>
+<li>使用二次求解器
+<ul>
+<li>最小化二次函数</li>
+<li>受到线性约束</li>
+</ul>
+</li>
+<li>问题：求解器对于大数据效率低下！</li>
+</ul>
+<p>$f(w,b) = \frac{1}{2} w * w + C*\sum_{i=1}^{n}\max\set{0,1-y_i(w*x_i+b)}$</p>
+<ul>
+<li>如何最小化凸函数 g(z)：切线</li>
+<li>使用梯度下降法</li>
+</ul>
+<p><img src="/29085/44.png" alt></p>
+<h3 id="如何计算-w">如何计算 w</h3>
+<p><img src="/29085/45.png" alt>
+<img src="/29085/46.png" alt>
+<img src="/29085/47.png" alt></p>
+<h2 id="深入-SVM">深入 SVM</h2>
+<h3 id="从线性可分到线性不可分到线性不可分">从线性可分到线性不可分到线性不可分</h3>
+<h4 id="从原始问题到对偶问题求解">从原始问题到对偶问题求解</h4>
+<ol>
+<li>等价问题转化</li>
+</ol>
+<p>$$
+\max\frac{1}{||w||}, s.t.\ y_i(w^Tx_i + b) \geq 1, i = 1, ..., n \
+转化为 \
+\min \frac{1}{2}||w||^2, s.t.\ y_i(w^Tx_i + b) \geq 1, i = 1, ..., n \
+$$</p>
+<ol>
+<li>我们可以看到目标函数是二次的，约束条件是线性的，所以其实一个凸二次规划问题。</li>
+<li>由于问题的特殊性，我们可以根据拉格朗日对偶性对换到对偶变量的优化问题，即通过求解与原问题等价的对偶问题得到原始问题的最优解，优点如下
+<ol>
+<li>对偶问题更容易求解。</li>
+<li>便于引入核函数，推广到非线性分类问题。</li>
+</ol>
+</li>
+<li>拉格朗日对偶性：通过给每一个约束条件加上一个拉格朗日乘子$\alpha$</li>
+</ol>
+<p>$$
+L(w, b, \alpha) = \frac{1}{2}||w||^2 - \sum\limits_{i=1}\limits^n\alpha_i*(y_i(w^T*x_i + b) - 1) \
+\theta(w) = \max\limits_{\alpha_i\geq 0}L(w, b ,\alpha) \
+$$</p>
+<ol start="4">
+<li>容易验证，如果某个约束条件不满足，则$\theta(w) = \infty$，当所有的约束条件满足时，则有$\theta(w) = \frac{1}{2}||w||^2$，即最初要最小化的值。</li>
+<li>即将问题转化为求解</li>
+</ol>
+<p>$$
+\min\limits_{w, b}\theta(w) = \min\limits_{w, b}\max\limits_{\alpha_i\geq 0}L(w, b ,\alpha) = p^*
+$$</p>
+<ol start="6">
+<li>这样是不容易求解的我们将最大和最小进行交换，得到</li>
+</ol>
+<p>$$
+\max\limits_{\alpha_i\geq 0}\min\limits_{w, b}L(w, b ,\alpha) = d^*
+$$</p>
+<ol start="7">
+<li>我们可以知道有$d^<em>\leq p^</em>$（在满足 K.K.T.条件时等价），对偶问题更容易求解，下面先求 L 对 w 和 b 的极小，再求 L 对$\alpha$的极大</li>
+</ol>
+<h4 id="K-K-T-条件">K.K.T.条件</h4>
+<ol>
+<li>一般最优化数学模型能表示为如下标准形式</li>
+</ol>
+<p>$$
+\min f(x) \
+s.t. h_j(x) = 0, j = 1, ..., p\
+g_k(x)\leq 0, k = 1, ..., q \
+x \in X \subset R^n \
+$$</p>
+<ul>
+<li>f(x)需要最小化的函数，h(x)等式约束，g(x)不等式约束，p 和 q 分别为等式约束和不等式约束的数量。</li>
+</ul>
+<ol start="2">
+<li>凸优化：$X\subset R^n$是一凸集，f：X-&gt;R 为一凸函数，凸优化就是要找出一点$x^* \in X$，使得每一个$x \in X$满足$f(x^*) \leq f(x)$</li>
+<li>KKT 条件的意义：是一个非线性规划问题能有最优解的必要和充分条件。</li>
+</ol>
+<blockquote>
+<p>KKT 条件：对之前的标准形式最优化数学模型，如果满足</p>
+<ol>
+<li>$h_j(x^<em>) = 0, j = 1, ..., p，g_k(x^</em>) \leq 0, k = 1, ..., q$</li>
+<li>$\triangle f(x^<em>) + \sum\limits_{j=1}\limits^p\lambda_j\triangle h_j(x^</em>) + \sum\limits_{j=1}\limits^p\mu_k\triangle g_k(x^<em>) = 0, \lambda_j \neq 0, u_k \geq 0, \mu_kg_k(x^</em>) = 0$
+作为满足 KKT 条件</li>
+</ol>
+</blockquote>
+<h4 id="对偶问题求解的三个步骤">对偶问题求解的三个步骤</h4>
+<ol>
+<li>第一步：固定$\alpha$，对 w 和 b 分别求偏导，带回 L 并化简（最后一步，注意$\sum\limits_{i=1}\limits^n\alpha_iy_i = 0$）</li>
+</ol>
+<p><img src="/29085/56.png" alt>
+<img src="/29085/55-1667398297841-218.png" alt>
+<img src="/29085/54.png" alt></p>
+<ol start="2">
+<li>第二步：求对$\alpha$的极大</li>
+</ol>
+<p><img src="/29085/57.png" alt></p>
+<ol start="3">
+<li>第三步：计算完成$L(w, b, \alpha)$关于 w 和 b 的最小化，以及与$\alpha$的极大之后，最后就是使用 SMO 算法求解对偶问题中的拉格朗日乘子$\alpha$</li>
+</ol>
+<p><img src="/29085/58.png" alt></p>
+<h4 id="线性不可分问题">线性不可分问题</h4>
+<ol>
+<li>对于一个数据点进行分类，实际上是将 x 代入$f(x) = w^Tx+b$计算出结果，根据正负号进行类别划分。</li>
+</ol>
+<p>$$
+\begin{array}{l}
+\because w^* = \sum\limits_{i=1}\limits^{n}\alpha_iy_ix_i \
+\therefore f(x) = (\sum\limits_{i=1}\limits^{n}\alpha_iy_ix_i)^T x + b \
+= \sum\limits_{i=1}\limits^{n}\alpha_iy_i&lt;x_i, x&gt; + b
+\end{array}
+$$</p>
+<ol start="2">
+<li>也就是对新点预测，只需要计算其与训练数据点的内积即可：非支持向量对应的$\alpha=0$，这些点不影响分类</li>
+</ol>
+<p><img src="/29085/59.png" alt></p>
+<h3 id="SVM：核函数：kernel">SVM：核函数：kernel</h3>
+<h4 id="特征空间的隐式映射：核函数">特征空间的隐式映射：核函数</h4>
+<ol>
+<li>对于非线性情况，SVM 选择一个核函数 K(·,·)，通过将数据映射到高维空间，来解决在原始空间中线性不可分的问题。</li>
+</ol>
+<p><img src="/29085/61.png" alt></p>
+<ol start="2">
+<li>非线性分类器模型：$f(x) = \sum\limits_{i=1}\limits^Nw_i\phi(x)+b$，建立非线性份分类器步骤
+<ol>
+<li>首先用非线性映射将数据变换到一个特征空间 F：重点</li>
+<li>在特征空间使用线性分类器进行分类</li>
+</ol>
+</li>
+<li>非线性决策规则：</li>
+</ol>
+<p>$$
+f(x) = \sum\limits_{i=1}\limits^l\alpha_iy_i&lt;\phi(x_i), \phi(x)&gt;+b
+$$</p>
+<h4 id="核函数：如何处理非线性数据">核函数：如何处理非线性数据</h4>
+<ol>
+<li>将非线性数据映射为线性数据</li>
+</ol>
+<h5 id="二维空间描述">二维空间描述</h5>
+<p>$$
+a_1X_1+a_2X_1^2+a_3X_2+a_4X_2^2+a_5X_1X_2+a_6=0
+$$</p>
+<h5 id="从二维空间到五维空间映射">从二维空间到五维空间映射</h5>
+<p>$$
+Z_1=X_1,Z_2=X_1^2,Z_3=X_3,Z_4=X_4,Z_5=X_1X_2
+$$</p>
+<h5 id="五维空间描述（线性超平面）">五维空间描述（线性超平面）</h5>
+<p>$$
+\sum\limits_{i=1}\limits^5a_iZ_i + a_6 = 0
+$$</p>
+<h5 id="计算方法">计算方法</h5>
+<blockquote>
+<p>假设有两个变量$x_1 = (\eta_1, \eta_2)^T, x_2 = (\xi_1,\xi_2)^T$</p>
+</blockquote>
+<ol>
+<li>方法一：映射后的内积为</li>
+</ol>
+<p>$$
+&lt;\phi(x_1), \phi(x_2)&gt; = \eta_1\xi_1 + \eta_1^2\xi_1^2 + \eta_2\xi_2 + \eta_2^2\xi_2^2 + \eta_1\eta_2\xi_1\xi_2
+$$</p>
+<ol start="2">
+<li>方法二：平方，在低维空间计算，如果遇到维度爆炸，前一种可能无法计算</li>
+</ol>
+<p>$$
+\begin{array}{l}
+(&lt;x_1, x_2&gt; + 1)^2 = 2\eta_1\xi_1 + \eta_1^2\xi_1^2 + 2\eta_2\xi_2 + \eta_2^2\xi_2^2 + 2\eta_1\eta_2\xi_1\xi_2 + 1 \
+等价于 \
+\phi(x_1, x_2) = (\sqrt{2}x_1, x_1^2, \sqrt{2}x_2,x_2^2,\sqrt{2}x_1x_2,1)^T \
+\end{array}
+$$</p>
+<h4 id="核函数">核函数</h4>
+<ol>
+<li>计算两个向量在隐式映射过后的空间中的内积的函数叫做核函数</li>
+<li>上例中为$K(x_1, x_2) = (&lt;x_1, x_2&gt; + 1)^2$</li>
+<li>分类函数为：$f(x) = \sum\limits_{i=1}\limits^Na_iy_iK(x_i, x)+b$</li>
+</ol>
+<h4 id="常见核函数">常见核函数</h4>
+<ol>
+<li>多项式核：$K(x_1, x_2) = (&lt;x_1, x_2&gt; + R)^d$，空间维度为$C_{m+d}^d$，原始空间维度为 m</li>
+<li>高斯核：$K(x_1,x_2) = \exp^{-\frac{||x_1-x_2||^2}{2\delta^2}}$，$\delta$影响高次特征上权重衰减的速度</li>
+</ol>
+<p><img src="/29085/60.png" alt></p>
+<ol start="3">
+<li>线性核：$K(x_1,x_2) = &lt;x_1, x_2&gt;$</li>
+</ol>
+<h3 id="使用松弛变量处理-outliers-方法">使用松弛变量处理 outliers 方法</h3>
+<ol>
+<li>如果有些情况下数据有噪声，我们称偏离正常位置很远的数据点为 outlier</li>
+</ol>
+<p><img src="/29085/62.png" alt></p>
+<ol start="2">
+<li>噪声点对目前的 SVM 有比较大的影响，我们通过允许数据点在一定程度上偏离超平面来解决这个问题。</li>
+<li>原本约束条件为：$y_i(w^Tx_i+b)\geq 1,i =1,...,n$</li>
+<li>新的约束条件为：$y_i(w^Tx_i+b)\geq 1 - \xi_i,i =1,...,n$</li>
+<li>$\xi_i$是松弛变量，对应数据点$x_i$允许偏离函数间隔的距离，对应的我们应该修正我们的优化问题：$\min \frac{1}{2}||w||^2 + C\sum\limits_{i = 1}\limits^n\xi_i$
+<ol>
+<li>参数 C：控制目标函数&quot;寻找 margin 最大的超平面“和”保证数据点偏差量最小&quot;之间的权重，实现确定好的变量。</li>
+<li>参数$\xi$是需要优化的变量</li>
+</ol>
+</li>
+<li>新的拉格朗日函数如下</li>
+</ol>
+<p>$$
+L(w, b, \xi, \alpha, r) = \frac{1}{2}||w||^2 + C\sum\limits_{i=1}\limits^n\xi_i - \sum\limits_{i=1}\limits^n\alpha_i(y_i(w^Tx_i+b) - 1 + \xi_i) - \sum\limits_{i=1}\limits^nr_i\xi_i
+$$</p>
+<ol start="7">
+<li>分析方法和上面相同</li>
+</ol>
+<p><img src="/29085/63.png" alt>
+<img src="/29085/64-1667398311414-221.png" alt></p>
+<h2 id="证明-SVM">证明 SVM</h2>
+<ol>
+<li>比较复杂，参见参考五</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/14693/" rel="prev" title="大数据分析-04-链接分析">
+      <i class="fa fa-chevron-left"></i> 大数据分析-04-链接分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/12678/" rel="next" title="大数据分析-07-聚类">
+      大数据分析-07-聚类 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E5%BC%95%E5%85%A5"><span class="nav-number">1.1.</span> <span class="nav-text">分类引入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E4%BD%93%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.2.</span> <span class="nav-text">物体的表示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="nav-number">1.4.</span> <span class="nav-text">训练和验证</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83"><span class="nav-number">1.4.1.</span> <span class="nav-text">训练</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%E9%97%AE%E9%A2%98"><span class="nav-number">1.4.2.</span> <span class="nav-text">统计问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.5.</span> <span class="nav-text">分类的实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Spam-Filter-%E5%9E%83%E5%9C%BE%E9%82%AE%E4%BB%B6%E8%AF%86%E5%88%AB%E5%99%A8"><span class="nav-number">1.5.1.</span> <span class="nav-text">Spam Filter 垃圾邮件识别器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E8%AF%86%E5%88%AB"><span class="nav-number">1.5.2.</span> <span class="nav-text">数字识别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1%E7%9A%84%E5%85%B6%E4%BB%96%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.6.</span> <span class="nav-text">实际分类任务的其他示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E7%9A%84%E5%BA%94%E7%94%A8%E9%A2%86%E5%9F%9F"><span class="nav-number">1.7.</span> <span class="nav-text">分类的应用领域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E6%95%88%E6%9E%9C%E7%9A%84%E8%AF%84%E4%BB%B7%E6%A0%87%E5%87%86"><span class="nav-number">1.8.</span> <span class="nav-text">分类效果的评价标准</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E5%87%86%E7%A1%AE%E7%8E%87"><span class="nav-number">1.8.1.</span> <span class="nav-text">分类准确率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">1.8.2.</span> <span class="nav-text">计算复杂度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E8%A7%A3%E9%87%8A%E6%80%A7"><span class="nav-number">1.8.3.</span> <span class="nav-text">可解释性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7"><span class="nav-number">1.8.4.</span> <span class="nav-text">可伸缩性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%BA%E5%A3%AE%E6%80%A7%E6%88%96%E9%B2%81%E6%A3%92%E6%80%A7"><span class="nav-number">1.8.5.</span> <span class="nav-text">强壮性或鲁棒性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%AF%E7%A7%AF%E5%A2%9E%E7%9B%8A%E5%9B%BE"><span class="nav-number">1.8.6.</span> <span class="nav-text">累积增益图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%B9%B3%E8%A1%A1%E6%95%B0%E6%8D%AE%E5%88%86%E7%B1%BB"><span class="nav-number">1.8.7.</span> <span class="nav-text">不平衡数据分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B7%B7%E6%B7%86%E7%B3%BB%E6%95%B0%E7%9F%A9%E9%98%B5"><span class="nav-number">1.8.8.</span> <span class="nav-text">使用混淆系数矩阵</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">分类算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF"><span class="nav-number">3.</span> <span class="nav-text">朴素贝叶斯</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E6%A6%82%E7%8E%87"><span class="nav-number">3.1.</span> <span class="nav-text">条件概率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E6%A6%82%E7%8E%87%E5%85%AC%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">全概率公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%85%AC%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">贝叶斯公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9D%E5%8F%B6%E6%96%AF%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">3.4.</span> <span class="nav-text">贝叶斯的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E7%9A%84%E6%A6%82%E7%8E%87%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.5.</span> <span class="nav-text">朴素贝叶斯的概率模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%B4%E7%B4%A0%E8%B4%9D%E5%8F%B6%E6%96%AF%E6%B5%81%E7%A8%8B"><span class="nav-number">3.6.</span> <span class="nav-text">朴素贝叶斯流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91"><span class="nav-number">4.</span> <span class="nav-text">决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.1.</span> <span class="nav-text">决策树的示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91%E4%B9%8B-ID3-%E7%AE%97%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">决策树之 ID3 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E7%86%B5"><span class="nav-number">4.2.1.</span> <span class="nav-text">信息熵</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%A2%9E%E7%9B%8A"><span class="nav-number">4.2.2.</span> <span class="nav-text">信息增益</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E7%86%B5%E5%92%8C%E4%BF%A1%E6%81%AF%E5%A2%9E%E7%9B%8A%E7%9A%84%E8%AE%A1%E7%AE%97%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.2.3.</span> <span class="nav-text">信息熵和信息增益的计算示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ID3-%E7%AE%97%E6%B3%95%E8%BF%87%E7%A8%8B%E6%8F%8F%E8%BF%B0"><span class="nav-number">4.2.4.</span> <span class="nav-text">ID3 算法过程描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ID3-%E7%AE%97%E6%B3%95%E7%9A%84%E4%B8%8D%E8%B6%B3"><span class="nav-number">4.2.5.</span> <span class="nav-text">ID3 算法的不足</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C4-5-%E7%AE%97%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">C4.5 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E8%BF%9E%E7%BB%AD%E7%9A%84%E7%89%B9%E5%BE%81%E7%A6%BB%E6%95%A3%E5%8C%96"><span class="nav-number">4.3.1.</span> <span class="nav-text">将连续的特征离散化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E5%A2%9E%E7%9B%8A%E7%8E%87"><span class="nav-number">4.3.2.</span> <span class="nav-text">信息增益率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E7%BC%BA%E5%A4%B1%E5%80%BC%E5%A4%84%E7%90%86%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.3.3.</span> <span class="nav-text">对于缺失值处理的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#C4-5-%E7%AE%97%E6%B3%95%E7%9A%84%E4%B8%8D%E8%B6%B3%E4%B8%8E%E6%94%B9%E8%BF%9B"><span class="nav-number">4.3.4.</span> <span class="nav-text">C4.5 算法的不足与改进</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CART-%E7%AE%97%E6%B3%95"><span class="nav-number">4.4.</span> <span class="nav-text">CART 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GINI-%E6%8C%87%E6%95%B0"><span class="nav-number">4.4.1.</span> <span class="nav-text">GINI 指数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%85%B7%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">4.4.2.</span> <span class="nav-text">算法具体流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CART-%E4%BE%8B%E5%AD%90%E4%B8%80"><span class="nav-number">4.4.3.</span> <span class="nav-text">CART 例子一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E7%BB%AD%E7%89%B9%E5%BE%81%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.4.4.</span> <span class="nav-text">连续特征的处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A6%BB%E6%95%A3%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">4.4.5.</span> <span class="nav-text">离散数据的处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CART-%E4%BE%8B%E5%AD%90%E4%BA%8C"><span class="nav-number">4.4.6.</span> <span class="nav-text">CART 例子二</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%AA%E6%9E%9D"><span class="nav-number">4.5.</span> <span class="nav-text">剪枝</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%AA%E6%9E%9D%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">4.5.1.</span> <span class="nav-text">剪枝损失函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%AA%E6%9E%9D%E6%80%9D%E8%B7%AF"><span class="nav-number">4.5.2.</span> <span class="nav-text">剪枝思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E9%AA%8C%E8%AF%81%E7%AD%96%E7%95%A5"><span class="nav-number">4.5.3.</span> <span class="nav-text">交叉验证策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%AA%E6%9E%9D%E7%AE%97%E6%B3%95%E8%BF%87%E7%A8%8B"><span class="nav-number">4.5.4.</span> <span class="nav-text">剪枝算法过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KNN-%E7%AE%97%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">KNN 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E5%BA%A6%E9%87%8F"><span class="nav-number">5.1.</span> <span class="nav-text">距离度量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#K-%E5%80%BC%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-number">5.2.</span> <span class="nav-text">K 值的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%8F%8F%E8%BF%B0"><span class="nav-number">5.3.</span> <span class="nav-text">算法描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E4%BC%98%E7%82%B9"><span class="nav-number">5.4.</span> <span class="nav-text">算法优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E7%BC%BA%E7%82%B9"><span class="nav-number">5.5.</span> <span class="nav-text">算法缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KNN-%E7%AE%97%E6%B3%95%E7%9A%84-Sklearn-%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.6.</span> <span class="nav-text">KNN 算法的 Sklearn 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KNN-%E8%BF%9B%E8%A1%8C%E9%B8%A2%E5%B0%BE%E8%8A%B1%E6%95%B0%E6%8D%AE%E9%9B%86%E5%88%86%E7%B1%BB"><span class="nav-number">5.6.1.</span> <span class="nav-text">KNN 进行鸢尾花数据集分类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0"><span class="nav-number">6.</span> <span class="nav-text">集成学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E6%B3%95%EF%BC%88Ensemble-learning%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">什么是集成学习法（Ensemble learning）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="nav-number">6.2.</span> <span class="nav-text">集成学习的基本思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E9%9B%86%E6%88%90%E5%88%86%E7%B1%BB%E5%99%A8%E7%9A%84%E8%BF%87%E7%A8%8B%E6%8F%8F%E8%BF%B0"><span class="nav-number">6.3.</span> <span class="nav-text">构建集成分类器的过程描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E9%9B%86%E6%88%90%E5%88%86%E7%B1%BB%E5%99%A8%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">6.4.</span> <span class="nav-text">构建集成分类器的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%A4%84%E7%90%86%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">6.4.1.</span> <span class="nav-text">通过处理训练数据集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%A4%84%E7%90%86%E8%BE%93%E5%85%A5%E7%89%B9%E5%BE%81"><span class="nav-number">6.4.2.</span> <span class="nav-text">通过处理输入特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%A4%84%E7%90%86%E7%B1%BB%E6%A0%87%E5%8F%B7"><span class="nav-number">6.4.3.</span> <span class="nav-text">通过处理类标号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%A4%84%E7%90%86%E5%AD%A6%E4%B9%A0%E7%AE%97%E6%B3%95"><span class="nav-number">6.4.4.</span> <span class="nav-text">通过处理学习算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E5%88%86%E7%B1%BB%E5%99%A8%E6%96%B9%E6%B3%95%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">6.5.</span> <span class="nav-text">集成分类器方法的优缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SVM-%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA"><span class="nav-number">7.</span> <span class="nav-text">SVM 支持向量机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%88%92%E5%88%86%E5%92%8C%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%88%92%E5%88%86"><span class="nav-number">7.1.</span> <span class="nav-text">线性划分和非线性划分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%B1%BB%E6%A0%87%E6%B3%A8%E7%9A%84%E8%B5%B7%E6%BA%90%EF%BC%9A%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92"><span class="nav-number">7.2.</span> <span class="nav-text">分类标注的起源：逻辑回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E9%97%B4%E9%9A%94%EF%BC%88Functional-margin%EF%BC%89%E4%B8%8E%E5%87%A0%E4%BD%95%E9%97%B4%E9%9A%94%EF%BC%88Geometrical-margin%EF%BC%89"><span class="nav-number">7.3.</span> <span class="nav-text">函数间隔（Functional margin）与几何间隔（Geometrical margin）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E9%97%B4%E9%9A%94"><span class="nav-number">7.3.1.</span> <span class="nav-text">函数间隔</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E9%97%B4%E9%9A%94"><span class="nav-number">7.3.2.</span> <span class="nav-text">几何间隔</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E5%88%86%E7%A6%BB%E5%99%A8-Maximum-Margin-Classifier-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">7.4.</span> <span class="nav-text">最大分离器 Maximum Margin Classifier 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AF%BB%E6%89%BE%E5%88%B0%E6%9C%80%E4%BC%98%E8%B6%85%E5%B9%B3%E9%9D%A2"><span class="nav-number">7.5.</span> <span class="nav-text">如何寻找到最优超平面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E8%BE%B9%E7%95%8C"><span class="nav-number">7.6.</span> <span class="nav-text">决策边界</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E8%BE%B9%E7%95%8C"><span class="nav-number">7.6.1.</span> <span class="nav-text">线性分类边界</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E8%BE%B9%E7%95%8C"><span class="nav-number">7.6.2.</span> <span class="nav-text">非线性分类边界</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA"><span class="nav-number">7.7.</span> <span class="nav-text">支持向量机</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB"><span class="nav-number">7.7.1.</span> <span class="nav-text">最大距离</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB%E6%98%AF%E5%A5%BD%E7%9A%84"><span class="nav-number">7.7.2.</span> <span class="nav-text">为什么最大距离是好的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA"><span class="nav-number">7.7.3.</span> <span class="nav-text">距离如何表示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-number">7.7.4.</span> <span class="nav-text">最大距离的求解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%84%E8%8C%83%E8%B6%85%E5%B9%B3%E9%9D%A2"><span class="nav-number">7.8.</span> <span class="nav-text">规范超平面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E4%B8%8A%E8%BF%B0%E5%8C%96%E7%AE%80%E5%90%8E%E6%9C%80%E5%A4%A7%E8%B7%9D%E7%A6%BB"><span class="nav-number">7.9.</span> <span class="nav-text">通过上述化简后最大距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%88%86%E6%9E%90"><span class="nav-number">7.10.</span> <span class="nav-text">非线性分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Slack-Penalty-C"><span class="nav-number">7.10.1.</span> <span class="nav-text">Slack Penalty C</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA%E7%9A%84%E8%87%AA%E7%84%B6%E5%BD%A2%E5%BC%8F"><span class="nav-number">7.10.2.</span> <span class="nav-text">支持向量机的自然形式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E8%B7%9D%E7%A6%BB"><span class="nav-number">7.11.</span> <span class="nav-text">如何计算距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97-w"><span class="nav-number">7.12.</span> <span class="nav-text">如何计算 w</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5-SVM"><span class="nav-number">8.</span> <span class="nav-text">深入 SVM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%8F%AF%E5%88%86%E5%88%B0%E7%BA%BF%E6%80%A7%E4%B8%8D%E5%8F%AF%E5%88%86%E5%88%B0%E7%BA%BF%E6%80%A7%E4%B8%8D%E5%8F%AF%E5%88%86"><span class="nav-number">8.1.</span> <span class="nav-text">从线性可分到线性不可分到线性不可分</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%8E%9F%E5%A7%8B%E9%97%AE%E9%A2%98%E5%88%B0%E5%AF%B9%E5%81%B6%E9%97%AE%E9%A2%98%E6%B1%82%E8%A7%A3"><span class="nav-number">8.1.1.</span> <span class="nav-text">从原始问题到对偶问题求解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#K-K-T-%E6%9D%A1%E4%BB%B6"><span class="nav-number">8.1.2.</span> <span class="nav-text">K.K.T.条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E5%81%B6%E9%97%AE%E9%A2%98%E6%B1%82%E8%A7%A3%E7%9A%84%E4%B8%89%E4%B8%AA%E6%AD%A5%E9%AA%A4"><span class="nav-number">8.1.3.</span> <span class="nav-text">对偶问题求解的三个步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E4%B8%8D%E5%8F%AF%E5%88%86%E9%97%AE%E9%A2%98"><span class="nav-number">8.1.4.</span> <span class="nav-text">线性不可分问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVM%EF%BC%9A%E6%A0%B8%E5%87%BD%E6%95%B0%EF%BC%9Akernel"><span class="nav-number">8.2.</span> <span class="nav-text">SVM：核函数：kernel</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E7%A9%BA%E9%97%B4%E7%9A%84%E9%9A%90%E5%BC%8F%E6%98%A0%E5%B0%84%EF%BC%9A%E6%A0%B8%E5%87%BD%E6%95%B0"><span class="nav-number">8.2.1.</span> <span class="nav-text">特征空间的隐式映射：核函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%87%BD%E6%95%B0%EF%BC%9A%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%95%B0%E6%8D%AE"><span class="nav-number">8.2.2.</span> <span class="nav-text">核函数：如何处理非线性数据</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8C%E7%BB%B4%E7%A9%BA%E9%97%B4%E6%8F%8F%E8%BF%B0"><span class="nav-number">8.2.2.1.</span> <span class="nav-text">二维空间描述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%8E%E4%BA%8C%E7%BB%B4%E7%A9%BA%E9%97%B4%E5%88%B0%E4%BA%94%E7%BB%B4%E7%A9%BA%E9%97%B4%E6%98%A0%E5%B0%84"><span class="nav-number">8.2.2.2.</span> <span class="nav-text">从二维空间到五维空间映射</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%94%E7%BB%B4%E7%A9%BA%E9%97%B4%E6%8F%8F%E8%BF%B0%EF%BC%88%E7%BA%BF%E6%80%A7%E8%B6%85%E5%B9%B3%E9%9D%A2%EF%BC%89"><span class="nav-number">8.2.2.3.</span> <span class="nav-text">五维空间描述（线性超平面）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><span class="nav-number">8.2.2.4.</span> <span class="nav-text">计算方法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%87%BD%E6%95%B0"><span class="nav-number">8.2.3.</span> <span class="nav-text">核函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%A0%B8%E5%87%BD%E6%95%B0"><span class="nav-number">8.2.4.</span> <span class="nav-text">常见核函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%9D%BE%E5%BC%9B%E5%8F%98%E9%87%8F%E5%A4%84%E7%90%86-outliers-%E6%96%B9%E6%B3%95"><span class="nav-number">8.3.</span> <span class="nav-text">使用松弛变量处理 outliers 方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%81%E6%98%8E-SVM"><span class="nav-number">9.</span> <span class="nav-text">证明 SVM</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

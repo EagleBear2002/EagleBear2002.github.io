@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$$ \def\T{\mathcal{T}} \def\P{\mathcal{P}} \def\WR{\mathsf{WR}} \def\WW{\mathsf{WW}} \def\RW{\mathsf{RW}} $$ 摘要 数据库客户程序鲁棒性问题是数据库一致性领域的一个分支，是验证客户程序在弱隔离级别下的行为在多大程度上满足某个强隔离级别（一般是 SER）。鲁棒性常被分为动态鲁棒性和静态鲁棒性两">
+<meta property="og:type" content="article">
+<meta property="og:title" content="客户程序鲁棒性综述">
+<meta property="og:url" content="https://eaglebear2002.github.io/46287/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="$$ \def\T{\mathcal{T}} \def\P{\mathcal{P}} \def\WR{\mathsf{WR}} \def\WW{\mathsf{WW}} \def\RW{\mathsf{RW}} $$ 摘要 数据库客户程序鲁棒性问题是数据库一致性领域的一个分支，是验证客户程序在弱隔离级别下的行为在多大程度上满足某个强隔离级别（一般是 SER）。鲁棒性常被分为动态鲁棒性和静态鲁棒性两">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/46287/image-20250707120942718.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46287/image-20250707133631470.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/46287/image-20250707135029076.png">
+<meta property="article:published_time" content="2024-08-02T09:05:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.772Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/46287/image-20250707120942718.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/46287/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>客户程序鲁棒性综述 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/46287/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          客户程序鲁棒性综述
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-02 17:05:00" itemprop="dateCreated datePublished" datetime="2024-08-02T17:05:00+08:00">2024-08-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>$$
+\def\T{\mathcal{T}}
+\def\P{\mathcal{P}}
+\def\WR{\mathsf{WR}}
+\def\WW{\mathsf{WW}}
+\def\RW{\mathsf{RW}}
+$$</p>
+<p><strong>摘要</strong></p>
+<p>数据库客户程序鲁棒性问题是数据库一致性领域的一个分支，是验证客户程序在弱隔离级别下的行为在多大程度上满足某个强隔离级别（一般是 SER）。鲁棒性常被分为动态鲁棒性和静态鲁棒性两个层次来讨论。</p>
+<ul>
+<li>动态鲁棒性研究数据库的某一个弱隔离级别 $I_1$ 下的执行历史 $H$ 是否满足较强的隔离级别 $I_2$（一般是 SER）。如果满足，我们说 $H$ 在 $I_1$ 下是鲁棒的。动态鲁棒性的研究与执行历史验证较为相似。</li>
+<li>静态鲁棒性研究客户程序 $P$ 在弱隔离级别 $I_1$ 下的所有执行历史是否都满足较强的隔离级别 $I_2$（一般是 SER）。如果满足，我们说 $P$ 在 $I_1$ 下是鲁棒的。例如，如果 $P$ 在 SI 下鲁棒，则我们可以在 SI 下运行 $P$，这可以在保证执行历史满足 SER 的情况下提高系统性能和吞吐率。</li>
+</ul>
+<h2 id="现有工作综述">现有工作综述</h2>
+<table>
+<thead>
+<tr>
+<th>$I_1 \backslash I_2$</th>
+<th>PC</th>
+<th>SI</th>
+<th>SER</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RU</td>
+<td>暂无</td>
+<td>暂无</td>
+<td>[Ketsman PODS'20&amp;TODS'22] （非分布式）充要条件</td>
+</tr>
+<tr>
+<td>RC</td>
+<td>暂无</td>
+<td>暂无</td>
+<td>[Ketsman PODS'20&amp;TODS'22] （非分布式）充要条件<br>[Vandevoort VLDB'21] （非分布式）事务模板的充要条件，有实验数据，未开源<br>[Vandevoort EDBT'23] （非分布式）控制结构（循环和条件）以及插入、删除和谓词读取的事务程序</td>
+</tr>
+<tr>
+<td>RA</td>
+<td>暂无</td>
+<td>暂无</td>
+<td>暂无</td>
+</tr>
+<tr>
+<td>CC</td>
+<td>[Bouajjani ESOP'21] 充要条件，转化为 CC 对 SER 鲁棒性</td>
+<td>[Bouajjani ESOP'21] 充要条件，$CC \to SI \iff CC \to PC \land PC \to SI$</td>
+<td>[Bernardi CONCUR'16] 充分条件<br>[Beillahi CONCUR'19] CC、CM、CCv 下充要条件</td>
+</tr>
+<tr>
+<td>PC</td>
+<td>/</td>
+<td>[Bouajjani ESOP'21] 充要条件，依赖程序搜索</td>
+<td>[Bernardi CONCUR'16] 充分条件</td>
+</tr>
+<tr>
+<td>PSI</td>
+<td>/</td>
+<td>暂无</td>
+<td>[Bernardi CONCUR'16] 充分条件</td>
+</tr>
+<tr>
+<td>SI</td>
+<td>/</td>
+<td>/</td>
+<td>[Fekete TODS'05] 充分条件<br>[Bernardi CONCUR'16] 充分条件<br>[Enea CAV'19] 假充要条件</td>
+</tr>
+</tbody>
+</table>
+<p>[Enea CAV'19] 对 Robust 的定义是“产生的所有 trace $tr = (\tau,\WR,\WW,\RW)$ 都满足 SER ”而非“产生的所有历史 $h = (\tau, \WR)$ 都满足 SER”。</p>
+<h2 id="TODS-25-Allocating-Isolation-Levels-to-Transactions-in-a-Multiversion-Setting">TODS'25 Allocating Isolation Levels to Transactions in a Multiversion Setting</h2>
+<h3 id="problems">problems</h3>
+<p>传统上，应用程序开发人员需要手动为每种类型的事务静态地选择一个隔离级别，这极具挑战性。如果选择过于保守的隔离级别（例如全部使用可串行化），会严重影响吞吐量；如果选择较低的隔离级别，则需要编写复杂的代码来处理可能出现的并发异常，这不仅容易出错，也增加了开发负担。</p>
+<h3 id="contributions">contributions</h3>
+<p>本文提出了一种在多版本数据库中<strong>系统性地分配隔离级别给事务的框架</strong>。其核心贡献在于，该框架能够根据事务的特性和行为，自动为每个事务动态地分配最合适的隔离级别，以在确保所需正确性的前提下最大化性能。它旨在将复杂性从应用程序开发人员转移到数据库系统内部。</p>
+<h3 id="techniques-basic-ideas">techniques (basic ideas)</h3>
+<p>该框架的基本思想是，它通过<strong>分析事务的访问模式</strong>（读集和写集），动态地识别潜在的冲突。例如，对于只读事务，可以安全地分配快照隔离级别以实现高吞吐量；而对于可能产生写偏斜等异常的事务，系统会将其隔离级别<strong>自动提升</strong>到可串行化。该方法可能结合静态分析和运行时监控，以在事务执行前或执行期间做出明智的隔离级别决策。</p>
+<h3 id="limitations">limitations</h3>
+<p>该方法可能存在以下局限：</p>
+<ul>
+<li><strong>分析开销</strong>：在事务执行前进行复杂的访问模式分析可能会引入额外的开销。</li>
+<li><strong>无法处理所有动态情况</strong>：对于某些高度动态或依赖于运行时输入才能确定访问模式的事务，其分析的准确性可能会受限。</li>
+<li><strong>依赖于工作负载</strong>：该框架的性能增益可能高度依赖于数据库的工作负载，如果大部分事务都存在潜在冲突，则其优势会减弱。</li>
+</ul>
+<h2 id="VLDB-25-Using-Read-Promotion-and-Mixed-Isolation-Levels-for-Performant-Yet-Serializable-Execution-of-Transaction-Programs">VLDB'25 Using Read Promotion and Mixed Isolation Levels for Performant Yet Serializable Execution of Transaction Programs</h2>
+<h3 id="problems-2">problems</h3>
+<p>在实践中，许多数据库系统默认使用快照隔离（SI）等较低的隔离级别，以换取更高的性能。但这将处理并发异常（如写偏斜）的责任推给了应用程序开发者。目前的挑战在于，如何在不牺牲性能的前提下，为事务程序提供可串行化的正确性保证，从而简化开发。</p>
+<h3 id="contributions-2">contributions</h3>
+<p>本文提出了一种名为**“读提升”（Read Promotion）<strong>的新技术，并将其与混合隔离级别相结合。该方法的核心思想是，让事务在执行时</strong>以较低的隔离级别（如 SI）开始**，一旦系统<strong>检测到可能导致可串行化异常的特定条件</strong>，就会在运行时动态地将事务提升到更高的隔离级别。其结果是，应用程序获得了可串行化的保证，而系统则避免了在没有必要时使用开销巨大的高隔离级别。</p>
+<h3 id="techniques-basic-ideas-2">techniques (basic ideas)</h3>
+<p>该技术基于一个两阶段模型：</p>
+<ol>
+<li><strong>初始阶段</strong>：所有事务都以快照隔离（SI）运行，该级别通常提供很好的并发性能。</li>
+<li><strong>动态提升</strong>：系统持续监控事务的读写依赖关系。例如，当一个事务 A 读取了另一个并发事务 B 刚刚写入的数据，而事务 A 自身又要写入数据时，存在写偏斜的潜在风险。一旦检测到这种模式，系统会立即执行**“读提升”**，将事务 A 的隔离级别提升到可串行化，从而防止异常的发生，并可能触发事务中止或锁升级。</li>
+</ol>
+<h3 id="limitations-2">limitations</h3>
+<p>该方法的局限性包括：</p>
+<ul>
+<li><strong>检测开销</strong>：运行时监控和检测潜在异常模式会引入额外的开销，特别是在高并发环境下。</li>
+<li><strong>提升时机</strong>：如果提升机制不够智能，可能导致过早或过晚的提升，从而影响性能。过晚的提升可能意味着事务已经进行了大量工作，然后才被中止。</li>
+<li><strong>不透明性</strong>：对于应用程序开发者来说，事务何时被提升是不透明的，这可能使得调试变得更加困难。</li>
+</ul>
+<h2 id="VLDB-25-TxnSails-Achieving-Serializable-Transaction-Scheduling-with-Self-Adaptive-Isolation-Level-Selection">VLDB'25 TxnSails-Achieving Serializable Transaction Scheduling with Self-Adaptive Isolation Level Selection</h2>
+<h3 id="problems-3">problems</h3>
+<p>如何构建一个能够<strong>自动</strong>、<strong>持续</strong>地为每个事务选择最佳隔离级别的调度器，同时保证整个事务执行序列的可串行化，是一个重要的挑战。这需要系统能够理解不同事务类型的行为，并随着工作负载的变化而动态调整。</p>
+<h3 id="contributions-3">contributions</h3>
+<p>本文提出了一个名为 <strong>TxnSails</strong> 的自适应事务调度框架。其核心贡献在于，它引入了一种<strong>基于学习和反馈机制的隔离级别自适应选择器</strong>。该系统能够观察事务执行历史，学习不同事务类型在不同隔离级别下的表现（例如，冲突率、延迟），并据此为新来的事务动态地选择最合适的隔离级别，从而在不牺牲可串行化正确性的前提下最大化系统吞吐量。</p>
+<h3 id="techniques-basic-ideas-3">techniques (basic ideas)</h3>
+<p>TxnSails 的基本思想是**“自适应学习”<strong>。它通过一个内部模型，持续收集并分析事务执行的元数据（如读写集、事务持续时间、冲突类型）。该模型将这些数据作为输入，输出一个策略，决定在当前工作负载下，哪种隔离级别最适合哪种事务类型。例如，对于历史上很少引发冲突的事务类型，调度器可能会为其分配快照隔离；而对于经常导致写偏斜的事务类型，调度器则会为其默认分配可串行化。这个模型是</strong>持续更新**的，能够随着工作负载的变化而自我调整。</p>
+<h3 id="limitations-3">limitations</h3>
+<p>该框架的局限性包括：</p>
+<ul>
+<li><strong>“冷启动”问题</strong>：在系统刚启动或工作负载发生剧烈变化时，学习模型可能需要一段时间来积累足够的数据才能做出有效的决策，这期间性能可能不如预期。</li>
+<li><strong>模型开销</strong>：收集数据和运行自适应模型本身会产生额外的计算和存储开销。</li>
+<li><strong>调试挑战</strong>：由于隔离级别的选择是自动化且动态的，当出现问题时，很难追溯和解释系统为何做出了某个特定的决策，这给调试和维护带来了挑战</li>
+</ul>
+<h2 id="Gotsman-等人在-Robustness-上的贡献">Gotsman 等人在 Robustness 上的贡献</h2>
+<ul>
+<li>
+<p>CONCUR'16-Robustness against Consistency Models with Atomic Visibility</p>
+<ul>
+<li>给出 CC、PC、PSI、SI 与 SER 混合下静态鲁棒性的充分条件</li>
+</ul>
+</li>
+<li>
+<p>PODC'16-Analysing Snapshot Isolation &amp; JACM'18-Analysing Snapshot Isolation（更长）</p>
+<ul>
+<li>用集合不等式定义 SI，似乎是基于 Kleene Algebra with Tests [Kozen CSL'96]</li>
+<li>对 SI 下的事务斩断进行静态分析</li>
+<li>给出鲁棒性 SI $\to$ SER 和 PSI $\to$ SI 的充要条件，但过于简略且未给出算法</li>
+<li>整篇文章完全基于数学分析，没有原型工具和实验</li>
+</ul>
+</li>
+<li>
+<p>CONCUR'17-Algebraic Laws for Weak Consistency</p>
+<ul>
+<li>揭示了抽象执行和依赖图两种形式化模型的内在联系</li>
+</ul>
+</li>
+</ul>
+<h2 id="Enea-等人在-Robustness-上的贡献">Enea 等人在 Robustness 上的贡献</h2>
+<ul>
+<li>
+<p>CONCUR'19-Robustness Against Transactional Causal Consistency</p>
+<ul>
+<li>给出 CC、CCv、CM（CC 的几个变体） 下鲁棒性的充分条件</li>
+</ul>
+</li>
+<li>
+<p>CAV'19-Checking Robustness Against Snapshot Isolation</p>
+</li>
+<li>
+<p>ESOP'21-Checking Robustness Between Weak Transactional Consistency Models</p>
+<ul>
+<li>验证了 CC-PC-SI-SER 四种隔离级别间的鲁棒性（除了 PC-SER）</li>
+<li>目前唯一一个开源的工具：Boogie</li>
+</ul>
+</li>
+</ul>
+<p>以上三份工作的特点：</p>
+<ul>
+<li>对于鲁棒性的定义与我们的不同：Enea 等人对 Robust 的定义是“产生的所有 trace $tr = (\tau,\WR,\WW,\RW)$ 都满足 SER ”
+而我们数据库领域的定义是“产生的所有历史 $h = (\tau, \WR)$ 都满足 SER”，这两个定义是不等价的。</li>
+<li>将程序鲁棒性判定问题转化成可达性问题；</li>
+<li>给出了程序鲁棒性的充要条件。</li>
+</ul>
+<h2 id="Vandevoort-等人在-Robustness-against-RC-上的贡献">Vandevoort 等人在 Robustness against RC 上的贡献</h2>
+<ul>
+<li>PODS'20-Deciding Robustness for Lower SQL Isolation Levels
+<ul>
+<li>理论细节最完善，是后续工作的基础；</li>
+<li>提出了判定事务集合 $\T$ 在无隔离级别、RU、RC 下鲁棒性的充要条件</li>
+</ul>
+</li>
+<li>VLDB'21-Robustness Against Read Committed for Transaction Templates
+<ul>
+<li>提出了判定事务集合 $\T$ 和事务模板 $\P$ 在 RC 下鲁棒性的充要条件和多项式时间算法</li>
+<li>给出了 SmallBank 和 TPC-Ckv 的鲁棒子集</li>
+<li>有实验数据，未开源</li>
+</ul>
+</li>
+<li>PODS'22-Robustness Against Read Committed-A Free Transactional Lunch
+<ul>
+<li>引入干涉图（interference graph）用于解释 VLDB'21 提出的算法，但并未给出证明</li>
+<li>无实验数据</li>
+</ul>
+</li>
+<li>ICDT'23-Robustness Against Read Committed for Transaction Templates with Functional Constraints
+<ul>
+<li>对事务模板扩展了功能约束（functional constraints），看不懂</li>
+<li>纯数学分析，无原型工具和实验</li>
+</ul>
+</li>
+<li>EDBT'23-Detecting Robustness against MVRC for Transaction Programs with Predicate Reads
+<ul>
+<li>扩展了具有控制结构（循环和条件）以及插入、删除和谓词读取的事务程序</li>
+<li>有新算法和实验，未开源</li>
+<li>明确指出本文的 Assumption 不适用于分布式系统</li>
+</ul>
+</li>
+<li>SIGMOD'23-When is it safe to run a transactional workload under Read Committed
+<ul>
+<li>对以上所有文章的综述</li>
+</ul>
+</li>
+</ul>
+<h2 id="数据库程序鲁棒性-benchmark">数据库程序鲁棒性 benchmark</h2>
+<p>CAV'19-Checking Robustness Against Snapshot Isolation 使用了较多的 benchmark。</p>
+<p><img src="/46287/image-20250707120942718.png" alt></p>
+<p>ESOP'21-Checking Robustness Between Weak Transactional Consistency Models</p>
+<p><img src="/46287/image-20250707133631470.png" alt></p>
+<p>VLDB'14-OLTP-Bench an extensible testbed for benchmarking relational databases</p>
+<p><img src="/46287/image-20250707135029076.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/3094/" rel="prev" title="并发算法和理论-并发声明语义">
+      <i class="fa fa-chevron-left"></i> 并发算法和理论-并发声明语义
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/56149/" rel="next" title="TODS'05-Making Snapshot Isolation Serializable">
+      TODS'05-Making Snapshot Isolation Serializable <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E6%9C%89%E5%B7%A5%E4%BD%9C%E7%BB%BC%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">现有工作综述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TODS-25-Allocating-Isolation-Levels-to-Transactions-in-a-Multiversion-Setting"><span class="nav-number">2.</span> <span class="nav-text">TODS&#39;25 Allocating Isolation Levels to Transactions in a Multiversion Setting</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#problems"><span class="nav-number">2.1.</span> <span class="nav-text">problems</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contributions"><span class="nav-number">2.2.</span> <span class="nav-text">contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#techniques-basic-ideas"><span class="nav-number">2.3.</span> <span class="nav-text">techniques (basic ideas)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#limitations"><span class="nav-number">2.4.</span> <span class="nav-text">limitations</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VLDB-25-Using-Read-Promotion-and-Mixed-Isolation-Levels-for-Performant-Yet-Serializable-Execution-of-Transaction-Programs"><span class="nav-number">3.</span> <span class="nav-text">VLDB&#39;25 Using Read Promotion and Mixed Isolation Levels for Performant Yet Serializable Execution of Transaction Programs</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#problems-2"><span class="nav-number">3.1.</span> <span class="nav-text">problems</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contributions-2"><span class="nav-number">3.2.</span> <span class="nav-text">contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#techniques-basic-ideas-2"><span class="nav-number">3.3.</span> <span class="nav-text">techniques (basic ideas)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#limitations-2"><span class="nav-number">3.4.</span> <span class="nav-text">limitations</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VLDB-25-TxnSails-Achieving-Serializable-Transaction-Scheduling-with-Self-Adaptive-Isolation-Level-Selection"><span class="nav-number">4.</span> <span class="nav-text">VLDB&#39;25 TxnSails-Achieving Serializable Transaction Scheduling with Self-Adaptive Isolation Level Selection</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#problems-3"><span class="nav-number">4.1.</span> <span class="nav-text">problems</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contributions-3"><span class="nav-number">4.2.</span> <span class="nav-text">contributions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#techniques-basic-ideas-3"><span class="nav-number">4.3.</span> <span class="nav-text">techniques (basic ideas)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#limitations-3"><span class="nav-number">4.4.</span> <span class="nav-text">limitations</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gotsman-%E7%AD%89%E4%BA%BA%E5%9C%A8-Robustness-%E4%B8%8A%E7%9A%84%E8%B4%A1%E7%8C%AE"><span class="nav-number">5.</span> <span class="nav-text">Gotsman 等人在 Robustness 上的贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enea-%E7%AD%89%E4%BA%BA%E5%9C%A8-Robustness-%E4%B8%8A%E7%9A%84%E8%B4%A1%E7%8C%AE"><span class="nav-number">6.</span> <span class="nav-text">Enea 等人在 Robustness 上的贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vandevoort-%E7%AD%89%E4%BA%BA%E5%9C%A8-Robustness-against-RC-%E4%B8%8A%E7%9A%84%E8%B4%A1%E7%8C%AE"><span class="nav-number">7.</span> <span class="nav-text">Vandevoort 等人在 Robustness against RC 上的贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7-benchmark"><span class="nav-number">8.</span> <span class="nav-text">数据库程序鲁棒性 benchmark</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 并发进程程序设计的概念 顺序程序设计 程序是实现算法的操作（指令）序列； 程序顺序执行是指其在处理器上执行是严格有序的，前一个操作被执行完后，才能开始后继操作，被称为程序执行的内部顺序性；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机与操作系统-06-并发程序设计">
+<meta property="og:url" content="https://eaglebear2002.github.io/62127/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 并发进程程序设计的概念 顺序程序设计 程序是实现算法的操作（指令）序列； 程序顺序执行是指其在处理器上执行是严格有序的，前一个操作被执行完后，才能开始后继操作，被称为程序执行的内部顺序性；">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/3.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/4.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/38.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/35.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/37.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/108.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/29.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/5.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/6.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/30.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/7.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/31.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/8.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/32.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/33.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/34.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/36.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/40.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/41.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/42.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/43.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/44.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/45.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/12.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/47.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/48.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/16.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/49.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/50.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/51.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/52.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/55.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/57.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/58.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/59.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/60.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/61.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/62.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/63.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/64.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/65.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/66.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/67.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/68.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/71.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/72.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/70.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/73.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/74.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/110.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/76.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/75.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/77.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/111.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/79.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/21.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/22.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/81.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/82.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/83.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/112.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/25.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/26.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/86.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/87.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/88.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/89.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/90.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/91.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/27.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/92.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/113.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/62127/28.png">
+<meta property="article:published_time" content="2023-01-06T02:56:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.578Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/62127/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/62127/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机与操作系统-06-并发程序设计 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/62127/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机与操作系统-06-并发程序设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-06 10:56:00" itemprop="dateCreated datePublished" datetime="2023-01-06T10:56:00+08:00">2023-01-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">2022Fall-计算机与操作系统</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>32k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>29 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="并发进程程序设计的概念">并发进程程序设计的概念</h2>
+<h3 id="顺序程序设计">顺序程序设计</h3>
+<p><strong>程序</strong>是实现算法的操作（指令）序列；</p>
+<p>程序顺序执行是指其在处理器上执行是<strong>严格有序</strong>的，前一个操作被执行完后，才能开始后继操作，被称为<strong>程序执行的内部顺序性</strong>；</p>
+<p>把一个具体问题的求解过程设计成一个程序或者若<strong>严格顺序</strong>执行的<strong>程序序列</strong>，这称为<strong>程序执行的外部顺序性</strong>。</p>
+<h4 id="顺序程序设计的特性">顺序程序设计的特性</h4>
+<ol>
+<li>程序执行的<strong>顺序性</strong>：程序指令执行是严格按序的，每个操作必须在下一个操作开始前结束；</li>
+<li>计算环境的<strong>封闭性</strong>：程序运行时如同独占受操作系统保护的资源，资源状态只能由程序本身决定和改变，不受外界因素改变；</li>
+<li>计算结果的<strong>确定性</strong>：程序执行结果与执行速度和执行时段无关；</li>
+<li>计算过程的<strong>可再现性</strong>：程序对相同数据集的执行轨迹是确定的。</li>
+</ol>
+<h3 id="进程的并发执行">进程的并发执行</h3>
+<ol>
+<li>多道程序设计让多个程序同时进入内存去竞争处理器以获得运行机会</li>
+<li>OS 允许计算机系统在一个时间段内存在多个正在运行的进程，即允许多个进程并发执行</li>
+<li>OS 保证按照“顺序程序设计”方法编制的程序在并发执行时不受影响，如同独占计算机</li>
+<li>这些按照顺序程序设计思想编制的进程在 OS 中并发执行属于无关的并发进程</li>
+</ol>
+<h3 id="并发程序设计的引入例">并发程序设计的引入例</h3>
+<h4 id="顺序程序设计-2">顺序程序设计</h4>
+<p>循环地（从输入机读 78 秒再计算 52 秒再向磁带机输出 20 秒）按照顺序程序设计方法，设计成如下一个程序：</p>
+<img src="/62127/1.png" style="zoom:33%;">
+<p>处理器利用率：$\frac{52}{78 + 52 + 20} \approx 34.7%$</p>
+<h4 id="并发程序设计例子">并发程序设计例子</h4>
+<p>换一种设计思路，设计 3 个独立运行的程序，让它们同时进入多道程序系统去并发执行：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) &#123; input，send &#125;<br><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) &#123; receive，process，send &#125;<br><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>) &#123; receive，output &#125;<br></code></pre></td></tr></table></figure>
+<img src="/62127/2.png" style="zoom: 50%;">
+<ol>
+<li>处理器利用率 $=\frac{52 \times n}{78 \times n + 52 + 20}$</li>
+<li>计算一定是在接收结束之后的，$\lim\limits_{n\rightarrow \infty}\frac{52 \times n}{78 \times n + 52 + 20} \approx 66.7%$后，利用率会大大提高。</li>
+</ol>
+<h3 id="并发程序设计">并发程序设计</h3>
+<ol>
+<li><strong>程序并发执行</strong>是指一组程序的执行在<strong>时间上是重叠</strong>的，所谓重叠的是指一个程序执行第一条指令是在另一个程序执行完最后一条指令之前开始的。
+<ol>
+<li>宏观上，并发性反应了一个时间段内有几个程序都处于运行但运行尚未结束的状态。</li>
+<li>微观上，任一时刻都只有一个程序在运行。</li>
+</ol>
+</li>
+<li>并发实质是处理器在几个程序之间的多路复用，对有限物力资源强制行使多用户共享，消除计算机部件之间的互等现象，提高资源利用率。</li>
+<li>并发使得程序失去了封闭性、顺序性、确定性和可再现性。</li>
+<li>并发程序设计指一个程序被设计成可以与其他程序并发执行。</li>
+</ol>
+<h4 id="并发程序设计的特性">并发程序设计的特性</h4>
+<ol>
+<li><strong>并行性</strong>：多个进程在多道程序系统中并发执行或者在多处理器系统中并行执行，提高了计算效率</li>
+<li><strong>共享性</strong>：多个进程共享软件资源</li>
+<li><strong>交往性</strong>：多个进程并发执行时存在制约，增加了程序设计的难度</li>
+</ol>
+<h2 id="并发进程的制约关系">并发进程的制约关系</h2>
+<h3 id="无关与交往的并发进程">无关与交往的并发进程</h3>
+<p><strong>无关</strong>的并发进程：一组并发进程分别在不同的变量集合上运行，一个进程的执行与其他并发进程的进展无关；</p>
+<p><strong>交往</strong>的并发进程：一组并发进程共享某些变量，一个进程的执行可能影响其他并发进程的结果。</p>
+<h3 id="与时间有关的错误">与时间有关的错误</h3>
+<p>对于一组交往的并发进程，执行的相对速度无法相互控制。如果程序设计不当，可能出现各种“与时间有关的”错误：</p>
+<ol>
+<li>表现一：<strong>结果不唯一</strong>，不同的执行序列有不同的结果。</li>
+<li>表现二：<strong>永远等待</strong></li>
+</ol>
+<h4 id="结果错误的例子：机票问题">结果错误的例子：机票问题</h4>
+<img src="/62127/3.png" style="zoom:50%;">
+<ol>
+<li>每两条机器指令之间都存在着一定的<strong>时间缝隙</strong>，导致时间片轮转可能导致的抢占问题。</li>
+<li>时间片轮转调度，如果<strong>并发数足够高</strong>，那么可能导致一张票被非常多的人抢到。</li>
+<li>此时出现把同一张票卖给两个旅客的情况，两个旅客可能各自都买到一张<strong>同天同次航班</strong>的机票，可是，Aj 的值实际上只减去 1，造成余票数不正确。特别是，当某次航班只有一张余票时，可能把一张票同时售给两位旅客。</li>
+</ol>
+<h4 id="永远等待的例子：内存管理问题">永远等待的例子：内存管理问题</h4>
+<img src="/62127/4.png" style="zoom:50%;">
+<p>由于 borrow 和 return 共享代表主存物理资源的临界变量 X，对并发执行不加限制会导致错误。</p>
+<p>例如：</p>
+<ol>
+<li>一个进程调用 borrow 申请主存，在执行比较 B 和 X 大小的指令后，发现 B&gt;X，但在执行{进程进入等待主存资源队列}前</li>
+<li>另一个进程调用 return 抢先执行，归还所借全部主存资源</li>
+<li>这时，由于前一个进程还未成为等待者，return 中的{释放等主存资源进程}相当于空操作，以后当调用 borrow 的应用进程被置成{等主存资源}时，可能己经没有其他进程再来归还主存，从而，申请资源的进程处于永远等待状态</li>
+</ol>
+<h3 id="进程的交互：进程互斥与进程同步">进程的交互：进程互斥与进程同步</h3>
+<p>因此，交互的并发进程在执行时必须进行<strong>制约</strong>，才能保证得到合理的结果</p>
+<h4 id="进程互斥（竞争）">进程互斥（竞争）</h4>
+<ol>
+<li>并发进程之间因相互争夺<strong>独占性资源</strong>而产生的竞争制约关系</li>
+<li>一个进程的执行可能影响到同其<strong>竞争资源</strong>的其他进程，如果两个进程要访问同一资源，那么，一个进程通过操作系统分配得到该资源，另一个将不得不等待。</li>
+<li>进程互斥是解决进程间<strong>竞争关系（间接制约关系）的手段</strong>。</li>
+<li><strong>进程互斥</strong>指若干个进程要使用同一共享资源时，任何时刻最多允许一个进程去使用，其他要使用该资源的进程必须等待，直到占有资源的进程释放该资源</li>
+</ol>
+<h5 id="竞争带来的问题">竞争带来的问题</h5>
+<ol>
+<li>资源竞争的两个控制问题：
+<ol>
+<li>一个是<strong>死锁（Deadlock）问题</strong>： 一组进程如果都获得了部分资源，还想要得到其他进程所占有的资源，最终所有的进程将陷入死锁。</li>
+<li>一个是<strong>饥饿（Starvation）问题</strong>： 一个进程由于其他进程总是优先于它而被无限期拖延，可以使用 FCFS 来解决饥饿问题。</li>
+</ol>
+</li>
+<li>操作系统需要保证诸进程能<strong>互斥</strong>地访问临界资源，既要解决饥饿问题，又要解决死锁问题</li>
+</ol>
+<h5 id="竞争关系：死锁">竞争关系：死锁</h5>
+<ol>
+<li>临界资源：互斥使用的资源</li>
+<li>死锁： 一组进程因争夺资源陷入永远等待的状态</li>
+<li>P0 和 P1 两个进程，均需要使用 S 和 Q 两类资源，每类资源数为 1
+<ol>
+<li>P0：申请（S）$\to$ 申请（Q） $\to$ 释放（S）$\to$ 释放（Q）</li>
+<li>P1：申请（Q）$\to$ 申请（S） $\to$ 释放（Q）$\to$ 释放（S）</li>
+<li>以上两个进程互相持有对方的资源的锁，导致无法继续进行。</li>
+</ol>
+</li>
+</ol>
+<h4 id="进程同步（协作）">进程同步（协作）</h4>
+<ol>
+<li>并发进程之间为完成共同任务基于<strong>某个条件</strong>来协调执行先后关系而产生的协作制约关系</li>
+<li>某些进程为完成同一任务需要<strong>分工协作</strong>，由于合作的每一个进程都是独立地以不可预知的速度推进，这就需要相互协作的进程在某些协调点上<strong>协调</strong>各自的工作。当合作进程中的一个到达协调点后，在尚未得到其伙伴进程发来的消息或信号之前应<strong>阻塞自己</strong>，直到其他合作进程发来协调信号或消息后方被唤醒并继续执行</li>
+<li>是解决进程间<strong>协作关系（直接制约关系）的手段</strong>。</li>
+<li><strong>进程同步</strong>指两个以上进程基于某个条件来协调它们的活动。一个进程的执行依赖于另一个协作进程的消息或信号，当一个进程没有得到来自于另一个进程的消息或信号时则需等待，直到消息或信号到达才被唤醒</li>
+<li>同步和异步
+<ol>
+<li>同步：<strong>等待/阻塞</strong></li>
+<li>异步：<strong>不等/平行</strong></li>
+</ol>
+</li>
+<li>进程互斥关系是一种特殊的<strong>进程同步</strong>关系，即<strong>逐次使用互斥</strong>共享资源，是对进程使用资源次序上的一种协调</li>
+</ol>
+<h4 id="并发进程之间的关系">并发进程之间的关系</h4>
+<img src="/62127/38.png" style="zoom: 33%;">
+<h4 id="“忙式等待”方法解决临界区调度的缺点">“忙式等待”方法解决临界区调度的缺点</h4>
+<ol>
+<li>临界区管理的简单方法
+<ol>
+<li>关中断</li>
+<li>测试并建立指令</li>
+<li>对换指令</li>
+<li>Peterson 算法</li>
+</ol>
+</li>
+<li>存在问题
+<ol>
+<li>对不能进入临界区的进程，采用<strong>忙式等待</strong>测试法，<strong>浪费 CPU 时间</strong></li>
+<li>将测试能否进入临界区的责任推给各个竞争的进程会<strong>削弱系统的可靠性</strong>，加重用户编程负担</li>
+</ol>
+</li>
+<li>通用的解决方法：信号量与 PV 操作</li>
+</ol>
+<h4 id="并发进程设计控制">并发进程设计控制</h4>
+<img src="/62127/35.png" style="zoom: 50%;">
+<h3 id="进程的无关性">进程的无关性 *</h3>
+<p>进程的无关性是进程的执行与时间无关的一个充分条件</p>
+<h4 id="Bernstein-条件">Bernstein 条件</h4>
+<p>$$
+R(P_i)={a_{i1},a_{i2},..., a_{in}}，程序 P_i 在执行期间引用的变量集\
+W(P_i)={b_{i1},b_{i2},...,b_{im}}，程序 P_i 在执行期间改变的变量集
+$$</p>
+<p>若两个进程的程序$P_1$和$P_2$能满足 Bernstein 条件，即满足：$R(P_1)\cap W(P_2) \cup R(P_2) \cap W(P_1) \cup W(P_1) \cap W(P_2) = \emptyset$则并发进程的执行与时间无关，保持封闭性和可再现性。</p>
+<ol>
+<li>$R(P_1)\cap W(P_2) \cup R(P_2) \cap W(P_1)$，表明一个程序在两次读操作之间存储单元的数据不会被改变。</li>
+<li>$W(P_1) \cap W(P_2)$：表明程序的写操作结果不会丢失。</li>
+</ol>
+<h4 id="Bernstein-条件例子">Bernstein 条件例子</h4>
+<ol>
+<li>例如，有如下分属四个进程中的四条语句：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">S1: a := x + y<br>S2: b := z + 1<br>S3: c := a - b<br>S4: w := c + 1<br></code></pre></td></tr></table></figure>
+<ol>
+<li>于是有：
+<ol>
+<li>$R(S1)=\set{x,y} , R(S2)=\set{z}, R(S3)=\set{a,b}, R(S4)=\set{c}$</li>
+<li>$W(S1)=\set{a}, W(S2)=\set{b} , W(S3)=\set{c} , W(S4)=\set{w}$</li>
+</ol>
+</li>
+<li>$S_1$和$S_2$可并发执行，满足 Bernstein 条件</li>
+<li>其他语句并发执行可能会产生与时间有关的错误</li>
+</ol>
+<h4 id="并发程序设计的优点">并发程序设计的优点</h4>
+<ol>
+<li>单处理器系统：有效利用资源，让处理器和设备、设备和设备同时工作，充分发挥硬件设备的并行工作能力。</li>
+<li>多处理器系统：让进城在不同处理器上物理地并行工作，加快计算速度。</li>
+<li>简化程序设计：编写并发执行的小程序进度较快，更容易保证正确性。</li>
+</ol>
+<h3 id="顺序程序设计与并发程序设计">顺序程序设计与并发程序设计 *</h3>
+<img src="/62127/37.png" style="zoom:33%;">
+<h2 id="临界区">临界区</h2>
+<h3 id="互斥与临界区">互斥与临界区</h3>
+<p><strong>临界资源</strong>：互斥<strong>共享变量</strong>所代表的资源，即一次只能被一个进程使用的资源</p>
+<ol>
+<li>举例：火车上的卫生间就是一种互斥使用的共享资源</li>
+<li>使用共享变量代表共享资源</li>
+</ol>
+<p><strong>临界区</strong>（critical section）：并发进程中与互斥共享变量相关的<strong>程序段</strong>，与同一变量有关的临界区分散在各进程的程序段中，而各进程的执行速度不可预见。</p>
+<p>多个并发进程访问临界资源时，存在<strong>竞争制约</strong>关系，如果两个进程同时停留在相关的临界区内，就会出现与时间相关的错误。</p>
+<p><strong>竞争条件</strong>（race condition）</p>
+<p>调度原则：</p>
+<ol>
+<li>互斥使用，有空让进</li>
+<li>忙则要等，有限等待</li>
+<li>择一而入，算法可行（避开饥饿）</li>
+</ol>
+<h3 id="临界区的描述">临界区的描述</h3>
+<p>确定临界资源：<code>shared &lt;variable&gt;</code></p>
+<p>确定临界区：<code>region &lt;variable&gt; do &lt;statement_list&gt;</code></p>
+<p>两个进程的临界区有相同的临界资源，就是<strong>相关的</strong>临界区，必须互斥进入。</p>
+<p>两个临界区不相关，进入就没有限制。</p>
+<img src="/62127/108.png" style="zoom:33%;">
+<h3 id="临界区管理的三个要求（Dijkstra，1965）">临界区管理的三个要求（Dijkstra，1965）</h3>
+<ol>
+<li><strong>一次至多允许一个</strong>进程能够进入临界区内执行：在某些特殊情况下可能会突破</li>
+<li>如果已有进程在临界区，<strong>其他试图进入</strong>的进程应<strong>等待</strong>，一个进程不能无限止地等待进入临界区</li>
+<li>一个进程不能无限止地停留在临界区内（进入临界区内的进程应在<strong>有限时间</strong>内退出，以便让等待进程中的一个进入）</li>
+</ol>
+<h3 id="临界区的使用">临界区的使用</h3>
+<img src="/62127/29.png" style="zoom:33%;">
+<h3 id="临界区的嵌套使用">临界区的嵌套使用</h3>
+<img src="/62127/5.png" style="zoom:33%;">
+<h2 id="临界区管理实现的尝试">临界区管理实现的尝试</h2>
+<h3 id="临界区管理：尝试一">临界区管理：尝试一</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/62127/6.png" alt></th>
+<th><img src="/62127/30.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>存在的问题： <strong>两个进程可能都进去</strong></li>
+<li>进程 P1 测试 inside2 与随后置 inside1 之间（由于时间片轮转等诸多原因），P2 可能发现 inside1 有值 false，于是它将置 inside2 为 true，并且与进程 P1 同时进入临界区，而对于 P2 而言也是同理的</li>
+</ol>
+<h3 id="临界区管理：尝试二">临界区管理：尝试二</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/62127/7.png" alt></th>
+<th><img src="/62127/31.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>优先表示自己在临界区内，存在的问题： <strong>两个进程都进不去</strong></li>
+<li>延迟进程 P2 对 inside2 的测试，先置 inside1 为 true，用以封锁 P2，但是有可能每个进程都把自己的标志置成 true，从而出现死循环，这时没有进程能在有限时间内进入临界区，造成永远等待。</li>
+</ol>
+<h3 id="解决思路">解决思路</h3>
+<p>问题：框内的（测试锁、建立锁）两条指令执行过程不能中断：</p>
+<p><img src="/62127/8.png" alt></p>
+<h4 id="解决算法：peterson-算法">解决算法：peterson 算法 *</h4>
+<ol>
+<li>通用性和效率比较差</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 公共的变量声明部分</span><br><span class="hljs-type">bool</span> inside[<span class="hljs-number">2</span>];      <span class="hljs-comment">// 存储是否进入的情况</span><br>inside[<span class="hljs-number">0</span>] = <span class="hljs-literal">false</span>;<br>inside[<span class="hljs-number">1</span>] = <span class="hljs-literal">false</span>;<br><span class="hljs-keyword">enum</span>&#123;<span class="hljs-number">0</span>, <span class="hljs-number">1</span>&#125; turn;     <span class="hljs-comment">// 指示器 turn 来指示可以由哪个进程进入</span><br></code></pre></td></tr></table></figure>
+<img src="/62127/32.png" style="zoom:33%;">
+<p>上图中的绿色箭头可以理解为激活和唤醒。下图中展示了一种修改方案：这种修改是不可行的。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/62127/33.png" alt></th>
+<th><img src="/62127/34.png" alt></th>
+</tr>
+</thead>
+</table>
+<ol>
+<li>P0 中执行了 turn=1, 暂时进不去</li>
+<li>等 P1 中执行 turn=0, P0 可以进去</li>
+<li>P0 使用完临界区，退出临界区的时候，将 turn=0（好像是多余的），此时 P1 还是进不去，要等 p0 执行 turn=1，使得 P1 有机会进入临界区</li>
+<li>之后，P1 退出临界区的时候，turn=1，P0 暂时进不去，等在 P1 中执行 turn=0，P0 可以再次进入临界区</li>
+<li>因此，P0 和 P1 使用临界区的次序变成了完全<strong>一比一</strong>的交替方式，这只能是临界区互斥使用的一个特例，不能满足临界区互斥使用的<strong>完全随机性</strong>。</li>
+</ol>
+<h2 id="临界区管理实现的硬件方式">临界区管理实现的硬件方式</h2>
+<h3 id="关中断">关中断 *</h3>
+<ol>
+<li>实现互斥的最简单方法：进程进入临界区时关中断，进程退出临界区时开中断。</li>
+<li>关中断后，时钟中断也会被屏蔽，进程上下文切换完全由中断事件引起。</li>
+<li>Linux 关中断：<code>cli()</code>，开中断：<code>sti()</code></li>
+<li>关中断适用场合</li>
+</ol>
+<h4 id="关中断方法优点">关中断方法优点</h4>
+<p>简单、有效，队操作系统自身很有用。</p>
+<h4 id="关中断方法的缺点">关中断方法的缺点</h4>
+<ol>
+<li>关中断时间过长影响性能和系统效率</li>
+<li>不适用于多处理器系统</li>
+</ol>
+<h3 id="测试并建立指令">测试并建立指令</h3>
+<p>TS（Test and Set）指令的处理过程：返回条件码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">TS</span>(x) &#123;<br>	<span class="hljs-keyword">if</span> (x == <span class="hljs-literal">false</span>) &#123;<br>		x = <span class="hljs-literal">true</span>;<br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>	&#125; <span class="hljs-keyword">else</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br><br><span class="hljs-comment">// TS 指令实现进程互斥</span><br><span class="hljs-type">bool</span> lock = <span class="hljs-literal">false</span>;<br>process	Pi &#123;	<span class="hljs-comment">// i = 1, 2, ..., n</span><br>    <span class="hljs-type">bool</span> pi;<br>    repeat pi = <span class="hljs-built_in">TS</span>(lock) until pi; <span class="hljs-comment">// 循环请求锁</span><br>    &#123; 临界区; &#125;<br>    lock = fakse;  <span class="hljs-comment">// 解锁</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="对换指令">对换指令</h3>
+<p>对换指令是交换两个字的值</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">swap</span>(a, b) &#123;<br>    temp = a;<br>    a = b;<br>    b = temp;<br>&#125;<br><span class="hljs-comment">// 对换指令实现进程互斥</span><br><span class="hljs-type">bool</span> lock = <span class="hljs-literal">false</span>;<br>process Pi &#123;           <span class="hljs-comment">// i = 1, 2, ..., n</span><br>    Boolean pi;<br>    pi = <span class="hljs-literal">true</span>;<br>    <span class="hljs-function">repeat <span class="hljs-title">swap</span><span class="hljs-params">(lock, pi)</span> until !pi；<span class="hljs-comment">// 循环请求锁</span></span><br><span class="hljs-function">    </span>&#123; 临界区; &#125;<br>    lock = <span class="hljs-literal">false</span>； <span class="hljs-comment">// 解锁</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="实现临界区管理的硬件设施">实现临界区管理的硬件设施</h3>
+<p>TS 和 swap 指令均是<strong>忙式等待</strong>，效率低。</p>
+<p>简单的解决办法是在<strong>进出临界区时开关中断</strong>，这样临界区执行就不会中断了，执行就有原子性：</p>
+<ol>
+<li>关中断</li>
+<li>临界区</li>
+<li>开中断</li>
+</ol>
+<p>操作系统原语就采用这种实现思路。</p>
+<p>但是，临界区的指令长度应该短小精悍，这样才能保证系统效率。不建议用户程序使用，滥用是可怕的！</p>
+<h2 id="PV-操作与进程互斥">PV 操作与进程互斥</h2>
+<h3 id="问题的提出">问题的提出</h3>
+<ol>
+<li>TS 或 swap 指令管理临界区，采用忙式轮询，效率低</li>
+<li>关开中断管理临界区，不便交给用户程序使用</li>
+<li>参考：操作系统访问硬件资源时采用“请求-等待-中断恢复”方式</li>
+</ol>
+<h3 id="同步和同步机制">同步和同步机制 *</h3>
+<ol>
+<li>著名的生产者-消费者问题是典型的进程同步问题。</li>
+<li>为什么 count 的值是不确定的，因为我们并没有对 count 进行封锁（同步）</li>
+<li>课本 134 页</li>
+</ol>
+<h3 id="信号量的构思">信号量的构思</h3>
+<p>信号量：一种**可动态定义的软件资源。**信号量是一种变量类型，有两个分量，一个是信号量的值，另一个是信号量队列指针。</p>
+<p>核心数据结构：等待进程队列</p>
+<p>信号量声明：资源报到，建立队列</p>
+<p>申请资源的原语：若申请不得，调用进程入队等待</p>
+<p>归还资源的原语：若队列中有等待进程，需释放</p>
+<p>信号量撤销：资源注销，撤销队列</p>
+<p>信号量分类：</p>
+<ol>
+<li>按照用途：
+<ol>
+<li>公用信号量：联系一组并发进程，相关进程均可在此信号量上执行 PV 操作，初值为 1，实现<strong>进程互斥</strong>。</li>
+<li>私有信号量：联系一组并发进程，仅允许此信号量所拥有的进程执行 P 操作，其他相关进程可以在其上执行 V 操作，初值为 0 或正整数，多用于<strong>进程同步</strong>。</li>
+</ol>
+</li>
+<li>按照取值：
+<ol>
+<li>二值信号量：值为 0 或 1，用于解决互斥问题。</li>
+<li>一般信号量（计数信号量），允许大于 1 的整数值，主要解决进程同步。</li>
+</ol>
+</li>
+</ol>
+<h4 id="记录型信号量的定义">记录型信号量的定义</h4>
+<p>设 s 为一个记录型数据结构，一个分量为整型量 value，另一个为信号量队列 queue，P 和 V 操作原语定义：</p>
+<ol>
+<li>P(s)：将信号量 s 减去 1，若结果小于 0，则调用 P(s) 的进程被置成等待信号量 s 的状态。正数表示资源可复用次数，负数绝对值表示队列中进程个数，0 值表示无资源且无进程等待。</li>
+<li>V(s)：将信号量 s 加 1，若结果不大于 0，则释放（唤醒）一个等待信号量 s 的进程，使其转换为就绪态</li>
+</ol>
+<p><strong>原语</strong>：CPU 处于内核态，在关中断环境下执行的一段<strong>指令序列</strong>。</p>
+<p>原子性：不被中断，确保安全且完整执行这段指令序列。</p>
+<img src="/62127/36.png" style="zoom:33%;">
+<p>强调：对于信号量，只允许使用 P 和 V 原语操作访问信号量，不能直接对信号量的整型值做读写操作，也不能直接对信号量的队列做任何其他操作。</p>
+<h4 id="PV-原语操作含义及其伪代码">PV 原语操作含义及其伪代码</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 基本数据结构定义</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">semaphore</span> &#123;<br>   <span class="hljs-type">int</span> value;           <span class="hljs-comment">/* 信号量值，正值表示资源可复用次数，0 值表示无资源且无进程等待，负数的绝对 */</span><br>   <span class="hljs-keyword">struct</span> <span class="hljs-title class_">pcb</span>* list;    <span class="hljs-comment">/* 信号量队列指针，等待队列 */</span><br>&#125;;<br><br><span class="hljs-comment">// P 操作原语</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">P</span><span class="hljs-params">(semahore s)</span> </span>&#123;<br>   s.value--;           <span class="hljs-comment">/* 信号量值减 1 */</span><br>   <span class="hljs-keyword">if</span>(s.value &lt; <span class="hljs-number">0</span>)<br>      <span class="hljs-built_in">sleep</span>(s.list);<br>   <span class="hljs-comment">/* 若信号量值小于 0，执行 P 操作的进程调用 sleep(s.list) 阻塞自己，被置成等待信号量 s 状态并移入 s 信号量队列，转向进程调度程序 */</span><br>&#125;<br><br><span class="hljs-comment">// V 操作原语</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">V</span> <span class="hljs-params">( semaphore s)</span> </span>&#123;<br>   s.value++;           <span class="hljs-comment">/* 信号量值加 1 */</span><br>   <span class="hljs-keyword">if</span>(s.value &lt;=<span class="hljs-number">0</span>)<br>      <span class="hljs-built_in">wakeup</span>(s.list) ;<br>   <span class="hljs-comment">/* 若信号量值小于等于 0，则调用 wakeup(s. list) 从信号量 s 队列中释放一个等待信号量 s 的进程并转换成就绪态，进程则继续执行 */</span><br>&#125;<br><br><span class="hljs-comment">// PV 操作解决进程互斥问题框架</span><br>semaphore s;<br>s = <span class="hljs-number">1</span>;<br>cobegin<br>   process Pi &#123;<br>      <span class="hljs-comment">// code here</span><br>      <span class="hljs-built_in">P</span>(s);<br>      临界区;<br>      <span class="hljs-built_in">V</span>(s);<br>      <span class="hljs-comment">// code here</span><br>   &#125;<br>coend;<br></code></pre></td></tr></table></figure>
+<h4 id="补充：二值信号量数据结构定义">补充：二值信号量数据结构定义 *</h4>
+<p>设 s 为一个记录型数据结构，一个分量为整型量 value，仅能取值 0 或 1，另一个为信号量队列 queue，P 和 V 操作原语定义：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">binary_semaphore</span> &#123;<br>	<span class="hljs-type">int</span> value;		   <span class="hljs-comment">// 取值为 0 或 1</span><br>	<span class="hljs-keyword">struct</span> <span class="hljs-title class_">pcb</span>* list;  <span class="hljs-comment">// 等待队列</span><br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">BP</span><span class="hljs-params">(binary_semaphore s)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (s.value == <span class="hljs-number">1</span>) &#123;<br>		s.value = <span class="hljs-number">0</span>;<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-built_in">sleep</span>(s.list);<br>	&#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">BV</span><span class="hljs-params">(binary_sempahore s)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (s.list is <span class="hljs-built_in">empty</span>()) &#123;<br>		s.value = <span class="hljs-number">1</span>;<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-built_in">wakeup</span>(s.list);<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="信号量与-PV-操作管理临界资源的的举例（火车上的卫生间）">信号量与 PV 操作管理临界资源的的举例（火车上的卫生间） *</h4>
+<img src="/62127/40.png" style="zoom:50%;">
+<h3 id="信号量与进程状态转化模型及其队列模型">信号量与进程状态转化模型及其队列模型</h3>
+<h4 id="信号量与进程状态转换模型">信号量与进程状态转换模型</h4>
+<img src="/62127/41.png" style="zoom:50%;">
+<h4 id="信号量与进程状态转换模型（队列模型）">信号量与进程状态转换模型（队列模型）</h4>
+<img src="/62127/42.png" style="zoom:50%;">
+<h3 id="信号量与-PV-操作的推论">信号量与 PV 操作的推论</h3>
+<ol>
+<li><strong>推论 1</strong>：若信号量 s 为正值，则<strong>该值等于在封锁进程之前对信号量 s 可施行的 P 操作次数</strong>、亦等于<strong>s 所代表的实际还可以使用的物理资源数</strong></li>
+<li><strong>推论 2</strong>：若信号量 s 为负值，则<strong>其绝对值等于登记排列在该信号量 s 队列之中等待的进程个数</strong>、亦即恰好等于<strong>对信号量 s 实施 P 操作而被封锁起来并进入信号量 s 队列的进程数</strong></li>
+<li><strong>推论 3</strong>：通常，P 操作意味着<strong>请求</strong>一个资源，V 操作意味着<strong>释放</strong>一个资源；在一定条件下，P 操作代表<strong>阻塞进程</strong>操作，而 V 操作代表<strong>唤醒被阻塞进程</strong>的操作</li>
+</ol>
+<h3 id="信号量的应用">信号量的应用</h3>
+<h4 id="信号量程序设计的一般结构">信号量程序设计的一般结构</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore s = <span class="hljs-number">1</span>;<br>cobegin<br>Process Pi <span class="hljs-comment">/* i=1,...,n */</span><br>&#123;<br>	<span class="hljs-comment">// code here</span><br>	<span class="hljs-built_in">P</span>(s);  <span class="hljs-comment">// 申请进入临界区</span><br>	<span class="hljs-comment">/* critical region 临界区 */</span><br>	<span class="hljs-built_in">V</span>(s);  <span class="hljs-comment">// 申请退出临界区</span><br>		   <span class="hljs-comment">// code here</span><br>&#125;;<br>coend<br></code></pre></td></tr></table></figure>
+<ol>
+<li>说明： 在表达纯粹互斥关系时信号量初值为 1，且同一个信号量的 P 操作和 V 操作处于同一个进程之中。</li>
+<li>但是这种情形不适用于同步关系。</li>
+<li>假设有 n 个进程，则 s 的取值范围为 [1-n, 1]</li>
+</ol>
+<h4 id="信号量与-PV-操作控制并发进程之间的临界资源">信号量与 PV 操作控制并发进程之间的临界资源</h4>
+<img src="/62127/43.png" style="zoom:33%;">
+<h3 id="求解互斥问题">求解互斥问题</h3>
+<h4 id="飞机票问题">飞机票问题</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> A[m];<br>semaphore mutex = <span class="hljs-number">1</span>;<br>cobegin<br>process Pi &#123;<br>	<span class="hljs-type">int</span> Xi;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-comment">// 按旅客订票要求找到 A[j];</span><br>		<span class="hljs-built_in">P</span>(mutex);<br>		Xi = A[j];<br>		<span class="hljs-keyword">if</span> (Xi &gt;= <span class="hljs-number">1</span>) &#123;<br>			<span class="hljs-comment">// 如果售票成功，在 if 内释放信号量</span><br>			Xi--;<br>			A[j] = Xi;<br>			<span class="hljs-built_in">V</span>(mutex);<br>			<span class="hljs-comment">// 输出一张票;</span><br>		&#125;<br>		<span class="hljs-keyword">else</span> &#123;<br>			<span class="hljs-comment">// 如果票不足，则跳出后释放信号量</span><br>			<span class="hljs-built_in">V</span>(mutex);<br>			<span class="hljs-comment">// 输出“票已售完”;</span><br>		&#125;<br>	&#125;<br>&#125;<br>coend<br></code></pre></td></tr></table></figure>
+<ol>
+<li>P 操作和 V 操作在执行路径上一一匹配。</li>
+<li>只有相同航班的票数才是相关的临界资源，所以用一个信号量处理全部机票会影响进程并发度。</li>
+<li>下面的例子是将不同航班的信号量分开：</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> A[m];<br>semaphore s[m];<br>s[j] = <span class="hljs-number">1</span>;<br>cobegin<br>process Pi &#123;<br>	<span class="hljs-type">int</span> Xi;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-comment">// 按旅客定票要求找到 A[j];</span><br>		<span class="hljs-built_in">P</span>(s[j]);<br>		Xi = A[j];<br>		<span class="hljs-keyword">if</span> (Xi &gt;= <span class="hljs-number">1</span>) &#123;<br>			Xi--;<br>			A[j] = Xi;<br>			<span class="hljs-built_in">V</span>(s[j]);<br>			<span class="hljs-comment">// 输出一张票;</span><br>		&#125; <span class="hljs-keyword">else</span> &#123;<br>			<span class="hljs-built_in">V</span>(s[j]);<br>			<span class="hljs-comment">// 输出“票已售完”;</span><br>		&#125;<br>	&#125;<br>&#125;<br>coend<br></code></pre></td></tr></table></figure>
+<h4 id="哲学家就餐问题">哲学家就餐问题</h4>
+<p>问题描述：有五个哲学家围坐在一圆桌旁，桌中央有一盘通心面，每人面前有一只空盘子，每两人之间放一把叉子。每个哲学家思考、饥饿、然后吃通心面。为了吃面，每个哲学家必须获得两把叉子，且每人只能直接从自己左边或右边去取叉子。</p>
+<p>Dijkstra 最早设计了哲学家就餐问题，哲学家顺时针编号。</p>
+<img src="/62127/44.png" style="zoom: 50%;">
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 存在死锁的哲学家就餐问题</span><br>semaphore fork[<span class="hljs-number">5</span>];<br><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++)<br>	fork[i] = <span class="hljs-number">1</span>;<br><br><span class="hljs-function">cobegin</span><br><span class="hljs-function">process	<span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123;  <span class="hljs-comment">// i= 0,1,2,3,4</span><br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">think</span>();			   <span class="hljs-comment">// 思考</span><br>		<span class="hljs-built_in">P</span>(fork[i]);			   <span class="hljs-comment">// 先取右手的叉子</span><br>		<span class="hljs-built_in">P</span>(fork[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);  <span class="hljs-comment">// 再取左手的叉子</span><br>		<span class="hljs-built_in">eat</span>();				   <span class="hljs-comment">// 吃饭</span><br>		<span class="hljs-built_in">V</span>(fork[i]);			   <span class="hljs-comment">// 放下左手的叉子</span><br>		<span class="hljs-built_in">V</span>(fork[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);  <span class="hljs-comment">// 放下右手的叉子</span><br>	&#125;<br>&#125;<br>coend<br></code></pre></td></tr></table></figure>
+<ol>
+<li>上面的代码存在死锁的问题：特殊的执行轨迹比如每一个哲学家都拿到了一侧的叉子</li>
+<li>上述解法可能出现永远等待，有若干种办法可避免死锁
+<ol>
+<li>至多允许四个哲学家同时取叉子（C. A. R. Hoare 方案）</li>
+<li>奇数号先取左手边的叉子，偶数号先取右手边的叉子</li>
+</ol>
+</li>
+</ol>
+<h5 id="至多允许四位哲学家同时取叉子">至多允许四位哲学家同时取叉子</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 设置侍者，添加房间信号量来控制同时取叉子的哲学家个数。</span><br>semaphore fork[<span class="hljs-number">5</span>];<br><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++)<br>	fork[i] = <span class="hljs-number">1</span>;<br>semaphore room = <span class="hljs-number">4</span>;	 <span class="hljs-comment">// 增加一个侍者，设想有两个房间 1 号房间是会议室，2 号房间是餐厅</span><br><span class="hljs-function">cobegin</span><br><span class="hljs-function">process	<span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123; <span class="hljs-comment">/*i=0,1,2,3, 4 */</span><br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">think</span>();<br>		<span class="hljs-built_in">P</span>(room);  <span class="hljs-comment">// 控制最多允许 4 位哲学家进入 2 号房间餐厅取叉子</span><br>		<span class="hljs-built_in">P</span>(fork[i]);<br>		<span class="hljs-built_in">P</span>(fork[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>		<span class="hljs-built_in">eat</span>();<br>		<span class="hljs-built_in">V</span>(fork[(i + <span class="hljs-number">1</span>) % <span class="hljs-number">5</span>]);<br>		<span class="hljs-built_in">V</span>(fork[i]);<br>		<span class="hljs-built_in">V</span>(room);<br>	&#125;<br>&#125;<br>coend<br></code></pre></td></tr></table></figure>
+<h5 id="限制奇数哲学家优先取左手，偶数哲学家优先取右手">限制奇数哲学家优先取左手，偶数哲学家优先取右手</h5>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 限制奇数哲学家优先取左手，偶数哲学家优先取右手</span><br><span class="hljs-function">process <span class="hljs-title">philosopher</span><span class="hljs-params">(<span class="hljs-type">int</span> i)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (i % <span class="hljs-number">2</span> == <span class="hljs-number">0</span>) &#123;<br>		<span class="hljs-built_in">P</span>(fork[i]);				 <span class="hljs-comment">// 偶数哲学家先右手</span><br>		<span class="hljs-built_in">P</span>(fork[(i + <span class="hljs-number">1</span>) mod <span class="hljs-number">5</span>]);	 <span class="hljs-comment">// 后左手</span><br>		<span class="hljs-built_in">eat</span>();<br>		<span class="hljs-built_in">V</span>(fork[i]);<br>		<span class="hljs-built_in">V</span>(fork[(i + <span class="hljs-number">1</span>) mod <span class="hljs-number">5</span>]);<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-built_in">P</span>(fork[(i + <span class="hljs-number">1</span>) mod <span class="hljs-number">5</span>]);	 <span class="hljs-comment">// 奇数哲学家，先左手</span><br>		<span class="hljs-built_in">P</span>(fork[i]);				 <span class="hljs-comment">// 后右手</span><br>		<span class="hljs-built_in">eat</span>();<br>		<span class="hljs-built_in">V</span>(fork[(i + <span class="hljs-number">1</span>) mod <span class="hljs-number">5</span>]);<br>		<span class="hljs-built_in">V</span>(fork[i]);<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="求解同步问题">求解同步问题</h3>
+<ol>
+<li>进程同步：并发进程为完成共同任务基于某个条件来协调执行先后关系而产生的协作制约关系</li>
+<li>一个进程的执行等待来自于其他进程的消息</li>
+<li>解决的基本思路：
+<ol>
+<li>定义一个信号量：其数值代表可用消息数</li>
+<li>等待消息进程：执行 P，无消息则等待</li>
+<li>发出消息进程：执行 V，有等待进程则释放</li>
+</ol>
+</li>
+</ol>
+<h4 id="生产者与消费者">生产者与消费者</h4>
+<p>问题描述：有 $n$ 个生产者和 $m$ 个消费者，连接在一个有 $k$ 个单位缓冲区的有界缓冲区上。其中，生产者进程 $Producer_i$ 和消费者进程 $Consumer_j$ 都是并发进程。</p>
+<ol>
+<li>只要缓冲区未满，生产者 $Producer_i$ 生产的产品就可投入缓冲区</li>
+<li>只要缓冲区不空，消费者进程 $Consumer_j$ 就可从缓冲区取走并消耗产品可能情形：
+<ol>
+<li>$n=1, m=1, k=1$</li>
+<li>$n=1, m=1, k&gt;1$</li>
+<li>$n&gt;1, m&gt;1, k&gt;1$</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/45.png" style="zoom:50%;">
+<h5 id="一个生产者、一个消费者、一个缓冲单元">一个生产者、一个消费者、一个缓冲单元</h5>
+<p>生产者和消费者共享缓冲区：</p>
+<ol>
+<li>缓冲区有空位时，生产者可放入产品，否则等待</li>
+<li>缓冲区有产品时，消费者可取出产品，否则等待</li>
+</ol>
+<img src="/62127/12.png" style="zoom:50%;">
+<p>解决思路：</p>
+<ol>
+<li>同步关系 1：消费者一开始在等待产品到来，考虑设置一个信号量（等待产品）；一开始无产品，初值为 0</li>
+<li>同步关系 2：消费者则在等待缓冲区中有空位，也可设置一个信号量（等待缓冲区）；一开始缓冲区有空位，初值为 1</li>
+</ol>
+<p>核心是缓冲区只允许放一个产品</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> B;			<span class="hljs-comment">/* 共享缓冲区 */</span><br>semaphore sput; <span class="hljs-comment">/* 可以使用的空缓冲区数 */</span><br>semaphore sget; <span class="hljs-comment">/* 缓冲区可以使用的产品数 */</span><br>sput = <span class="hljs-number">1</span>;		<span class="hljs-comment">/* 缓冲区内允许放入一件产品 */</span><br>sget = <span class="hljs-number">0</span>;		<span class="hljs-comment">/* 缓冲区内没有产品 */</span><br></code></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th><font face="Consolas">process producer() {<br> while (true) {<br> product = produce();<br> P(sput);<br> B = product;<br> V(sget); // 允许 get<br> }<br>}</font></th>
+<th><font face="Consolas">process consumer() {<br> while (true) {<br> P(sget);<br> product = B;<br> V(sput); // 允许 put<br> consume(product);<br> }<br>}</font></th>
+</tr>
+</thead>
+</table>
+<h5 id="一个生产者、一个消费者、多个缓冲单元">一个生产者、一个消费者、多个缓冲单元</h5>
+<p>P 操作的次序是重要的，可能导致死锁。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> B[k];		<span class="hljs-comment">/* 共享缓冲区 */</span><br>semaphore sput; <span class="hljs-comment">/* 可以使用的空缓冲区数 */</span><br>semaphore sget; <span class="hljs-comment">/* 缓冲区可以使用的产品数 */</span><br>sput = k;		<span class="hljs-comment">/* 缓冲区内允许放入一件产品 */</span><br>sget = <span class="hljs-number">0</span>;		<span class="hljs-comment">/* 缓冲区内没有产品 */</span><br><span class="hljs-type">int</span> putptr = <span class="hljs-number">0</span>, getptr = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/47.png" style="zoom:50%;">
+<h5 id="多个生产者、多个消费者、多个缓冲单元">多个生产者、多个消费者、多个缓冲单元</h5>
+<p>如果没有 $S_1$、$S_2$ 的话，在多个生产者和消费者时，对于生产者和消费者序列本身需要用 $S_1$、$S_2$ 控制。</p>
+<blockquote>
+<p>该例题中同时使用了互斥信号量和同步信号量，注意区分二者的功能。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> B[k];		<span class="hljs-comment">/* 共享缓冲区 */</span><br>semaphore sput; <span class="hljs-comment">/* 可以使用的空缓冲区数 */</span><br>semaphore sget; <span class="hljs-comment">/* 缓冲区可以使用的产品数 */</span><br>sput = k;		<span class="hljs-comment">/* 缓冲区内允许放入 k 件产品 */</span><br>sget = <span class="hljs-number">0</span>;		<span class="hljs-comment">/* 缓冲区内没有产品 */</span><br><span class="hljs-type">int</span> putptr = <span class="hljs-number">0</span>, getptr = <span class="hljs-number">0</span>;<br>semaphore s1 = <span class="hljs-number">1</span>, s2 = <span class="hljs-number">1</span>;              <span class="hljs-comment">/* 互斥信号量 putptr, getptr */</span><br></code></pre></td></tr></table></figure>
+<img src="/62127/48.png" style="zoom:50%;">
+<h4 id="苹果-桔子问题">苹果-桔子问题</h4>
+<img src="/62127/16.png" style="zoom:50%;">
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> plate;<br>semaphore sp;  <span class="hljs-comment">/* 盘子里可以放几个水果 */</span><br>semaphore sg1; <span class="hljs-comment">/* sg1 = 1，当且仅当盘子里有桔子，即允许取走桔子 */</span><br>semaphore sg2; <span class="hljs-comment">/* sg2 = 1，当且仅当盘子里有苹果，即允许取走苹果 */</span><br>sp = <span class="hljs-number">1</span>;		   <span class="hljs-comment">/* 盘子里允许放入一个水果*/</span><br>sg1 = <span class="hljs-number">0</span>;	   <span class="hljs-comment">/* 不允许取走桔子 */</span><br>sg2 = <span class="hljs-number">0</span>;	   <span class="hljs-comment">/* 不允许取走苹果 */</span><br></code></pre></td></tr></table></figure>
+<img src="/62127/49.png" style="zoom:50%;">
+<h3 id="小结">小结</h3>
+<p>1965 年 Dijkstra 发明的同步控制的编程方法：</p>
+<img src="/62127/50.png" style="zoom:50%;">
+<h2 id="并发程序设计习题讲解">并发程序设计习题讲解</h2>
+<h3 id="信号量-前驱关系">信号量-前驱关系</h3>
+<table>
+<thead>
+<tr>
+<th><img src="/62127/51.png" alt></th>
+<th><img src="/62127/52.png" style="zoom:80%;"></th>
+</tr>
+</thead>
+</table>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore s1 = <span class="hljs-number">0</span>; <span class="hljs-comment">/*表示进程 P1 是否已经执行完成*/</span><br>semaphore s2 = <span class="hljs-number">0</span>; <span class="hljs-comment">/*表示进程 P2 是否已经执行完成*/</span><br>semaphore s3 = <span class="hljs-number">0</span>; <span class="hljs-comment">/*表示进程 P3 是否已经执行完成*/</span><br>semaphore s4 = <span class="hljs-number">0</span>; <span class="hljs-comment">/*表示进程 P4 是否已经执行完成*/</span><br>semaphore s5 = <span class="hljs-number">0</span>; <span class="hljs-comment">/*表示进程 P5 是否已经执行完成*/</span><br><span class="hljs-built_in">main</span>() &#123;<br>	<span class="hljs-function">cobegin</span><br><span class="hljs-function">	<span class="hljs-title">P1</span><span class="hljs-params">()</span></span>;<br>	<span class="hljs-built_in">P2</span>();<br>	<span class="hljs-built_in">P3</span>();<br>	<span class="hljs-built_in">P4</span>();<br>	<span class="hljs-built_in">P5</span>();<br>	<span class="hljs-built_in">p6</span>();<br>	coend<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="读者-写者问题">读者/写者问题</h3>
+<p>读者与写者问题（reader-writer problem）（Courtois, 1971）也是一个经典的并发程序设计问题。有两组并发进程：读者和写者，共享一个文件 F，要求：</p>
+<ol>
+<li>允许<strong>多个读者</strong>可同时对文件执行读操作</li>
+<li>只允许<strong>一个写者</strong>往文件中写信息</li>
+<li>任意写者在完成写操作之前不允许其他读者或写者工作</li>
+<li>写者执行写操作前，应让已有的<strong>写者和读者</strong>全部退出</li>
+<li>使用 PV 操作求解该问题</li>
+</ol>
+<h4 id="读者优先">读者优先</h4>
+<ol>
+<li><code>rmutex</code> 控制对 <code>read_count</code> 的互斥访问；</li>
+<li>读者需要对互斥信号量 <code>rmutex</code> 进行排队；</li>
+<li>只有第一个读者需要对 <code>wmutex</code> 排队，后来的读者不需要对 <code>wmutex</code> 排队，可以插队到写者前面；</li>
+<li>为了保证读时不被打断，读时用 <code>wmutex</code> 信号量阻塞写者；当前所有读者读完后，写者才开始写。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore rmutex = <span class="hljs-number">1</span>; <span class="hljs-comment">// 控制对 read_count 的互斥访问</span><br>semaphore wmutex = <span class="hljs-number">1</span>; <span class="hljs-comment">// 控制对文件内容的互斥写</span><br><span class="hljs-type">int</span> read_count = <span class="hljs-number">0</span>;<br><br><span class="hljs-function">process <span class="hljs-title">reader_i</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">P</span>(rmutex);	<span class="hljs-comment">// rmutex 用于互斥访问 read_cout</span><br>		<span class="hljs-keyword">if</span> (read_count == <span class="hljs-number">0</span>)<br>			<span class="hljs-built_in">P</span>(wmutex);	<span class="hljs-comment">// 如果当前是第一个读者，阻塞写者，以保证读到的数据不被更改</span><br>		++read_count;<br>		<span class="hljs-built_in">V</span>(rmutex);<br><br>		<span class="hljs-built_in">read</span>();<br><br>		<span class="hljs-built_in">P</span>(rmutex);<br>		<span class="hljs-keyword">if</span> (--read_count == <span class="hljs-number">0</span>)<br>			<span class="hljs-built_in">V</span>(wmutex);	<span class="hljs-comment">// 如果当前结束的是最后一个读者，允许开始写</span><br>		<span class="hljs-built_in">V</span>(rmutex);<br>	&#125;<br>&#125;<br><br><span class="hljs-function">process <span class="hljs-title">writer_i</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">P</span>(wmutex);	<span class="hljs-comment">// wmutex 用于互斥访问</span><br>		<span class="hljs-built_in">write</span>();<br>		<span class="hljs-built_in">V</span>(wmutex);<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>该代码并没有将读者的优先级提高到理论最高优先级。笔者在另一篇文章 <a href="https://eaglebear2002.github.io/2022Fall-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%B8%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%86%8D%E8%AE%BA%E2%80%9C%E8%AF%BB%E8%80%85%E4%BC%98%E5%85%88%E2%80%9D/">再论“读者优先”</a> 设计了新的算法，在不抢占资源的情况下将读者的优先级提高到了理论最高优先级。</p>
+</blockquote>
+<h4 id="写者优先">写者优先</h4>
+<ol>
+<li>后来的写者可以插队到先来的、还未开始读的读者前面；</li>
+<li>互斥变量 <code>z</code> 保证了每次最多只有一个读者在互斥变量 <code>rmutex</code> 排队；</li>
+<li>“第一个”写者到来时，写者可以立刻对 <code>rmutex</code> 排队，且此时最多只有一个读者在 <code>rmutex</code> 排队；</li>
+<li>“后来的”写者到来时，不用对 <code>rmutex</code> 排队，直接等前面的写者写完后继续写；</li>
+<li>“最后一个”写者离开时，开放 <code>rmutex</code> 使得读者可以开始读；</li>
+<li>写者使用 <code>rmutex</code> 阻塞读者。</li>
+</ol>
+<img src="/62127/55.png" style="zoom:50%;">
+<h4 id="读写公平">读写公平</h4>
+<ol>
+<li>只比读者优先增加了一个互斥信号量 <code>S</code>；</li>
+<li>所有读者和写者一起对互斥信号量 <code>S</code> 排队，这样后来的读者无法插队到先来的写者前面；</li>
+<li>其他性质与读者优先相同。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore rmutex = <span class="hljs-number">1</span>; <span class="hljs-comment">// 控制对 read_count 的互斥访问</span><br>semaphore wmutex = <span class="hljs-number">1</span>; <span class="hljs-comment">// 控制对文件内容的互斥写</span><br>semaphore S = <span class="hljs-number">1</span>; <span class="hljs-comment">// 控制读写公平的信号量</span><br><span class="hljs-type">int</span> read_count = <span class="hljs-number">0</span>;<br><br><span class="hljs-function">process <span class="hljs-title">reader_i</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">P</span>(S);<br>		<span class="hljs-built_in">P</span>(rmutex);	<span class="hljs-comment">// rmutex 用于互斥访问 read_count</span><br>		<span class="hljs-keyword">if</span> (read_count == <span class="hljs-number">0</span>)<br>			<span class="hljs-built_in">P</span>(wmutex);	<span class="hljs-comment">// 如果当前是第一个读者，阻塞写者，以保证读到的数据不被更改</span><br>		++read_count;<br>		<span class="hljs-built_in">V</span>(rmutex);<br>		<span class="hljs-built_in">V</span>(S);<br><br>		<span class="hljs-built_in">read</span>();<br><br>		<span class="hljs-built_in">P</span>(rmutex);<br>		<span class="hljs-keyword">if</span> (--read_count == <span class="hljs-number">0</span>)<br>			<span class="hljs-built_in">P</span>(wmutex);	<span class="hljs-comment">// 如果当前没有读者，允许开始写</span><br>		<span class="hljs-built_in">V</span>(rmutex);<br>	&#125;<br>&#125;<br><br><span class="hljs-function">process <span class="hljs-title">writer_i</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>		<span class="hljs-built_in">P</span>(S);<br>		<span class="hljs-built_in">P</span>(wmutex);	<span class="hljs-comment">// wmutex 用于互斥访问</span><br>		<span class="hljs-built_in">write</span>();<br>		<span class="hljs-built_in">V</span>(wmutex);<br>		<span class="hljs-built_in">V</span>(S);<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="睡眠的理发师问题">睡眠的理发师问题</h3>
+<ol>
+<li>理发店理有一位理发师、一把理发椅和 n 把供等候理发的顾客坐的椅子</li>
+<li>如果没有顾客，理发师便在理发椅上睡觉</li>
+<li>一个顾客到来时，它必须叫醒理发师</li>
+<li>如果理发师正在理发时又有顾客来到，则如果有空椅子可坐，就坐下来等待，否则就离开</li>
+<li>使用 PV 操作求解该问题</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> waiting = <span class="hljs-number">0</span>;  <span class="hljs-comment">// 等候理发顾客坐的椅子数</span><br><span class="hljs-type">int</span> CHAIRS = N;	  <span class="hljs-comment">// 为顾客准备的椅子数</span><br>semaphore customers, barbers, mutex;<br>customers = <span class="hljs-number">0</span>;	<span class="hljs-comment">// customers = 1，当且仅当有顾客可以理发</span><br>barbers = <span class="hljs-number">0</span>;	<span class="hljs-comment">// barber = 1， 当且仅当理发师可以理发</span><br>mutex = <span class="hljs-number">1</span>;		<span class="hljs-comment">// mutex 用于控制对 waiting 的互斥访问</span><br></code></pre></td></tr></table></figure>
+<img src="/62127/57.png" style="zoom:50%;">
+<h3 id="农夫猎人问题">农夫猎人问题</h3>
+<p>有一个铁笼子，每次只能放入一个动物。猎手向笼中放入老虎，农夫向笼中放入羊；动物园等待取笼中的老虎，饭店等待取笼中的羊。请用 P、V 操作原语写出同步执行的程序。</p>
+<p>和苹果-桔子问题没有本质区别。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore Scage = <span class="hljs-number">1</span>;<br>semaphore Stiger = <span class="hljs-number">0</span>;<br>semaphore Ssheep = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/58.png" style="zoom:50%;">
+<h3 id="银行业务问题">银行业务问题</h3>
+<p>某大型银行办理人民币储蓄业务，由 n 个储蓄员负责。每个顾客进入银行后先至取号机取一个号，并且在等待区找到空沙发坐下等着叫号。取号机给出的号码依次递增，并假定有足够多的空沙发容纳顾客。当一个储蓄员空闲下来，就叫下一个号。请用信号量和 P，V 操作正确编写储蓄员进程和顾客进程的程序。</p>
+<p>类似苹果-桔子。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore customer_count, server_count, mutex;<br>customer_count = <span class="hljs-number">0</span>;<br>server_count = n;<br>mutex = <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/59.png" style="zoom:50%;">
+<h3 id="缓冲区管理">缓冲区管理</h3>
+<p>有 n 个进程将字符逐个读入到一个容量为 80 的缓冲区中（n&gt;1），当缓冲区满后，由输出进程 Q 负责一次性取走这 80 个字符。这种过程循环往复，请用信号量和 P、V 操作写出 n 个读入进程（P1， P2，…，Pn）和输出进程 Q 能正确工作的动作序列。</p>
+<p>生产者消费者问题。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore mutex = <span class="hljs-number">1</span>, empty = <span class="hljs-number">80</span>, full0;<br><span class="hljs-type">int</span> count = <span class="hljs-number">0</span>, in = <span class="hljs-number">0</span>;<br><span class="hljs-type">char</span> buffer[<span class="hljs-number">80</span>];<br></code></pre></td></tr></table></figure>
+<img src="/62127/60.png" style="zoom:50%;">
+<p>一次性 V 80 次。</p>
+<h3 id="售票问题">售票问题</h3>
+<p>汽车司机与售票员之间必须协同工作，一方面只有售票员把车门关好了司机才能开车，因此，售票员关好门应通知司机开车，然后售票员进行售票。另一方面，只有当汽车已经停下，售票员才能开门上下客，故司机停车后应该通知售票员。假定某辆公共汽车上有一名司机与两名售票员，汽车当前正在始发站停车上客，试用信号量与 P、V 操作写出他们的同步算法。</p>
+<img src="/62127/61.png" style="zoom:50%;">
+<h3 id="吸烟者问题">吸烟者问题</h3>
+<p>一个经典同步问题：吸烟者问题（patil，1971）。</p>
+<p>三个吸烟者在一个房间内，还有一个香烟供应者。为了制造并抽掉香烟，每个吸烟者需要三样东西：烟草、纸和火柴，供应者有丰富货物提供。三个吸烟者中，第一个有自己的烟草，第二个有自己的纸和第三个有自己的火柴。供应者随机地将两样东西放在桌子上，允许一个吸烟者进行对健康不利的吸烟。当吸烟者<strong>完成吸烟后</strong>唤醒供应者，供应者再把两样东西放在桌子上，唤醒另一个吸烟者。试用信号量和 P、V 操作求解该问题。</p>
+<blockquote>
+<p>该代码是在吸烟者完成取物品后、完成吸烟前唤醒供应者，与题意不符，但不影响算法的正确性。</p>
+</blockquote>
+<img src="/62127/62.png" style="zoom:50%;">
+<h3 id="独木桥问题">独木桥问题</h3>
+<h4 id="独木桥问题-1">独木桥问题 1</h4>
+<p>东西向汽车过独木桥，为了保证安全，只要桥上无车，则允许一方的汽车过桥，待一方的车全部过完后，另一方的车才允许过桥。请用信号量和 PV 操作写出过独木桥问题的同步算法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore wait = <span class="hljs-number">1</span>, mutex1 = <span class="hljs-number">1</span>, mutex2 = <span class="hljs-number">1</span>;<br><span class="hljs-type">int</span> count1 = <span class="hljs-number">0</span>, count2 = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/63.png" style="zoom:50%;">
+<h4 id="独木桥问题-2">独木桥问题 2</h4>
+<p>在独木桥问题 1 中，限制桥面上最多可以有 k 辆汽车通过。试用信号量和 P，V 操作写出过独木桥问题的同步算法。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs scss">semaphore wait = <span class="hljs-number">1</span>, mutex1 = <span class="hljs-number">1</span>, mutex2 = <span class="hljs-number">1</span>, bridge = k;<br>int count1 = <span class="hljs-number">0</span>, count2 = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/64.png" style="zoom:50%;">
+<h4 id="独木桥问题-3">独木桥问题 3</h4>
+<p>在独木桥问题 1 中，以 3 辆汽车为一组，要求保证东方和西方以组为单位交替通过汽车。试用信号量和 P，V 操作写出汽车过独木桥问题的同步算法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore wait = <span class="hljs-number">1</span>, mutex1 = <span class="hljs-number">1</span>, mutex2 = <span class="hljs-number">1</span>;<br><span class="hljs-type">int</span> counter1 = <span class="hljs-number">0</span>, counter2 = <span class="hljs-number">0</span>, counteru1 = <span class="hljs-number">0</span>, countd1 = <span class="hljs-number">0</span>, counteru2 = <span class="hljs-number">0</span>, counterd2 = <span class="hljs-number">0</span>;<br>semaphore S1 = <span class="hljs-number">3</span>, S2 = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/65.png" style="zoom:50%;">
+<h4 id="独木桥问题-4">独木桥问题 4</h4>
+<p>在独木桥问题 1 中，要求各方向的汽车串行过桥，但当另一方提出过桥时，应能阻止对方未上桥的后继车辆，待桥面上的汽车过完桥后，另一方的汽车开始过桥。试用信号量和 P，V 操作写出过独木桥问题的同步算法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore stop = <span class="hljs-number">1</span>, wait = <span class="hljs-number">1</span>, mutex1 = <span class="hljs-number">1</span>, mutex2 = <span class="hljs-number">1</span>;<br><span class="hljs-type">int</span> count1 = <span class="hljs-number">0</span>, count2 = <span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+<img src="/62127/66.png" style="zoom:50%;">
+<h2 id="管程">管程</h2>
+<h3 id="管程的提出">管程的提出</h3>
+<p>使用信号量和 PV 操作实现进程同步与互斥时，对共享资源的管理分散于各个进程中。管程希望能够集中和封装对同一个共享资源的所有访问。</p>
+<p>管程是管理进程的进程，管程是一种软件模块和机制。</p>
+<h3 id="管程和条件变量">管程和条件变量</h3>
+<ol>
+<li>管程试图<strong>抽象</strong>相关并发进程对<strong>共享变量</strong>访问，以提供一个友善的并发程序设计开发环境。</li>
+<li>管程是由若干<strong>公共（共享）变量</strong>及其说明和所有访问这些变量的过程所组成
+<ol>
+<li>管程的局部变量只能由该管程的过程读取</li>
+<li>把分散在各进程中的临界区集中起来进行管理</li>
+</ol>
+</li>
+<li>防止进程有意或无意的<strong>违法同步</strong>操作，进程只能互斥地调用管程中的过程。</li>
+<li>便于用<strong>高级语言</strong>来书写程序</li>
+</ol>
+<h3 id="管程定义和属性">管程定义和属性</h3>
+<p>管程的定义：管程是由局部于自己的若干公共（共享）变量及其说明和所有访问这些公共变量的过程所组成的软件模块</p>
+<p>管程的属性：</p>
+<ol>
+<li>共享性：管程中的移出过程可被所有调用管程的过程的进程所共享</li>
+<li>安全性：管程的局部变量只能由此管程内部分访问，不允许进程或其他管程直接访问。</li>
+<li>互斥性：任一时刻，共享资源的进程可以访问管程中的管理此资源的过程，但最多只有一个调用者能够真正进入管程，其他调用者必须等待直到管程可用。</li>
+</ol>
+<h3 id="管程的形式">管程的形式</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp">type &lt;管程名&gt;= monitor &#123;<br>	&lt;局部变量说明&gt;;<br>	&lt;条件变量说明&gt;;<br>	&lt;初始化语句&gt;;<br>	define&lt;管程内定义的，管程外可调用的过程或函数名列表&gt;;<br>	use&lt;管程外定义的，管程内将调用的过程或函数名列表&gt;;<br><br>	&lt;过程名/函数名&gt;(&lt;形式参数表&gt;) &#123;<br>		&lt;过程/函数体&gt;;<br>	&#125;<br><br>	&lt;过程名/函数名&gt;(&lt;形式参数表&gt;) &#123;<br>		&lt;过程/函数体&gt;;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="管程的结构">管程的结构</h3>
+<img src="/62127/67.png" style="zoom:50%;">
+<ol>
+<li><code>wait()</code> 操作请求资源</li>
+<li><code>signal()</code> 操作唤醒条件变量</li>
+</ol>
+<h3 id="管程的条件变量">管程的条件变量</h3>
+<ol>
+<li>当资源不足导致进程阻塞时，同时开放管程，让挡在管程外的一个进程进入管程。</li>
+<li>条件变量：是出现在管程内的一种数据结构，且只有在<strong>管程中</strong>才能被访问，它对管程内的所有过程是全局的，只能通过两个<strong>原语操作</strong>来控制它，用于阻塞进程的信号量。
+<ol>
+<li><code>wait()</code>：当一个管程过程发现无法继续时（如发现没有可用资源时），它在某些条件变量上执行 <code>wait()</code>，这个动作引起调用进程阻塞，直到另一个进程在该条件变量上执行 <code>signal()</code></li>
+<li><code>signal()</code>：
+<ol>
+<li>如果存在其他进程由于对条件变量执行 <code>wait()</code> 而被阻塞，便释放之</li>
+<li>如果没有进程在等待，那么信号不被保存，并不是立即退出管程等待队列，而是进入 next 信号量，以保证多个进程都可以正常退出。</li>
+</ol>
+</li>
+<li>条件变量仅仅维护阻塞队列的作用，如果没有等待时发生 <code>signal()</code> 操作，相当于空操作。</li>
+</ol>
+</li>
+<li>使用 <code>signal()</code> 释放等待进程时，可能出现两个进程同时停留在管程内。解决方法：
+<ol>
+<li><strong>执行 <code>signal()</code> 的进程等待，直到被释放进程退出管程或等待另一个条件</strong></li>
+<li>被释放进程等待，直到执行 <code>signal()</code> 的进程退出管程或等待另一个条件</li>
+</ol>
+</li>
+<li>霍尔（Hoare, 1974）采用第一种办法</li>
+<li>汉森（Hansen）选择两者的折衷，规定管程中的过程所执行的<code>signal()</code> 操作是过程体的最后一个操作</li>
+</ol>
+<h3 id="管程和进程对比">管程和进程对比</h3>
+<ol>
+<li>管程定义公用数据结构，进程定义私有数据结构</li>
+<li>管程将共享变量上的同步操作集中统一管理，临界区分散在每个进程中。</li>
+<li>管程为了解决进程共享资源的互斥，进程为了占有系统资源和实现系统并发。</li>
+<li>管程被想要使用共享资源的所有进程调用，管程和调用它的进程不能并行工作；进程间可以并行工作。</li>
+</ol>
+<h3 id="管程的实现（Hoare-方法）">管程的实现（Hoare 方法）</h3>
+<ol>
+<li>霍尔方法使用 P 和 V 操作原语来实现对管程中过程的互斥调用，及实现对共享资源互斥使用的管理</li>
+<li>不要求 <code>signal()</code> 操作是过程体的最后一个操作，且 <code>wait()</code> 和 <code>signal()</code> 操作可被设计成可以中断的过程</li>
+<li>使用 <code>signal()</code> 释放一个等待进程时，霍尔管程让执行 <code>signal()</code> 的进程等待，直到<strong>被释放进程退出管程或等待另一个条件</strong></li>
+<li>霍尔管程基于 PV 操作原语实现：
+<ol>
+<li><code>wait()</code> 和 <code>signal()</code> 可以是程序过程</li>
+<li>可以用语言机制实现霍尔管程</li>
+</ol>
+</li>
+</ol>
+<h4 id="Hoare-管程的数据结构">Hoare 管程的数据结构</h4>
+<h5 id="互斥信号量-mutex">互斥信号量 <code>mutex</code></h5>
+<ol>
+<li>对每个管程，使用用于<strong>管程中过程互斥调用</strong>的信号量 <code>mutex</code>（初值为 1）；</li>
+<li>任何一个进程，调用管程中的任何过程时，应执行 <code>P(mutex)</code>；进程退出管程时，需要判断是否有进程在 <code>next</code> 信号量等待，如果有（即 <code>next_count&gt;0</code>），则通过 <code>V(next)</code> 唤醒一个发出 <code>signal</code> 的进程，否则应执行 <code>V(mutex)</code> 放管程，以便让其他调用者进入</li>
+<li>为了使进程在等待资源期间，其他进程能进入管程，故在 <code>wait</code> 操作中也必须执行 <code>V(mutex)</code>，否则会妨碍其他进程进入管程，导致无法释放资源</li>
+</ol>
+<h5 id="进程的信号量-next-和计数器-next-count">进程的信号量 <code>next</code> 和计数器 <code>next-count</code></h5>
+<ol>
+<li>对每个管程，引入信号量 <code>next</code>（初值为 0），凡发出 <code>signal</code> 操作的进程应该用 <code>P(next)</code> 阻塞自己，直到被释放进程退出管程或产生其他等待条件</li>
+<li>进程在退出管程的过程前，须检查是否有别的进程在信号量 <code>next</code> 上等待，若有，则用 <code>V(next)</code> 唤醒它。<code>next-count</code>（初值为 0），用来记录在 <code>next</code> 上等待的进程个数</li>
+</ol>
+<h5 id="挂起等待资源的进程的信号量-x-sem-和计数器-x-count">挂起等待资源的进程的信号量 <code>x-sem</code> 和计数器 <code>x-count</code></h5>
+<ol>
+<li>引入信号量 <code>x-sem</code>（初值为 0），申请资源得不到满足时，执行 <code>P(x-sem)</code> 阻塞。由于释放资源时，需要知道是否有别的进程在等待资源，用计数器 <code>x-count</code>（初值为 0）记录等待资源的进程数</li>
+<li>执行 <code>signal()</code> 操作时，应让等待资源的进程中的某个进程立即恢复运行，而不让其他进程抢先进入管程，这可以用 <code>V(x-sem)</code> 来实现</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">// 每个管程定义如下数据结构 ：</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">InterfaceModule</span> &#123;  <span class="hljs-comment">// InterfaceModule 是结构体名字</span><br>	semaphore mutex;			  <span class="hljs-comment">// 进程调用管程过程前使用的互斥信号量</span><br>	semaphore next;				  <span class="hljs-comment">// 发出 signal 的进程阻塞自己的信号量</span><br>	<span class="hljs-type">int</span> next_count;				  <span class="hljs-comment">// 在 next 上等待的进程数</span><br>&#125;;<br><br>mutex = <span class="hljs-number">1</span>;		 <span class="hljs-comment">// mutex = 0 当且仅当管程内有进程</span><br>next = <span class="hljs-number">0</span>;		 <span class="hljs-comment">// next = 1 当且仅当管程内有进程在等待</span><br>next_count = <span class="hljs-number">0</span>;	 <span class="hljs-comment">// 初始化语句</span><br></code></pre></td></tr></table></figure>
+<h4 id="Hoare-管程的-enter-和-leave-操作">Hoare 管程的 <code>enter()</code> 和 <code>leave()</code> 操作</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">enter</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-built_in">P</span>(IM.mutex);  <span class="hljs-comment">// 如果当前管程当中还有进程在等待，则当前进程在进入管程之前阻塞自己</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">leave</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;  <span class="hljs-comment">// 当前进程执行完毕，准备离开管程</span><br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)		   <span class="hljs-comment">// 判断是否有正在等待的进程</span><br>		<span class="hljs-built_in">V</span>(IM.next);				   <span class="hljs-comment">// 有就释唤醒一个正在等待的进程</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="Hoare-管程的-wait-操作">Hoare 管程的 <code>wait()</code> 操作</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cpp">semaphore x_sem = <span class="hljs-number">0</span>;	  <span class="hljs-comment">// 与资源相关的信号量，初始化为 0</span><br><span class="hljs-type">int</span> x_count = <span class="hljs-number">0</span>;	  <span class="hljs-comment">// 在 x_sem 上等待的进程数</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">wait</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	x_count++;				<span class="hljs-comment">// 等资源进程个数加 1，x_count 初始化为 0</span><br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)	<span class="hljs-comment">// 判断是否有等待的进程</span><br>		<span class="hljs-built_in">V</span>(IM.next);			<span class="hljs-comment">// 有就唤醒一个等待中的管程</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>	<span class="hljs-built_in">P</span>(x_sem);		  <span class="hljs-comment">// 等资源进程阻塞自己</span><br>	x_count--;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="Hoare-管程的-signal-操作">Hoare 管程的 <code>signal()</code> 操作</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">signal</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (x_count &gt; <span class="hljs-number">0</span>) &#123;	  <span class="hljs-comment">// 判断是否有等待资源的进程</span><br>		IM.next_count++;  <span class="hljs-comment">// 等待的进程个数加 1</span><br>		<span class="hljs-built_in">V</span>(x_sem);		  <span class="hljs-comment">// 释放一个等资源的进程</span><br>		<span class="hljs-built_in">P</span>(IM.next);		  <span class="hljs-comment">// 发出 signal，进程阻塞自己</span><br>		IM.next_count--;  <span class="hljs-comment">// 等待的进程个数减 1</span><br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<img src="/62127/68.png" style="zoom:50%;">
+<h4 id="合并汇总">合并汇总</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">enter</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-built_in">P</span>(IM.mutex);  <span class="hljs-comment">// 如果当前管程当中还有进程在等待，则当前进程在进入管程之前阻塞自己</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">leave</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;  <span class="hljs-comment">// 当前进程执行完毕，准备离开管程</span><br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)		   <span class="hljs-comment">// 判断是否有正在等待的进程</span><br>		<span class="hljs-built_in">V</span>(IM.next);				   <span class="hljs-comment">// 有就释唤醒一个正在等待的进程</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>&#125;<br><br>semaphore x_sem = <span class="hljs-number">0</span>;  <span class="hljs-comment">// 与资源相关的信号量，初始化为 0</span><br><span class="hljs-type">int</span> x_count = <span class="hljs-number">0</span>;	  <span class="hljs-comment">// 在 x_sem 上等待的进程数</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">wait</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	x_count++;				<span class="hljs-comment">// 等资源进程个数加 1，x_count 初始化为 0</span><br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)	<span class="hljs-comment">// 判断是否有等待的进程</span><br>		<span class="hljs-built_in">V</span>(IM.next);			<span class="hljs-comment">// 有就唤醒一个等待中的管程</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>	<span class="hljs-built_in">P</span>(x_sem);		  <span class="hljs-comment">// 等资源进程阻塞自己</span><br>	x_count--;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">signal</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (x_count &gt; <span class="hljs-number">0</span>) &#123;	  <span class="hljs-comment">// 判断是否有等待资源的进程</span><br>		IM.next_count++;  <span class="hljs-comment">// 等待的进程个数加 1</span><br>		<span class="hljs-built_in">V</span>(x_sem);		  <span class="hljs-comment">// 释放一个等资源的进程</span><br>		<span class="hljs-built_in">P</span>(IM.next);		  <span class="hljs-comment">// 发出 signal，进程阻塞自己</span><br>		IM.next_count--;  <span class="hljs-comment">// 等待的进程个数减 1</span><br>	&#125;<br>&#125;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">InterfaceModule</span> &#123;  <span class="hljs-comment">// InterfaceModule 是结构体的名字</span><br>	semaphore mutex;			  <span class="hljs-comment">// 进程调用管程过程前使用的互斥信号量</span><br>	semaphore next;				  <span class="hljs-comment">// 发出 signal 的进程挂起自己的信号量</span><br>	<span class="hljs-type">int</span> next_count;<br>&#125;;	<span class="hljs-comment">// 在 next 上等待的进程数</span><br><span class="hljs-comment">// 初始化语句</span><br>mutex = <span class="hljs-number">1</span>;<br>next = <span class="hljs-number">0</span>;<br>next_count = <span class="hljs-number">0</span>;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">enter</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-built_in">P</span>(IM.mutex);  <span class="hljs-comment">// 判有否发出过 signal 的进程</span><br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">leave</span><span class="hljs-params">(InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)<br>		<span class="hljs-built_in">V</span>(IM.next);	 <span class="hljs-comment">// 有就释放一个发出过 signal 的进程</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>&#125;<br><br>semaphore x_sem;  <span class="hljs-comment">// 与资源相关的信号量</span><br><span class="hljs-type">int</span> x_count = <span class="hljs-number">0</span>;  <span class="hljs-comment">// 在 x_sem 上等待的进程数</span><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">wait</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	x_count++;				<span class="hljs-comment">// 等资源进程个数加 1，x_count 初始化为 0</span><br>	<span class="hljs-keyword">if</span> (IM.next_count &gt; <span class="hljs-number">0</span>)	<span class="hljs-comment">// 判断是否有发出过 signal 的进程</span><br>		<span class="hljs-built_in">V</span>(IM.next);			<span class="hljs-comment">// 有就释放一个</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">V</span>(IM.mutex);  <span class="hljs-comment">// 否则开放管程</span><br>	<span class="hljs-built_in">P</span>(x_sem);		  <span class="hljs-comment">// 等资源进程阻塞自己，x_sem 初始化为 0</span><br>	x_count--;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">signal</span><span class="hljs-params">(semaphore&amp; x_sem, <span class="hljs-type">int</span>&amp; x_count, InterfaceModule&amp; IM)</span> </span>&#123;<br>	<span class="hljs-keyword">if</span> (x_count &gt; <span class="hljs-number">0</span>) &#123;	  <span class="hljs-comment">// 判断是否有等待资源的进程</span><br>		IM.next_count++;  <span class="hljs-comment">// 发出 signal 进程个数加 1</span><br>		<span class="hljs-built_in">V</span>(x_sem);		  <span class="hljs-comment">// 释放一个等资源的进程</span><br>		<span class="hljs-built_in">P</span>(IM.next);		  <span class="hljs-comment">// 发出 signal 进程阻塞自己</span><br>		IM.next_count--;  <span class="hljs-comment">// 发出 signal 进程个数减 1</span><br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="管程求解进程同步与互斥问题">管程求解进程同步与互斥问题</h3>
+<p>互斥问题：</p>
+<ol>
+<li>读者写者问题</li>
+<li>哲学家就餐问题</li>
+</ol>
+<p>同步问题：</p>
+<ol>
+<li>生产者-消费者问题</li>
+<li>苹果-桔子问题</li>
+</ol>
+<h4 id="霍尔管程求解读者-写者问题-写者优先">霍尔管程求解读者/写者问题-写者优先</h4>
+<img src="/62127/71.png" style="zoom:50%;">
+<img src="/62127/72.png" style="zoom: 50%;">
+<h4 id="霍尔管程求解哲学家就餐问题">霍尔管程求解哲学家就餐问题</h4>
+<img src="/62127/70.png" style="zoom:50%;">
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">cobegin</span><br><span class="hljs-function">process <span class="hljs-title">philosopher_i</span><span class="hljs-params">()</span> </span>&#123;<br>L:<br>    <span class="hljs-built_in">thinking</span>();<br>    dining_philosopers.<span class="hljs-built_in">pickup</span>(i);<br>    <span class="hljs-built_in">eating</span>();<br>    dining_philosophers.<span class="hljs-built_in">putdown</span>(i);<br>    <span class="hljs-keyword">goto</span> L;<br>&#125;<br>coend<br></code></pre></td></tr></table></figure>
+<h4 id="AND-型信号量（课本-188-189-第-53-题）">AND 型信号量（课本 188-189 第 53 题）</h4>
+<p>求解可以使用 AND 型信号量 SP 和 SV 操作</p>
+<ol>
+<li><code>SP(fork[i], fork[(i+1)%5])</code></li>
+<li><code>SV(fork[i], fork[(i+1)%5])</code></li>
+</ol>
+<h4 id="霍尔管程解决生产者消费者问题">霍尔管程解决生产者消费者问题</h4>
+<img src="/62127/73.png" style="zoom:50%;">
+<h4 id="霍尔管程求解苹果桔子问题">霍尔管程求解苹果桔子问题</h4>
+<ol>
+<li>桌上有一只盘子，每次只能放入一只水果。爸爸专向盘子中放苹果（apple)，妈妈专向盘子中放桔子（orange），一个儿子专等吃盘子中的桔子，一个女儿专等吃盘子里的苹果。使用 Hoare 管程求解该问题</li>
+<li>SP：盘子</li>
+<li>SS：桔子</li>
+<li>SD：苹果</li>
+</ol>
+<img src="/62127/74.png" style="zoom:50%;">
+<h2 id="进程通信（信息传递）">进程通信（信息传递）</h2>
+<h3 id="进程通信的概念">进程通信的概念</h3>
+<ol>
+<li>交往进程通过<strong>信号量操作</strong>实现进程互斥和同步，这是一种低级通信方式</li>
+<li>进程有时还需要交换<strong>更多</strong>的信息（如把数据传送给另一个进程），可以引进高级通信方式：<strong>进程通信机制</strong>，实现进程间用<strong>信件</strong>来交换信息，进程通信扩充了并发进程的<strong>数据共享</strong></li>
+<li>通信方式包括很多种
+<ol>
+<li>信号通信机制：只能发送单个信号</li>
+<li>管道通信机制</li>
+<li>消息传递机制</li>
+<li>信号量通信机制</li>
+<li>共享内存通信机制。</li>
+</ol>
+</li>
+<li>当进程互相交互时，必须满足两个基本要求：<strong>同步和通信</strong>
+<ol>
+<li>为实施互斥，进程间需要同步</li>
+<li>为了协作，进程间需要交换信息</li>
+</ol>
+</li>
+<li>消息传递提供了这些功能，最典型的消息传递原语
+<ol>
+<li>send：发送消息的原语</li>
+<li>receive：接收消息的原语</li>
+</ol>
+</li>
+</ol>
+<h3 id="信号通信机制">信号通信机制</h3>
+<h4 id="软中断（P152-页）">软中断（P152 页）</h4>
+<p>信号是一种软中断，用于内核或进程对某个进程发出中断，向进程通知某个特定事件的发生或迫使进程执行信号处理程序。</p>
+<p>中断和信号：</p>
+<ol>
+<li>相同：
+<ol>
+<li>概念上一致</li>
+<li>异步过程</li>
+<li>均采用向量表</li>
+<li>均有屏蔽设施</li>
+</ol>
+</li>
+<li>不同：
+<ol>
+<li>中断由硬件和软件结合实现，信号完全依靠软件实现。</li>
+<li>中断向量和中断处理程序均位于系统空间；信号向量表位于用系统空间，但信号处理程序由应用程序提供，在用户空间处理。</li>
+</ol>
+</li>
+</ol>
+<h3 id="信号通信机制-2">信号通信机制</h3>
+<ol>
+<li>用户、内核和进程都可以生成和发送信号。</li>
+<li>由进程执行指令而产生的信号称为同步信号，如除以 0；</li>
+<li>像击键之类的进程之外的事件所引起的信号叫做异步信号。</li>
+</ol>
+<img src="/62127/110.png" style="zoom:50%;">
+<h3 id="消息格式">消息格式</h3>
+<img src="/62127/76.png" style="zoom:50%;">
+<h3 id="进程直接通信">进程直接通信</h3>
+<ol>
+<li>发送或接收信件的进程指出信件发给谁或从谁那里接收信件
+<ol>
+<li>send（P, 信件）：把信件发送给进程 P</li>
+<li>receive（Q, 信件）：从进程 Q 接收信件</li>
+</ol>
+</li>
+<li>对称直接寻址，发送进程和接收进程必须<strong>命名对方</strong>以便通信，原语 send() 和 receive()义如下：
+<ol>
+<li>send(P, messsage) 发送消息到进程 P</li>
+<li>receive(Q, message) 接收来自进程 Q 的消息</li>
+</ol>
+</li>
+<li>非对称直接寻址，<strong>只要发送者命名接收者，而接收者不需要命名发送者</strong>，send() receive()义如下：
+<ol>
+<li>send(P, messsage) 发送消息到进程 P</li>
+<li>receive(<strong>id</strong>, message) 接收来自任何进程的消息，变量 id 置成与其通信的进程名称</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/75.png" style="zoom:50%;">
+<h3 id="进程间接通信">进程间接通信</h3>
+<ol>
+<li>发送或者接收信件通过<strong>一个信箱</strong>来进行，该信箱有<strong>唯一标识符</strong></li>
+<li>消息不是直接从发送者发送到接收者，而是发送到由<strong>临时保存这些消息的队列组成的一个共享数据结构</strong>，这些队列通常成为<strong>信箱</strong>（mailbox）</li>
+<li>一个进程给合适的信箱发送消息，另一进程从信箱中获得消息。</li>
+<li>信箱为操作系统所有是指由操作系统统一<strong>设置信箱</strong>，归<strong>系统</strong>所有，供相互通信的进程共享，<strong>消息缓冲机制</strong>就是一个著名的例子。</li>
+<li>一个进程为其他进程提供服务，此时信箱又叫做<strong>端口（port）</strong></li>
+<li>间接通信的 send() receive()义如下：
+<ol>
+<li>send(A,message)：把一封信件（消息）传送到信箱 A，本身执行包含两种情况
+<ol>
+<li>同步的（阻塞型），等待进程回答消息才继续。</li>
+<li>异步的（非阻塞型），不等待进程回答，先继续执行，之后再回来处理。</li>
+</ol>
+</li>
+<li>receive(A,message)：从信箱 A 接收一封信件（消息）
+<ol>
+<li>同步的（阻塞型），没有信息则挂起，知道有信息进入，如果有消息立即返回</li>
+<li>异步的（非阻塞型），查询信箱后，进程立即返还控制权，如果有消息则返回消息，否则返回标志码。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>一般我们选择<strong>非阻塞式</strong>send 和<strong>阻塞式</strong>receive：发送可以一直发送信息直到满，接受通常是服务器进程，知道有信息才被唤醒。</li>
+<li>“发送”和“接收”两条原语的功能为：
+<ol>
+<li>发送信件：如果指定的信箱未满，则将信件送入信箱中由指针所指示的位置，并释放等待该信箱中信件的等待者；否则，发送信件者被置成等待信箱状态</li>
+<li>接收信件：如果指定信箱中有信，则取出一封信件，并释放等待信箱的等待者，否则，接收信件者被置成等待信箱中信件的状态</li>
+</ol>
+</li>
+<li>send 和 receive 的代码实现</li>
+</ol>
+<img src="/62127/77.png" style="zoom:50%;">
+<h4 id="间接通信的信箱">间接通信的信箱</h4>
+<ol>
+<li>信箱是存放信件的存储区域，每个信箱可以分成信箱特征和信箱体两部分
+<ol>
+<li>信箱头指出信箱容量、信件格式、存放信件位置的指针等</li>
+<li>信箱体用来存放信件，信箱体分成若干个区，每个区可容纳一封信</li>
+</ol>
+</li>
+</ol>
+<h4 id="发送信件原语的处理流程">发送信件原语的处理流程</h4>
+<ol>
+<li>若指定的信箱未满</li>
+<li>则把信件送入信箱中指针所指示的位置，释放等待该信箱中信件的等待者</li>
+<li>否则，发送信件者被置成等待信箱的状态</li>
+</ol>
+<h4 id="接收信件原语的处理流程">接收信件原语的处理流程</h4>
+<ol>
+<li>若指定信箱中有信件</li>
+<li>则取出一封信件，释放等待信箱的等待者</li>
+<li>否则，接收信件者被置成等待信箱中信件的状态</li>
+</ol>
+<h3 id="管道和套接字">管道和套接字</h3>
+<ol>
+<li>管道（pipeline）是 Unix 和 C 的传统通信方式
+<ol>
+<li>进程通过管道读写数据时，另一个进程需要等待</li>
+<li>发送者和接收者必须都知道对方存在</li>
+<li>发送者和接受者之间要实现正确的同步关系</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/111.png" style="zoom:50%;">
+<ol start="2">
+<li>套接字（socket）起源于 Unix BSD 版本，目前已经被 Unix 和 Windows 操作系统广泛采用，并支持 TCP/IP 协议，即支持本机的进程间通信，也支持网络级的进程间通信</li>
+<li>管道和套接字都是基于信箱的消息传递方式的一种<strong>变体</strong>，它们与传统的信箱方式等价，区别在于没有预先设定消息的边界。换言之，如果一个进程发送 10 条 100 字节的消息，而另一个进程接收 1000 个字节，那么接收者将一次获得 10 条消息</li>
+</ol>
+<h2 id="消息传递通信机制">消息传递通信机制</h2>
+<ol>
+<li>消息传递的复杂性在于地址空间隔离，发送进程无法将信息直接复制到接收空间的地址空间中，需要由操作系统完成。</li>
+<li>消息缓冲是在 1973 年由 P.B.Hansan 提出的一种进程间高级通信设施，并在 RC4000 系统中实现</li>
+<li>消息缓冲通信的基本思想是：由操作系统统一管理一组用于通信的消息缓冲存储区，每一个消息缓冲存储区可存放一个消息（信件）。当一个进程要发送消息时，先在自己的消息发送区里生成待发送的消息，包括：接收进程名、消息长度、消息正文等。然后，向系统申请一个消息缓冲区，把消息从发送区复制到消息缓冲区中，注意在复制过程中系统会将接收进程名换成发送进程名，以便接收者识别。随后该消息缓冲区被挂到接收消息的进程的消息队列上，供接收者在需要时从消息队列中摘下并复制到消息接收区去使用，同时释放消息缓冲区。</li>
+</ol>
+<h3 id="消息缓冲通信">消息缓冲通信</h3>
+<ol>
+<li>消息缓冲通信涉及的数据结构：
+<ol>
+<li>sender：发送消息的进程名或标识符</li>
+<li>size：发送的消息长度</li>
+<li>text：发送的消息正文</li>
+<li>next-ptr：指向下一个消息缓冲区的指针</li>
+</ol>
+</li>
+<li>在进程的 PCB 中涉及通信的数据结构：
+<ol>
+<li>mptr：消息队列队首指针</li>
+<li>mutex：消息队列互斥信号量，初值为 1</li>
+<li>sm：表示接收进程消息队列上消息的个数，初值为 0，是控制收发进程同步的信号量</li>
+</ol>
+</li>
+<li>发送原语和接收原语的实现如下：
+<ol>
+<li>发送原语 Send：申请一个消息缓冲区，把发送区内容复制到这个缓冲区中；找到接收进程的 PCB，执行互斥操作 P(mutex)；把缓冲区挂到接收进程消息队列的尾部，执行 V(sm)、即消息数加 1；执行 V(mutex)</li>
+<li>接收原语 Receive：执行 P(sm)看有否信件；执行互斥操作 P(mutex)，从消息队列中摘下第一个消息，执行 V(mutex)；把消息缓冲区内容复制到接收区，释放消息缓冲区</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/79.png" style="zoom:50%;">
+<h3 id="消息传递机制解决进程互斥和同步问题">消息传递机制解决进程互斥和同步问题</h3>
+<h4 id="解决进程互斥问题">解决进程互斥问题</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">create_mailbox</span>(box);<br><span class="hljs-built_in">send</span> (box，null)；<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Pi</span><span class="hljs-params">()</span> </span>&#123; <span class="hljs-comment">/*i = l,2,...，n*/</span><br>   message msg；<br>   <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>)&#123;<br>      <span class="hljs-built_in">receive</span>(box，msg)；<br>      <span class="hljs-comment">/* 临界区 */</span> ;<br>      <span class="hljs-built_in">send</span>( box,msg)；<br>   &#125;<br>&#125;<br><span class="hljs-function">cobegin</span><br><span class="hljs-function">   <span class="hljs-title">Pi</span><span class="hljs-params">()</span></span>;<br>coend<br></code></pre></td></tr></table></figure>
+<ol>
+<li>阻塞式 receive()语和非阻塞式 send()语。</li>
+<li>消息可以看做是传递的令牌</li>
+</ol>
+<h3 id="消息传递求解生产者消费者问题">消息传递求解生产者消费者问题</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span> capacity;                    <span class="hljs-comment">/* 缓冲区最多个数 */</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">producer</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>&#123;             <span class="hljs-comment">/* 生产者进程 */</span><br>   <span class="hljs-type">int</span> item;<br>   message m;                    <span class="hljs-comment">/* 消息缓冲区 */</span><br>   <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>)&#123;<br>      item = <span class="hljs-built_in">produce_item</span>();     <span class="hljs-comment">/* 生产消息 */</span><br>      <span class="hljs-built_in">receive</span>(consumer, &amp;m);     <span class="hljs-comment">/* 等待消费者发送空缓冲区 */</span><br>      <span class="hljs-built_in">build_message</span>( &amp;m，item);  <span class="hljs-comment">/* 构造一条发送的消息 */</span><br>      <span class="hljs-built_in">send</span>(consumer, &amp;m);        <span class="hljs-comment">/*发送消息给消费者*/</span><br>   &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">consumer</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span></span>&#123;             <span class="hljs-comment">/*消费者进程*/</span><br>   <span class="hljs-type">int</span> item,i ;<br>   message m;<br>   <span class="hljs-keyword">for</span>(i = <span class="hljs-number">0</span>; i &lt; capacity ; i++)<br>      <span class="hljs-built_in">send</span> (producer，&amp;m);       <span class="hljs-comment">/*给消费者发送空缓冲区*/</span><br>   <span class="hljs-keyword">while</span>(<span class="hljs-literal">true</span>)&#123;<br>      <span class="hljs-built_in">receive</span>( producer,&amp;m);     <span class="hljs-comment">/*接收含有 item 的消息*/</span><br>      item = <span class="hljs-built_in">extract_item</span>(&amp;m);   <span class="hljs-comment">/*从 item 取消息*/</span><br>      <span class="hljs-built_in">send</span>(producer,&amp;m);        <span class="hljs-comment">/*回送空缓冲区给生产者*/</span><br>      <span class="hljs-built_in">consume_item</span>(item);        <span class="hljs-comment">/*使用消息*/</span><br>   &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol>
+<li>consumer 发送 capacity 条空消息，生产者对信息加工后给消费者。</li>
+<li>通过上面方式，整体信息数不变。</li>
+</ol>
+<h2 id="高级进程通信机制">高级进程通信机制</h2>
+<h3 id="基于流的进程通信">基于流的进程通信</h3>
+<ol>
+<li>多个进程使用一个共享的消息缓冲区（可称为管道、多路转接器、套接字）</li>
+<li>一些进程往消息缓冲区中写入字符流（send/write）</li>
+<li>一些进程从消息缓冲区中读出字符流（receive/read）</li>
+<li>信息交换单位基于字符流，长度任意</li>
+</ol>
+<h3 id="基于字符流的进程通信规约">基于字符流的进程通信规约</h3>
+<img src="/62127/21.png" style="zoom:50%;">
+<h3 id="远程过程调用-RPC（Remote-Procedure-Call）">远程过程调用 RPC（Remote Procedure Call）</h3>
+<ol>
+<li>采用<strong>客户/服务器</strong>计算模式</li>
+<li><strong>服务器进程</strong>提供一系列<strong>过程/服务</strong>，供客户进程调用</li>
+<li><strong>客户进程</strong>通过调用服务器进程提供的<strong>过程/服务</strong>获得服务</li>
+<li>考虑到客户计算机和服务器计算机的硬件异构型，外部数据表示 XDR 被引入来转换每台计算机的特殊数据格式为标准数据格式</li>
+</ol>
+<h3 id="RPC-执行步骤">RPC 执行步骤</h3>
+<ol>
+<li>客户进程以普通方式调用客户存根</li>
+<li>客户存根组织 RPC 消息并执行 Send，激活内核程序</li>
+<li>内核把消息通过网络发送到远地内核</li>
+<li>远地内核把消息送到服务器存根</li>
+<li>服务器存根取出消息中参数后调用服务器过程</li>
+<li>服务器过程执行完后把结果返回至服务器存根</li>
+<li>服务器存根进程将它打包并激活内核程序</li>
+<li>服务器内核把消息通过网络发送至客户机内核</li>
+<li>客户内核把消息交给客户存根</li>
+<li>客户存根从消息中取出结果返回给客户进程</li>
+<li>客户进程获得控制权并得到了过程调用的结果</li>
+</ol>
+<h3 id="基于-RPC-XDR-的高级通信规约">基于 RPC/XDR 的高级通信规约</h3>
+<img src="/62127/22.png" style="zoom:50%;">
+<h2 id="死锁的产生">死锁的产生</h2>
+<h3 id="死锁的产生-2">死锁的产生</h3>
+<ol>
+<li>允许多个进程并发执行共享系统资源时，系统必须提供<strong>同步</strong>机制和<strong>进程通信</strong>机制</li>
+<li>然而，对这种机制使用不当的话，可能会出现进程永远被阻塞的现象</li>
+<li>例如，两个进程<strong>分别等待对方占有</strong>的一个资源，于是两者都不能执行而处于永远等待，这种现象称为“死锁”</li>
+</ol>
+<h4 id="例-1-进程推进顺序不当产生死锁">例 1-进程推进顺序不当产生死锁</h4>
+<p>设系统有打印机、绘图仪各一台，被进程 Q1 和 Q2 共享。两个进程并发执行，按下列次序请求和释放资源：</p>
+<img src="/62127/81.png" style="zoom:50%;">
+<p>进程资源轨迹图：</p>
+<img src="/62127/82.png" style="zoom:50%;">
+<h4 id="例-2-PV-操作使用不当产生死锁">例 2-PV 操作使用不当产生死锁</h4>
+<img src="/62127/83.png" style="zoom:67%;">
+<h4 id="例-3-资源分配不当引起死锁">例 3-资源分配不当引起死锁</h4>
+<p>若系统中有 m 个资源被 n 个进程共享，每个进程都要求 k 个资源，而 m &lt; nK 时，即资源数小于进程所要求的总数时，如果分配不得当就可能引起死锁</p>
+<h4 id="例-4-对临时性资源使用不加限制引起死锁">例 4-对临时性资源使用不加限制引起死锁</h4>
+<p>进程通信使用的信件是一种临时性资源，如果对信件的发送和接收不加限制，可能引起死锁。</p>
+<p>进程 P1 等待进程 P3 的信件 S3 来到后再向进程 P2 发送信件 S1；P2 又要等待 P1 的信件 S1 来到后再向 P3 发送信件 S2；而 P3 也要等待 P2 的信件 S2 来到后才能发出信件 S3。这种情况下形成了<strong>循环等</strong>待，产生死锁。</p>
+<h4 id="独木桥（例）">独木桥（例）</h4>
+<p>只能在一个方向行车，可能发生死锁，也可能发生饥饿。</p>
+<h3 id="死锁的定义">死锁的定义</h3>
+<p>一组进程处于死锁状态是指：每一个进程都在等待被另一个进程所占有的、不能抢占的资源。例如，</p>
+<ol>
+<li>存在 n 个进程 P1, P2, …, Pn</li>
+<li>进程 Pi 因为申请不到资源 Ri 而处于等待状态</li>
+<li>而 Ri 又被 Pi+1 占有，Rn 被 P1 占有</li>
+<li>显然，这 n 个进程的等待状态永远不能结束，</li>
+<li>这 n 个进程就处于死锁状态</li>
+</ol>
+<p>操作系统中的死锁指：如果在一个进程集合中的每个进程都在<strong>等待只能由该集合中的其他一个进程才能引发</strong>的事件，则称<strong>一组进程或系统</strong>此时发生<strong>死锁</strong>。</p>
+<p>例如，n 个进程 P1，P2，…，Pn，Pi 因为申请不到资源 Rj 而处于等待状态，而 Rj 又被 Pi+1 占有，Pn 欲申请的资源被 P1 占有，此时这 n 个进程的等待状态永远不能结束，则说这 n 个进程处于死锁状态。</p>
+<h3 id="解决死锁问题的三个方法">解决死锁问题的三个方法</h3>
+<p>综合上面的例子，产生死锁的因素不仅与系统拥有的资源数量有关，而且与资源分配策略，进程对资源的使用要求以及并发进程的推进顺序有关</p>
+<p>可从三个方面来解决死锁问题：</p>
+<ol>
+<li>死锁防止</li>
+<li>死锁避免</li>
+<li>死锁检测和恢复</li>
+</ol>
+<h3 id="死锁产生的四个必要条件">死锁产生的四个必要条件</h3>
+<ol>
+<li>互斥条件： 进程应互斥使用资源，任一时刻一个资源仅为一个进程独占</li>
+<li>占有和等待条件： 一个进程请求资源得不到满足而等待时，不释放已占有的资源</li>
+<li>不可剥夺条件： 任一进程不能从另一进程那里抢夺资源</li>
+<li>循环等待条件： 存在一个循环等待链，每一个进程分别等待它前一个进程所持有的资源</li>
+</ol>
+<p>前三个是死锁存在的必要条件，但不是充分条件，第四个条件是前三个条件同时存在时所产生的结果。</p>
+<h3 id="死锁的防止">死锁的防止</h3>
+<p>破坏四个必要条件之一，死锁就可防止。</p>
+<h4 id="破坏第一个条件-资源共享化">破坏第一个条件-资源共享化</h4>
+<p>使资源可同时访问而不是互斥使用。</p>
+<p>可再入程序、只读数据文件、时钟、磁盘等<strong>软硬件资源</strong>均可用这种办法管理，但有许多资源如可写文件、磁带机等由于特殊性质决定<strong>只能互斥占有</strong>，而不能被同时访问，所以这种做法许多场合行不通。</p>
+<h4 id="破坏第二个条件-静态分配">破坏第二个条件-静态分配</h4>
+<p><strong>静态分配</strong>是指进程<strong>在执行中不再申请资源</strong>，就不会出现占有某些资源再等待另一些资源的情况。所有并发执行的进程要求的资源总和不超过系统拥有的资源数。</p>
+<p>静态分配实现简单，被许多操作系统采用，但会严重地<strong>降低</strong>资源利用率，因为在每个进程占有的资源中，有些资源在运行后期使用，甚至有些资源在例外情况（极个别情况）下才被使用，可能造成进程占有一些几乎不用的资源，而使其他想用这些资源的进程产生等待。</p>
+<h4 id="破坏第三个条件-剥夺式调度">破坏第三个条件-剥夺式调度</h4>
+<p>采用剥夺式调度方法，适用于内存和处理器资源，不适用于所有资源。</p>
+<p>方法：</p>
+<ol>
+<li>如果要申请新的资源，必须主动释放已占用资源（剥夺式），若仍需要占用此资源，则需要重新发起申请。</li>
+<li>资源管理程序为进程分配新资源时，若有资源则分配，否则将剥夺进程已占有的全部资源，并让进程进入等待资源状态，资源充足后再唤醒它重新申请所有需要的资源。</li>
+</ol>
+<h4 id="破坏第四个条件-层次分配和按序分配">破坏第四个条件-层次分配和按序分配</h4>
+<p>上述死锁防止办法造成资源利用率和吞吐率低。介绍两种比较实用的死锁防止方法</p>
+<p>采用层次分配策略：</p>
+<ol>
+<li>在层次分配策略下，资源被分成多个层</li>
+<li>一个进程得到某一层的一个资源后，它只能<strong>再申请在较高层</strong>的资源</li>
+<li>当一个进程要释放某层的一个资源时，必须先<strong>释放所占用的较高层</strong>的资源</li>
+<li>当一个进程获得了<strong>某一层</strong>的一个资源后，它想再申请该层中的另一个资源，那么，必须先释放该层中的已占资源</li>
+</ol>
+<p>层次策略的变种按序分配策略：</p>
+<ol>
+<li>把系统的所有资源排一个顺序，例如，系统若共有 n 个进程，共有 m 个资源，用 $r_i$ 表示第 i 个资源，于是这 m 个资源是：$r_1, r_2, ..., r_m$</li>
+<li>规定如果进程不得在占用资源 $r_i(1\leq i \leq m)$ 后再申请 $r_j(j&lt;i)$。不难证明，按这种策略分配资源时系统不会发生死锁。</li>
+</ol>
+<h3 id="死锁的避免">死锁的避免</h3>
+<ol>
+<li>当不能防止死锁的产生时，如果能掌握并发进程中与每个进程有关的<strong>资源申请情况</strong>，仍然可以避免死锁的发生</li>
+<li>只需在为申请者分配资源前先测试系统状态，若把资源分配给申请者会产生死锁的话，则拒绝分配，否则接收申请，为它分配资源。</li>
+</ol>
+<h4 id="银行家算法（资源分配拒绝法）">银行家算法（资源分配拒绝法）</h4>
+<ol>
+<li>银行家算法：
+<ol>
+<li>银行家拥有一笔周转资金，借钱给有偿还能力的客户</li>
+<li>客户要求分期贷款，如果客户能够得到各期贷款，就一定能够归还贷款，否则就一定不能归还贷款</li>
+<li>银行家应谨慎的贷款，防止出现坏帐</li>
+</ol>
+</li>
+<li>用银行家算法避免死锁：
+<ol>
+<li>操作系统（银行家）</li>
+<li>操作系统管理的资源（周转资金）</li>
+<li>进程（要求贷款的客户）</li>
+</ol>
+</li>
+<li>银行家算法允许前三个必要条件存在，通过核实的资源分配算法<strong>确保不会出现进程循环等待链</strong>，从而避免死锁。</li>
+<li>系统首先检查申请者对资源的最大需求量
+<ol>
+<li>如果现存的资源可以满足它的最大需求量时，就满足当前的申请</li>
+<li>如果不能则拒绝启动该进程。</li>
+</ol>
+</li>
+<li>换言之，仅仅在申请者可能<strong>无条件</strong>地归还它所申请的全部资源时，才分配资源给它。</li>
+</ol>
+<h4 id="银行家算法的数据结构">银行家算法的数据结构</h4>
+<p>一个系统有 $n$ 个进程和 $m$ 种不同类型的资源，定义包含以下向量和矩阵的数据结构：</p>
+<ol>
+<li>系统中每类资源总数向量：$Resource=(R_1,R_2,...,R_m)$</li>
+<li>系统中每类资源当前可用数向量：$Available=(V_1,V_2,...,V_m)$</li>
+<li>每个进程对各类资源的最大需求矩阵：$Claim[i,j]$，如果 $Claim[i,j]=k$ 表示进程 $P_i$ 需要 $R_j$ 类资源的最大数目为 $k$ 个。</li>
+<li>每个进程已占有各类资源数量矩阵：$Allocation[i,j]$，若 $Allocation[i,j] = k$ 表示进程 $P_i$ 占有 $R_j$ 类资源 $k$ 个，初始值为 0。</li>
+<li>每个进程尚需要各类资源数量矩阵 $Need[i,j]$，若 $Need[i,j] = k$ 表示进程 $P_i$ 还需要 $R_j$ 类资源 $k$ 个。$Need[i,j] = Claim[i,j] - Allocation[i,j]$</li>
+<li>每个进程从当前申请各类资源数量矩阵 $Request[i,j]$，若 $Request[i, j] = k$，表示进程 $P_i$ 当前申请 $R_j$ 类资源 $k$ 个。</li>
+</ol>
+<h4 id="银行家算法中下列关系式确保成立">银行家算法中下列关系式确保成立</h4>
+<p>系统要启动一个新进程工作（第 $n+1$ 个），对于资源 $Resource[i]$ 即 $R_i$ 的最大需求需求满足不等式：</p>
+<p>$$
+Claim[(n+1), i] \le R_i - \sum\limits_{k=1}\limits^nClaim[k, i]
+$$</p>
+<p>也就是应当满足当前系统中所有进程对资源 $R_i$ 的最大需求数，加上启动的新进程的资源最大需求数，不超过系统拥有的最大资源数时才启动该进程（进程拒绝启动法）。</p>
+<p>算法性质：</p>
+<ol>
+<li>$\forall 1 \le i \le m, 1 \le k \le n. R_i=V_i+\sum A_{ki}$ 表示所有资源要么被分配、要么尚可分配；</li>
+<li>$C_{ki} \leq R_i$ 对 $i=1,..,m, k=1,..,n$ 表示进程申请资源数不能超过系统拥有的资源总数；</li>
+<li>$A_{ki} \leq C_{ki}$ 对 $i=1,..,m,k=1,..,n$ 表示进程申请任何类资源数不能超过声明的最大资源需求数；</li>
+</ol>
+<h4 id="系统安全性">系统安全性</h4>
+<p>系统安全性定义：在时刻 $T_0$ 系统是安全的,仅当存在一个进程序列 $P_1,..,P_n$，对进程 $P_k$ 满足公式：</p>
+<p>$$
+\forall 1 \le i \le m, 1 \le k \le n.Need[k, i] \leq Available[i] + \sum\limits_{j=1}\limits^{k-1}Allocation[j, i]
+$$</p>
+<p>即，从该时刻开始，有一种合法的进程调度序列，使得对于每个进程，所需要的资源数目都不高于当前可用资源加上前面的进程释放的资源之和。</p>
+<h4 id="银行家算法的基本思想">银行家算法的基本思想</h4>
+<ol>
+<li>系统中的所有进程进入进程集合。</li>
+<li>在<strong>安全状态</strong>下系统收到进程的资源请求后，先把资源<strong>试探性</strong>分配给它。</li>
+<li>系统用剩下的可用资源和进程集合中其他进程还要的资源数作比较，在进程集合中找到剩余资源能满足最大需求量的进程（从而，保证这个进程运行完毕并归还全部资源）</li>
+<li>把这个进程从集合中去掉，系统的剩余资源更多了，反复执行上述步骤。（进程退出系统，资源回收）</li>
+<li>最后，检查进程集合，若为空表明本次申请可行，系统处于安全状态，可实施本次分配;否则，有进程执行不完，系统处于<strong>不安全</strong>状态，本次资源分配暂不实施，让申请进程等待。</li>
+<li>注：安全序列是不唯一的，2019 年有考察。</li>
+</ol>
+<h4 id="银行家算法的程序及实现">银行家算法的程序及实现</h4>
+<p><img src="/62127/112.png" alt></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">state</span> &#123;<span class="hljs-comment">//全局数据结构</span><br>   <span class="hljs-type">int</span> resource[m];<br>   <span class="hljs-type">int</span> available[m];<br>   <span class="hljs-type">int</span> claim[n][m];<br>   <span class="hljs-type">int</span> allocation[n][m];<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">resource_allocation</span><span class="hljs-params">()</span> </span>&#123; <span class="hljs-comment">//资源分配算法</span><br>   <span class="hljs-keyword">if</span>(allocation[i,*]+request[*]&gt;claim[i,*])<br>      &#123;error&#125;; <span class="hljs-comment">//申请量超过最大需求值</span><br>   <span class="hljs-keyword">else</span> &#123;<br>      <span class="hljs-keyword">if</span>(request[*]&gt;available[*])<br>         &#123;suspend process.&#125;;<br>      <span class="hljs-keyword">else</span> &#123; <span class="hljs-comment">//尝试分配，define newstate by:</span><br>         allocation[i,*]=allocation[i,*]+request[*];<br>         available[*]=available[*]-request[*];<br>      &#125;<br>   &#125;<br>   <span class="hljs-keyword">if</span>(<span class="hljs-built_in">safe</span>(newstate))<br>      &#123;carry out allocation&#125;;<br>   <span class="hljs-keyword">else</span> &#123;<br>      &#123;restore original state&#125;;<br>      &#123;suspend process&#125;;<br>   &#125;<br>&#125;<br><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">safe</span><span class="hljs-params">(state s)</span> </span>&#123; <span class="hljs-comment">//安全性测试算法</span><br>   <span class="hljs-type">int</span> currentavail[m];<br>   set &lt;process&gt; rest;<br>   currentavail[*]=available[*];<br>   rest=&#123;all process&#125;;<br>   possible=<span class="hljs-literal">true</span>;<br>   <span class="hljs-keyword">while</span>(possible)&#123; <span class="hljs-comment">//rest 中找一个 Pk，满足以下条件</span><br>      claim[k,*]-allocation[k,*]&lt;=currentavail[*]<br>      <span class="hljs-keyword">if</span>(found)&#123;<br>         currentavail[*]=currentavail[*]+allocation[k,*];<br>         rest=rest-&#123;Pk&#125;;<br>      &#125;<span class="hljs-keyword">else</span>&#123;<br>         possible=<span class="hljs-literal">false</span>;<br>      &#125;<br>   &#125;<br>   <span class="hljs-keyword">return</span>(rest=null);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="银行家算法例子">银行家算法例子</h4>
+<h5 id="银行家算法例-1">银行家算法例 1</h5>
+<table>
+<thead>
+<tr>
+<th><img src="/62127/25.png" alt></th>
+<th><img src="/62127/26.png" alt></th>
+</tr>
+</thead>
+</table>
+<p>P 或者 R 再申请资源时，不能分配，因为现在只剩下 2 个资源，不能满足它们的最大需求</p>
+<h5 id="实例说明系统所处的安全或不安全状态（1）">实例说明系统所处的安全或不安全状态（1）</h5>
+<ol>
+<li>如果系统中共有五个进程和 A、B、C 三类资源</li>
+<li>A 类资源共有 10 个,B 类资源共有 5 个,C 类资源共有 7 个</li>
+<li>在时刻$T_0$,系统目前资源分配情况如下：</li>
+</ol>
+<img src="/62127/86.png" style="zoom: 33%;">
+<img src="/62127/87.png" style="zoom:33%;">
+<ol>
+<li>可以断言目前系统处于安全状态，因为序列$\set{P_1,P_3,P_4,P_2,P_0}$能满足安全性条件</li>
+</ol>
+<img src="/62127/88.png" style="zoom:33%;">
+<ol start="2">
+<li>假设$P_1$又请求 1 个 A 类资源和 2 个 c 类资源，得到新的状态如下图所示：
+<ol>
+<li>$Request1(1, 0, 2) \leq Need(1, 2, 2)$</li>
+<li>$Request1(1, 0, 2) \leq Available(3, 3, 2)$</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/89.png" style="zoom:33%;">
+<ol start="3">
+<li>判定新状态是否安全?可执行安全性测试算法，找到一个进程序列$\set{P_1,P_3,P_4,P_0,P_2}$能满足安全性条件，所以可正式把资源分配给进程 P1；</li>
+</ol>
+<img src="/62127/90.png" style="zoom:33%;">
+<ol start="4">
+<li>假设$P_4$发起资源请求，按照银行家算法检查，资源不足不予以分配
+<ol>
+<li>$Request4(3, 3, 0) \leq Need(4, 3, 1)$</li>
+<li>$Request4(3, 3, 0) &gt; Available(2, 3, 0)$</li>
+</ol>
+</li>
+<li>假设$P_0$发起资源请求，按照银行加算法检查，得到中间结果如下
+<ol>
+<li>$Request0(0, 2, 0) \leq Need(7, 3, 1)$</li>
+<li>$Request0(0, 2, 0) \leq Available(2, 3, 0)$</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/91.png" style="zoom:33%;">
+<h3 id="死锁的检测">死锁的检测</h3>
+<h4 id="死锁的检测-2">死锁的检测</h4>
+<ol>
+<li>解决死锁问题的另一条途径是<strong>死锁检测方法</strong></li>
+<li>这种方法对资源的分配不加限制，但系统定时运行一个“<strong>死锁检测</strong>”程序，判断系统内是否已出现死锁，若检测到死锁则设法加以解除</li>
+<li>检测的一种方法：可设置两张表格来记录进程使用资源的情况
+<ol>
+<li>等待资源表记录每个被<strong>阻塞进程等待</strong>的资源</li>
+<li>占用资源表记录每个进程<strong>占有</strong>的资源</li>
+</ol>
+</li>
+<li>进程申请资源时，先查该资源<strong>是否为其它进程所占用</strong>
+<ol>
+<li>若资源空闲，则把该资源分配给申请者且登入占用资源表</li>
+<li>否则，则登入进程等待资源表</li>
+</ol>
+</li>
+</ol>
+<img src="/62127/27.png" style="zoom:33%;">
+<ol>
+<li>死锁检测程序定时检测这两张表，若有进程$P_i$等待资源$r_k$，且$r_k$被进程$P_j$占用，则说$P_i$和$P_j$具有“等待占用关系”，记为$W(P_i, P_j)$</li>
+<li>死锁检测程序反复检测这两张表，可以列出所有的“<strong>等待占用</strong>关系”</li>
+<li>如果出现$W(P_i, P_j)，W(P_j, P_k)，...，W(P_m,P_n)，W(P_n, P_i)$时，显然，系统中存在一组循环等待资源的进程：$P_i，P_j，P_k，...，P_m，P_n$，也就是说出现了死锁</li>
+</ol>
+<h4 id="资源分配图与死锁定理">资源分配图与死锁定理</h4>
+<ol>
+<li>资源分配图的图例
+<ol>
+<li>每个资源用一个<strong>方框</strong>表示</li>
+<li>方框中的<strong>黑圆点</strong>表示此资源类中的各个资源</li>
+<li>每个进程用一个<strong>圆圈</strong>表示</li>
+<li><strong>有向边</strong>表示进程申请资源和资源被分配情况</li>
+</ol>
+</li>
+<li>约定$P_i\rightarrow R_j$为请求边，表示进程$P_i$申请资源类$R_j$中的一个资源得不到满足而处于等待$R_j$类资源的状态，该有向边从进程开始指到方框的边缘，表示进程$P_i$申请$R_j$类中的一个资源。</li>
+<li>$Rj\rightarrow Pi$为分配边，表示$R_j$类中的一个资源已被进程$P_i$占用，由于已把一个具体的资源分给了进程 Pi，故该有向边从方框内的某个黑圆点出发指向进程。</li>
+</ol>
+<img src="/62127/92.png" style="zoom: 25%;">
+<ol>
+<li>图 3.6 中存在环路，经过分析是存在死锁的</li>
+<li>图 3.7 中存在环路，但是经过分析是不存在死锁的，因为$R_1$和$R_2$资源都不只一个，$P_2$和$P_4$进程归还后是可以避免的。</li>
+<li>我们可以用矩阵和向量来求解，手机图片</li>
+</ol>
+<h5 id="死锁检测算法">死锁检测算法</h5>
+<ol>
+<li>如果进程-资源分配图中无环路，此时系统没有发生死锁。</li>
+<li>如果进程-资源分配图中有环路，且每个资源都只有一个资源则发生死锁。</li>
+<li>如果进程-资源分配图中有环路，且所涉及资源有多个资源，则未必发生死锁，需要具体问题具体分析：可以通过消去法来判断，消去即不阻塞其他进程又与其他进程相关的进程的所有请求边和分配边，得到一个孤立点。接着将等待资源的进程分配后再次消去，如果最后所有的进程都成为孤立点则是无死锁的，图是可完全简化的，否则图是不可以完全简化的。</li>
+</ol>
+<h5 id="死锁定理">死锁定理</h5>
+<p>系统为死锁状态的充分条件是：当且仅当该状态的进程-资源分配图是<strong>不可完全简化</strong>的。该充分条件称为死锁定理</p>
+<p><img src="/62127/113.png" alt></p>
+<h4 id="死锁检测的数据结构">死锁检测的数据结构</h4>
+<p>把两张表格中记录的进程使用和等待资源的情况用一个矩阵 A 来表示</p>
+<img src="/62127/28.png" style="zoom: 33%;">
+<h4 id="死锁检测程序可用-Warshall-的传递闭包算法">死锁检测程序可用 Warshall 的传递闭包算法</h4>
+<ol>
+<li>检测是否有死锁发生，即对矩阵 $A$ 构造传递闭包$A^*[bij]$</li>
+<li>$A^*[bij]$中的每个$bij$是对$A[bij]$执行如下算法</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">for k:=1 to n do<br>   for i:=1 to n do<br>      for j:=1 to do<br>         bij:= bij 并 (bik 并 bkj)<br></code></pre></td></tr></table></figure>
+<h3 id="死锁检测和恢复">死锁检测和恢复</h3>
+<ol>
+<li>死锁被检测到后可以通过各种方法来解除系统死锁以恢复到可运行状态，方法有资源剥夺法、进程回退法、进程撤销法和系统重启法。
+<ol>
+<li>资源剥夺法：剥夺陷于死锁的进程所占用的资源，但并不撤销此进程，直至死锁解除。可仿照撤销陷于死锁的进程那样来选择剥夺资源的进程。</li>
+<li>进程回退法：根据系统保存的检查点让所有进程回退，直到足以解除死锁，这种措施要求系统建立保存检査点、回退及重启机制。</li>
+<li>进程撤销法：
+<ol>
+<li>撤销陷于死锁的<strong>所有进程</strong>，解除死锁，继续运行。</li>
+<li>逐个撤销<strong>陷于死锁</strong>的进程，回收其资源并<strong>重新分派</strong>，直至死锁解除。但是究竟先撤销哪个死锁进程呢？可选择符合下面条件之一的进程先撤销： PU 消耗时间最少者、产生的输出量最少者、预计剩余执行时间最长者、分得的资源数量最少者或优先级最低者。</li>
+</ol>
+</li>
+<li>系统重启法：结束所有进程的执行并<strong>重新启动</strong>操作系统。这种方法很简单，但先前的工作全部作废，损失很大。</li>
+</ol>
+</li>
+<li>检测死锁是否出现和发现死锁后实现恢复的代价大于防止和避免死锁花费的代价，但是这样的代价是值得的，因为死锁不是经常出现的。
+<ol>
+<li>检测策略的代价依赖于<strong>死锁出现的频率</strong></li>
+<li>恢复的代价是指处理器<strong>时间的损失</strong>。</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/7962/" rel="prev" title="Lab5-函数和变量">
+      <i class="fa fa-chevron-left"></i> Lab5-函数和变量
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/19232/" rel="next" title="B 站自定义倍速播放">
+      B 站自定义倍速播放 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">并发进程程序设计的概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">顺序程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.1.</span> <span class="nav-text">顺序程序设计的特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%B9%B6%E5%8F%91%E6%89%A7%E8%A1%8C"><span class="nav-number">1.2.</span> <span class="nav-text">进程的并发执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%BC%95%E5%85%A5%E4%BE%8B"><span class="nav-number">1.3.</span> <span class="nav-text">并发程序设计的引入例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-2"><span class="nav-number">1.3.1.</span> <span class="nav-text">顺序程序设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%BE%8B%E5%AD%90"><span class="nav-number">1.3.2.</span> <span class="nav-text">并发程序设计例子</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.4.</span> <span class="nav-text">并发程序设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.4.1.</span> <span class="nav-text">并发程序设计的特性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%B6%E7%BA%A6%E5%85%B3%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">并发进程的制约关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E5%85%B3%E4%B8%8E%E4%BA%A4%E5%BE%80%E7%9A%84%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B"><span class="nav-number">2.1.</span> <span class="nav-text">无关与交往的并发进程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E6%97%B6%E9%97%B4%E6%9C%89%E5%85%B3%E7%9A%84%E9%94%99%E8%AF%AF"><span class="nav-number">2.2.</span> <span class="nav-text">与时间有关的错误</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF%E7%9A%84%E4%BE%8B%E5%AD%90%EF%BC%9A%E6%9C%BA%E7%A5%A8%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.1.</span> <span class="nav-text">结果错误的例子：机票问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B0%B8%E8%BF%9C%E7%AD%89%E5%BE%85%E7%9A%84%E4%BE%8B%E5%AD%90%EF%BC%9A%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.2.</span> <span class="nav-text">永远等待的例子：内存管理问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E4%BA%A4%E4%BA%92%EF%BC%9A%E8%BF%9B%E7%A8%8B%E4%BA%92%E6%96%A5%E4%B8%8E%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5"><span class="nav-number">2.3.</span> <span class="nav-text">进程的交互：进程互斥与进程同步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E4%BA%92%E6%96%A5%EF%BC%88%E7%AB%9E%E4%BA%89%EF%BC%89"><span class="nav-number">2.3.1.</span> <span class="nav-text">进程互斥（竞争）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AB%9E%E4%BA%89%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">竞争带来的问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AB%9E%E4%BA%89%E5%85%B3%E7%B3%BB%EF%BC%9A%E6%AD%BB%E9%94%81"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">竞争关系：死锁</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5%EF%BC%88%E5%8D%8F%E4%BD%9C%EF%BC%89"><span class="nav-number">2.3.2.</span> <span class="nav-text">进程同步（协作）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">2.3.3.</span> <span class="nav-text">并发进程之间的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C%E5%BF%99%E5%BC%8F%E7%AD%89%E5%BE%85%E2%80%9D%E6%96%B9%E6%B3%95%E8%A7%A3%E5%86%B3%E4%B8%B4%E7%95%8C%E5%8C%BA%E8%B0%83%E5%BA%A6%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">2.3.4.</span> <span class="nav-text">“忙式等待”方法解决临界区调度的缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B%E8%AE%BE%E8%AE%A1%E6%8E%A7%E5%88%B6"><span class="nav-number">2.3.5.</span> <span class="nav-text">并发进程设计控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%97%A0%E5%85%B3%E6%80%A7"><span class="nav-number">2.4.</span> <span class="nav-text">进程的无关性 *</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Bernstein-%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.4.1.</span> <span class="nav-text">Bernstein 条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bernstein-%E6%9D%A1%E4%BB%B6%E4%BE%8B%E5%AD%90"><span class="nav-number">2.4.2.</span> <span class="nav-text">Bernstein 条件例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">2.4.3.</span> <span class="nav-text">并发程序设计的优点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.5.</span> <span class="nav-text">顺序程序设计与并发程序设计 *</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA"><span class="nav-number">3.</span> <span class="nav-text">临界区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E4%B8%8E%E4%B8%B4%E7%95%8C%E5%8C%BA"><span class="nav-number">3.1.</span> <span class="nav-text">互斥与临界区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%9A%84%E6%8F%8F%E8%BF%B0"><span class="nav-number">3.2.</span> <span class="nav-text">临界区的描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%E7%9A%84%E4%B8%89%E4%B8%AA%E8%A6%81%E6%B1%82%EF%BC%88Dijkstra%EF%BC%8C1965%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">临界区管理的三个要求（Dijkstra，1965）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">3.4.</span> <span class="nav-text">临界区的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%9A%84%E5%B5%8C%E5%A5%97%E4%BD%BF%E7%94%A8"><span class="nav-number">3.5.</span> <span class="nav-text">临界区的嵌套使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%B0%9D%E8%AF%95"><span class="nav-number">4.</span> <span class="nav-text">临界区管理实现的尝试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%EF%BC%9A%E5%B0%9D%E8%AF%95%E4%B8%80"><span class="nav-number">4.1.</span> <span class="nav-text">临界区管理：尝试一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%EF%BC%9A%E5%B0%9D%E8%AF%95%E4%BA%8C"><span class="nav-number">4.2.</span> <span class="nav-text">临界区管理：尝试二</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="nav-number">4.3.</span> <span class="nav-text">解决思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E7%AE%97%E6%B3%95%EF%BC%9Apeterson-%E7%AE%97%E6%B3%95"><span class="nav-number">4.3.1.</span> <span class="nav-text">解决算法：peterson 算法 *</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0%E7%9A%84%E7%A1%AC%E4%BB%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">临界区管理实现的硬件方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%B8%AD%E6%96%AD"><span class="nav-number">5.1.</span> <span class="nav-text">关中断 *</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%B8%AD%E6%96%AD%E6%96%B9%E6%B3%95%E4%BC%98%E7%82%B9"><span class="nav-number">5.1.1.</span> <span class="nav-text">关中断方法优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%B8%AD%E6%96%AD%E6%96%B9%E6%B3%95%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">5.1.2.</span> <span class="nav-text">关中断方法的缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%B9%B6%E5%BB%BA%E7%AB%8B%E6%8C%87%E4%BB%A4"><span class="nav-number">5.2.</span> <span class="nav-text">测试并建立指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%8D%A2%E6%8C%87%E4%BB%A4"><span class="nav-number">5.3.</span> <span class="nav-text">对换指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%B4%E7%95%8C%E5%8C%BA%E7%AE%A1%E7%90%86%E7%9A%84%E7%A1%AC%E4%BB%B6%E8%AE%BE%E6%96%BD"><span class="nav-number">5.4.</span> <span class="nav-text">实现临界区管理的硬件设施</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PV-%E6%93%8D%E4%BD%9C%E4%B8%8E%E8%BF%9B%E7%A8%8B%E4%BA%92%E6%96%A5"><span class="nav-number">6.</span> <span class="nav-text">PV 操作与进程互斥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA"><span class="nav-number">6.1.</span> <span class="nav-text">问题的提出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%92%8C%E5%90%8C%E6%AD%A5%E6%9C%BA%E5%88%B6"><span class="nav-number">6.2.</span> <span class="nav-text">同步和同步机制 *</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E6%9E%84%E6%80%9D"><span class="nav-number">6.3.</span> <span class="nav-text">信号量的构思</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%9E%8B%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">6.3.1.</span> <span class="nav-text">记录型信号量的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PV-%E5%8E%9F%E8%AF%AD%E6%93%8D%E4%BD%9C%E5%90%AB%E4%B9%89%E5%8F%8A%E5%85%B6%E4%BC%AA%E4%BB%A3%E7%A0%81"><span class="nav-number">6.3.2.</span> <span class="nav-text">PV 原语操作含义及其伪代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9A%E4%BA%8C%E5%80%BC%E4%BF%A1%E5%8F%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89"><span class="nav-number">6.3.3.</span> <span class="nav-text">补充：二值信号量数据结构定义 *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E-PV-%E6%93%8D%E4%BD%9C%E7%AE%A1%E7%90%86%E4%B8%B4%E7%95%8C%E8%B5%84%E6%BA%90%E7%9A%84%E7%9A%84%E4%B8%BE%E4%BE%8B%EF%BC%88%E7%81%AB%E8%BD%A6%E4%B8%8A%E7%9A%84%E5%8D%AB%E7%94%9F%E9%97%B4%EF%BC%89"><span class="nav-number">6.3.4.</span> <span class="nav-text">信号量与 PV 操作管理临界资源的的举例（火车上的卫生间） *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E5%8C%96%E6%A8%A1%E5%9E%8B%E5%8F%8A%E5%85%B6%E9%98%9F%E5%88%97%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.4.</span> <span class="nav-text">信号量与进程状态转化模型及其队列模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.4.1.</span> <span class="nav-text">信号量与进程状态转换模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E6%A8%A1%E5%9E%8B%EF%BC%88%E9%98%9F%E5%88%97%E6%A8%A1%E5%9E%8B%EF%BC%89"><span class="nav-number">6.4.2.</span> <span class="nav-text">信号量与进程状态转换模型（队列模型）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E-PV-%E6%93%8D%E4%BD%9C%E7%9A%84%E6%8E%A8%E8%AE%BA"><span class="nav-number">6.5.</span> <span class="nav-text">信号量与 PV 操作的推论</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">6.6.</span> <span class="nav-text">信号量的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%B8%80%E8%88%AC%E7%BB%93%E6%9E%84"><span class="nav-number">6.6.1.</span> <span class="nav-text">信号量程序设计的一般结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F%E4%B8%8E-PV-%E6%93%8D%E4%BD%9C%E6%8E%A7%E5%88%B6%E5%B9%B6%E5%8F%91%E8%BF%9B%E7%A8%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E4%B8%B4%E7%95%8C%E8%B5%84%E6%BA%90"><span class="nav-number">6.6.2.</span> <span class="nav-text">信号量与 PV 操作控制并发进程之间的临界资源</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E4%BA%92%E6%96%A5%E9%97%AE%E9%A2%98"><span class="nav-number">6.7.</span> <span class="nav-text">求解互斥问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A3%9E%E6%9C%BA%E7%A5%A8%E9%97%AE%E9%A2%98"><span class="nav-number">6.7.1.</span> <span class="nav-text">飞机票问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%93%B2%E5%AD%A6%E5%AE%B6%E5%B0%B1%E9%A4%90%E9%97%AE%E9%A2%98"><span class="nav-number">6.7.2.</span> <span class="nav-text">哲学家就餐问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%87%B3%E5%A4%9A%E5%85%81%E8%AE%B8%E5%9B%9B%E4%BD%8D%E5%93%B2%E5%AD%A6%E5%AE%B6%E5%90%8C%E6%97%B6%E5%8F%96%E5%8F%89%E5%AD%90"><span class="nav-number">6.7.2.1.</span> <span class="nav-text">至多允许四位哲学家同时取叉子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%99%90%E5%88%B6%E5%A5%87%E6%95%B0%E5%93%B2%E5%AD%A6%E5%AE%B6%E4%BC%98%E5%85%88%E5%8F%96%E5%B7%A6%E6%89%8B%EF%BC%8C%E5%81%B6%E6%95%B0%E5%93%B2%E5%AD%A6%E5%AE%B6%E4%BC%98%E5%85%88%E5%8F%96%E5%8F%B3%E6%89%8B"><span class="nav-number">6.7.2.2.</span> <span class="nav-text">限制奇数哲学家优先取左手，偶数哲学家优先取右手</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98"><span class="nav-number">6.8.</span> <span class="nav-text">求解同步问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85%E4%B8%8E%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">6.8.1.</span> <span class="nav-text">生产者与消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%94%9F%E4%BA%A7%E8%80%85%E3%80%81%E4%B8%80%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E3%80%81%E4%B8%80%E4%B8%AA%E7%BC%93%E5%86%B2%E5%8D%95%E5%85%83"><span class="nav-number">6.8.1.1.</span> <span class="nav-text">一个生产者、一个消费者、一个缓冲单元</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%94%9F%E4%BA%A7%E8%80%85%E3%80%81%E4%B8%80%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E3%80%81%E5%A4%9A%E4%B8%AA%E7%BC%93%E5%86%B2%E5%8D%95%E5%85%83"><span class="nav-number">6.8.1.2.</span> <span class="nav-text">一个生产者、一个消费者、多个缓冲单元</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%9A%E4%B8%AA%E7%94%9F%E4%BA%A7%E8%80%85%E3%80%81%E5%A4%9A%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E3%80%81%E5%A4%9A%E4%B8%AA%E7%BC%93%E5%86%B2%E5%8D%95%E5%85%83"><span class="nav-number">6.8.1.3.</span> <span class="nav-text">多个生产者、多个消费者、多个缓冲单元</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8B%B9%E6%9E%9C-%E6%A1%94%E5%AD%90%E9%97%AE%E9%A2%98"><span class="nav-number">6.8.2.</span> <span class="nav-text">苹果-桔子问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">6.9.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E4%B9%A0%E9%A2%98%E8%AE%B2%E8%A7%A3"><span class="nav-number">7.</span> <span class="nav-text">并发程序设计习题讲解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%87%8F-%E5%89%8D%E9%A9%B1%E5%85%B3%E7%B3%BB"><span class="nav-number">7.1.</span> <span class="nav-text">信号量-前驱关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E8%80%85-%E5%86%99%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">7.2.</span> <span class="nav-text">读者&#x2F;写者问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E8%80%85%E4%BC%98%E5%85%88"><span class="nav-number">7.2.1.</span> <span class="nav-text">读者优先</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%99%E8%80%85%E4%BC%98%E5%85%88"><span class="nav-number">7.2.2.</span> <span class="nav-text">写者优先</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E5%85%AC%E5%B9%B3"><span class="nav-number">7.2.3.</span> <span class="nav-text">读写公平</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9D%A1%E7%9C%A0%E7%9A%84%E7%90%86%E5%8F%91%E5%B8%88%E9%97%AE%E9%A2%98"><span class="nav-number">7.3.</span> <span class="nav-text">睡眠的理发师问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%9C%E5%A4%AB%E7%8C%8E%E4%BA%BA%E9%97%AE%E9%A2%98"><span class="nav-number">7.4.</span> <span class="nav-text">农夫猎人问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E4%B8%9A%E5%8A%A1%E9%97%AE%E9%A2%98"><span class="nav-number">7.5.</span> <span class="nav-text">银行业务问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA%E7%AE%A1%E7%90%86"><span class="nav-number">7.6.</span> <span class="nav-text">缓冲区管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%94%AE%E7%A5%A8%E9%97%AE%E9%A2%98"><span class="nav-number">7.7.</span> <span class="nav-text">售票问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%B8%E7%83%9F%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">7.8.</span> <span class="nav-text">吸烟者问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%E9%97%AE%E9%A2%98"><span class="nav-number">7.9.</span> <span class="nav-text">独木桥问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%E9%97%AE%E9%A2%98-1"><span class="nav-number">7.9.1.</span> <span class="nav-text">独木桥问题 1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%E9%97%AE%E9%A2%98-2"><span class="nav-number">7.9.2.</span> <span class="nav-text">独木桥问题 2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%E9%97%AE%E9%A2%98-3"><span class="nav-number">7.9.3.</span> <span class="nav-text">独木桥问题 3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%E9%97%AE%E9%A2%98-4"><span class="nav-number">7.9.4.</span> <span class="nav-text">独木桥问题 4</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B"><span class="nav-number">8.</span> <span class="nav-text">管程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E7%9A%84%E6%8F%90%E5%87%BA"><span class="nav-number">8.1.</span> <span class="nav-text">管程的提出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E5%92%8C%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F"><span class="nav-number">8.2.</span> <span class="nav-text">管程和条件变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E5%AE%9A%E4%B9%89%E5%92%8C%E5%B1%9E%E6%80%A7"><span class="nav-number">8.3.</span> <span class="nav-text">管程定义和属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E7%9A%84%E5%BD%A2%E5%BC%8F"><span class="nav-number">8.4.</span> <span class="nav-text">管程的形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">8.5.</span> <span class="nav-text">管程的结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E7%9A%84%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F"><span class="nav-number">8.6.</span> <span class="nav-text">管程的条件变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E5%92%8C%E8%BF%9B%E7%A8%8B%E5%AF%B9%E6%AF%94"><span class="nav-number">8.7.</span> <span class="nav-text">管程和进程对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%88Hoare-%E6%96%B9%E6%B3%95%EF%BC%89"><span class="nav-number">8.8.</span> <span class="nav-text">管程的实现（Hoare 方法）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Hoare-%E7%AE%A1%E7%A8%8B%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">8.8.1.</span> <span class="nav-text">Hoare 管程的数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E4%BF%A1%E5%8F%B7%E9%87%8F-mutex"><span class="nav-number">8.8.1.1.</span> <span class="nav-text">互斥信号量 mutex</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9A%84%E4%BF%A1%E5%8F%B7%E9%87%8F-next-%E5%92%8C%E8%AE%A1%E6%95%B0%E5%99%A8-next-count"><span class="nav-number">8.8.1.2.</span> <span class="nav-text">进程的信号量 next 和计数器 next-count</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%82%E8%B5%B7%E7%AD%89%E5%BE%85%E8%B5%84%E6%BA%90%E7%9A%84%E8%BF%9B%E7%A8%8B%E7%9A%84%E4%BF%A1%E5%8F%B7%E9%87%8F-x-sem-%E5%92%8C%E8%AE%A1%E6%95%B0%E5%99%A8-x-count"><span class="nav-number">8.8.1.3.</span> <span class="nav-text">挂起等待资源的进程的信号量 x-sem 和计数器 x-count</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hoare-%E7%AE%A1%E7%A8%8B%E7%9A%84-enter-%E5%92%8C-leave-%E6%93%8D%E4%BD%9C"><span class="nav-number">8.8.2.</span> <span class="nav-text">Hoare 管程的 enter() 和 leave() 操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hoare-%E7%AE%A1%E7%A8%8B%E7%9A%84-wait-%E6%93%8D%E4%BD%9C"><span class="nav-number">8.8.3.</span> <span class="nav-text">Hoare 管程的 wait() 操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hoare-%E7%AE%A1%E7%A8%8B%E7%9A%84-signal-%E6%93%8D%E4%BD%9C"><span class="nav-number">8.8.4.</span> <span class="nav-text">Hoare 管程的 signal() 操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%88%E5%B9%B6%E6%B1%87%E6%80%BB"><span class="nav-number">8.8.5.</span> <span class="nav-text">合并汇总</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E7%A8%8B%E6%B1%82%E8%A7%A3%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%AD%A5%E4%B8%8E%E4%BA%92%E6%96%A5%E9%97%AE%E9%A2%98"><span class="nav-number">8.9.</span> <span class="nav-text">管程求解进程同步与互斥问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%8D%E5%B0%94%E7%AE%A1%E7%A8%8B%E6%B1%82%E8%A7%A3%E8%AF%BB%E8%80%85-%E5%86%99%E8%80%85%E9%97%AE%E9%A2%98-%E5%86%99%E8%80%85%E4%BC%98%E5%85%88"><span class="nav-number">8.9.1.</span> <span class="nav-text">霍尔管程求解读者&#x2F;写者问题-写者优先</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%8D%E5%B0%94%E7%AE%A1%E7%A8%8B%E6%B1%82%E8%A7%A3%E5%93%B2%E5%AD%A6%E5%AE%B6%E5%B0%B1%E9%A4%90%E9%97%AE%E9%A2%98"><span class="nav-number">8.9.2.</span> <span class="nav-text">霍尔管程求解哲学家就餐问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AND-%E5%9E%8B%E4%BF%A1%E5%8F%B7%E9%87%8F%EF%BC%88%E8%AF%BE%E6%9C%AC-188-189-%E7%AC%AC-53-%E9%A2%98%EF%BC%89"><span class="nav-number">8.9.3.</span> <span class="nav-text">AND 型信号量（课本 188-189 第 53 题）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%8D%E5%B0%94%E7%AE%A1%E7%A8%8B%E8%A7%A3%E5%86%B3%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">8.9.4.</span> <span class="nav-text">霍尔管程解决生产者消费者问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%8D%E5%B0%94%E7%AE%A1%E7%A8%8B%E6%B1%82%E8%A7%A3%E8%8B%B9%E6%9E%9C%E6%A1%94%E5%AD%90%E9%97%AE%E9%A2%98"><span class="nav-number">8.9.5.</span> <span class="nav-text">霍尔管程求解苹果桔子问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%EF%BC%88%E4%BF%A1%E6%81%AF%E4%BC%A0%E9%80%92%EF%BC%89"><span class="nav-number">9.</span> <span class="nav-text">进程通信（信息传递）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">9.1.</span> <span class="nav-text">进程通信的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="nav-number">9.2.</span> <span class="nav-text">信号通信机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%B8%AD%E6%96%AD%EF%BC%88P152-%E9%A1%B5%EF%BC%89"><span class="nav-number">9.2.1.</span> <span class="nav-text">软中断（P152 页）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6-2"><span class="nav-number">9.3.</span> <span class="nav-text">信号通信机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%A0%BC%E5%BC%8F"><span class="nav-number">9.4.</span> <span class="nav-text">消息格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E7%9B%B4%E6%8E%A5%E9%80%9A%E4%BF%A1"><span class="nav-number">9.5.</span> <span class="nav-text">进程直接通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%97%B4%E6%8E%A5%E9%80%9A%E4%BF%A1"><span class="nav-number">9.6.</span> <span class="nav-text">进程间接通信</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%B4%E6%8E%A5%E9%80%9A%E4%BF%A1%E7%9A%84%E4%BF%A1%E7%AE%B1"><span class="nav-number">9.6.1.</span> <span class="nav-text">间接通信的信箱</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E9%80%81%E4%BF%A1%E4%BB%B6%E5%8E%9F%E8%AF%AD%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-number">9.6.2.</span> <span class="nav-text">发送信件原语的处理流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E4%BF%A1%E4%BB%B6%E5%8E%9F%E8%AF%AD%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-number">9.6.3.</span> <span class="nav-text">接收信件原语的处理流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E9%81%93%E5%92%8C%E5%A5%97%E6%8E%A5%E5%AD%97"><span class="nav-number">9.7.</span> <span class="nav-text">管道和套接字</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="nav-number">10.</span> <span class="nav-text">消息传递通信机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E7%BC%93%E5%86%B2%E9%80%9A%E4%BF%A1"><span class="nav-number">10.1.</span> <span class="nav-text">消息缓冲通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6%E8%A7%A3%E5%86%B3%E8%BF%9B%E7%A8%8B%E4%BA%92%E6%96%A5%E5%92%8C%E5%90%8C%E6%AD%A5%E9%97%AE%E9%A2%98"><span class="nav-number">10.2.</span> <span class="nav-text">消息传递机制解决进程互斥和同步问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E8%BF%9B%E7%A8%8B%E4%BA%92%E6%96%A5%E9%97%AE%E9%A2%98"><span class="nav-number">10.2.1.</span> <span class="nav-text">解决进程互斥问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92%E6%B1%82%E8%A7%A3%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E9%97%AE%E9%A2%98"><span class="nav-number">10.3.</span> <span class="nav-text">消息传递求解生产者消费者问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6"><span class="nav-number">11.</span> <span class="nav-text">高级进程通信机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%B5%81%E7%9A%84%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1"><span class="nav-number">11.1.</span> <span class="nav-text">基于流的进程通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%AD%97%E7%AC%A6%E6%B5%81%E7%9A%84%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1%E8%A7%84%E7%BA%A6"><span class="nav-number">11.2.</span> <span class="nav-text">基于字符流的进程通信规约</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8-RPC%EF%BC%88Remote-Procedure-Call%EF%BC%89"><span class="nav-number">11.3.</span> <span class="nav-text">远程过程调用 RPC（Remote Procedure Call）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RPC-%E6%89%A7%E8%A1%8C%E6%AD%A5%E9%AA%A4"><span class="nav-number">11.4.</span> <span class="nav-text">RPC 执行步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-RPC-XDR-%E7%9A%84%E9%AB%98%E7%BA%A7%E9%80%9A%E4%BF%A1%E8%A7%84%E7%BA%A6"><span class="nav-number">11.5.</span> <span class="nav-text">基于 RPC&#x2F;XDR 的高级通信规约</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="nav-number">12.</span> <span class="nav-text">死锁的产生</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E4%BA%A7%E7%94%9F-2"><span class="nav-number">12.1.</span> <span class="nav-text">死锁的产生</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B-1-%E8%BF%9B%E7%A8%8B%E6%8E%A8%E8%BF%9B%E9%A1%BA%E5%BA%8F%E4%B8%8D%E5%BD%93%E4%BA%A7%E7%94%9F%E6%AD%BB%E9%94%81"><span class="nav-number">12.1.1.</span> <span class="nav-text">例 1-进程推进顺序不当产生死锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B-2-PV-%E6%93%8D%E4%BD%9C%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E4%BA%A7%E7%94%9F%E6%AD%BB%E9%94%81"><span class="nav-number">12.1.2.</span> <span class="nav-text">例 2-PV 操作使用不当产生死锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B-3-%E8%B5%84%E6%BA%90%E5%88%86%E9%85%8D%E4%B8%8D%E5%BD%93%E5%BC%95%E8%B5%B7%E6%AD%BB%E9%94%81"><span class="nav-number">12.1.3.</span> <span class="nav-text">例 3-资源分配不当引起死锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BE%8B-4-%E5%AF%B9%E4%B8%B4%E6%97%B6%E6%80%A7%E8%B5%84%E6%BA%90%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%8A%A0%E9%99%90%E5%88%B6%E5%BC%95%E8%B5%B7%E6%AD%BB%E9%94%81"><span class="nav-number">12.1.4.</span> <span class="nav-text">例 4-对临时性资源使用不加限制引起死锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8B%AC%E6%9C%A8%E6%A1%A5%EF%BC%88%E4%BE%8B%EF%BC%89"><span class="nav-number">12.1.5.</span> <span class="nav-text">独木桥（例）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">12.2.</span> <span class="nav-text">死锁的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%AD%BB%E9%94%81%E9%97%AE%E9%A2%98%E7%9A%84%E4%B8%89%E4%B8%AA%E6%96%B9%E6%B3%95"><span class="nav-number">12.3.</span> <span class="nav-text">解决死锁问题的三个方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E4%BA%A7%E7%94%9F%E7%9A%84%E5%9B%9B%E4%B8%AA%E5%BF%85%E8%A6%81%E6%9D%A1%E4%BB%B6"><span class="nav-number">12.4.</span> <span class="nav-text">死锁产生的四个必要条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E9%98%B2%E6%AD%A2"><span class="nav-number">12.5.</span> <span class="nav-text">死锁的防止</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A0%B4%E5%9D%8F%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%9D%A1%E4%BB%B6-%E8%B5%84%E6%BA%90%E5%85%B1%E4%BA%AB%E5%8C%96"><span class="nav-number">12.5.1.</span> <span class="nav-text">破坏第一个条件-资源共享化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A0%B4%E5%9D%8F%E7%AC%AC%E4%BA%8C%E4%B8%AA%E6%9D%A1%E4%BB%B6-%E9%9D%99%E6%80%81%E5%88%86%E9%85%8D"><span class="nav-number">12.5.2.</span> <span class="nav-text">破坏第二个条件-静态分配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A0%B4%E5%9D%8F%E7%AC%AC%E4%B8%89%E4%B8%AA%E6%9D%A1%E4%BB%B6-%E5%89%A5%E5%A4%BA%E5%BC%8F%E8%B0%83%E5%BA%A6"><span class="nav-number">12.5.3.</span> <span class="nav-text">破坏第三个条件-剥夺式调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A0%B4%E5%9D%8F%E7%AC%AC%E5%9B%9B%E4%B8%AA%E6%9D%A1%E4%BB%B6-%E5%B1%82%E6%AC%A1%E5%88%86%E9%85%8D%E5%92%8C%E6%8C%89%E5%BA%8F%E5%88%86%E9%85%8D"><span class="nav-number">12.5.4.</span> <span class="nav-text">破坏第四个条件-层次分配和按序分配</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E9%81%BF%E5%85%8D"><span class="nav-number">12.6.</span> <span class="nav-text">死锁的避免</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%EF%BC%88%E8%B5%84%E6%BA%90%E5%88%86%E9%85%8D%E6%8B%92%E7%BB%9D%E6%B3%95%EF%BC%89"><span class="nav-number">12.6.1.</span> <span class="nav-text">银行家算法（资源分配拒绝法）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">12.6.2.</span> <span class="nav-text">银行家算法的数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E4%B8%AD%E4%B8%8B%E5%88%97%E5%85%B3%E7%B3%BB%E5%BC%8F%E7%A1%AE%E4%BF%9D%E6%88%90%E7%AB%8B"><span class="nav-number">12.6.3.</span> <span class="nav-text">银行家算法中下列关系式确保成立</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E6%80%A7"><span class="nav-number">12.6.4.</span> <span class="nav-text">系统安全性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%80%9D%E6%83%B3"><span class="nav-number">12.6.5.</span> <span class="nav-text">银行家算法的基本思想</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E7%9A%84%E7%A8%8B%E5%BA%8F%E5%8F%8A%E5%AE%9E%E7%8E%B0"><span class="nav-number">12.6.6.</span> <span class="nav-text">银行家算法的程序及实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E4%BE%8B%E5%AD%90"><span class="nav-number">12.6.7.</span> <span class="nav-text">银行家算法例子</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95%E4%BE%8B-1"><span class="nav-number">12.6.7.1.</span> <span class="nav-text">银行家算法例 1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E8%AF%B4%E6%98%8E%E7%B3%BB%E7%BB%9F%E6%89%80%E5%A4%84%E7%9A%84%E5%AE%89%E5%85%A8%E6%88%96%E4%B8%8D%E5%AE%89%E5%85%A8%E7%8A%B6%E6%80%81%EF%BC%881%EF%BC%89"><span class="nav-number">12.6.7.2.</span> <span class="nav-text">实例说明系统所处的安全或不安全状态（1）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E6%A3%80%E6%B5%8B"><span class="nav-number">12.7.</span> <span class="nav-text">死锁的检测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E7%9A%84%E6%A3%80%E6%B5%8B-2"><span class="nav-number">12.7.1.</span> <span class="nav-text">死锁的检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E5%88%86%E9%85%8D%E5%9B%BE%E4%B8%8E%E6%AD%BB%E9%94%81%E5%AE%9A%E7%90%86"><span class="nav-number">12.7.2.</span> <span class="nav-text">资源分配图与死锁定理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E6%A3%80%E6%B5%8B%E7%AE%97%E6%B3%95"><span class="nav-number">12.7.2.1.</span> <span class="nav-text">死锁检测算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E5%AE%9A%E7%90%86"><span class="nav-number">12.7.2.2.</span> <span class="nav-text">死锁定理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E6%A3%80%E6%B5%8B%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">12.7.3.</span> <span class="nav-text">死锁检测的数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E6%A3%80%E6%B5%8B%E7%A8%8B%E5%BA%8F%E5%8F%AF%E7%94%A8-Warshall-%E7%9A%84%E4%BC%A0%E9%80%92%E9%97%AD%E5%8C%85%E7%AE%97%E6%B3%95"><span class="nav-number">12.7.4.</span> <span class="nav-text">死锁检测程序可用 Warshall 的传递闭包算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%BB%E9%94%81%E6%A3%80%E6%B5%8B%E5%92%8C%E6%81%A2%E5%A4%8D"><span class="nav-number">12.8.</span> <span class="nav-text">死锁检测和恢复</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 软件需求是一个连接现实世界与计算机世界的活动:它既需要从问题出发，分析问题域，研究解决问题所需要的互动效应。 一个产品的开发过程  客户想要什么 产品经理理解 设计师分析 程序员进行编写 交给测试人员测试 商业人员描述这个产品 项目的文档 如何进行部署 价格像过山车一样变化 如何进行支持运维 进行广告宣传">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-05-需求基础">
+<meta property="og:url" content="https://eaglebear2002.github.io/13814/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 软件需求是一个连接现实世界与计算机世界的活动:它既需要从问题出发，分析问题域，研究解决问题所需要的互动效应。 一个产品的开发过程  客户想要什么 产品经理理解 设计师分析 程序员进行编写 交给测试人员测试 商业人员描述这个产品 项目的文档 如何进行部署 价格像过山车一样变化 如何进行支持运维 进行广告宣传">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/1-1676528982199-1021.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/2-1676528982199-1022.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/image-20230706143220518.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/image-20230706143231075.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/image-20230706143246533.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/4-1676528982199-1024.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/5-1676528982199-1025.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/image-20230706143815759.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/7-1676528982200-1026.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/image-20230706143618087.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/13814/9-1676528982200-1028.png">
+<meta property="article:published_time" content="2022-05-31T06:45:11.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.621Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/13814/1-1676528982199-1021.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/13814/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-05-需求基础 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/13814/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-05-需求基础
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 14:45:11" itemprop="dateCreated datePublished" datetime="2022-05-31T14:45:11+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<p>软件需求是一个连接现实世界与计算机世界的活动:它既需要从问题出发，分析问题域，研究解决问题所需要的互动效应。</p>
+<h2 id="一个产品的开发过程">一个产品的开发过程</h2>
+<ol>
+<li>客户想要什么</li>
+<li>产品经理理解</li>
+<li>设计师分析</li>
+<li>程序员进行编写</li>
+<li>交给测试人员测试</li>
+<li>商业人员描述这个产品</li>
+<li>项目的文档</li>
+<li>如何进行部署</li>
+<li>价格像过山车一样变化</li>
+<li>如何进行支持运维</li>
+<li>进行广告宣传</li>
+<li>最后使用用户需要什么</li>
+</ol>
+<h2 id="需求工程的内容">需求工程的内容</h2>
+<h3 id="软件建立的依据">软件建立的依据</h3>
+<p>单纯的软件系统是不能解决问题的，它只有和现实世界之间形成<strong>有效互动</strong>才能实现问题的解决</p>
+<p><img src="/13814/1-1676528982199-1021.png" alt></p>
+<h3 id="需求工程">需求工程</h3>
+<p>需求工程的概念：所有需求处理活动的总和。它<strong>收集</strong>信息、<strong>分析</strong>问题、<strong>整合</strong>观点、记录需求并<strong>验证</strong>其正确性，最终描述出软件被应用后与其环境互动形成的<strong>期望效应</strong>。</p>
+<p>三个主要任务：</p>
+<ol>
+<li>需求工程必须说明软件系统将被应用的应用环境及其<strong>目标</strong>，说明用来达成这些目标的软件功能，也即要同时说明软件“需要<strong>做什么</strong>”和“<strong>为什么</strong>需要做”。</li>
+<li>需求工程必须将目标和功能反映到软件系统当中，映射为<strong>可行的软件行为</strong>，并对软件行为进行准确的<strong>规格说明</strong>。</li>
+<li>现实世界是<strong>不断变化</strong>的世界，因此需求工程还需要妥善处理目标和功能随着时间演化的变动情况。</li>
+</ol>
+<h3 id="需求工程的具体活动">需求工程的具体活动</h3>
+<p><img src="/13814/2-1676528982199-1022.png" alt></p>
+<ol>
+<li>需求要逐步进行<strong>验证</strong>，越早发现 bug 所付出的代价越少。</li>
+<li>需求工程活动包括需求开发和需求管理两部分。</li>
+</ol>
+<h3 id="需求开发过程模型">需求开发过程模型</h3>
+<p><img src="/13814/image-20230706143220518.png" alt></p>
+<ol>
+<li>需求获取是从利益相关人的问题域中提取出来的。</li>
+<li>需求应该是面向很多人的，这样子才能体现出来需求的有用性。</li>
+</ol>
+<h3 id="需求获取">需求获取</h3>
+<ol>
+<li>从<strong>人、文档或者环境</strong>当中获取需求的过程</li>
+<li>要利用各种方法和技术来<strong>发现</strong>需求
+<ul>
+<li>需求是客观存在的，但是一定是由需求开发人员提出的</li>
+</ul>
+</li>
+</ol>
+<h4 id="目标分析">目标分析</h4>
+<ol>
+<li>根据问题确定目标：发现用户的期望和现实之间的差距</li>
+<li>通过分析利害关系人确定目标：一个软件系统可能会有很多的厉害关系人，他们需要从各自立场出发，具有不同的目标要求</li>
+</ol>
+<h4 id="需求获取的常见困难">需求获取的常见困难</h4>
+<ol>
+<li>用户和开发人员的背景不同，立场不同：“床边 B 超，肝胆胰脾”：很难以保证开发人员懂得这句话的含义</li>
+<li>普通用户缺乏<strong>概括性、综合性</strong>的表述能力：不聪明的记者：请别人进行一句话描述</li>
+<li>用户存在<strong>认知困境</strong>：平板电脑,在 ipad 还没有出现的时候</li>
+<li>用户<strong>越俎代庖</strong>：双机热备：如果甲方有一定的经验，我们就是要求系统能够...，至于怎么实现是你开发者的事</li>
+<li><strong>缺乏用户参与</strong>：不愿参与的医生：有一些情况下用户并不愿意参与开发</li>
+</ol>
+<h4 id="用户需求获取的方法">用户需求获取的方法</h4>
+<ol>
+<li>面谈：面对面的会见；问答格式</li>
+<li>问卷：集体获取方法之一</li>
+<li>文档分析</li>
+<li>头脑风暴：特殊的群体面谈方法，目的是发现潜在需求</li>
+<li>专题讨论</li>
+<li>原型：建立一个有形的制品来方便沟通和交流</li>
+</ol>
+<h4 id="以-Story-board-作为原型">以 Story board 作为原型</h4>
+<p><img src="/13814/image-20230706143231075.png" alt></p>
+<h4 id="重新认识需求获取">重新认识需求获取</h4>
+<ol>
+<li>用户和开发人员的背景不同，立场不同：&quot;床边 B 超,肝胆胰脾&quot;：消除默认知识</li>
+<li>普通用户缺乏概括性、综合性的表述能力：不聪明的记者：专业的需求人员</li>
+<li>用户存在认知困境：平板电脑：原型（做一个原型帮助用户理解的草图模型）</li>
+<li>用户越俎代庖
+<ul>
+<li>双机热备：需求是开发人员开发出来的，不是用户提出来的</li>
+<li>我们就是要求系统能够....，至于怎么实现是你开发者的事：协商</li>
+</ul>
+</li>
+<li>缺乏用户参与：不愿参与的医生：为用户参与提供方便</li>
+</ol>
+<h3 id="需求分析">需求分析</h3>
+<ol>
+<li>通过<strong>建模</strong>来整合各种信息，以使得人们更好的理解问题。</li>
+<li>为问题定义出一个需求集合，这个集合能够为问题界定一个有效的<strong>解决方案</strong>。</li>
+<li><strong>检查</strong>需求当中存在的错误、遗漏、不一致等各种缺陷，并加以修正。</li>
+</ol>
+<h4 id="边界分析">边界分析</h4>
+<ol>
+<li>定义项目的范围。系统边界之内定义的是系统需要对外提供的功能。</li>
+<li>系统边界的定义要保证系统能够和周围环境形成有效的互动</li>
+<li>系统用例图、上下文图通常被用来定义系统的边界。</li>
+</ol>
+<h4 id="需求建模">需求建模</h4>
+<ol>
+<li>建模是为展现和解释信息而进行的抽象描述活动</li>
+<li>常用的技术包括类图、顺序图、状态图等建模技术</li>
+<li>在为需求建模时，常用的技术包括<strong>数据流图、实体关系图、状态转换图、类图</strong>等半形式化建模技术。</li>
+</ol>
+<h3 id="需求规格说明">需求规格说明</h3>
+<ol>
+<li>在系统用户之间<strong>交流需求信息</strong></li>
+<li>要简洁、精确、一致和易于理解</li>
+<li>需求工程师在这个阶段的重要工作包括：
+<ol>
+<li>定制文档模版，提高效率</li>
+<li>编写文档（模型预言和自然语言两种）</li>
+</ol>
+</li>
+</ol>
+<h3 id="需求验证">需求验证</h3>
+<ol>
+<li>需求规格说明文档至少要满足下面几个标准：
+<ol>
+<li>文档内每条需求都<strong>正确、准确</strong>的反映了用户的意图；</li>
+<li>文档记录的需求集在整体上具有<strong>完整性和一致性</strong>；</li>
+<li>文档的组织方式和需求的书写方式具有<strong>可读性</strong>和<strong>可修改性（方便保证版本简化）</strong>。</li>
+</ol>
+</li>
+<li>需求验证的方法：包括同级评审、原型、模拟等。</li>
+</ol>
+<h3 id="需求管理">需求管理</h3>
+<ol>
+<li>保证需求作用的持续、稳定和有效发挥：在需求开发活动之后，设计、测试、实现等后续的软件系统开发活动都需要以围绕需求开展工作</li>
+<li>进行变更控制：纳入和实现合理的变更请求，拒绝不合理的变更请求，控制变更的成本和影响范围</li>
+</ol>
+<h2 id="需求基础">需求基础</h2>
+<h3 id="需求重要">需求重要</h3>
+<ol>
+<li>IEEE 对需求的定义为[IEEE610.12-1990]：
+<ol>
+<li>用户为了解决问题或达到某些目标所需要的条件或能力；</li>
+<li>系统或系统部件为了满足合同、标准、规范或其它正式文档所规定的要求而需要具备的条件或能力；</li>
+<li>对 1 或 2 中的一个条件或一种能力的一种文档化表述。</li>
+</ol>
+</li>
+<li>需求是一种期望：源自现实又高于现实，需求是多变和可调整的，项目可以依据实际情况调整需求的实现程度。</li>
+</ol>
+<h3 id="需求的表述方式">需求的表述方式</h3>
+<ol>
+<li>作为一种<strong>期望</strong>，需求通常被表述为&quot;系统应该…&quot;、&quot;在…时，系统应该…&quot;、 &quot;用户可以通过系统…&quot;等，例如 R1。</li>
+<li>R1：系统应该允许顾客退回已经购买的产品。</li>
+</ol>
+<h3 id="软件解决方案">软件解决方案</h3>
+<ol>
+<li>需求是一种<strong>解决问题后所能达到的期望</strong></li>
+<li>一件事情的两面
+<ul>
+<li>问题是糟糕的一面</li>
+<li>需求是理想的一面</li>
+</ul>
+</li>
+</ol>
+<p><img src="/13814/image-20230706143246533.png" alt></p>
+<h3 id="需求开发的目标">需求开发的目标</h3>
+<p><img src="/13814/4-1676528982199-1024.png" alt></p>
+<h3 id="问题域">问题域</h3>
+<ol>
+<li>现实世界运行规律的一种反映</li>
+<li>需求的<strong>产生域</strong>，也是需求的<strong>解决地</strong>。</li>
+<li>最终的软件产品要在现实中部署，它能够部分影响问题域，但不能任意改变现实
+<ul>
+<li>软件开发必须尊重问题域，不能因为技术原因妄自修改现实世界的实际情况。</li>
+</ul>
+</li>
+</ol>
+<h3 id="问题的解决">问题的解决</h3>
+<ol>
+<li>基础：模拟与共享现象</li>
+<li>方法：直接与间接</li>
+<li>解决方案：需求规格说明</li>
+</ol>
+<h3 id="区分需求、问题域和规格说明">区分需求、问题域和规格说明</h3>
+<h4 id="问题域-2">问题域</h4>
+<ol>
+<li>现实世界运行规律的一种反映</li>
+<li>需求的<strong>产生域</strong>，也是需求的<strong>解决地</strong>。</li>
+<li>最终的软件产品要在现实中部署，它能够部分影响问题域，但不能任意改变现实
+<ul>
+<li>软件开发必须尊重问题域，不能因为技术原因妄自修改现实世界的实际情况。</li>
+</ul>
+</li>
+</ol>
+<h4 id="规格说明">规格说明</h4>
+<ol>
+<li>软件产品的方案描述，它以软件产品的运行机制为主要内容。</li>
+<li>它不是需求但实现需求，不是问题域但需要与问题域互动。</li>
+<li>规格说明要以关注<strong>对外交互</strong>的方式描述软件解决方案，它既需要从软件产品的角度而不是用户的角度进行描述，又不能太多地涉及软件产品的内部构造机制。</li>
+<li>为什么描述的是交互?
+<ul>
+<li>因为交互对我们而言是一个对外的重要展示。</li>
+</ul>
+</li>
+</ol>
+<h3 id="超市销售系统">超市销售系统</h3>
+<ol>
+<li>问题：超市的成本太高</li>
+<li>需求：超市的成本应该降低：比较笼统</li>
+<li>问题域：超市的成本主要由人力成本和库存成本组成</li>
+<li>规格说明
+<ul>
+<li>库存预测：大致进行推测</li>
+<li>库存报警</li>
+</ul>
+</li>
+</ol>
+<p><img src="/13814/5-1676528982199-1025.png" alt></p>
+<h2 id="三种需求层次：业务需求、用户需求、系统级需求（需求的层次性）">三种需求层次：业务需求、用户需求、系统级需求（需求的层次性）</h2>
+<p>题型：给出一个实例，给出三个层次的例子，对给定的需求实例，判断其层次</p>
+<img src="/13814/image-20230706143815759.png" style="zoom: 67%;">
+<h3 id="业务需求（目标，解决方案与系统特性）">业务需求（目标，解决方案与系统特性）</h3>
+<ol>
+<li>业务需求是高层次的解决方案和系统特性、系统开发的战略出发点、高层次的需求，描述为什么要开发系统。</li>
+<li>为什么是系统特性？因为还没有到细节的部分</li>
+<li>特性说明了系统为用户提供的各项功能，它限定了系统的<strong>范围</strong>(Scope)</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[示例]<br>1. R2：在系统使用 3 个月后，销售额度应该提高 20%（期望，没有从软件角度进行描述，业务需求）<br>2. 可以建立高层次的解决方案，其系统特性如 SF1~SF4 所示。(Feature)，如下是系统需求<br>    SF1：管理 VIP 顾客信息。<br>    SF2：提供 VIP 顾客服务，增加回头率。<br>    SF3：使用多样化的特价方案，吸引顾客购买，增加销售额。<br>    SF4：使用多样化的赠送方案，吸引顾客购买，增加销售额。<br></code></pre></td></tr></table></figure>
+<h3 id="用户需求（任务，问题域知识）">用户需求（任务，问题域知识）</h3>
+<ol>
+<li>问题域知识：执行具体任务的用户对系统所能完成任务的期望，描述了系统能帮用户做什么
+<ol>
+<li>直接用户</li>
+<li>间接用户（<strong>通用软件的销售人员和售后支持人员</strong>）</li>
+</ol>
+</li>
+<li>问题域知识：是需要了解到期望所来源的背景知识。</li>
+<li><strong>特性</strong>
+<ul>
+<li>模糊、不清晰（允许适度的用形容词和副词）</li>
+<li>多特性混杂（功能和非功能的混杂）</li>
+<li>多逻辑混杂（一个任务需要多次系统交互才能完成）</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[示例]<br>1. R3：系统要帮助收银员完成销售处理（期望，用户需求）<br>2. SF1：管理 VIP 顾客信息针对系统需求<br>3. 针对每一个系统特性，都可以建立一组用户需求。例如对 SF1，可以建立用户需求组如 UR1.1~UR1.7，它们中每一条都是用户完成具体任务所需要的功能：<br>    UR1.1：系统应该允许客户经理添加、修改或者删除会员个人信息。（问题域）<br>    UR1.2：系统应该记录会员的购买信息。<br>    UR1.3：系统应该允许客户经理查看会员的个人信息和购买信息。<br>    UR1.4：系统应该允许客户经理查看所有会员的统计信息。<br></code></pre></td></tr></table></figure>
+<ul>
+<li>例如对 UR1.1，需要<strong>补充问题域知识</strong>如下：会员的个人信息有：客户编号、姓名、联系方式（具体是什么：手机、邮箱等）、积分。</li>
+</ul>
+<h3 id="系统需求">系统需求</h3>
+<ol>
+<li>需求分析模型：用户对<strong>系统行为的期望</strong>，每个系统级需求反映了<strong>一次外界与系统的交互行为</strong>，或者<strong>系统的一个实现细节</strong>（和用户需求有着很大的区别）</li>
+<li>描述了开发人员<strong>需要实现什么</strong></li>
+<li>将用户需求转化为系统需求的过程是一个复杂的过程
+<ul>
+<li>首先需要分析<strong>问题领域</strong>及其特性，从中发现问题域和计算机系统的共享知识，建立系统的知识模型；</li>
+<li>然后将用户需求<strong>部署到系统模型</strong>当中，即定义系列的系统行为，让它们联合起来实现用户需求，每一个系统行为即为一个系统需求。</li>
+<li>该过程就是需求工程当中最为重要的需求分析活动，又称<strong>建模与分析活动</strong>。</li>
+</ul>
+</li>
+<li>系统级需求还可能会补充一些与软件实现相关的细节。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[示例]<br>1. UR1.3：系统应该允许客户经理查看会员的个人信息和购买信息。<br>2. R4：收银员输入购买的商品时，系统要显示该商品的描述、单价、数量和总价。（期望，展现系统输入输出，系统级需求）<br>3. 对用户需求 UR1.3，可以依据任务中的交互细节将之转化为系统级需求 SR1.3.1~ SR1.3.4。<br>    SR1.3.1 在接到客户经理的请求后，系统应该为客户经理提供所有会员的个人信息。<br>    SR1.3.2 在客户经理输入会员的客户编号时，系统要提供该会员的个人信息。<br>    SR1.3.3 在客户经理选定一个会员并申请查看购买信息时，系统要提供该会员的历史购买记录。<br>    SR1.3.4 经理可以通过键盘输入客户编号，也可以通过读卡器输入客户编号。<br></code></pre></td></tr></table></figure>
+<h3 id="综合示例">综合示例</h3>
+<ol>
+<li>R1：在系统使用 3 个月后，销售额度应该提高 20%（业务需求-为何开发系统）</li>
+<li>R2：系统要帮助收银员完成销售处理；（用户需求-帮助用户做什么）</li>
+<li>系统特性 SF1：管理 VIP 顾客信息，针对每一个系统特性，都可以建立一组用户需求。例如对 SF1，每一条都是用户完成具体任务所需要的功能：
+<ul>
+<li>UR1.1：客户经理可以使用系统添加、修改或者删除会员个人信息。（用户需求）</li>
+<li>UR1.2：收银员使用系统进行销售时会记录会员的购买信息。（用户需求）</li>
+<li>UR1.3：客户经理可以使用系统查看会员的个人信息和购买信息。（用户需求）</li>
+<li>UR1.4：客户经理可以使用系统查看所有会员的统计信息。（用户需求）</li>
+</ul>
+</li>
+<li>R3：收银员输入购买的商品时，系统要显示该商品的描述、单价、数量和总价（系统级需求-系统怎么与外界交互）</li>
+<li>对用户需求 UR1.3，可以依据任务中的交互细节将之转化为系统级需求 SR1.3.1 ~ SR1.3.4。
+<ul>
+<li>SR1.3.1 在接到客户经理的请求后，系统应该为客户经理提供所有会员的个人信息。（系统级需求）</li>
+<li>SR1.3.2 在客户经理输入会员的客户编号时，系统要提供该会员的个人信息。（系统级需求）</li>
+<li>SR1.3.3 在客户经理选定一个会员并申请查看购买信息时，系统要提供该会员的历史购买记录。</li>
+<li>SR1.3.4 经理可以通过键盘输入客户编号，也可以通过读卡器输入客户编号。（系统级需求）</li>
+</ul>
+</li>
+<li>ATM 机：问题：营业厅人力成本过高，不吸引客户（业务需求）</li>
+<li>问题域：存钱、取钱、转账（用户需求）</li>
+</ol>
+<h3 id="课堂练习">课堂练习</h3>
+<ol>
+<li>NBA 数据分析应用</li>
+<li>业务需求
+<ol>
+<li>NBA 球队老板希望知道谁是 2014-2015 赛季最大心脏的投手？</li>
+<li>老板想要买球星</li>
+<li>老板想要知道应该派遣哪位球星上</li>
+</ol>
+</li>
+<li>用户需求？
+<ol>
+<li>系统应该允许老板可以查看各个投手的数据</li>
+<li>系统应该允许老板查看最后两分钟，投手的得分率和投篮次数。</li>
+<li>系统应该允许老板查看投手的转会信息和身价</li>
+</ol>
+</li>
+<li>系统级需求？
+<ol>
+<li>在接到老板的请求后，系统应该为老板提供所有球星的相关信息。</li>
+</ol>
+</li>
+<li>千万不要忘记业务需求，一定要基于业务需求出发。</li>
+</ol>
+<h2 id="需求分类">需求分类</h2>
+<p>题型：对给定实例，给出不同类型的需求例子；对给定的需求示例，判断需求类型</p>
+<h3 id="需求谱系分类">需求谱系分类</h3>
+<p><img src="/13814/7-1676528982200-1026.png" alt></p>
+<ol>
+<li>需求展开为三项，系统需求展开为三项</li>
+</ol>
+<h3 id="综合案例">综合案例</h3>
+<ol>
+<li>项目需求（<strong>人的数量、计划成本、时间</strong>）
+<ul>
+<li>R5：项目的成本要控制在 60 万元人民币以下。</li>
+<li>R6：项目要在 6 个月内完成。</li>
+</ul>
+</li>
+<li>过程需求（<strong>人的分工、合作、方法、工具</strong>）
+<ul>
+<li>R7：在开发中，开发者要提交软件需求规格说明文档、设计描述文档和测试报告。</li>
+<li>R8：项目要使用持续集成方法进行开发。</li>
+</ul>
+</li>
+<li>其他需求
+<ul>
+<li>R9：系统要购买专用服务器，其规格不低于….。</li>
+<li>R10：系统投入使用时，需要对用户进行 1 个星期的集中培训。</li>
+</ul>
+</li>
+<li>不切实际的期望
+<ul>
+<li>R11：系统要分析会员的购买记录，预测该会员将来一周和一个月内、会购买的商品；（技术上不可行）</li>
+<li>R12：系统要能够对每月的出入库以及销售行为进行标准的财务分析；（在有限的资源条件下可行）</li>
+<li>R13：在使用系统时，收银员必须要在 2 个小时内完成一个销售处理的所有操作。（超出了软件所影响的问题域范围）</li>
+</ul>
+</li>
+<li>正确的形式
+<ul>
+<li>R14：如果一个销售处理任务在 2 个小时内没有完成，系统要撤销该任务的所有已执行操作</li>
+</ul>
+</li>
+</ol>
+<h3 id="软件需求的分类（IEEE">软件需求的分类（IEEE)</h3>
+<ol>
+<li>功能需求（Functional Requirement)：和系统主要共作相关的需求，即在不考虑物理约束的情况下，用户希望系统所能够执行的活动，这些活动可以帮助用户完成任务。<strong>功能需求主要表现为系统和环境之间的行为交互</strong>。</li>
+<li>性能需求（Performance Requirement)：系统整体或系统组成部分应该拥有的性能特征，例如 CPU 使用率、内存使用率等。</li>
+<li>质量属性（Quality Attribute)：系统完成工作的质量，即系统需要在一个“好的程度”上实现功能需求，例如可靠性程度、可维护性程度等。</li>
+<li>对外接口（External Interface)：系统和环境中其他系统之间需要建立的接口，包括硬件接口、软件接口、数据库接口等等。</li>
+<li>约束：进行系统构造时需要遵守的约束，例如<strong>编程语言、硬件设施</strong>等</li>
+</ol>
+<h4 id="功能需求">功能需求</h4>
+<ol>
+<li>功能需求是最常见、最主要和最重要的需求，是能够为用户带来业务价值的系统行为</li>
+<li><strong>最需要按照三个抽象层次进行展开</strong>，说明了关系</li>
+<li>软件产品产生价值的基础，需求检查最重要的部分</li>
+<li>比如：在接到客户经理的请求后，系统应该为客户经理提供所有会员的个人信息。</li>
+</ol>
+<h4 id="数据需求">数据需求</h4>
+<ol>
+<li><strong>功能需求</strong>的补充：如果在功能需求部分明确定义了<strong>相关的数据结构</strong>，那么就不需要再行定义数据需求</li>
+<li>数据需求是需要在数据库、文件或者其他介质中存储的数据描述，通常包括下列内容：
+<ul>
+<li>各个功能使用的<strong>数据信息</strong>；</li>
+<li>使用频率；</li>
+<li>可访问性要求；</li>
+<li><strong>数据实体及其关系</strong>；</li>
+<li>完整性约束；</li>
+<li><strong>数据保持</strong>要求。</li>
+</ul>
+</li>
+<li>例如，连锁超市销售系统可以使用数据需求 DR1 和 DR2。
+<ul>
+<li>DR1：系统需要存储的数据实体及其关系为图 6-14 的内容。（数据实体及其关系）</li>
+<li>DR2：系统需要存储 1 年内的销售记录和退货记录。（数据保持）</li>
+</ul>
+</li>
+</ol>
+<h4 id="性能需求">性能需求</h4>
+<ol>
+<li>需要进行专门的模拟和测试
+<ul>
+<li>速度（Speed)，系统完成任务的时间，例如 PR1。
+<ul>
+<li>PR1：所有的用户查询都必须在<strong>10 秒</strong>内完成。</li>
+</ul>
+</li>
+<li>容量（Capacity)，系统所能存储的数据量，例如 PR2。
+<ul>
+<li>PR2：系统应该能够存储至少 100 万个销售信息。</li>
+</ul>
+</li>
+<li>吞吐量（Throughput)，系统在连续的时间内完成的事务数量，例如 PR3。
+<ul>
+<li>PR3：解释器每分钟应该至少解析 5000 条没有错误的语句。</li>
+</ul>
+</li>
+<li>负载（Load)，系统可以承载的并发工作量，例如 PR4。
+<ul>
+<li>PR4：系统应该允许 50 个营业服务器同时从集中服务器上进行数据的上传或下载。</li>
+</ul>
+</li>
+<li>实时性（Time-Critical)，严格的实时要求，例如 PR5。
+<ul>
+<li>PR5：监测到病人异常后，监控器必须在 0.5 秒内发出警报。（和故障警报不同，故障不是系统的正常功能）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>一定避免使用<strong>很快、较快</strong>等修饰词，而如果难以估计明确，应当结合需求的灵活性，保证可行性。</li>
+</ol>
+<h4 id="需求的灵活性">需求的灵活性</h4>
+<ol>
+<li>PR6：98% 的查询不能超过 10 秒。</li>
+<li>PR7：
+<ul>
+<li>（最低标准）在 200 个用户并发时，系统不能崩溃；</li>
+<li>（一般标准）在 200 个用户并发时，系统应该在 80% 的时间内能正常工作；</li>
+<li>（理想标准）在 200 个用户并发时，系统应该能保持正常的工作状态。</li>
+</ul>
+</li>
+</ol>
+<h4 id="质量属性">质量属性</h4>
+<ol>
+<li>系统为了满足<strong>规定的及隐含</strong>的所有要求而需要具备的要素称为质量</li>
+<li>质量属性是为了度量质量要素而选用的特征</li>
+<li>质量模型就是能够为质量需求的描述和评价提供工作基础的特征集及特征之间的联系</li>
+<li>质量属性的重要性
+<ul>
+<li>对设计的影响很大</li>
+<li>对越复杂的系统越为重要</li>
+<li>[Robert19901] ：真实的现实系统中，在决定系统的成功或失败的因素中，满足非功能属性往往被满足功能性需求更为重要。</li>
+</ul>
+</li>
+</ol>
+<p><img src="/13814/image-20230706143618087.png" alt></p>
+<h5 id="常见质量属性">常见质量属性</h5>
+<ol>
+<li><strong>可靠性</strong>(Reliability)：在规格时间间隔内和规定条件下，系统或部件执行所要求能力的能力。
+<ul>
+<li>QA1：在进行数据的下载和上传中，如果网络故障，系统不能出现故障。能不能检测网络中断，并且进行恢复。</li>
+</ul>
+</li>
+<li><strong>可用性</strong>(Availability)：软件系统在投入使用时可操作和可访问的程度或能实现其指定系统功能的概率。
+<ul>
+<li>QA2：系统的可用性要达到 98%。</li>
+</ul>
+</li>
+<li><strong>安全性</strong>(Security)：软件阻止对其程序和数据进行未授权访问的能力，未授权的访问可能是有意，也可能是无意的。
+<ul>
+<li>QA3：VIP 顾客只能查看自己的个人信息和购买记录；</li>
+<li>收银员只能查看，不能修改、删除 VIP 顾客的信息。</li>
+</ul>
+</li>
+<li><strong>可维护性</strong>(Maintainability)：软件系统或部件能修改以排除故障、改进性能或其他属性或适应变更了的环境的容易程度，包括可修改性（Modifiability）可扩展性（Extensibility)。
+<ul>
+<li>QA4：如果系统要增加新的特价类型，要能够在 2 个人月内完成。</li>
+</ul>
+</li>
+<li><strong>可移植性</strong>(Portability)：系统或部件能从一种硬件或软件环境转换至另外一种环境的特性。
+<ul>
+<li>QA5：集中服务器要能够在 1 人月内从 Window 7 操作系统更换到 Solaris 10 操作系统。</li>
+</ul>
+</li>
+<li><strong>易用性</strong>(Usability)：与用户使用软件所花费的努力及其对使用的评价相关的特性。
+<ul>
+<li>QA6：使用系统 1 个月的收银员进行销售处理的效率要达到 10 件商品/分钟。</li>
+</ul>
+</li>
+</ol>
+<h5 id="质量属性的开发">质量属性的开发</h5>
+<ol>
+<li>用户并不能明确地提出他们对产品质量的期望：并不了解软件系统的开发过程，也就无从判断哪些质量属性会在怎样的程度上给设计带来多大的影响，也无法将他们对软件系统的质量要求细化成一组组的可量化的质量属性</li>
+<li>需求工程师
+<ul>
+<li>质量属性大都是和功能需求联系在一起的，因此需要对照软件的质量属性检查每一项功能需求，尽力去判断质量属性存在的可能性 ，形容词和副词通常意味着质量属性的存在</li>
+<li>对于一些不和任何功能需求相联系的全局性质量属性，需求工程师要在碰到特定的实例时意识到它们的存在</li>
+<li>开发原型判断能不能保证可靠性等，和工程师进行确定</li>
+</ul>
+</li>
+</ol>
+<h4 id="对外接口">对外接口</h4>
+<ol>
+<li><strong>解系统和其他系统</strong>之间的软硬件接口：包括硬件接口、软件接口、数据库接口等
+<ul>
+<li>接口的用途</li>
+<li>接口的输入输出</li>
+<li>数据格式</li>
+<li>命令格式</li>
+<li>异常处理要求</li>
+</ul>
+</li>
+<li>用户界面</li>
+<li>案例，注册使用 Google Maps API</li>
+</ol>
+<p><img src="/13814/9-1676528982200-1028.png" alt></p>
+<h4 id="约束">约束</h4>
+<ol>
+<li>总体上限制了开发人员设计和构建系统时的选择范围</li>
+<li><strong>系统开发及运行的环境</strong>
+<ul>
+<li>包括目标机器、操作系统、网络环境、编程语言、数据库管理系统等</li>
+<li>C1：系统要使用 Java 语言进行开发。</li>
+</ul>
+</li>
+<li><strong>问题域内的相关标准</strong>
+<ul>
+<li>包括法律法规、行业协定、企业规章等。</li>
+</ul>
+</li>
+<li><strong>商业规则</strong>
+<ul>
+<li>用户在任务执行中的一些潜在规则也会限制开发人员设计和构建系统的选择范围</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">R1：已过保质期的食品不能销售<br>R2：顾客可以使用美元付款<br></code></pre></td></tr></table></figure>
+<ol>
+<li>提交的地址解析请求次数是否有限制？（这就是为什么 Google Map API 进行控制）
+<ul>
+<li>如果在  24  小时时段内收到来自一个  IP  地址超过  15,000  个地址解析请求，或从一个  IP  地址提交的地址解析请求速率过快，Google  地图  API 编码器将用  620  状态代码开始响应。如果地址解析器的使用仍然过多，则从该  IP  地址对  Google  地图  API  地址解析器的访问可能被永久阻止。</li>
+</ul>
+</li>
+</ol>
+<h3 id="一些说明">一些说明</h3>
+<ol>
+<li>整个需求：项目需求、过程需求、系统需求（包括软件需求、硬件需求和其他需求）</li>
+<li>软件需求有着三中不同的层次需求：业务需求、用户需求和系统需求，分类是按照性能需求等等。</li>
+<li>层次性：是指细节不一样，分类是指描述的东西不一样。</li>
+</ol>
+<h2 id="题目">题目</h2>
+<ol>
+<li>为了有效地捕获系统需求,应采用（C) 。
+A.瀑布模型
+B.V 模型
+C.原型模型
+D.螺旋模型</li>
+<li>软件开发过程中，需求分析阶段的输出不包括（D)
+A.数据流图
+B.实体联系图
+C.数据字典
+D.软件体系结构图</li>
+<li>&quot;软件产品必须能够在 3 秒内对用户请求作出响应&quot;属于软件需求中的（B)
+A.功能需求
+B.非功能需求
+C.设计约束
+D.逻辑需求</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/40559/" rel="prev" title="软件工程与计算II-04-项目启动">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-04-项目启动
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/16162/" rel="next" title="软件工程与计算II-06-需求分析方法">
+      软件工程与计算II-06-需求分析方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%BA%A7%E5%93%81%E7%9A%84%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">一个产品的开发过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">2.</span> <span class="nav-text">需求工程的内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%BB%BA%E7%AB%8B%E7%9A%84%E4%BE%9D%E6%8D%AE"><span class="nav-number">2.1.</span> <span class="nav-text">软件建立的依据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">需求工程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%B7%A5%E7%A8%8B%E7%9A%84%E5%85%B7%E4%BD%93%E6%B4%BB%E5%8A%A8"><span class="nav-number">2.3.</span> <span class="nav-text">需求工程的具体活动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%BC%80%E5%8F%91%E8%BF%87%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.4.</span> <span class="nav-text">需求开发过程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E8%8E%B7%E5%8F%96"><span class="nav-number">2.5.</span> <span class="nav-text">需求获取</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E5%88%86%E6%9E%90"><span class="nav-number">2.5.1.</span> <span class="nav-text">目标分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E8%8E%B7%E5%8F%96%E7%9A%84%E5%B8%B8%E8%A7%81%E5%9B%B0%E9%9A%BE"><span class="nav-number">2.5.2.</span> <span class="nav-text">需求获取的常见困难</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%9C%80%E6%B1%82%E8%8E%B7%E5%8F%96%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">2.5.3.</span> <span class="nav-text">用户需求获取的方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5-Story-board-%E4%BD%9C%E4%B8%BA%E5%8E%9F%E5%9E%8B"><span class="nav-number">2.5.4.</span> <span class="nav-text">以 Story board 作为原型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E8%AE%A4%E8%AF%86%E9%9C%80%E6%B1%82%E8%8E%B7%E5%8F%96"><span class="nav-number">2.5.5.</span> <span class="nav-text">重新认识需求获取</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90"><span class="nav-number">2.6.</span> <span class="nav-text">需求分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%B9%E7%95%8C%E5%88%86%E6%9E%90"><span class="nav-number">2.6.1.</span> <span class="nav-text">边界分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%BB%BA%E6%A8%A1"><span class="nav-number">2.6.2.</span> <span class="nav-text">需求建模</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E"><span class="nav-number">2.7.</span> <span class="nav-text">需求规格说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E9%AA%8C%E8%AF%81"><span class="nav-number">2.8.</span> <span class="nav-text">需求验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E7%AE%A1%E7%90%86"><span class="nav-number">2.9.</span> <span class="nav-text">需求管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%9F%BA%E7%A1%80"><span class="nav-number">3.</span> <span class="nav-text">需求基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E9%87%8D%E8%A6%81"><span class="nav-number">3.1.</span> <span class="nav-text">需求重要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E7%9A%84%E8%A1%A8%E8%BF%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">需求的表述方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.3.</span> <span class="nav-text">软件解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%BC%80%E5%8F%91%E7%9A%84%E7%9B%AE%E6%A0%87"><span class="nav-number">3.4.</span> <span class="nav-text">需求开发的目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%9F%9F"><span class="nav-number">3.5.</span> <span class="nav-text">问题域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3"><span class="nav-number">3.6.</span> <span class="nav-text">问题的解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%BA%E5%88%86%E9%9C%80%E6%B1%82%E3%80%81%E9%97%AE%E9%A2%98%E5%9F%9F%E5%92%8C%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E"><span class="nav-number">3.7.</span> <span class="nav-text">区分需求、问题域和规格说明</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%9F%9F-2"><span class="nav-number">3.7.1.</span> <span class="nav-text">问题域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%84%E6%A0%BC%E8%AF%B4%E6%98%8E"><span class="nav-number">3.7.2.</span> <span class="nav-text">规格说明</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E5%B8%82%E9%94%80%E5%94%AE%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.8.</span> <span class="nav-text">超市销售系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E9%9C%80%E6%B1%82%E5%B1%82%E6%AC%A1%EF%BC%9A%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%E3%80%81%E7%94%A8%E6%88%B7%E9%9C%80%E6%B1%82%E3%80%81%E7%B3%BB%E7%BB%9F%E7%BA%A7%E9%9C%80%E6%B1%82%EF%BC%88%E9%9C%80%E6%B1%82%E7%9A%84%E5%B1%82%E6%AC%A1%E6%80%A7%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">三种需求层次：业务需求、用户需求、系统级需求（需求的层次性）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%9A%E5%8A%A1%E9%9C%80%E6%B1%82%EF%BC%88%E7%9B%AE%E6%A0%87%EF%BC%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%8E%E7%B3%BB%E7%BB%9F%E7%89%B9%E6%80%A7%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">业务需求（目标，解决方案与系统特性）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%9C%80%E6%B1%82%EF%BC%88%E4%BB%BB%E5%8A%A1%EF%BC%8C%E9%97%AE%E9%A2%98%E5%9F%9F%E7%9F%A5%E8%AF%86%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">用户需求（任务，问题域知识）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E9%9C%80%E6%B1%82"><span class="nav-number">4.3.</span> <span class="nav-text">系统需求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.4.</span> <span class="nav-text">综合示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BE%E5%A0%82%E7%BB%83%E4%B9%A0"><span class="nav-number">4.5.</span> <span class="nav-text">课堂练习</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%88%86%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">需求分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E8%B0%B1%E7%B3%BB%E5%88%86%E7%B1%BB"><span class="nav-number">5.1.</span> <span class="nav-text">需求谱系分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%BC%E5%90%88%E6%A1%88%E4%BE%8B"><span class="nav-number">5.2.</span> <span class="nav-text">综合案例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E9%9C%80%E6%B1%82%E7%9A%84%E5%88%86%E7%B1%BB%EF%BC%88IEEE"><span class="nav-number">5.3.</span> <span class="nav-text">软件需求的分类（IEEE)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E9%9C%80%E6%B1%82"><span class="nav-number">5.3.1.</span> <span class="nav-text">功能需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9C%80%E6%B1%82"><span class="nav-number">5.3.2.</span> <span class="nav-text">数据需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E9%9C%80%E6%B1%82"><span class="nav-number">5.3.3.</span> <span class="nav-text">性能需求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E7%9A%84%E7%81%B5%E6%B4%BB%E6%80%A7"><span class="nav-number">5.3.4.</span> <span class="nav-text">需求的灵活性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7"><span class="nav-number">5.3.5.</span> <span class="nav-text">质量属性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7"><span class="nav-number">5.3.5.1.</span> <span class="nav-text">常见质量属性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B4%A8%E9%87%8F%E5%B1%9E%E6%80%A7%E7%9A%84%E5%BC%80%E5%8F%91"><span class="nav-number">5.3.5.2.</span> <span class="nav-text">质量属性的开发</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E5%A4%96%E6%8E%A5%E5%8F%A3"><span class="nav-number">5.3.6.</span> <span class="nav-text">对外接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%A6%E6%9D%9F"><span class="nav-number">5.3.7.</span> <span class="nav-text">约束</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E8%AF%B4%E6%98%8E"><span class="nav-number">5.4.</span> <span class="nav-text">一些说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE"><span class="nav-number">6.</span> <span class="nav-text">题目</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

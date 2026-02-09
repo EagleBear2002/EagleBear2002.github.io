@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="编译预处理  与作用域、类型、接口等概念格格不入  潜伏于坏境：编译预处理，可以不写在程序中 穿透作用域：在编译预处理的时候，忽略作用域。    12345678910111213&#x2F;&#x2F;编译预处理潜伏于环境#include &lt;stdio.h&gt;extern double sqrt(double);void main() &#123;	printf(&quot;The square root">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++ 编译预处理">
+<meta property="og:url" content="https://eaglebear2002.github.io/56693/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="编译预处理  与作用域、类型、接口等概念格格不入  潜伏于坏境：编译预处理，可以不写在程序中 穿透作用域：在编译预处理的时候，忽略作用域。    12345678910111213&#x2F;&#x2F;编译预处理潜伏于环境#include &lt;stdio.h&gt;extern double sqrt(double);void main() &#123;	printf(&quot;The square root">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/56693/1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/56693/2.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/56693/3.png">
+<meta property="article:published_time" content="2022-06-21T10:14:21.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.594Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/56693/1.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/56693/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>C++ 编译预处理 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/56693/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++ 编译预处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-06-21 18:14:21" itemprop="dateCreated datePublished" datetime="2022-06-21T18:14:21+08:00">2022-06-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-C-%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2022Spring-C++ 高级程序设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="编译预处理">编译预处理</h2>
+<ol>
+<li>与作用域、类型、接口等概念格格不入
+<ol>
+<li>潜伏于坏境：编译预处理，可以不写在程序中</li>
+<li>穿透作用域：在编译预处理的时候，忽略作用域。</li>
+</ol>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">//编译预处理潜伏于环境</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-function"><span class="hljs-keyword">extern</span> <span class="hljs-type">double</span> <span class="hljs-title">sqrt</span><span class="hljs-params">(<span class="hljs-type">double</span>)</span></span>;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The square root of 2 is %g\n&quot;</span>, <span class="hljs-built_in">sqrt</span>(<span class="hljs-number">2</span>));<br>	<span class="hljs-built_in">fflush</span>(stdout);	 <span class="hljs-comment">//立刻输出</span><br>	<span class="hljs-keyword">return</span> (<span class="hljs-number">0</span>);<br>&#125;<br><span class="hljs-comment">// cc -Dsqrt=rand -Dreturn=abort(-D 是开关变量,Define,是 find&amp;replace)</span><br><span class="hljs-comment">//上一句的含义是将 sqrt 转换成为 rand，然后将 return 替换成 about</span><br><span class="hljs-comment">//返回值</span><br><span class="hljs-comment">// The square root of 2 is 7.82997e+28</span><br><span class="hljs-comment">// abort - core dumped（将内存中所有的状态保存下来）</span><br></code></pre></td></tr></table></figure>
+<ol start="2">
+<li>设想：
+<ol>
+<li>置换</li>
+<li>应用方式丰富,很难为其的找到具有更好的结构且高效的替代品</li>
+</ol>
+</li>
+<li>关于对于 <code>#include</code>、<code>#define</code>、<code>#ifdef</code>、<code>#pragma</code> 的不同处理</li>
+</ol>
+<h2 id="include">#include</h2>
+<ol>
+<li>include 会打开文件内容，然后将文件内容拷贝过来</li>
+<li>保证接口的定义在本文件中有效</li>
+<li>暴露源文本</li>
+</ol>
+<h2 id="define">#define</h2>
+<h3 id="符号常量">符号常量</h3>
+<p><code>#define pi 3.14</code></p>
+<p><code>const pi = 3.14</code></p>
+<p>不需要分号，因为他是编译预处理而不是代码</p>
+<h3 id="开放子过程">开放子过程</h3>
+<p>使用 <code>inline</code> 函数</p>
+<h3 id="过程函数泛型">过程函数泛型</h3>
+<p><code>#define max(a,b) (a) &gt; (b) ? (a) : (b)</code>这个 max 宏和函数有什么区别</p>
+<ul>
+<li>为什么没有括号不行？因为他不懂乘法：<code>#define mul(a,b) a * b</code></li>
+<li>如果使用：<code>max(1+2,2+3)//1 + 2 * 2 + 3</code></li>
+<li>宏还可能带来重复计算（只是一个编译预处理）</li>
+</ul>
+<p>double int 等对函数重载</p>
+<p>宏是定义和所有的同类型比较的泛型。</p>
+<p>宏的严重缺陷：宏没有函数的类型检查</p>
+<p>将 <code>int</code> 写成参数 <code>T</code>（类型参数）：<code>T max(T,T)</code></p>
+<h3 id="Generic-types">Generic types</h3>
+<ol>
+<li>使用模板来替代大量重复的部分</li>
+</ol>
+<h3 id="重命名-vaou">重命名 vaou</h3>
+<ol>
+<li>namespace 的形式</li>
+</ol>
+<h3 id="字符串连接">字符串连接</h3>
+<p>不可以被替代</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">define</span> Conn(x,y) x ## y <span class="hljs-comment">//x 和 y 连接起来</span></span><br><span class="hljs-comment">//在编译之前进行替换</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> ToChar(x) #@x</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> ToString(x) #x</span><br></code></pre></td></tr></table></figure>
+<p>这个是为了帮助框架的实现</p>
+<h3 id="特殊目的用法">特殊目的用法</h3>
+<p>不可以被替代</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">if</span> <span class="hljs-comment">//如果</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">else</span> <span class="hljs-comment">//不然</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">elif</span> <span class="hljs-comment">//不然如果</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span> <span class="hljs-comment">//if 结束</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> <span class="hljs-comment">//如果定义了</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> <span class="hljs-comment">//如果没有定义</span></span><br></code></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> MY_PRINTF_VERSION	 <span class="hljs-comment">//如果宏在之前没有被定义</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> MY_PRINTF_VERSION 1	 <span class="hljs-comment">//那么将这个宏定义为 1</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-comment">//选择编译，选择不同情况下，使用哪个源代码</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> MY_PRINTF_VERSION == 1</span><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">printf</span><span class="hljs-params">(*str)</span> </span>&#123;<br>&#125;<br><span class="hljs-meta">#<span class="hljs-keyword">elif</span> MY_PRINTF_VERSION == 2</span><br><span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">printf</span><span class="hljs-params">(<span class="hljs-type">char</span>* fmt, <span class="hljs-type">char</span>* args, ...)</span> </span>&#123;&#125;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+<p>有些程序的部分是保障机制，在不同形式下的保障是不同的</p>
+<p>使用开关量的编译选择，用来在发布的时候对于不应该被发布的东西进行开关量的调整（就可以不用删除）</p>
+<p>有一些调试是不能通过断点调试的，所以我们就可以打开开关变量，用来记录更加清晰深刻的日志。</p>
+<h3 id="General-macro-processing">General macro processing</h3>
+<ol>
+<li>不可以被替代</li>
+<li>我们可以将一些 warning 确认没有问题忽略掉</li>
+<li>我们也可以通过将一些 warning 提高为 error 的高级别，这样子就可以更加清晰的发现问题（IDE 集成）</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">once</span><br><span class="hljs-function"><span class="hljs-title">warning</span><span class="hljs-params">(disable:<span class="hljs-number">4101</span>)</span></span><br><span class="hljs-function"><span class="hljs-title">warning</span><span class="hljs-params">(error:<span class="hljs-number">160</span>)</span></span><br></code></pre></td></tr></table></figure>
+<h2 id="ifdef">#ifdef</h2>
+<ol>
+<li>版本控制</li>
+<li>注释代码</li>
+</ol>
+<h2 id="pragma">#pragma</h2>
+<ol>
+<li>层间控制</li>
+<li>告知编译器</li>
+<li><code>#pragma pack()</code>
+<ul>
+<li>在计算机内存空间中，我们往往是要进行数据的对齐，这样子可以提高内存数据的读取效率</li>
+<li>我们可以通过传递预编译指令用来对于指定数据的对齐</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/flyinggod/p/8343478.html">#pragma pack()法详解</a></li>
+</ol>
+<h2 id="程序组织">程序组织</h2>
+<ol>
+<li>逻辑结构：相关联的函数/文件形成的抽象上的图结构</li>
+<li>物理结构：考虑到每个函数 f 存储的位置，不一定存在同一个 cpp</li>
+<li>一个源程序不论有多少个源文件，只有一个源文件能包含 main 函数</li>
+</ol>
+<img src="/56693/1.png" style="zoom:80%;">
+<ol>
+<li>工程文件
+<ol>
+<li>外部函数</li>
+<li>外部变量</li>
+</ol>
+</li>
+<li>组织是物理层面</li>
+</ol>
+<img src="/56693/2.png" style="zoom:67%;">
+<ol start="5">
+<li>我们直接将一些头文件<code>.h</code>中写好函数原型</li>
+</ol>
+<h3 id="头文件和-cpp-文件">头文件和 cpp 文件</h3>
+<img src="/56693/3.png" style="zoom:80%;">
+<ol>
+<li>我们要始终注意 scope 和 lifetime</li>
+<li>作用域
+<ol>
+<li>程序级作用域（函数外定义的变量）:一个程序可能有很多源文件，程序级就是说整个程序可见</li>
+<li>函数级作用域:在 Stack 中，同一个函数内可见</li>
+<li>块级作用域:在 Stack 中，同一个代码块内可见，比如 while 循环中定义的一个变量</li>
+<li>文件级作用域:在 A 和 B 中的 process()不同函数的，同一个文件中可见</li>
+</ol>
+</li>
+<li>协同:B 中使用 A 中的，需要标明 extern，然后在编译前确认查找</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">extern</span> <span class="hljs-type">float</span> salary;<br><span class="hljs-function"><span class="hljs-keyword">extern</span> <span class="hljs-type">void</span> <span class="hljs-title">show</span><span class="hljs-params">()</span></span>;<br></code></pre></td></tr></table></figure>
+<ol start="4">
+<li>将外部要用的，开发的，A 把对应的放到 a.h 头文件中，而 B 就不需要进行读取 A 文件内容，B 在使用时在文件头<code>#include &quot;a.h&quot;</code>:功能就是直接复制粘贴过来，是 preprocess 命令</li>
+<li>如果有些服务不想要提供:将作用域限制到文件内:就是文件级作用域</li>
+<li>常量作用域默认是文件作用域，我们也将其抽象成为<code>const.h</code>文件来查看管理</li>
+<li>main 是全生命周期的，活在栈中。</li>
+</ol>
+<h3 id="extern-的另一个用法">extern 的另一个用法</h3>
+<ol>
+<li>extern 可以用来修饰变量或函数，用来说明此变量/函数是在别处定义的，要在此处<strong>引用</strong>，而不会新开辟一块内存。
+<ul>
+<li>该变量或函数必须是唯一的，如果多个 cpp 文件中都有定义则会报错</li>
+<li>一般不用 extern 修饰常量，因为常量默认作用域是文件</li>
+</ul>
+</li>
+<li>函数默认的生命是 extern 的，带有关键字仅仅是语义上这个函数可能在其他源文件里有定义。</li>
+</ol>
+<h3 id="头文件的内容">头文件的内容</h3>
+<ol>
+<li>放置不占空间的部分</li>
+<li>放置常量定义</li>
+<li>放置变量/函数声明（为什么可以这么干？）
+<ol>
+<li><strong>a.cpp 和 a.h 并没有联系</strong>，link 时会从所有编译好的文件中找 B 需要的符号，如果几个不同文件中实现了同一个函数/定义了同一个全局变量，就会报错</li>
+<li>编译阶段，B 虽然找不到该函数或变量（理解为符号表的信息不完整），但连接时会从 A 生成的目标代码中找到此函数</li>
+</ol>
+</li>
+<li>放置宏</li>
+<li>放置类型定义</li>
+<li>放置内联函数（必须写到头文件）
+<ul>
+<li>为什么内联函数要放置到头文件中?因为不这么做，无法正常使用</li>
+<li>inline 是基于源代码的复用，根据原型是不行的</li>
+<li>如果头文件中有 inline，但是被拒绝了？如果头文件中的 inline 函数很复杂（loop 等），那么我们会将对应代码替换进去的时候，生成了多份的 static（局部于文件作用域）</li>
+<li>相对的话:如果不是 inline 函数，那么函数只会有一份。</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-comment">//c.h</span><br><span class="hljs-function"><span class="hljs-keyword">inline</span> <span class="hljs-type">int</span> <span class="hljs-title">f</span><span class="hljs-params">()</span></span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>&#125;<br><span class="hljs-comment">//c.app</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;c.h&quot;</span><span class="hljs-comment">//是可以 inline 的</span></span><br></code></pre></td></tr></table></figure>
+<ol start="7">
+<li>头文件可以再次放置头文件</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/29030/" rel="prev" title="《NoSQL 精粹》第十章-列族数据库">
+      <i class="fa fa-chevron-left"></i> 《NoSQL 精粹》第十章-列族数据库
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/11976/" rel="next" title="C++ 高级程序设计-03-指针和引用">
+      C++ 高级程序设计-03-指针和引用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%A2%84%E5%A4%84%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">编译预处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#include"><span class="nav-number">2.</span> <span class="nav-text">#include</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#define"><span class="nav-number">3.</span> <span class="nav-text">#define</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E5%B8%B8%E9%87%8F"><span class="nav-number">3.1.</span> <span class="nav-text">符号常量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%94%BE%E5%AD%90%E8%BF%87%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">开放子过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E7%A8%8B%E5%87%BD%E6%95%B0%E6%B3%9B%E5%9E%8B"><span class="nav-number">3.3.</span> <span class="nav-text">过程函数泛型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generic-types"><span class="nav-number">3.4.</span> <span class="nav-text">Generic types</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%91%BD%E5%90%8D-vaou"><span class="nav-number">3.5.</span> <span class="nav-text">重命名 vaou</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.6.</span> <span class="nav-text">字符串连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E7%9B%AE%E7%9A%84%E7%94%A8%E6%B3%95"><span class="nav-number">3.7.</span> <span class="nav-text">特殊目的用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#General-macro-processing"><span class="nav-number">3.8.</span> <span class="nav-text">General macro processing</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ifdef"><span class="nav-number">4.</span> <span class="nav-text">#ifdef</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pragma"><span class="nav-number">5.</span> <span class="nav-text">#pragma</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E7%BB%84%E7%BB%87"><span class="nav-number">6.</span> <span class="nav-text">程序组织</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E5%92%8C-cpp-%E6%96%87%E4%BB%B6"><span class="nav-number">6.1.</span> <span class="nav-text">头文件和 cpp 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#extern-%E7%9A%84%E5%8F%A6%E4%B8%80%E4%B8%AA%E7%94%A8%E6%B3%95"><span class="nav-number">6.2.</span> <span class="nav-text">extern 的另一个用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B4%E6%96%87%E4%BB%B6%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">6.3.</span> <span class="nav-text">头文件的内容</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

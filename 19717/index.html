@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 数据链路层概述 本章主要是局域网的数据链路层的技术标准，主要是以太网的介质和无线网的介质两大类。 是一个直连线路上的介质控制，在无线路由器上，会有不同的第二层（手机到路由器，路由器到远端），数据链路层只能在一个网段，不能跨链路. 物理层和数据链路层的区别">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网计算-03-局域网数据链路层原理与技术">
+<meta property="og:url" content="https://eaglebear2002.github.io/19717/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 数据链路层概述 本章主要是局域网的数据链路层的技术标准，主要是以太网的介质和无线网的介质两大类。 是一个直连线路上的介质控制，在无线路由器上，会有不同的第二层（手机到路由器，路由器到远端），数据链路层只能在一个网段，不能跨链路. 物理层和数据链路层的区别">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111111858.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095343998.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220413211307123.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220413211238358.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220414142648279.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220416143412463.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095406058.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625182049677.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220416143556873.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220416143629306.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220416143647428.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111143055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111149255.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111205844.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095529301.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095554456.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/data_link_layer-1-CSMACA.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095629445.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625180916903.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111234097.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20230721111242160.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095718197.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220625095732721.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/data_link_layer-3-Transparent_Bridge.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/19717/image-20220416154934864.png">
+<meta property="article:published_time" content="2022-05-24T10:11:52.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.604Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/19717/image-20230721111111858.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/19717/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网计算-03-局域网数据链路层原理与技术 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/19717/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网计算-03-局域网数据链路层原理与技术
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-24 18:11:52" itemprop="dateCreated datePublished" datetime="2022-05-24T18:11:52+08:00">2022-05-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Spring-互联网计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="数据链路层概述">数据链路层概述</h2>
+<p>本章主要是局域网的数据链路层的技术标准，主要是以太网的介质和无线网的介质两大类。</p>
+<p>是一个直连线路上的介质控制，在无线路由器上，会有不同的第二层（手机到路由器，路由器到远端），数据链路层只能在一个网段，不能跨链路.</p>
+<h3 id="物理层和数据链路层的区别">物理层和数据链路层的区别</h3>
+<table>
+<thead>
+<tr>
+<th>第一层</th>
+<th>第二层</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无法与上层通信</td>
+<td>通过 LLC 与上层通信</td>
+</tr>
+<tr>
+<td>无法确定哪台主机将会传输或接受二进制数据</td>
+<td>通过 MAC 确定</td>
+</tr>
+<tr>
+<td>无法命名或标识主机</td>
+<td>通过寻址或命名过程来实现</td>
+</tr>
+<tr>
+<td>仅仅能描述比特流</td>
+<td>通过帧来组织/分组比特</td>
+</tr>
+</tbody>
+</table>
+<h3 id="数据链路层-Data-Link-Layer">数据链路层 Data Link Layer</h3>
+<p><img src="/19717/image-20230721111111858.png" alt></p>
+<p>问题：如何在不稳定（instable）的链路上正确传输数据？</p>
+<p>数据链路层提供：</p>
+<ul>
+<li>网络介质访问：</li>
+<li>跨媒体物理传输（transmission）：</li>
+</ul>
+<p>第二层协议明确了：</p>
+<ul>
+<li>在链路上交换的数据格式</li>
+<li>链路上的两个节点的行为</li>
+</ul>
+<p>在数据链路层，过程就是协议。</p>
+<p>在两端校验，帧是否是正确的，或者是不正确的，如果正确交付第三层，否则进行相应的处理</p>
+<h3 id="局域网和数据链路">局域网和数据链路</h3>
+<p>主要工作：</p>
+<ul>
+<li>错误识别（notification）</li>
+<li>网络拓扑（Network topology）</li>
+<li>流控制（Flow control）</li>
+</ul>
+<p>第一层和第二层的不同：</p>
+<ul>
+<li>第一层不可以访问更高层（upper-level layers），而第二层是通过逻辑链路（Logical Link Control）控制进行</li>
+<li>第 1 层无法决定哪个主机将发送（transmit）或接收（receive）来自组的二进制数据；第 2 层使用媒体访问控制（MAC）做到这一点，共用总线链路</li>
+<li>第 1 层无法命名或识别计算机；第 2 层使用寻址（或命名）过程，以太网场景下</li>
+<li>第 1 层只能描述比特流；第 2 层使用成帧对比特进行组织或分组。</li>
+</ul>
+<h3 id="第二层提供的服务">第二层提供的服务</h3>
+<p>提供给网络层的三层服务</p>
+<ol>
+<li>（最弱，最不靠谱的）没有确认（acknowledgement）的无连接（Connectionless）服务
+<ul>
+<li>发送取出就行，不用等收到确认</li>
+<li>可靠（Reliable）的链接（上层以确保数据正确性）</li>
+<li>实时任务，比较高效</li>
+<li>适用于大多数局域网</li>
+</ul>
+</li>
+<li>带有确认的无连接服务：不可靠的链接，例如无线网络：需要保证一定的通信质量（比如无线网络的传输），同时会损失一定的性能。</li>
+<li>带有确认的连接服务
+<ul>
+<li>比如蓝牙：需要先确定绑定关系才能进行通信</li>
+<li>手机和手机之间的蓝牙连接需要确定一些信息</li>
+</ul>
+</li>
+</ol>
+<p>三种服务的连接的不同和区别：</p>
+<ol>
+<li>无线连接和有线连接相比多了<strong>确认</strong>的过程</li>
+<li>网线连接：我们通信的对象是路由器，由路由器进行转发</li>
+<li>PPPoP 是<strong>路由器和远端</strong>的服务器的连接</li>
+<li>有线无线都接给路由器，都需要连接，但是无线网相对有线网需要确认（包确认）</li>
+</ol>
+<h3 id="常见的局域网的介质访问控制">常见的局域网的介质访问控制</h3>
+<p>常见的局域网的介质访问控制（Media Access Control）</p>
+<p><img src="/19717/image-20220625095343998.png" alt></p>
+<ol>
+<li>以太网（Ethernet）：逻辑总线拓扑（信息流在线性总线上）和物理星形或扩展星形（连线为星形）</li>
+<li>令牌环（Token Ring）：逻辑环拓扑（信息流在一个环中）和物理星形拓扑（以星形连接）</li>
+<li>FDDI（光纤分布式数据接口）：逻辑环拓扑（信息流在一个环中）和物理双环拓扑（作为双环连接）,光纤作为传输介质，曾经很常用，后来被以太网有线接入逐渐替代</li>
+</ol>
+<h3 id="介质访问控制方法">介质访问控制方法</h3>
+<p>介质访问控制方法（Access Methods）</p>
+<h4 id="两大类介质访问控制方法">两大类介质访问控制方法</h4>
+<p><img src="/19717/image-20220413211307123.png" alt></p>
+<p>码分多址属于静态划分信道的方法</p>
+<p><img src="/19717/image-20220413211238358.png" alt></p>
+<p><strong>CSMA 的对比总结</strong></p>
+<p><img src="/19717/image-20220414142648279.png" alt></p>
+<ol>
+<li>确定性轮流（Deterministic—taking turns）：Token Ring and FDDI（Fiber Distributed Data Interface，光纤分布式数据接口）</li>
+<li>争用式（Non-deterministic（probabilistic））
+<ol>
+<li>非确定性（概率性）-先到先得 first come, first sesrved</li>
+<li>Ethernet/802.3</li>
+<li>70 年代，Norman Abramson 设计</li>
+<li>Pure ALOHA： 纯 ALOHA 协议
+<ul>
+<li>主机任何时候都可以发送数据</li>
+<li>如果发生冲突，延迟一段时间再发送</li>
+</ul>
+</li>
+<li>Slotted ALOHA： 分段 ALOHA 协议
+<ul>
+<li>把信道在时间上分段。主机任何时候都发送数据，但是必须等待下一个时间分段的开始才开始发送</li>
+<li>如果发生冲突，延迟一段时间再发送</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="确定性轮流-Deterministic-MAC-Protocols">确定性轮流 Deterministic MAC Protocols</h4>
+<ol>
+<li>特殊数据令牌在环中循环（circulates）。</li>
+<li>当主机收到令牌时，它可以传输数据而不是令牌。这称为夺取（seizing）令牌。</li>
+<li>当发送（transmitted）的帧返回到发送器时，站点将发送新令牌； 框架已从环上卸下或脱落（stripped）。</li>
+</ol>
+<h4 id="非确定性-MAC-协议-Non-Deterministic-MAC-Protocols">非确定性 MAC 协议 Non-Deterministic MAC Protocols</h4>
+<ol>
+<li>此 MAC 协议称为带冲突检测的载波侦听多路访问（CSMA/CD，Carrier Sense Multiple Access with Collision Detection）（<strong>重要考点</strong>）</li>
+<li>为了使用这种共享介质（shared-medium）技术，以太网允许网络设备为传输权进行仲裁（arbitrate）。</li>
+<li>适用于总线结构的以太网。</li>
+</ol>
+<h3 id="局域网数据传输（Transmitison）方式：三种">局域网数据传输（Transmitison）方式：三种</h3>
+<ol>
+<li>单播（unicast）-将单个数据包从源发送到网络上的单个目标</li>
+<li>多播（multicast）-由发送到网络上特定节点子集的单个数据包组成，这些节点都有同样的进程进行响应</li>
+<li>广播（broadcast）-由单个数据包组成，该数据包传输到网络上的所有节点。（广播的目的地址是 0x11111111）</li>
+</ol>
+<h2 id="以太网和带冲突检测的载波侦听多路访问-CSMA-CD">以太网和带冲突检测的载波侦听多路访问 CSMA/CD</h2>
+<p><strong>确定碰撞后的重传时间</strong></p>
+<p><img src="/19717/image-20220416143412463.png" alt></p>
+<h3 id="逻辑链路-LLC-和介质访问控制-MAC-子层">逻辑链路 LLC 和介质访问控制 MAC 子层</h3>
+<ol>
+<li>无缘电缆的方式传播电波：以太网</li>
+<li>帧传播速度提高了</li>
+<li>帧的标准没有改变</li>
+</ol>
+<h4 id="局域网标准">局域网标准</h4>
+<ol>
+<li>定义物理媒体和用于将设备连接到媒体的连接器</li>
+<li>在数据链路层定义设备的通信方式</li>
+<li>数据链路层定义了如何在物理介质上传输数据。</li>
+<li>数据链路层还定义了如何封装（encapsulate）特定于协议的流量（traffic），以使去往不同上层协议的流量在到达堆栈时可以使用相同的通道。</li>
+</ol>
+<p><img src="/19717/image-20220625095406058.png" alt></p>
+<blockquote>
+<p>IEEE 802.2 对应 LLC，以太网则覆盖物理层和链路层</p>
+</blockquote>
+<ol>
+<li>IEEE 将数据链路层分为两部分：
+<ol>
+<li>媒体访问控制（MAC）（转换为媒体）</li>
+<li>逻辑链路控制（LLC）（过渡到网络层）</li>
+</ol>
+</li>
+<li>乍一看，IEEE 标准似乎以两种方式违反了 OSI 模型。
+<ol>
+<li>首先，它定义自己的层（LLC），包括其接口等。</li>
+<li>其次，看来 MAC 层标准 802.3 和 802.5 跨越了第 2 层/第 1 层接口。
+<ul>
+<li>802.5 令牌环网</li>
+<li>802.3 覆盖了物理层和第二层下半层</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>但是，802.3 和 802.5 定义了用于构建特定技术的命名，框架和媒体访问控制规则，都规范了对应的方案，不同方案不同解决标准</li>
+</ol>
+<h4 id="MAC-LLC">MAC &amp; LLC</h4>
+<ol>
+<li>MAC 子层（802.3）
+<ul>
+<li>定义如何在物理线路上传输帧（frames）</li>
+<li>处理物理寻址</li>
+<li>定义网络拓扑</li>
+<li>定义线路规则（discipline）</li>
+</ul>
+</li>
+<li>LLC 子层（802.2）
+<ul>
+<li>逻辑上标识不同的协议类型，然后将其封装，兼容不同介质的访问</li>
+<li>使用 SAP 标识符执行逻辑标识，用来做发送的位置的标识</li>
+<li>LLC 帧的类型取决于上层协议期望的标识符，对于上层服务进行支持</li>
+<li>LLC 已经比较规范了，后来有的厂商已经放弃继续做</li>
+</ul>
+</li>
+</ol>
+<h3 id="介质访问控制子层">介质访问控制子层</h3>
+<p>MAC 子层（Media Access Control Sublayer）：</p>
+<ol>
+<li>以字节为单位进行帧结构描述</li>
+<li>有 802.3 的规范和以太网的规范</li>
+<li>MAC 介质访问控制子层的帧结构：</li>
+</ol>
+<p><img src="/19717/image-20220625182049677.png" alt></p>
+<h4 id="前文">前文</h4>
+<p>从 1 和 0 的交替（alternating）模式开始，称为前同步码（preamble）：</p>
+<ul>
+<li>告诉接收方，要来数据了，因为不是预约发数据的模式，这个码就是为了保证对方有相应准备时间，前面 7 个是前同步码（0b10101010），最后一个是帧开始定界符（0x10101011）</li>
+<li>使用曼彻斯特编码的方案，无传输的时候是 0 电平的</li>
+</ul>
+<p>前同步码告诉接收站一帧即将到来，前同步码不是 MAC 帧的内容。</p>
+<h4 id="目标和源物理地址字段">目标和源物理地址字段</h4>
+<ol>
+<li>源地址：始终是单播地址</li>
+<li>目的地址：单播地址，组播地址或广播地址</li>
+<li>MAC 地址：6 个字节为目的地址（Dest.add） 6 个字节为源地址（Source.add），和第三层第四层报文有差别</li>
+<li>先看目的地址的好处：交换机等看到目的地址就可以进行判断，提高效率</li>
+</ol>
+<h4 id="长度字段">长度字段</h4>
+<p>长度字段指示在该字段之后且在帧检查序列字段之前（precede）的数据字节数。</p>
+<ol>
+<li>2 个字节长，早期规范放的是长度，指定<strong>数据长度</strong>，以太网-2 标准下则是使用 type 来完成这部分内容，指定后面的 DATA 是 IP 还是 IPX 的报文数据。</li>
+<li>没有长度也可以计算出来长度，通过有电平长度就可以计算出数据的长度</li>
+<li>数据长度的限制（46-1500 字节），以太网的帧长度不能长于 1518 字节</li>
+<li>为了避免歧义，只要保证 Length 的数据大于数据报的最大长度即可保证是表示 type，保证和之前兼容</li>
+</ol>
+<h4 id="数据字段">数据字段</h4>
+<p>数据字段包含您要发送的信息。</p>
+<ol>
+<li>数据的长度为 46（18 + 46 = 64 字节）-1500 字节，帧的大小<strong>至少是 64 个字节</strong>，如果数据太短需要补充 0 才能生成 data，前引导码不算帧长度</li>
+<li>以太网规定，小于 64 字节的帧是由于冲突而终止的无效帧</li>
+<li>最前面 8 个字段不算帧的内容</li>
+<li><strong>4 个 64 字节大小帧同时发送才能保证占据全部的链路</strong>，100m 链路，用 512us，就是 512bit</li>
+</ol>
+<h4 id="FCS-字段">FCS 字段</h4>
+<p>FCS 字段（四个字节）包含循环冗余校验（cyclic redundancy check）值：</p>
+<ol>
+<li>固定 4 字节</li>
+<li>发送设备创建 CRC</li>
+<li>接收设备重新计算 CRC，以检查在传输（transit）过程中可能对帧造成的损坏（damage）。</li>
+<li>发送方用有效帧的内容除以一个数字，取得的余数放到这个位置，进行发送，接收方。也会将这个帧的内容除以那个数，然后将得到的进行比较，判断是否出现错误。</li>
+<li>FCS 正确不一定能保证数据是正确的，几次错误后导致 FCS 还是正确的，但是这种出错率比较低</li>
+<li>CRC 错误在不同情况下不同处理：有时候是直接抛弃，有时候还要再校验一下。</li>
+</ol>
+<p><strong>最小帧长</strong></p>
+<p><img src="/19717/image-20220416143556873.png" alt></p>
+<p><img src="/19717/image-20220416143629306.png" alt></p>
+<p><img src="/19717/image-20220416143647428.png" alt></p>
+<p>局域网只具有物理层和数据链路层的功能</p>
+<p>广域网具有网络层，物理层，数据链路层的功能</p>
+<p>局域网大多是多点接入的总线型网络</p>
+<h3 id="LLC-逻辑链路控制子层没懂，不知道考不考">LLC 逻辑链路控制子层没懂，不知道考不考</h3>
+<ol>
+<li>逻辑链路控制（LLC）子层通过单个链路管理设备之间的通信</li>
+<li>LLC 在 IEEE 802.2 规范中定义，并且支持无连接和面向连接（connect-oriented）的服务。</li>
+<li>LLC 子层允许部分数据链接层独立于现有技术运行,单个 LLC 子层可以与不同的 MAC 子层兼容（compatible）。</li>
+<li>LLC 子层基有面向连接的，也有不面向连接的，也就是既可以是进行总线服务，也可以实现令牌环路</li>
+<li>LLC 为什么被弃用了?因为局域网的正确率比较高，不需要 LLC 来进行守护，避免拖累速度和效率，而这部分也已经被第四层完成了</li>
+<li>蓝牙等特殊连接，直到第二层就已经结束，所以就需要使用 LLC 来完成</li>
+<li>有无连接是在 LLC 部分执行的，无法在 MAC 上进行处理的</li>
+</ol>
+<h4 id="LLC-子层：封装">LLC 子层：封装</h4>
+<p><img src="/19717/image-20230721111143055.png" alt></p>
+<ol>
+<li>LLC 子层服务上层，LLC 会放在 packet 前面，然后再做一次封装。</li>
+<li>第二次封装则为 LLC 子层向 MAC 子层请求封装操作。</li>
+<li>如上的过程如下：
+<ol>
+<li>LLC 获取网络协议数据（数据包，packet），并添加更多控制信息以帮助将数据包传递到其目的地。</li>
+<li>它添加了 802.2 规范的两个寻址组件，以在每一端标识上层协议：
+<ul>
+<li>目标服务访问点（DSAP）</li>
+<li>源服务访问点（SSAP）</li>
+</ul>
+</li>
+<li>然后，此重新打包的数据将传输到 MAC 以进一步封装数据。</li>
+<li>基于 SAP 规范进行地址和分配。</li>
+</ol>
+</li>
+<li>提供了
+<ol>
+<li>无确认的无连接服务，被使用在
+<ol>
+<li>可靠链路（上层来保证数据正确性）</li>
+<li>实时任务</li>
+<li>大多数的局域网内</li>
+</ol>
+</li>
+<li>有确认的无连接服务，被使用在，不可靠链路，比如无线网</li>
+<li>确认的有连接服务</li>
+</ol>
+</li>
+</ol>
+<h3 id="MAC-子层上的介质访问控制">MAC 子层上的介质访问控制</h3>
+<h4 id="十六进制数（Hexadecimal）作为-MAC-地址">十六进制数（Hexadecimal）作为 MAC 地址</h4>
+<ol>
+<li>MAC 地址为 48 位，始终表示为<strong>12 个十六进制数字</strong>。</li>
+<li>IEEE 管理的前 6 个十六进制数字（从左到右）标识制造商（manufacturer）或销售商（供应商），并包括组织唯一标识符（OUI）。
+<ul>
+<li>OUI 是生产的厂商，比如 0060CF 就是 Cisco 的，然后可以使用后面 24 个 bit 进行自己的编码</li>
+<li>一个厂商是可以买多个 OUI 的，也可以几个单位买一个 OUI</li>
+<li>第一个 bit 取 0 表示这个地址是一个单播地址，取 1 则是表示是一个多播地址。</li>
+<li>第二个 bit 取 0 表示这个地址是全球唯一地址，取 1 则表示是一个地址唯一地址</li>
+</ul>
+</li>
+<li>其余的 6 位十六进制数字包括接口序列号，由特定供应商管理。</li>
+</ol>
+<p><img src="/19717/image-20230721111149255.png" alt></p>
+<h4 id="以太网-802-3-广播">以太网 802.3 广播</h4>
+<ol>
+<li>广播
+<ul>
+<li>目标 MAC：全 1（FFFF.FFFF.FFFF）</li>
+<li>保证所有的设备都能收到这个地址</li>
+<li>会导致非目的主机进行地址解析</li>
+</ul>
+</li>
+<li>广播会不必要地打断电台（stations），从而严重影响电台的性能</li>
+<li>因此，仅在以下情况下才应使用广播：
+<ul>
+<li>目的地的 MAC 地址未知</li>
+<li>T 目的地是所有主机</li>
+</ul>
+</li>
+<li>非必要情况下我们不希望有很多广播，有可能会导致广播风暴</li>
+</ol>
+<h4 id="以太网操作">以太网操作</h4>
+<ol>
+<li>以太网是广播网络，也就是说，每个站都可以看到所有帧，而不管它们是否是目的地</li>
+<li>通过 MAC 地址判断站点是否为目的地</li>
+<li>目标站在 OSI 层上发送数据。其他节点丢弃（discard）帧</li>
+</ol>
+<p><img src="/19717/image-20230721111205844.png" alt></p>
+<p>上图中 1 是总线拓扑，1 发送的数据帧会传达给所有在这个总线上的设备，非目的主机检查目的地址和本机 MAC 地址不同，则会将该帧丢弃。</p>
+<h4 id="广播操作步骤">广播操作步骤</h4>
+<ol>
+<li>听然后传送</li>
+<li>广播 jam 信号
+<ul>
+<li>是一个 32bit 的全 1 的数据帧表示出现了冲突</li>
+<li>标准思科认为是所有侦听的设备都会发送</li>
+</ul>
+</li>
+<li>发生碰撞（Collision）
+<ul>
+<li>两个设备同时使用链路发送电信号，则会出错。</li>
+<li>如果有冲突，则会一直侦听总线，等到空闲则可以组织数据帧发送</li>
+<li>还有问题就是多台主机同时进行组织数据帧进行发送</li>
+<li>因为同时还在侦听总线，如果出现冲突，则会发出 jam 信号，只要有 0 或者 1 传输，有电平则会表示使用</li>
+</ul>
+</li>
+<li>设备退回（back off）适当的时间，然后重新传输（retransmit）,发生冲突的设备，根据特定的回退算法</li>
+</ol>
+<p><img src="/19717/image-20220625095529301.png" alt="image-20220625095529301"></p>
+<ol start="5">
+<li>为什么 64 个字节才能抢线路？
+<ul>
+<li>10M 以太网，64 个字节才能在 512us 中传输满整个 100m 的线路</li>
+</ul>
+</li>
+</ol>
+<h4 id="以太网的-CSMA-CD">以太网的 CSMA/CD</h4>
+<p><img src="/19717/image-20220625095554456.png" alt="image-20220625095554456"></p>
+<ol>
+<li>首先设备要发送数据</li>
+<li>开始侦听链路是非忙，如果忙，则过一阵来再看看</li>
+<li>如果不忙，则开始准备发送
+<ul>
+<li>如果有错误，则到 9，表示有冲突发送，广播一个 jam sighnal，把自己尝试的次数 + 1（重发有一定限度）</li>
+<li>尝试次数过多，会像上层协议传输网络不可用</li>
+<li>尝试次数还可，则到 13 计算一个回退时间，来再次尝试，回退时间单位，会保证 A 和 D 的时间差能保证第一个人已经用完电路来避免冲突。</li>
+</ul>
+</li>
+<li>如果没有错误，则一直传输到结束为止</li>
+</ol>
+<h2 id="无线局域网和-CSMA-CA">无线局域网和 CSMA/CA</h2>
+<h3 id="无线（Wireless）局域网">无线（Wireless）局域网</h3>
+<p>无线局域网：</p>
+<ul>
+<li>基于单元的通信</li>
+<li>电台发送的信号只能被附近的电台接收</li>
+<li>短距离传输</li>
+</ul>
+<p>无线局域网标准：</p>
+<ol>
+<li>IEEE 802.11</li>
+<li>IEEE 802.11b</li>
+<li>IEEE 802.11a</li>
+<li>IEEE 802.11g</li>
+<li>IEEE 802.11n</li>
+</ol>
+<p>无线局域网分为两类</p>
+<ol>
+<li>有基础设施拓扑网络（Infrastructure mode）</li>
+<li>无基础设施拓扑网络（ad-hoc mode）</li>
+</ol>
+<p>基础设施是提前建设好的基站，可以覆盖一定的区域</p>
+<ol>
+<li>无线网卡和基础设施通信</li>
+</ol>
+<h4 id="虚拟载波监听">虚拟载波监听</h4>
+<ol>
+<li>源站把它要占用信道的时间（包括目的站发回确认帧所需的时间）写入到所发送的数据帧中（即在首部中的<em>持续时间</em>中写入需要占用信道的时间，以微秒为单位，一直到目的站把确认帧发送完为止），以便使其他所有站在这一段时间都不要发送数据。</li>
+<li>当站点检测到正在信道中传送的帧中的<em>持续时间</em>时，就调整自己的（Network Allocation Vector，NAV 网络分配向量）。NAV 指出了信道处于忙状态的持续时间。</li>
+<li>为什么信道空闲还要再等待呢?就是考虑可能有其他站点有<strong>高优先级</strong>的帧要发送。如有，就让高优先级帧先发迭。等待的时间就是 IFS（Inter-Frame Space，帧间间隔）。
+<ol>
+<li>SIFS（Short Inter-Frame Space，短帧间间隔）最短</li>
+<li>PIFS（Point Inter-Frame Space，点协调功能帧间间隔）其次</li>
+<li>DIFS（Distributed Inter-Frame Space，分布协调功能帧间间隔）最长。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/19717/data_link_layer-1-CSMACA.png" alt="WLAN 中的 CSMA/CA 示意"></p>
+<ol start="5">
+<li>实际吞吐量
+<ol>
+<li>因为源站点发出帧后，接收节点需要返回确认帧（ACK）。这将导致吞吐量降到带宽的一半</li>
+<li>还受到信号强度的影响，当信号变弱之后，将会发起 ARS（Adaptive Rate Selection，自适应速率选择），传输单元会将传输速率从 11 Mbps 降到 5.5 Mbps，或 5.5 到 2，或 2 到 1</li>
+</ol>
+</li>
+</ol>
+<h4 id="无线局域网标准">无线局域网标准</h4>
+<table>
+<thead>
+<tr>
+<th>协议名称</th>
+<th>带宽</th>
+<th>频率</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>802.11</td>
+<td>1-2 Mbps</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>802.11b</td>
+<td>11 Mbps</td>
+<td>2.4 GHz</td>
+<td>使用与 802.11 不同的编码技术来实现，向后兼容</td>
+</tr>
+<tr>
+<td>802.11a</td>
+<td>54 Mbps</td>
+<td>5 GHz</td>
+<td></td>
+</tr>
+<tr>
+<td>802.11g</td>
+<td></td>
+<td></td>
+<td>可提供与 802.11a（54Mbps）相同的功能<br>具有 802.11b 的向后兼容性</td>
+</tr>
+<tr>
+<td>802.11n</td>
+<td>108Mbps</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>IEEE 802.11：
+<ul>
+<li>一项关键技术：<strong>直接序列扩频（DSSS，Direct Sequence Spread Spectrum）</strong></li>
+<li>DSSS 适用于在 1 到 2 Mbps 范围内运行的无线设备，上面的这个速率在实际生活场景中要除以 2，因为无线通信都是有确认的，所以一般我们认为信道一来一回才有一次通信。</li>
+<li>DSSS 可以高达 11 Mbps 的速度运行，但在 2 Mbps 以上时将不被视为兼容</li>
+<li>也称为 Wi-Fi™，无线保证度，是星型拓扑，基站作为中心</li>
+</ul>
+</li>
+<li>IEEE 802.11b（Wi-Fi）：
+<ul>
+<li>传输能力提高到 11Mbps</li>
+<li>所有 802.11b 系统都向后兼容（backward compliant），因为它们还仅针对 DSSS 支持 1 和 2Mbps 数据速率的 802.11。</li>
+<li>通过使用与 802.11 不同的编码技术来实现（Achieves）更高的数据吞吐率</li>
+<li>在 2.4 GHz 内运行，解决了 802.11 中出现的部分问题</li>
+<li>使用的是高速直连方案</li>
+</ul>
+</li>
+<li>IEEE 802.11a：
+<ul>
+<li>涵盖在 5GHz 传输频带中运行的 WLAN 设备</li>
+<li>802.11a 能够提供 54 Mbps 的数据吞吐量，并且采用称为“速率加倍”的专有技术已达到 108 Mbps。</li>
+<li>实际上，更标准的等级是 20-26 Mbps。</li>
+<li>传播距离相比 802.11 和 802.11b 短（衰减强），但是对于多用户上网的支持更好了。</li>
+<li>使用<strong>正交频分复用</strong>技术。</li>
+</ul>
+</li>
+<li>IEEE 802.11g：
+<ul>
+<li>可以提供与 802.11a（54Mbps）相同的功能，但具有 802.11b 的向后兼容性</li>
+<li>使用**正交频分复用（OFDM，Orthogonal Frequency Division Multiplexing）**技术。</li>
+</ul>
+</li>
+<li>IEEE 802.11n： 下一代的 WLAN
+<ul>
+<li>提供的带宽是 802.11g 的两倍，即 108Mbps，理论上可达 500-600Mbps。实际上是 100M 左右</li>
+<li>目前使用比较多的方案。</li>
+</ul>
+</li>
+</ol>
+<h4 id="无线网络拓扑">无线网络拓扑</h4>
+<p><img src="/19717/image-20220625095629445.png" alt></p>
+<ol>
+<li>这里讲的是有基础设施的无线网络拓扑结构</li>
+<li>DS：分配系统，线</li>
+<li>上网还要通过网关</li>
+</ol>
+<h4 id="无线网络的基础设施">无线网络的基础设施</h4>
+<ol>
+<li>基本服务集（BSS）包括一个基站（BS）和几个无线主机
+<ul>
+<li>所有主机都可以在本地 BSS 中直接相互通信</li>
+<li>基站中两个主机之间是不直接互相通信的。</li>
+<li>同一个 BSS 中的主机间直接通信</li>
+</ul>
+</li>
+<li>接入点（AP）充当基础架构模式的基站（BS）
+<ul>
+<li>AP 硬连线到有线（cabled）局域网，以提供 Internet 访问和与有线网络的连接</li>
+<li>安装 AP 后，将分配服务集标识符（SSID）和通道</li>
+<li>单元格的范围是 91.44 至 152.4 米（300 至 500 英尺）</li>
+<li>覆盖大概 100m 左右</li>
+</ul>
+</li>
+<li>一个 BSS 可以通过分发系统（DS）连接到另一个 BSS，并构造一个扩展服务集（ESS）。</li>
+<li>家里的路由器既有 AP 的功能又有路由器功能，但是理论上只应该是 AP 的功能，一般我们认为家用路由器是一个 AP</li>
+</ol>
+<h3 id="访问过程（Accessing-Procedure）">访问过程（Accessing Procedure）</h3>
+<p>在 WLAN 中激活客户端时，它将开始“侦听”与之“关联”的兼容设备</p>
+<p>这被称为“扫描”</p>
+<ul>
+<li>主动扫描</li>
+<li>被动扫描</li>
+</ul>
+<p>需要和 AP 连接，才能向 AP 发送数据帧。</p>
+<h4 id="主动扫描">主动扫描</h4>
+<ol>
+<li>导致从寻求加入网络的无线节点发送探测（probe）请求。</li>
+<li>探测请求将包含它希望加入的网络的服务集标识符（SSID）</li>
+<li>当找到具有相同 SSID 的 AP 时，该 AP 将发出探测响应</li>
+<li>身份验证和关联步骤已完成</li>
+<li>移动端发出请求帧，但是 AP 不发送自己的信息</li>
+<li>AP 比较安全。不用发送出自己的 SSID</li>
+</ol>
+<h4 id="被动扫描">被动扫描</h4>
+<ol>
+<li>（ad hoc） 侦听由 AP（基础结构模式）或对等节点（ad hoc）传输的信标管理帧（beacon management frames），包含自己的 SSID 信息</li>
+<li>当节点接收到包含要尝试加入的网络的 SSID 的信标时，将尝试加入该网络。</li>
+<li>被动扫描是一个连续的过程，并且随着信号强度的变化，节点可能会与 AP 关联或分离，也是因为强度变化，所以连接状态需要维持。</li>
+</ol>
+<h3 id="无线局域网的帧结构">无线局域网的帧结构</h3>
+<ol>
+<li>WLAN 不使用标准的 802.3 帧。</li>
+<li>框架有三种类型
+<ul>
+<li>控制帧（Control Frames）</li>
+<li>管理帧（Management frames）</li>
+<li>数据帧（仅数据帧类似于 802.3 帧）</li>
+</ul>
+</li>
+<li>无线数据帧和 802.3 帧的有效载荷（payload）为 1500 字节
+<ul>
+<li>但是，以太帧不能超过 1518 字节，而无线帧则可能高达<strong>2346 字节</strong>。（是因为在无线情况下使用的是有确认的信息，增加无线帧有效数据大小，来对冲，确认的信息的损耗）。</li>
+<li>无线网络帧的大小也不会太大，尽量避免转换成有线帧的时候出现帧的拆分，也就是说大小一般在 1500 字节以下，通常，WLAN 帧大小将被限制为 1518 字节，因为它最常连接到有线以太网。</li>
+</ul>
+</li>
+</ol>
+<h3 id="数据帧结构（802-11-无线网）">数据帧结构（802.11 无线网）</h3>
+<p><img src="/19717/image-20220625180916903.png" alt></p>
+<ol>
+<li>帧控制信息包含 16 bit</li>
+<li>去往 AP 和来自 AP 是我们需要重点确认</li>
+<li>WEP 规格，Wired Equivalent Privacy（有线等效保密）</li>
+<li>持续期：参数，<strong>很重要</strong>，CSMA/CA 需要，这个信息</li>
+<li>有时间窗口，如果超时没收到信号，则进行重传</li>
+</ol>
+<h4 id="数据帧的的地址分类">数据帧的的地址分类</h4>
+<ol>
+<li>ad hoc（无线网地址）用地址 4</li>
+<li>有基础设施用的是地址 1、2、3</li>
+</ol>
+<h4 id="数据帧中的地址详解">数据帧中的地址详解</h4>
+<p><img src="/19717/image-20230721111234097.png" alt></p>
+<ol>
+<li>扩展星型拓扑</li>
+<li>去往 AP 和来自 AP 显然是不能全为 1 的
+<ol>
+<li>去往 AP 是指向 AP 发送，参考第二行</li>
+<li>为什么不能全为 1?因为两个 AP 之间通过有线进行通信，所以不是无线通信的过程。</li>
+</ol>
+</li>
+</ol>
+<h3 id="为什么我们需要-CSMA-CA？">为什么我们需要 CSMA/CA？</h3>
+<ol>
+<li>冲突（Collisions）可能发生在 WLAN 中，但是站点只能知道附近的传输，因此 CSMA/CD 不是一个好的选择。
+<ul>
+<li>隐藏站问题：当 A 将数据传输到 B 时，C 无法检测到 A 和 B 之间的传输，因此 C 可能会决定将数据传输到 B 并导致 B 发生冲突。</li>
+<li>暴露站问题：当 B 将数据传输到 A 时，C 可以检测到传输，因此 C 不会将数据传输到 D。但这是一个错误。（听到不应该听到的信号）</li>
+</ul>
+</li>
+</ol>
+<p><img src="/19717/image-20230721111242160.png" alt></p>
+<ol>
+<li>应用在无线网络 ad hoc 连接的时候，直接相连转发</li>
+<li>对应：总线拓扑</li>
+<li>这种情况下做不到全体的侦听</li>
+<li>什么我们不使用 CSMA/CD？
+<ol>
+<li>碰撞检测&quot;要求一个站点在发送本站数据的同时，还必须不间断地检测信道。一旦检测到碰撞，就立即停止发送。但由于无线信道的传输条件特殊，其信号强度的动态范围非常大，因此在 802.11 适配器上接收到的信号强度往往会远远小于发送信号的强度（信号强度可能相差百万倍）。如要在无线局域网的适配器上实现检测到碰撞，在硬件上需要的花费就会过大。</li>
+<li>更重要的是，即使我们能够在硬件上实现无线局域网的碰撞检测功能，我们仍然无法避免碰撞的发生。这就表明，无线局域网不需要进行碰撞检测。</li>
+</ol>
+</li>
+</ol>
+<h3 id="多路复用机制（Mechanism）">多路复用机制（Mechanism）</h3>
+<ol>
+<li>以太网
+<ul>
+<li>信号被传输到电缆上的<strong>所有</strong>站。</li>
+<li>发送站检测到冲突。</li>
+<li>一次只能在信道上发送一个有效帧。</li>
+</ul>
+</li>
+<li>WLAN 无线网络
+<ul>
+<li>信号通过电缆传输到发送站附近的站（相邻,不可以跨越有效距离发送）</li>
+<li>MAC 协议必须尽最大努力确保仅发送站靠近接收站，发送方只能发送一路信号给接受方，不能有多个发送方发送信号给一个接受点</li>
+<li>接收方检测确定冲突。</li>
+<li>一次可以在通道上传输<strong>多</strong>个有效（effective）帧,不可以产生冲突。</li>
+</ul>
+</li>
+</ol>
+<h3 id="CSMA-CA-避免冲突的载波侦听多路访问">CSMA/CA 避免冲突的载波侦听多路访问</h3>
+<ol>
+<li>CSMA/CA（Carrier Sense Multiple Access with Collision Avoidance）
+<ul>
+<li>发送站点在发送数据前，以<strong>控制短帧</strong>刺激接收站点发送应答短帧，使接收站点周围的站点监听到该帧，从而在一定时间内避免数据发送</li>
+<li>基本过程
+<ol>
+<li>A 向 B 发送 RTS（Request To Send，请求发送）帧，A 周围的站点在一定时间内不发送数据，以保证 CTS 帧返回给 A；</li>
+<li>B 向 A 回答 CTS（Clear To Send，清除发送）帧，B 周围的站点在一定时间内不发送数据，以保证 A 发送完数据；</li>
+<li>A 开始发送</li>
+<li>若控制帧 RTS 或 CTS 发生冲突，采用二进制指数后退算法等待随机时间，再重新开始。（A 和 C 同时发送 RTS）</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>退避时间短的设备先传输</li>
+<li>发现冲突所有设备同时退避</li>
+<li>在 ad hoc 网络中比较无序，存在大量延时，比如 CTS 和 RTS 相碰撞，这种情况是比较少的，异常情况，不在本课程考虑范围内。</li>
+</ol>
+<h4 id="CSMA-CA-过程">CSMA/CA 过程</h4>
+<p><img src="/19717/image-20220625095718197.png" alt></p>
+<ol>
+<li>为避免冲突，802.11 所有站点在完成一个事务后必须等待一段时间才能进行下一个动作，这个时间被称为 IFS，具体取决于帧的类型。</li>
+<li>SIFS（Short interframe space）：短帧间间隔 28us，用于本设备接受发送状态转换，不足够源站接受 CTS</li>
+<li>DIFS（Distributed Inter-frame Spacing）：分布协调功能帧间间隔 128us（多个节点进行协调）</li>
+<li>应答 CTS（Clear to Send），等待 SIFS（Short interframe space）后发送数据</li>
+<li>过程中的时间写入时间数据标记位</li>
+<li>NAV（网络分配向量）：网络协调时间,时间长度：NAV 计算方式在后面，NAV 是一开始就进行预估了，别的节点抢到了节点时，我们会减掉别人正常通信的时间，不是一直累积下去的情况。</li>
+<li>下一次经过争用窗口来抢</li>
+<li>源站需要收到确认信息 CTS 才能接着发送信息</li>
+<li>多个源站向目的站发 RTS 给目的站，目的站发现冲突，告诉各自站点，PPT 处理的是 RTS</li>
+</ol>
+<h4 id="CSMA-MA-实例">CSMA/MA 实例</h4>
+<p><img src="/19717/image-20220625095732721.png" alt></p>
+<ol>
+<li>A 的反应时间少，抢到使用权</li>
+<li>E 加入进来的话也会计算出一个退避时间</li>
+</ol>
+<h3 id="实际数据传输率">实际数据传输率</h3>
+<ol>
+<li>当源节点发送帧时，接收节点将返回肯定确认（ACK）。
+<ul>
+<li>这可能导致消耗 50% 的可用带宽（bandwidth）。</li>
+<li>在额定为 11 Mbps 的 802.11b 无线局域网上，这会将实际数据吞吐量降低到最大 5.0 到 5.5Mbps。</li>
+</ul>
+</li>
+<li>网络性能也会受到信号强度的影响
+<ul>
+<li>随着信号变弱，可以调用自适应速率选择（ARS）</li>
+<li>信号会受到距离影响，越远信号越弱，功率越低，带宽不能稳定到初始带宽</li>
+<li>传输单元会将数据速率从 11 Mbps 降低到 5.5Mbps，从 5.5 Mbps 降低到 2 Mbps 或 2 Mbps 到 1 Mbps。</li>
+</ul>
+</li>
+</ol>
+<h3 id="WLAN-和-Ethernet-区别">WLAN 和 Ethernet 区别</h3>
+<table>
+<thead>
+<tr>
+<th>Ethernet</th>
+<th>WLAN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信号被传输到连接在线缆上的所有站点上</td>
+<td>信号只被传输到接近发送站点的站点</td>
+</tr>
+<tr>
+<td></td>
+<td>接受站点检测冲突</td>
+</tr>
+<tr>
+<td>只会有一个有效帧在信道上传播</td>
+<td>会有多个有效帧同时在信道上传播</td>
+</tr>
+<tr>
+<td></td>
+<td>MAC 协议必须尽可能保证只有发送站点接近接收站点</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Layer-2-Devices-第二层设备">Layer 2 Devices 第二层设备</h2>
+<h3 id="NICs-网卡">NICs 网卡</h3>
+<ol>
+<li>NIC 执行重要的第 2 层数据链路层功能：
+<ol>
+<li>逻辑链接控制-与计算机上层通信</li>
+<li>媒体访问控制-提供对共享访问媒体的结构化访问</li>
+<li>命名-提供唯一的 MAC 地址标识符</li>
+<li>成帧-封装过程的一部分，打包比特以进行传输。</li>
+<li>信号-使用内置收发器创建信号并与媒体接口（也有第一层功能，变为 01 信号）</li>
+</ol>
+</li>
+</ol>
+<h3 id="网桥（Bridges）">网桥（Bridges）</h3>
+<ol>
+<li>网桥将流量划分为多个部分，并根据 MAC 地址而不是协议对流量进行过滤。</li>
+<li>网桥可以通过减少较大的冲突域来提高网络性能。
+<ol>
+<li>大的冲突域变少，碰撞和冲突会变少，但是网桥会成为一个瓶颈。（网桥将数据帧检验存储再转发）</li>
+<li>导致延迟提高 10-30%</li>
+</ol>
+</li>
+<li>在从网络的一个网段到其他网段的流量较低的情况下，网桥最有效,当网段之间的流量变大时，网桥会成为瓶颈（bottleneck），并减慢通信速度。</li>
+<li>一般是处理两个不同的分段，相对比较简单。</li>
+<li>是一种储存转发（store-and-forward）设备，因为它必须接受整个帧并在转发前校验 CRC（事实上这必要性不大）</li>
+</ol>
+<h4 id="透明网桥原理">透明网桥原理</h4>
+<p><img src="/19717/data_link_layer-3-Transparent_Bridge.png" alt></p>
+<ol>
+<li>Mac 表放到缓存的位置，刚启动时是空表，之后逐渐学习。
+<ul>
+<li>Mac 地址表是有生命周期的，如果计时超过一个阈值没有刺激刷新 Mac 表，则会刷新表</li>
+<li>比如笔记本更换接入地址。</li>
+</ul>
+</li>
+<li>“透明”指局域网中的站点并不知道所发送的帧将经过哪几个网桥，因为网桥对各站来说是看不见的</li>
+<li>即插即用</li>
+<li>原理
+<ol>
+<li>从 A 发出的帧从接口 x 进入了网桥，则从这个接口发出帧就一定能达到 A。网桥每收到一个帧，就记下其源地址和进入网桥的接口，写入转发表。</li>
+<li>在收到一个新的帧时，在转发表中匹配此帧的目的地址，找到对应的接口并转发。</li>
+<li>在网桥的转发表中写入的信息除了地址和接口外，还有帧进入网桥的时间，因为
+<ul>
+<li>拓扑可能经常变化</li>
+<li>站点也可能会更换适配器（这就改变了站点的地址）</li>
+<li>站点并非总是处于工作状态</li>
+<li>把每个帧到达网桥的时间登记下来，就可以在转发表中只保留网络拓扑的最新状态信息，使得网桥中的转发表能反映当前网络的最新拓扑</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>问题：网络上的设备要发送数据但不知道目标地址时。
+<ul>
+<li>向网络上的所有设备发送广播。因为希望数据帧能够发送到全网，尽可能到达目的地</li>
+<li>由于网络上的每个设备都必须注意此类广播，因此网桥始终会转发这些广播。</li>
+</ul>
+</li>
+<li>广播过多会导致广播风暴，并且可能导致：
+<ul>
+<li>网络延时（network time-outs）</li>
+<li>交通减速（traffic slowdowns）</li>
+<li>低于可接受的性能</li>
+</ul>
+</li>
+</ol>
+<h4 id="源路由网桥">源路由网桥</h4>
+<ol>
+<li>发送帧时将详细的路由信息放在帧的首部中,从而使每个经过的网桥都了解帧的路径</li>
+<li>在令牌环网络中被广泛使用</li>
+<li>原理：源站以广播方式向目的站发送一个发现帧，每个发现帧都记录所经过的路由。发现帧到达目的站时就沿各自的路由返回源站。源站在得知这些路由后，从所有可能的路由中选择出一个最佳路由。凡从该源站向该目的站发送的帧的首部，都必须携带源站所确定的这一路由信息。</li>
+</ol>
+<h3 id="交换机（Switches）">交换机（Switches）</h3>
+<ol>
+<li>执行两个基本操作：
+<ol>
+<li>切换数据帧：在输入介质（medium）上接收帧，然后将其传输到输出介质</li>
+<li>维护交换操作：交换器建立和维护交换表并搜索循环。 路由器构建并维护路由表和交换表。（STB 协议避免回路）</li>
+</ol>
+</li>
+<li>交换是一项通过<strong>减少流量</strong>和 alleviates congestion 来缓解以太网 LAN 拥塞（alleviates congestion）的技术.
+<ol>
+<li>交换机创建专用（dedicated）的网段或点对点连接，并将这些网段连接到交换机内的虚拟网络中。</li>
+<li>之所以称为<strong>虚拟电路</strong>，是因为它仅在两个节点需要通信时才存在，并且在交换机内建立。网桥内部有一个高带宽的总线（一般内部带宽是接口带宽的 10 倍）</li>
+<li>您可以将每个交换机端口视为一个微桥（micro-bridge）。该过程称为微分段（microsegmentation）。</li>
+<li>每个交换机端口将介质的全部带宽提供给每个主机</li>
+</ol>
+</li>
+<li>局域网交换机可减少冲突域的大小（通过，VLAN 划分）</li>
+<li>但是，连接到交换机的所有主机仍位于同一广播域中。
+<ol>
+<li>也就是说，通过 LAN 交换机连接的所有其他节点仍将看到来自一个节点的广播。</li>
+<li>交换机不能划分广播域（端口-&gt;所有端口转发）</li>
+</ol>
+</li>
+<li>带宽利用率可以接近 100%</li>
+<li>交换机连接的是一个局域网，而路由器连接的是不同局域网。</li>
+</ol>
+<h4 id="交换机划分了冲突域">交换机划分了冲突域</h4>
+<ol>
+<li>转发的速度明显加快，因为它们在<strong>硬件</strong>中进行切换，而网桥在<strong>软件</strong>中进行切换。</li>
+<li>可以使用交换机连接 10 Mbps 以太网 LAN 和 100 Mbps 以太网 LAN。</li>
+<li>在交换式以太网实现中可用带宽可以接近 100%。</li>
+<li>共享以太网网络的容量不足其全部容量的 30% 至 40% 时，其性能最佳。</li>
+<li>一些交换机<strong>支持直通交换</strong>，这减少了延迟和延迟，而网桥仅支持<strong>存储转发交换（存储转发，存下来检验转发）</strong>。
+<ol>
+<li>直通交换：快速转发，不做校验，只看前 6 字节的 MAC 地址。</li>
+<li>局域网：网速比较快，传输速率高，网线比较短，可以认为是基本没有错误的，所以可以进行直通转发</li>
+</ol>
+</li>
+</ol>
+<h4 id="路由器划分了冲突域">路由器划分了冲突域</h4>
+<ol>
+<li>路由器可以创建最高级别的细分：
+<ol>
+<li>创建较小的<strong>碰撞域</strong></li>
+<li>创建较小的<strong>广播域</strong>：除非经过编程，否则路由器不会转发广播。</li>
+</ol>
+</li>
+<li>路由器通过检查数据包上的<strong>目标逻辑地址</strong>，然后在其路由表中查找转发指令来完成数据包的转发</li>
+<li>由于路由器比网桥执行更多的功能，因此它们以更高的延迟率运行。</li>
+<li>路由器可以用作<strong>网关</strong>，用于连接不同的网络媒体和不同的 LAN 技术</li>
+<li>是根据逻辑地址（IP 地址）进行转发，不再是 MAC</li>
+<li>function 比较多，所以延时会比较多。</li>
+</ol>
+<p><img src="/19717/image-20220416154934864.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/45330/" rel="prev" title="互联网计算-05-传输层原理与技术">
+      <i class="fa fa-chevron-left"></i> 互联网计算-05-传输层原理与技术
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/61334/" rel="next" title="互联网计算-09-局域网交换与虚拟局域网">
+      互联网计算-09-局域网交换与虚拟局域网 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">数据链路层概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%B1%82%E5%92%8C%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.</span> <span class="nav-text">物理层和数据链路层的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82-Data-Link-Layer"><span class="nav-number">1.2.</span> <span class="nav-text">数据链路层 Data Link Layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E5%9F%9F%E7%BD%91%E5%92%8C%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF"><span class="nav-number">1.3.</span> <span class="nav-text">局域网和数据链路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E6%8F%90%E4%BE%9B%E7%9A%84%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.4.</span> <span class="nav-text">第二层提供的服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E5%B1%80%E5%9F%9F%E7%BD%91%E7%9A%84%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="nav-number">1.5.</span> <span class="nav-text">常见的局域网的介质访问控制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E6%96%B9%E6%B3%95"><span class="nav-number">1.6.</span> <span class="nav-text">介质访问控制方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E5%A4%A7%E7%B1%BB%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E6%96%B9%E6%B3%95"><span class="nav-number">1.6.1.</span> <span class="nav-text">两大类介质访问控制方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E6%80%A7%E8%BD%AE%E6%B5%81-Deterministic-MAC-Protocols"><span class="nav-number">1.6.2.</span> <span class="nav-text">确定性轮流 Deterministic MAC Protocols</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E7%A1%AE%E5%AE%9A%E6%80%A7-MAC-%E5%8D%8F%E8%AE%AE-Non-Deterministic-MAC-Protocols"><span class="nav-number">1.6.3.</span> <span class="nav-text">非确定性 MAC 协议 Non-Deterministic MAC Protocols</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E5%9F%9F%E7%BD%91%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%EF%BC%88Transmitison%EF%BC%89%E6%96%B9%E5%BC%8F%EF%BC%9A%E4%B8%89%E7%A7%8D"><span class="nav-number">1.7.</span> <span class="nav-text">局域网数据传输（Transmitison）方式：三种</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E5%92%8C%E5%B8%A6%E5%86%B2%E7%AA%81%E6%A3%80%E6%B5%8B%E7%9A%84%E8%BD%BD%E6%B3%A2%E4%BE%A6%E5%90%AC%E5%A4%9A%E8%B7%AF%E8%AE%BF%E9%97%AE-CSMA-CD"><span class="nav-number">2.</span> <span class="nav-text">以太网和带冲突检测的载波侦听多路访问 CSMA&#x2F;CD</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E9%93%BE%E8%B7%AF-LLC-%E5%92%8C%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6-MAC-%E5%AD%90%E5%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">逻辑链路 LLC 和介质访问控制 MAC 子层</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B1%80%E5%9F%9F%E7%BD%91%E6%A0%87%E5%87%86"><span class="nav-number">2.1.1.</span> <span class="nav-text">局域网标准</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MAC-LLC"><span class="nav-number">2.1.2.</span> <span class="nav-text">MAC &amp; LLC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E5%AD%90%E5%B1%82"><span class="nav-number">2.2.</span> <span class="nav-text">介质访问控制子层</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E6%96%87"><span class="nav-number">2.2.1.</span> <span class="nav-text">前文</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E5%92%8C%E6%BA%90%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E5%AD%97%E6%AE%B5"><span class="nav-number">2.2.2.</span> <span class="nav-text">目标和源物理地址字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%95%BF%E5%BA%A6%E5%AD%97%E6%AE%B5"><span class="nav-number">2.2.3.</span> <span class="nav-text">长度字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5"><span class="nav-number">2.2.4.</span> <span class="nav-text">数据字段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FCS-%E5%AD%97%E6%AE%B5"><span class="nav-number">2.2.5.</span> <span class="nav-text">FCS 字段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LLC-%E9%80%BB%E8%BE%91%E9%93%BE%E8%B7%AF%E6%8E%A7%E5%88%B6%E5%AD%90%E5%B1%82%E6%B2%A1%E6%87%82%EF%BC%8C%E4%B8%8D%E7%9F%A5%E9%81%93%E8%80%83%E4%B8%8D%E8%80%83"><span class="nav-number">2.3.</span> <span class="nav-text">LLC 逻辑链路控制子层没懂，不知道考不考</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LLC-%E5%AD%90%E5%B1%82%EF%BC%9A%E5%B0%81%E8%A3%85"><span class="nav-number">2.3.1.</span> <span class="nav-text">LLC 子层：封装</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MAC-%E5%AD%90%E5%B1%82%E4%B8%8A%E7%9A%84%E4%BB%8B%E8%B4%A8%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="nav-number">2.4.</span> <span class="nav-text">MAC 子层上的介质访问控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E6%95%B0%EF%BC%88Hexadecimal%EF%BC%89%E4%BD%9C%E4%B8%BA-MAC-%E5%9C%B0%E5%9D%80"><span class="nav-number">2.4.1.</span> <span class="nav-text">十六进制数（Hexadecimal）作为 MAC 地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91-802-3-%E5%B9%BF%E6%92%AD"><span class="nav-number">2.4.2.</span> <span class="nav-text">以太网 802.3 广播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E6%93%8D%E4%BD%9C"><span class="nav-number">2.4.3.</span> <span class="nav-text">以太网操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.4.4.</span> <span class="nav-text">广播操作步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E7%9A%84-CSMA-CD"><span class="nav-number">2.4.5.</span> <span class="nav-text">以太网的 CSMA&#x2F;CD</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91%E5%92%8C-CSMA-CA"><span class="nav-number">3.</span> <span class="nav-text">无线局域网和 CSMA&#x2F;CA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%EF%BC%88Wireless%EF%BC%89%E5%B1%80%E5%9F%9F%E7%BD%91"><span class="nav-number">3.1.</span> <span class="nav-text">无线（Wireless）局域网</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E8%BD%BD%E6%B3%A2%E7%9B%91%E5%90%AC"><span class="nav-number">3.1.1.</span> <span class="nav-text">虚拟载波监听</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91%E6%A0%87%E5%87%86"><span class="nav-number">3.1.2.</span> <span class="nav-text">无线局域网标准</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91"><span class="nav-number">3.1.3.</span> <span class="nav-text">无线网络拓扑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E7%BD%91%E7%BB%9C%E7%9A%84%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD"><span class="nav-number">3.1.4.</span> <span class="nav-text">无线网络的基础设施</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%BF%87%E7%A8%8B%EF%BC%88Accessing-Procedure%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">访问过程（Accessing Procedure）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E6%89%AB%E6%8F%8F"><span class="nav-number">3.2.1.</span> <span class="nav-text">主动扫描</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A2%AB%E5%8A%A8%E6%89%AB%E6%8F%8F"><span class="nav-number">3.2.2.</span> <span class="nav-text">被动扫描</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E5%B1%80%E5%9F%9F%E7%BD%91%E7%9A%84%E5%B8%A7%E7%BB%93%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">无线局域网的帧结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%A7%E7%BB%93%E6%9E%84%EF%BC%88802-11-%E6%97%A0%E7%BA%BF%E7%BD%91%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">数据帧结构（802.11 无线网）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%A7%E7%9A%84%E7%9A%84%E5%9C%B0%E5%9D%80%E5%88%86%E7%B1%BB"><span class="nav-number">3.4.1.</span> <span class="nav-text">数据帧的的地址分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%A7%E4%B8%AD%E7%9A%84%E5%9C%B0%E5%9D%80%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.4.2.</span> <span class="nav-text">数据帧中的地址详解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81-CSMA-CA%EF%BC%9F"><span class="nav-number">3.5.</span> <span class="nav-text">为什么我们需要 CSMA&#x2F;CA？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E6%9C%BA%E5%88%B6%EF%BC%88Mechanism%EF%BC%89"><span class="nav-number">3.6.</span> <span class="nav-text">多路复用机制（Mechanism）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSMA-CA-%E9%81%BF%E5%85%8D%E5%86%B2%E7%AA%81%E7%9A%84%E8%BD%BD%E6%B3%A2%E4%BE%A6%E5%90%AC%E5%A4%9A%E8%B7%AF%E8%AE%BF%E9%97%AE"><span class="nav-number">3.7.</span> <span class="nav-text">CSMA&#x2F;CA 避免冲突的载波侦听多路访问</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CSMA-CA-%E8%BF%87%E7%A8%8B"><span class="nav-number">3.7.1.</span> <span class="nav-text">CSMA&#x2F;CA 过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CSMA-MA-%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.7.2.</span> <span class="nav-text">CSMA&#x2F;MA 实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E7%8E%87"><span class="nav-number">3.8.</span> <span class="nav-text">实际数据传输率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WLAN-%E5%92%8C-Ethernet-%E5%8C%BA%E5%88%AB"><span class="nav-number">3.9.</span> <span class="nav-text">WLAN 和 Ethernet 区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Layer-2-Devices-%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%AE%BE%E5%A4%87"><span class="nav-number">4.</span> <span class="nav-text">Layer 2 Devices 第二层设备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NICs-%E7%BD%91%E5%8D%A1"><span class="nav-number">4.1.</span> <span class="nav-text">NICs 网卡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E6%A1%A5%EF%BC%88Bridges%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">网桥（Bridges）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%8F%E6%98%8E%E7%BD%91%E6%A1%A5%E5%8E%9F%E7%90%86"><span class="nav-number">4.2.1.</span> <span class="nav-text">透明网桥原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BA%90%E8%B7%AF%E7%94%B1%E7%BD%91%E6%A1%A5"><span class="nav-number">4.2.2.</span> <span class="nav-text">源路由网桥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%EF%BC%88Switches%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">交换机（Switches）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%88%92%E5%88%86%E4%BA%86%E5%86%B2%E7%AA%81%E5%9F%9F"><span class="nav-number">4.3.1.</span> <span class="nav-text">交换机划分了冲突域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E5%88%92%E5%88%86%E4%BA%86%E5%86%B2%E7%AA%81%E5%9F%9F"><span class="nav-number">4.3.2.</span> <span class="nav-text">路由器划分了冲突域</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

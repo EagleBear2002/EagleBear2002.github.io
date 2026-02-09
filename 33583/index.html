@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="盒模型  元素的宽度和高度 最终元素的总宽度计算公式是这样的： 总元素的宽度&#x3D;宽度+左填充+右填充+左边框+右边框+左边距+右边距">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 前端开发-05-CSS 布局">
+<meta property="og:url" content="https://eaglebear2002.github.io/33583/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="盒模型  元素的宽度和高度 最终元素的总宽度计算公式是这样的： 总元素的宽度&#x3D;宽度+左填充+右填充+左边框+右边框+左边距+右边距">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223153149226.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223153212195.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223153350908.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223153840500.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154136608.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154325692.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154503979.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154756597.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154904044.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154910709.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223154914898.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223155648721.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163005226.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163038537.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163043304.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163341503.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163419887.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163424631.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223163429753.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164240326.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164359737.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164520350.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164643556.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164859243.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223164905227.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165035878.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165051877.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165150865.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165204527.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165213984.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165311980.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165446013.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/33583/image-20221223165450989.png">
+<meta property="article:published_time" content="2022-12-23T07:28:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.498Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/33583/image-20221223153149226.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/33583/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Web 前端开发-05-CSS 布局 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/33583/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Web 前端开发-05-CSS 布局
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-23 15:28:00" itemprop="dateCreated datePublished" datetime="2022-12-23T15:28:00+08:00">2022-12-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-Web-%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">2022Fall-Web 前端开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="盒模型">盒模型</h2>
+<img src="/33583/image-20221223153149226.png" alt="盒模型" style="zoom: 80%;">
+<h3 id="元素的宽度和高度">元素的宽度和高度</h3>
+<p>最终元素的总宽度计算公式是这样的：</p>
+<p>总元素的宽度=宽度+左填充+右填充+左边框+右边框+左边距+右边距</p>
+<p>元素的总高度最终计算公式是这样的：</p>
+<p>总元素的高度=高度+顶部填充+底部填充+上边框+下边框+上边距+下边距</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-tag">div</span> &#123;<br>	<span class="hljs-attribute">width</span>: <span class="hljs-number">400px</span>;<br>	<span class="hljs-attribute">border</span>: <span class="hljs-number">20px</span> solid green;<br>	<span class="hljs-attribute">padding</span>: <span class="hljs-number">20px</span>;<br>	<span class="hljs-attribute">margin</span>: <span class="hljs-number">20px</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="IE-怪异盒模型">IE 怪异盒模型</h3>
+<p><img src="/33583/image-20221223153212195.png" alt="IE 怪异盒模型"></p>
+<h3 id="盒模型-2">盒模型</h3>
+<p><img src="/33583/image-20221223153350908.png" alt="盒模型"></p>
+<h3 id="Position">Position</h3>
+<p>定位的基本思想很简单，它允许你定义元素框相对于其正常位置应该出现的位置，或者相对于父元素、另一个元素甚至浏览器窗口本身的位置。这个功能非常强大，用户代理对 CSS2 中定位的支持远胜于对其它方面的支持。</p>
+<p>CSS position 属性用于指定一个元素在文档中的定位方式</p>
+<ul>
+<li>static</li>
+<li>relative</li>
+<li>fixed</li>
+<li>absolute</li>
+<li>sticky</li>
+</ul>
+<h2 id="页面正常流">页面正常流</h2>
+<p><img src="/33583/image-20221223153840500.png" alt="页面正常流"></p>
+<h3 id="默认布局">默认布局</h3>
+<p>默认的，一个块级元素的内容宽度是其父元素的 100%，其高度与其内容高度一致。内联元素的 <code>height width</code> 与内容一致。你无法设置内联元素的 <code>height width</code> ——它们就那样置于块级元素的内容里。如果你想控制内联元素的尺寸，你需要为元素设置<code>display:block</code>（或者，<code>display:inline-block</code>，混合了 inline 和 block 的特性）；</p>
+<p>正常布局流是一套在浏览器视口内放置、组织元素的系统。默认的，块级元素按块流向布置，即基于其父元素的书写顺序（默认值：horizontal-tb）。每个块级元素会在上一个元素下面另起一行，它们会被设置好的 <code>margin</code> 分隔。以英语为例，或者其他的水平书写、自上而下模式里，块级元素被垂直组织的。内联元素的表现有所不同——它们不会另起一行；只要在其父级块级元素的宽度内有足够的空间，它们与其他内联元素、相邻的文本内容（或者被包裹的）被安排在同一行。如果空间不够，溢出的文本或元素将移到新的一行。</p>
+<p>如果两个相邻的元素都设置了 margin 并且两个 margin 有重叠，那么更大的设置会被保留，小的则会消失———这被称为外边距叠加。</p>
+<p><img src="/33583/image-20221223154136608.png" alt="This is the basic principle of Normal Flow"></p>
+<h3 id="Absolute">Absolute</h3>
+<p><code>position: absolute;</code> 的元素相对于最近的定位祖先元素进行定位（而不是相对于视口定位，如 <code>fixed</code>）。</p>
+<p>然而，如果绝对定位的元素没有祖先，它将使用文档主体（body），并随页面滚动一起移动。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/css&quot;</span>&gt;</span><span class="language-css"></span><br><span class="language-css">	<span class="hljs-selector-tag">h2</span><span class="hljs-selector-class">.pos_abs</span> &#123;</span><br><span class="language-css">		<span class="hljs-attribute">position</span>: absolute;</span><br><span class="language-css">		<span class="hljs-attribute">left</span>: <span class="hljs-number">100px</span>;</span><br><span class="language-css">		<span class="hljs-attribute">top</span>: <span class="hljs-number">150px</span>;</span><br><span class="language-css">	&#125;</span><br><span class="language-css"></span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;pos_abs&quot;</span>&gt;</span>这是带有绝对定位的标题<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span><br>	通过绝对定位，元素可以放置到页面上的任何位置。下面的标题距离页面左侧<br>	100px，距离页面顶部 150px。<br><span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p><img src="/33583/image-20221223154325692.png" alt></p>
+<h3 id="Relative">Relative</h3>
+<p><code>position: relative;</code> 的元素相对于其正常位置进行定位。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text/css&quot;</span>&gt;</span><span class="language-css"></span><br><span class="language-css">			<span class="hljs-selector-tag">h2</span><span class="hljs-selector-class">.pos_left</span> &#123;</span><br><span class="language-css">				<span class="hljs-attribute">position</span>: relative;</span><br><span class="language-css">				<span class="hljs-attribute">left</span>: -<span class="hljs-number">20px</span>;</span><br><span class="language-css">			&#125;</span><br><span class="language-css">			<span class="hljs-selector-tag">h2</span><span class="hljs-selector-class">.pos_right</span> &#123;</span><br><span class="language-css">				<span class="hljs-attribute">position</span>: relative;</span><br><span class="language-css">				<span class="hljs-attribute">left</span>: <span class="hljs-number">20px</span>;</span><br><span class="language-css">			&#125;</span><br><span class="language-css">		</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><br>	<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">h2</span>&gt;</span>这是位于正常位置的标题<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;pos_left&quot;</span>&gt;</span>这个标题相对于其正常位置向左移动<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;pos_right&quot;</span>&gt;</span>这个标题相对于其正常位置向右移动<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>相对定位会按照元素的原始位置对该元素进行移动。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>样式 &quot;left:-20px&quot; 从元素的原始左侧位置减去 20 像素。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br>		<span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>样式 &quot;left:20px&quot; 向元素的原始左侧位置增加 20 像素。<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br>	<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p><img src="/33583/image-20221223154503979.png" alt></p>
+<h3 id="fixed">fixed</h3>
+<p><code>position:fixed;</code> 的元素是相对于视口定位的，这意味着即使滚动页面，它也始终位于同一位置。<code>top</code>、<code>right</code>、<code>bottom</code> 和 <code>left</code> 属性用于定位此元素。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-tag">div</span><span class="hljs-selector-class">.fixed</span> &#123;<br>	<span class="hljs-attribute">position</span>: fixed;<br>	<span class="hljs-attribute">bottom</span>: <span class="hljs-number">0</span>;<br>	<span class="hljs-attribute">right</span>: <span class="hljs-number">0</span>;<br>	<span class="hljs-attribute">width</span>: <span class="hljs-number">300px</span>;<br>	<span class="hljs-attribute">border</span>: <span class="hljs-number">3px</span> solid <span class="hljs-number">#73ad21</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="static">static</h3>
+<p>HTML 元素默认情况下的定位方式为 static（静态）。</p>
+<p>静态定位的元素不受 <code>top</code>、<code>bottom</code>、<code>left</code> 和 <code>right</code> 属性的影响。</p>
+<p><code>position:static;</code> 的元素不会以任何特殊方式定位；它始终根据页面的正常流进行定位。</p>
+<h3 id="sticky">sticky</h3>
+<p><code>position:sticky;</code> 的元素根据用户的滚动位置进行定位。</p>
+<p>粘性元素根据滚动位置在相对（relative）和固定（fixed）之间切换。起先它会被相对定位，直到在视口中遇到给定的偏移位置为止—然后将其“粘贴”在适当的位置（比如 <code>position:fixed</code>）</p>
+<p><img src="/33583/image-20221223154756597.png" alt></p>
+<h3 id="float"><code>float</code></h3>
+<p>浮动的框可以向左或向右移动，直到它的外边缘碰到<strong>包含框或另一个浮动框的边框</strong>为止。</p>
+<p>由于浮动框不在文档的普通流中，所以文档的普通流中的块框表现得就像浮动框不存在一样。</p>
+<p><img src="/33583/image-20221223154904044.png" alt></p>
+<p><img src="/33583/image-20221223154910709.png" alt></p>
+<p><img src="/33583/image-20221223154914898.png" alt></p>
+<h3 id="Formatting-Context">Formatting Context</h3>
+<p>Formatting context 是 W3C CSS2.1 规范中的一个概念。它是页面中的一块渲染区域，并且有一套渲染规则，它决定了其子元素将如何定位，以及和其他元素的关系和相互作用。最常见的 Formatting context 有 Block Formatting Context（简称 BFC）和 Inline formatting context（简称 IFC）。</p>
+<p>BFC 是一个独立的布局环境，其中的元素布局是不受外界的影响，并且在一个 BFC 中，块盒与行盒（行盒由一行中所有的内联元素所组成）都会垂直的沿着其父元素的边框排列。</p>
+<h2 id="BFC">BFC</h2>
+<p>定义：BFC（Block formatting context）直译为“块级格式化上下文”。它是一个独立的渲染区域，只有 Block—level box 参与，它规定了内部的 Block-level Box 如何布局，并且与这个区域外部毫不相干。</p>
+<h3 id="BFC-的形成">BFC 的形成</h3>
+<p>下列方式会创建块格式化上下文：</p>
+<ol>
+<li>根元素（<code>&lt;html&gt;</code>）</li>
+<li>浮动元素（float 值不为 none）</li>
+<li>绝对定位元素（position 值为 absolute 或 fixed）</li>
+<li>行内块元素（display 值为 inline-block）</li>
+<li>表格单元格（display 值为 table-cell，HTML 表格单元格默认值）</li>
+<li>表格标题（display 值为 table-caption，HTML 表格标题默认值）</li>
+<li>匿名表格单元格元素（display 值为 table、table-row、table-row-group、table-header-group、table-footer- group（分别是 HTML table、tr、tbody、thead、tfoot 的默认值）或 inline-table）</li>
+<li>overflow 值不为 visible、clip 的块元素</li>
+<li>display 值为 flow-root 的元素</li>
+<li>contain 值为 layout、content 或 paint 的元素</li>
+<li>弹性元素（display 值为 flex 或 inline-flex 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器</li>
+<li>网格元素（display 值为 grid 或 inline-grid 元素的直接子元素），如果它们本身既不是 flex、grid 也不是 table 容器</li>
+<li>多列容器（column-count 或 column-width（en-US）值不为 auto，包括 column-count 为 1）</li>
+<li>column-span 值为 all 的元素始终会创建一个新的 BFC，即使该元素没有包裹在一个多列容器中（规范变更，Chromebug）</li>
+</ol>
+<h3 id="BFC-的布局规则">BFC 的布局规则</h3>
+<p>内部的 Box 会在垂直方向，一个接一个地放置。</p>
+<p>Box 垂直方向的距离由 margin 决定。属于同一个 BFC 的两个相邻 Box 的 margin 会发生重叠。</p>
+<p>每个盒子（块盒与行盒）的 margin box 的左边，与包含块 border box 的左边相接触（对于从左往右的格式化，否则相反）。即使存在浮动也是如此。</p>
+<p>BFC 的区域不会与 float box 重叠。</p>
+<p>BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。</p>
+<p>计算 BFC 的高度时，浮动元素也参与计算。</p>
+<h3 id="格式化上下文影响布局">格式化上下文影响布局</h3>
+<p>通常，我们会为定位和清除浮动创建新的 BFC，而不是更改布局，因为它将：</p>
+<ul>
+<li>包含内部浮动</li>
+<li>排除外部浮动</li>
+<li>阻止外边距重叠</li>
+</ul>
+<h3 id="高度塌陷">高度塌陷</h3>
+<p>当父元素未设置高度时，所有子元素浮动后，造成子元素脱离文档流进而无法把父元素撑开，父元素高度为</p>
+<p><img src="/33583/image-20221223155648721.png" alt></p>
+<h2 id="IFC">IFC</h2>
+<p>当多个内联（块级）元素排列在一起的时候就会形成一个 IFC，之间不能穿插有块级元素，否则会被切割成多个 IFC。</p>
+<h3 id="IFC-的影响">IFC 的影响</h3>
+<p>IFC 对布局产生的影响主要有以下三个方面：</p>
+<ol>
+<li>一个 IFC 内的元素都是水平排列的。</li>
+<li>横向的 margin、border、padding 属性对于这些元素都是有效的。</li>
+<li>垂直方向可以调整对齐方式。</li>
+</ol>
+<p><img src="/33583/image-20221223163005226.png" alt></p>
+<h3 id="复杂的-div-嵌套">复杂的 div 嵌套</h3>
+<p>代码复杂度高，网页加载速度慢</p>
+<p><img src="/33583/image-20221223163038537.png" alt="w"></p>
+<p><img src="/33583/image-20221223163043304.png" alt></p>
+<h3 id="现在……">现在……</h3>
+<ul>
+<li>不同平台：Windows，Mac，Linux，iOS，Android，WebOS，Chrome OS</li>
+<li>大量的设备</li>
+<li>不同的分辨率</li>
+<li>横屏与竖屏</li>
+<li>智能设备快速增长</li>
+<li>云计算、浏览器是未来</li>
+</ul>
+<h2 id="CSS-布局">CSS 布局</h2>
+<img src="/33583/image-20221223163341503.png" style="zoom: 80%;">
+<h3 id="最佳可访问性和可读性">最佳可访问性和可读性</h3>
+<p>编码时保持良好的 html 源码顺序非常重要，原因：</p>
+<ul>
+<li>网站技术故障时不能正确显示 css 样式，或移动和无线网络环境下，带宽有限，导致浏览器中出现没有样式的 HTML。</li>
+<li>资源顺序对网站的可访问性起着重要作用，因为对于盲人用户，当代码有一定的逻辑顺序时，能够快速跳过页眉和导航区域，直达页面的主要内容。</li>
+<li>确保网站的主导航链接和主要网页内容在资源排序中排在最前面，这样可以帮助搜索引擎优化。</li>
+</ul>
+<img src="/33583/image-20221223163419887.png" style="zoom: 80%;">
+<table>
+<thead>
+<tr>
+<th><img src="/33583/image-20221223163424631.png" style="zoom:80%;"></th>
+<th><img src="/33583/image-20221223163429753.png" style="zoom:67%;"></th>
+</tr>
+</thead>
+</table>
+<h3 id="响应式-Web-设计（Responsive-Web-Design）">响应式 Web 设计（Responsive Web Design）</h3>
+<p>自适应网页设计（英语：Responsive web design，通常缩写为 RWD）是一种网页设计方法，该设计可使网站在多种浏览设备（从桌面电脑显示器到移动电话或其他移动产品设备）上阅读和导航，同时减少缩放、平移和滚动。</p>
+<blockquote>
+<p>Responsive web design (RWD) is a web design approach aimed at crafting sites to provide an optimal viewing experience-easy reading and navigation with a minimum of resizing, panning,and scrolling-across a wide range of devices (from mobile phones to desktop computer monitors).</p>
+<div style="text-align:right">--Ethan Marcotte</div>
+</blockquote>
+<h3 id="响应式布局">响应式布局</h3>
+<p>曾经流行，不再是必不可少，原因：</p>
+<ul>
+<li>公司研发人员越来越充足，可以在 pc 端和移动端实现两套布局，分项目进行维护。</li>
+<li>响应式布局在适配上越来越简单。</li>
+</ul>
+<p>仍有存在的价值：</p>
+<ul>
+<li>移动端碎片化的现象将会无限期存在</li>
+<li>前端也必然进入物联网领域，任何设备界面的响应布局都将会成为关键挑战。</li>
+<li>响应式布局是 CSS 逐步发展中的一环，体现了 CSS 的灵活性。</li>
+</ul>
+<h4 id="优势">优势</h4>
+<p>网站可用性得到提升，同时与移动优先设计以及内容策略能够非常好的融合在一起。</p>
+<p>简化服务器端</p>
+<p>更容易维护</p>
+<p>只提供一个入口给搜索引擎</p>
+<p>能够支持未知设备</p>
+<h4 id="缺点">缺点</h4>
+<p>性能：</p>
+<ul>
+<li>兼容各种设备工作量大，效率低下</li>
+<li>代码累赘，会出现隐藏无用的元素，加载时间加长</li>
+</ul>
+<p>限制应用的复杂性</p>
+<ul>
+<li>折衷性质的设计解决方案，多方面因素影响而达不到最佳效果</li>
+</ul>
+<p>一定程度上改变了网站原有的布局结构，会出现用户混淆的情况</p>
+<h3 id="响应式网页设计">响应式网页设计</h3>
+<p>围绕着三个概念建立：</p>
+<ul>
+<li>流畅或灵活的页面布局，根据浏览器窗口大小成比例缩放。</li>
+<li>灵活、比例适中的图像和视听媒体。</li>
+<li>使用 CSS3 媒体查询（media query），确定浏览器屏幕的宽度并作出相应的调整。</li>
+</ul>
+<h3 id="流式布局和比例度量">流式布局和比例度量</h3>
+<p>页面固定宽度布局： 几年前流行</p>
+<p>复杂页面布局中，有助于用户更好地了解页面上的信息。尺寸固定，不能适应当今屏幕大小各异的互联网世界。不设定为一个固定宽度</p>
+<p><img src="/33583/image-20221223164240326.png" alt></p>
+<h3 id="流体表格（Fluid-Grid）">流体表格（Fluid Grid）</h3>
+<p>流体表格将页面栅格化，使用 em 相对单位取代 px 绝对单位</p>
+<p><a target="_blank" rel="noopener" href="https://alistapart.com/article/fluidgrids/">https://alistapart.com/article/fluidgrids/</a></p>
+<p><img src="/33583/image-20221223164359737.png" alt></p>
+<h3 id="em-排版尺寸">em 排版尺寸</h3>
+<p>单纯成比例的流式布局并不能完全解决屏幕尺寸问题，因为在小屏幕上页面布局可能会被压扁，而在大屏幕上会被拉伸变形。</p>
+<p>使用 em 排版尺寸就非常重要，原因：</p>
+<ul>
+<li>当设备屏幕上的排版太大或太小时，用户都可以很容易地进行调整，这对于有视力障碍的用户来说是一个重要的可访问特性。</li>
+<li>在 CSS 控制下，相对类型的大小可以很容易地缩放，在 <code>&lt;html&gt;</code> 或 <code>&lt;body&gt;</code>标签中使用 <code>font-size</code>元素，就可以很容易地对整个页面排版尺寸进行缩放。通过调整 em 的值，可以立刻放大或缩小页面上的所有排版，这在响应式设计中是一种非常有用的功能，可以快速缩放页面排版，以轻松匹配整个屏幕尺寸和分辨率。</li>
+</ul>
+<h4 id="使用-em-尺寸">使用 em 尺寸</h4>
+<p><img src="/33583/image-20221223164520350.png" alt></p>
+<h3 id="比例图像和媒体">比例图像和媒体</h3>
+<p><img src="/33583/image-20221223164643556.png" alt></p>
+<h3 id="HTML5-picture-元素">HTML5 <code>&lt;picture&gt;</code> 元素</h3>
+<p><code>picture</code> 元素允许我们在不同的设备上显示不同的图片，一般用于响应式。</p>
+<p>HTML5 引入了<code>&lt;picture&gt;</code>元素，该元素可以让图片资源的调整更加灵活。</p>
+<p><code>&lt;picture&gt;</code> 元素零或多个 <code>&lt;source&gt;</code> 元素和一个 <code>&lt;img&gt;</code> 元素， 每个 <code>&lt;source&gt;</code> 元素匹配不同的设备并引用不同的图像源，如果没有匹配的，就选择 <code>&lt;img&gt;</code> 元素的 <code>src</code> 属性中的 <code>url</code>。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs css">&lt;<span class="hljs-selector-tag">picture</span>&gt;<br>    &lt;<span class="hljs-selector-tag">source</span> media=&quot;(<span class="hljs-attribute">min-width</span>: <span class="hljs-number">650px</span>)<span class="hljs-string">&quot; srcset=&quot;</span>demo1.jpg<span class="hljs-string">&quot;&gt;</span><br><span class="hljs-string">    &lt;source media=&quot;</span>(min-width: <span class="hljs-number">465px</span>)<span class="hljs-string">&quot; srcset=&quot;</span>demo2.jpg<span class="hljs-string">&quot;&gt;</span><br><span class="hljs-string">    &lt;img src=&quot;</span>img_girl.jpg<span class="hljs-string">&quot;&gt;</span><br><span class="hljs-string">&lt;/picture&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="流体图片（Liquid-Image）">流体图片（Liquid Image）</h3>
+<p>图片是否传达了应该放在 <code>alt</code> 属性中的文本信息？</p>
+<p>是否想要确保图像总是打印出来，因为没有它打印输出就没有意义或不完整？</p>
+<p>是否需要链接图片？</p>
+<p>如果以上任何一个问题的答案是肯定的，那么图像就是内容，应该保存在 (X)HTML 中。</p>
+<p><img src="/33583/image-20221223164859243.png" alt></p>
+<p><img src="/33583/image-20221223164905227.png" alt></p>
+<h3 id="CSS3-media-query">CSS3 media query</h3>
+<p>有条件地检测用户显示屏的各个方面，然后根据这些条件有选择地加载出样式表，并提供最合适的布局、排版和图形。</p>
+<p>媒体查询可用于检测很多事情：</p>
+<ul>
+<li>viewport（视窗）的宽度与高度</li>
+<li>设备的宽度与高度</li>
+<li>朝向（智能手机横屏，竖屏）</li>
+<li>DPI 分辨率</li>
+</ul>
+<h3 id="独特布局">独特布局</h3>
+<p>响应式设计不仅仅是拉伸和缩小页面布局，而是要将内容和导航的独特布局以最好的方式显示到各种尺寸的屏幕上。</p>
+<p>大部分响应式设计会使用至少三种不同的布局样式表。</p>
+<p><img src="/33583/image-20221223165035878.png" alt></p>
+<h3 id="断点测量示例">断点测量示例</h3>
+<p><img src="/33583/image-20221223165051877.png" alt></p>
+<h3 id="Css3-media-queries">Css3 media queries</h3>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">max-width</span>: <span class="hljs-number">400px</span>) &#123;<br>	<span class="hljs-selector-class">.figure</span>,<br>	<span class="hljs-selector-tag">li</span><span class="hljs-selector-id">#f-mycroft</span> &#123;<br>		<span class="hljs-attribute">margin-right</span>: <span class="hljs-number">3.317535545023696682%</span>; <span class="hljs-comment">/* 21px / 633px */</span><br>		<span class="hljs-attribute">width</span>: <span class="hljs-number">48.341232227488151658%</span>; <span class="hljs-comment">/* 306px / 633px */</span><br>	&#125;<br>&#125;<br><span class="hljs-keyword">@media</span> (<span class="hljs-attribute">min-width</span>: <span class="hljs-number">1300px</span>) &#123;<br>	<span class="hljs-selector-class">.figure</span>,<br>	<span class="hljs-selector-tag">li</span><span class="hljs-selector-id">#f-mycroft</span> &#123;<br>		<span class="hljs-attribute">margin-right</span>: <span class="hljs-number">3.317535545023696682%</span>; <span class="hljs-comment">/* 21px / 633px */</span><br>		<span class="hljs-attribute">width</span>: <span class="hljs-number">13.902053712480252764%</span>; <span class="hljs-comment">/* 88px / 633px */</span><br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th><img src="/33583/image-20221223165150865.png" alt></th>
+<th><img src="/33583/image-20221223165204527.png" alt></th>
+<th><img src="/33583/image-20221223165213984.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="移动优先">移动优先</h3>
+<p>优先内容和功能：</p>
+<p>优先显示最重要的内容和功能，如果空间允许，再逐步加入次要内容和功能。</p>
+<p><img src="/33583/image-20221223165311980.png" alt></p>
+<h4 id="移动优先的好处">移动优先的好处</h4>
+<p>通用访问：</p>
+<ul>
+<li>只要移动端做的好，即使用户使用的是旧版本浏览器、没有 Javascript 或者关闭了 Javascript 的浏览器，或为视力残障人士设计的读屏浏览器，也能看到一个拥有基本功能的网站。</li>
+<li>移动优先是渐进将强理念的良好范例，所有用户都能访问核心内容和功能。不存在不能访问的情况。</li>
+</ul>
+<blockquote>
+<p>渐进渐强基本理念是首先基于一个具有广泛兼容性的核心方案，创建一个基线版本，然后再根据可能用到的浏览器的特性，慢慢添加一些特性和功能。</p>
+</blockquote>
+<h2 id="最佳实践">最佳实践</h2>
+<ul>
+<li>使用有效的，广泛支持的 HTML5 和 CSS3 来构建你的站点。</li>
+<li>利用 HTML5 新语义元素和 ARIA 为内容添加意义、可访问性和搜索可见性。</li>
+<li>在布局和排版中使用比例度量，如百分比和 em。</li>
+<li>根据用户的需求、观看设备的可能范围以及特定内容的性质，计算响应断点并使用媒体查询。</li>
+<li>使用移动优先的方法，建立最小和最基本的体验。</li>
+<li>根据屏幕空间、带宽和浏览器功能，逐步提升移动优先的体验。</li>
+<li>在研发周期中优先考虑浏览器因素，尽量避免使用复杂的、面向桌面的</li>
+<li>Photoshop 排版和静态图形设计。花哨的静态设计模型是一种过时的思维方式，与现代 web 实现完全脱节。</li>
+</ul>
+<p><img src="/33583/image-20221223165446013.png" alt></p>
+<h3 id="面包屑导航">面包屑导航</h3>
+<p><img src="/33583/image-20221223165450989.png" alt></p>
+<h4 id="作用">作用</h4>
+<ol>
+<li>让用户了解当前所处位置，以及当前页面在整个网站中的位置。</li>
+<li>体现了网站的架构层级，能够帮助用户快速学习和了解网站内容和组织方式，从而形成很好的位置感。</li>
+<li>提供返回各个层级的快速入口，方便用户操作。</li>
+<li>Google 已经将面包屑导航整合到搜索结果里面，因此优化面包屑导航每个层级的名称，多使用关键字，都可以实现 SEO 优化。面包屑路径，对于提高用户体验来说，是很有帮助的。</li>
+<li>方便用户，面包屑主要用于为用户提供导航一个网站的次要方法，通过为一个大型多级网站的所有页面提供面包屑路径，用户可以更容易的定位到上一次目录，引导用户通行；</li>
+<li>减少返回到上一级页面的点击或操作，不用使用浏览器的“返回”按钮或网站的主要导航来返回到上一级页面；</li>
+<li>不用常常占用屏幕空间，因为它们通常是水平排列以及简单的样式，面包屑路径不会占用页面太多的空间。这样的好处是，从内容过载方面来说，他们几乎没有任何负面影响；</li>
+<li>降低跳出率，面包屑路径会是一个诱惑首次访问者在进入一个页面后去浏览这个网站的非常好的方法。比如说，一个用户通过谷歌搜索到一个页面，然后看到一个面包屑路径，这将会诱使用户点击上一级页面去浏览感兴趣的相关主题。这样，从而，可以降低网站的总体跳出率。</li>
+<li>有利于百度蜘蛛对网站的抓取，蜘蛛直接沿着那个链走就可以了，很方便。</li>
+<li>面包屑有利于网站内链的建设，用面包屑大大增加了网站的内部连接，提高用户体验。</li>
+</ol>
+<h4 id="适用条件">适用条件</h4>
+<p>虽然眼下很多网站都流行使用面包屑导航，但是并不是所有的网站都适用。符合下面两个条件的网站才适合使用面包屑导航。</p>
+<ol>
+<li>层级较深的网站，面包屑导航适合层级较深的网站，如果只有一级分类的话，通过主导航就可以起到快速定位的作用。比如“豆瓣网”类型扁平构架的网站就没有使用面包屑导航。</li>
+<li>独立不交叉的网站结构，由于面包屑网站导航路径是线性结构的，因此网站内容必须划分的非常清晰，且不存在交叉；否则，面包屑导航的路径就不是唯一的，同一分类可能出现在不同的路径中，让用户感到困惑。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/56134/" rel="prev" title="Web 前端开发-04-CSS 基础">
+      <i class="fa fa-chevron-left"></i> Web 前端开发-04-CSS 基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/36839/" rel="next" title="Web 前端开发-06-1-JavaScript 基础">
+      Web 前端开发-06-1-JavaScript 基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%92%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">盒模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E7%B4%A0%E7%9A%84%E5%AE%BD%E5%BA%A6%E5%92%8C%E9%AB%98%E5%BA%A6"><span class="nav-number">1.1.</span> <span class="nav-text">元素的宽度和高度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IE-%E6%80%AA%E5%BC%82%E7%9B%92%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">IE 怪异盒模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%92%E6%A8%A1%E5%9E%8B-2"><span class="nav-number">1.3.</span> <span class="nav-text">盒模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Position"><span class="nav-number">1.4.</span> <span class="nav-text">Position</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B5%E9%9D%A2%E6%AD%A3%E5%B8%B8%E6%B5%81"><span class="nav-number">2.</span> <span class="nav-text">页面正常流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%B8%83%E5%B1%80"><span class="nav-number">2.1.</span> <span class="nav-text">默认布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Absolute"><span class="nav-number">2.2.</span> <span class="nav-text">Absolute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Relative"><span class="nav-number">2.3.</span> <span class="nav-text">Relative</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fixed"><span class="nav-number">2.4.</span> <span class="nav-text">fixed</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#static"><span class="nav-number">2.5.</span> <span class="nav-text">static</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sticky"><span class="nav-number">2.6.</span> <span class="nav-text">sticky</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#float"><span class="nav-number">2.7.</span> <span class="nav-text">float</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Formatting-Context"><span class="nav-number">2.8.</span> <span class="nav-text">Formatting Context</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BFC"><span class="nav-number">3.</span> <span class="nav-text">BFC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BFC-%E7%9A%84%E5%BD%A2%E6%88%90"><span class="nav-number">3.1.</span> <span class="nav-text">BFC 的形成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BFC-%E7%9A%84%E5%B8%83%E5%B1%80%E8%A7%84%E5%88%99"><span class="nav-number">3.2.</span> <span class="nav-text">BFC 的布局规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%8C%96%E4%B8%8A%E4%B8%8B%E6%96%87%E5%BD%B1%E5%93%8D%E5%B8%83%E5%B1%80"><span class="nav-number">3.3.</span> <span class="nav-text">格式化上下文影响布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E5%BA%A6%E5%A1%8C%E9%99%B7"><span class="nav-number">3.4.</span> <span class="nav-text">高度塌陷</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IFC"><span class="nav-number">4.</span> <span class="nav-text">IFC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IFC-%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">4.1.</span> <span class="nav-text">IFC 的影响</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E7%9A%84-div-%E5%B5%8C%E5%A5%97"><span class="nav-number">4.2.</span> <span class="nav-text">复杂的 div 嵌套</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8%E2%80%A6%E2%80%A6"><span class="nav-number">4.3.</span> <span class="nav-text">现在……</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSS-%E5%B8%83%E5%B1%80"><span class="nav-number">5.</span> <span class="nav-text">CSS 布局</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%8F%AF%E8%AE%BF%E9%97%AE%E6%80%A7%E5%92%8C%E5%8F%AF%E8%AF%BB%E6%80%A7"><span class="nav-number">5.1.</span> <span class="nav-text">最佳可访问性和可读性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E5%BC%8F-Web-%E8%AE%BE%E8%AE%A1%EF%BC%88Responsive-Web-Design%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">响应式 Web 设计（Responsive Web Design）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E5%BC%8F%E5%B8%83%E5%B1%80"><span class="nav-number">5.3.</span> <span class="nav-text">响应式布局</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8A%BF"><span class="nav-number">5.3.1.</span> <span class="nav-text">优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-number">5.3.2.</span> <span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BD%91%E9%A1%B5%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.4.</span> <span class="nav-text">响应式网页设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E5%BC%8F%E5%B8%83%E5%B1%80%E5%92%8C%E6%AF%94%E4%BE%8B%E5%BA%A6%E9%87%8F"><span class="nav-number">5.5.</span> <span class="nav-text">流式布局和比例度量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E4%BD%93%E8%A1%A8%E6%A0%BC%EF%BC%88Fluid-Grid%EF%BC%89"><span class="nav-number">5.6.</span> <span class="nav-text">流体表格（Fluid Grid）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#em-%E6%8E%92%E7%89%88%E5%B0%BA%E5%AF%B8"><span class="nav-number">5.7.</span> <span class="nav-text">em 排版尺寸</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-em-%E5%B0%BA%E5%AF%B8"><span class="nav-number">5.7.1.</span> <span class="nav-text">使用 em 尺寸</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E4%BE%8B%E5%9B%BE%E5%83%8F%E5%92%8C%E5%AA%92%E4%BD%93"><span class="nav-number">5.8.</span> <span class="nav-text">比例图像和媒体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML5-picture-%E5%85%83%E7%B4%A0"><span class="nav-number">5.9.</span> <span class="nav-text">HTML5 &lt;picture&gt; 元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E4%BD%93%E5%9B%BE%E7%89%87%EF%BC%88Liquid-Image%EF%BC%89"><span class="nav-number">5.10.</span> <span class="nav-text">流体图片（Liquid Image）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSS3-media-query"><span class="nav-number">5.11.</span> <span class="nav-text">CSS3 media query</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%AC%E7%89%B9%E5%B8%83%E5%B1%80"><span class="nav-number">5.12.</span> <span class="nav-text">独特布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%AD%E7%82%B9%E6%B5%8B%E9%87%8F%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.13.</span> <span class="nav-text">断点测量示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Css3-media-queries"><span class="nav-number">5.14.</span> <span class="nav-text">Css3 media queries</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E4%BC%98%E5%85%88"><span class="nav-number">5.15.</span> <span class="nav-text">移动优先</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E4%BC%98%E5%85%88%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">5.15.1.</span> <span class="nav-text">移动优先的好处</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.</span> <span class="nav-text">最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%8C%85%E5%B1%91%E5%AF%BC%E8%88%AA"><span class="nav-number">6.1.</span> <span class="nav-text">面包屑导航</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">6.1.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="nav-number">6.1.2.</span> <span class="nav-text">适用条件</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

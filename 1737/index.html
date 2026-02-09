@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="A huge number of informal messages are posted every day in social network sites, blogs and discussion forums. Emotions seem to be frequently important in these texts for expressing friendship, showing">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sentiment Strength Detection in Short Informal Text">
+<meta property="og:url" content="https://eaglebear2002.github.io/1737/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="A huge number of informal messages are posted every day in social network sites, blogs and discussion forums. Emotions seem to be frequently important in these texts for expressing friendship, showing">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/1737/clip_image002.gif">
+<meta property="og:image" content="https://eaglebear2002.github.io/1737/clip_image004.gif">
+<meta property="og:image" content="https://eaglebear2002.github.io/1737/clip_image006.gif">
+<meta property="og:image" content="https://eaglebear2002.github.io/1737/clip_image010.gif">
+<meta property="og:image" content="https://eaglebear2002.github.io/1737/clip_image012.gif">
+<meta property="article:published_time" content="2023-03-29T01:33:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.717Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/1737/clip_image002.gif">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/1737/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Sentiment Strength Detection in Short Informal Text | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/1737/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Sentiment Strength Detection in Short Informal Text
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-29 09:33:00" itemprop="dateCreated datePublished" datetime="2023-03-29T09:33:00+08:00">2023-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/EASIEST/" itemprop="url" rel="index"><span itemprop="name">EASIEST</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>74k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1:07</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>A huge number of informal messages are posted every day in social network sites, blogs and discussion forums. Emotions seem to be frequently important in these texts for expressing friendship, showing social support or as part of online arguments. Algorithms to identify sentiment and sentiment strength are needed to help understand the role of emotion in this informal communication and also to identify inappropriate or anomalous affective utterances, potentially associated with threatening behaviour to the self or others. Nevertheless, existing sentiment detection algorithms tend to be commercially-oriented, designed to identify opinions about products rather than user behaviours. This article partly fills this gap with a new algorithm, SentiStrength, to extract sentiment strength from informal English text, using new methods to exploit the de-facto grammars and spelling styles of cyberspace. Applied to MySpace comments and with a lookup table of term sentiment strengths optimised by machine learning, SentiStrength is able to predict positive emotion with 60.6% accuracy and negative emotion with 72.8% accuracy, both based upon strength scales of 1-5. The former, but not the latter, is better than baseline and a wide range of general machine learning approaches.</p>
+<blockquote>
+<p>每天在社交网站、博客和论坛上都会发布大量非正式消息。 在这些文本中，情感似乎对于表达友谊、显示社会支持或作为在线争论的一部分很重要。 需要识别情绪和情绪强度的算法来帮助理解情绪在这种非正式交流中的作用，并识别不恰当或异常的情感表达，这些表达可能与对自己或他人的威胁行为有关。 尽管如此，现有的情绪检测算法往往是面向商业的，旨在识别对产品的看法而不是用户行为。 本文使用新算法 SentiStrength 部分填补了这一空白，该算法使用新方法从非正式英语文本中提取情感强度，利用网络空间的实际语法和拼写风格。 应用于 MySpace 评论和通过机器学习优化的术语情绪强度查找表，SentiStrength 能够以 60.6% 的准确度预测积极情绪，以 72.8% 的准确度预测消极情绪，两者均基于 1-5 的强度等级。 前者，而不是后者，优于基线和广泛的通用机器学习方法。</p>
+</blockquote>
+<h2 id="Introduction">Introduction</h2>
+<p>Most opinion mining algorithms attempt to identify the polarity of sentiment in text: positive, negative or neutral. Whilst for many applications this is sufficient, texts often contain a mix of positive and negative sentiment and for some applications it is necessary to detect both simultaneously and also to detect the strength of sentiment expressed. For instance, programs to monitor sentiment in online communication, perhaps designed to identify and intervene when inappropriate emotions are used or to identify at-risk users (e.g., Huang, Goh, &amp; Liew, 2007), would need to be sensitive to the strength of sentiment expressed and whether participants were appropriately balancing positive and negative sentiment. In addition, basic research to understand the role of emotion in online communication (e.g., Derks, Fischer, &amp; Bos, 2008; e.g., Hancock, Gee, Ciaccio, &amp; Lin, 2008; Nardi, 2005) would also benefit from fine-grained sentiment detection, as would the growing body of psychology and other social science research into the role of sentiment in various types of discussion or general discourse (Balahur, Kozareva, &amp; Montoyo, 2009; Pennebaker, Mehl, &amp; Niederhoffer, 2003; Short &amp; Palmer, 2008).</p>
+<blockquote>
+<p>大多数意见挖掘算法都试图识别文本中情绪的极性：正面、负面或中性。 虽然对于许多应用程序来说这已经足够了，但文本通常包含正面和负面情绪的混合，对于某些应用程序，有必要同时检测两者并检测表达的情绪强度。 例如，监控在线交流情绪的程序可能旨在识别和干预何时使用不当情绪或识别处于风险中的用户（例如，Huang、Goh 和 Liew，2007 年），需要对强度敏感 表达的情绪以及参与者是否适当地平衡了正面和负面情绪。 此外，了解情绪在在线交流中的作用的基础研究（例如，Derks、Fischer 和 Bos，2008 年；例如，Hancock、Gee、Ciaccio 和 Lin，2008 年；Nardi，2005 年）也将受益于细粒度的 情绪检测，以及越来越多的心理学和其他社会科学研究，研究情绪在各种类型的讨论或一般话语中的作用（Balahur、Kozareva 和 Montoyo，2009 年；Pennebaker、Mehl 和 Niederhoffer，2003 年；Short 和 Palmer , 2008).</p>
+</blockquote>
+<p>A complicating factor for online sentiment detection is that there are many electronic communications media in which text based communication in English seems to frequently ignore the rules of grammar and spelling. Perhaps most famous is mobile phone text language with its abbreviations, emoticons and truncated sentences (Grinter &amp; Eldridge, 2003; Thurlow, 2003) but similar styles are evident in many other forms of computer mediated communication, including chatrooms, bulletin boards and social network sites (Baron, 2003; Crystal, 2006). Widely recognised innovations include emoticons like :-) that are reasonably effective in conveying emotion (Derks, Bos, &amp; von Grumbkow, 2008; Fullwood &amp; Martino, 2007) and word abbreviations like m8 (mate) and u (you) (Thurlow, 2003). Although sometimes seen as poor language use, these are a natural response to the technological affordances and social factors associated with a system (Baron, 2003; Walther &amp; Parks, 2002). These variations cause problems because typical linguistic sentiment analysis programs start with part of speech tagging (e.g., Brill, 1992), which is reliant upon standard spelling and grammar, and/or apply rules that assume at least correct spelling, if not correct grammar. Spelling correction can be useful in this context, but this is based upon the assumption that spelling deviations are likely to be accidental mistakes (Kukich, 1992; Pollock &amp; Zamora, 1984) and so current algorithms are unlikely to work well with deliberately non-standard spellings. Nevertheless, there is a range of common abbreviations and new words that a linguistic algorithm could, in principle, detect. Non-linguistic machine learning algorithms typically predict sentiment based upon occurrences of individual words, word pairs and word triples in documents. These may also perform poorly on informal text because of spelling problems and creativity in sentiment expression, even if a large training corpus is available (see below).</p>
+<blockquote>
+<p>在线情绪检测的一个复杂因素是，有许多电子通信媒体，其中基于英语文本的通信似乎经常忽略语法和拼写规则。 也许最著名的是带有缩写、表情符号和截断句子的手机文本语言（Grinter &amp; Eldridge，2003 年；Thurlow，2003 年），但类似的风格在许多其他形式的以计算机为媒介的交流中也很明显，包括聊天室、公告板和社交网站 （男爵，2003 年；水晶，2006 年）。 广泛认可的创新包括表情符号，如 :-)，它们在传达情感方面相当有效（Derks、Bos 和 von Grumbkow，2008 年；Fullwood 和 Martino，2007 年）和单词缩写，如 m8（伴侣）和 u（你）（Thurlow，2003 年） ). 尽管有时被视为语言使用不当，但这是对与系统相关的技术能力和社会因素的自然反应（Baron，2003 年；Walther &amp; Parks，2002 年）。 这些变化会导致问题，因为典型的语言情感分析程序从词性标记开始（例如，Brill，1992），它依赖于标准拼写和语法，和/或应用假定至少正确拼写（如果不是正确语法）的规则。 拼写校正在这种情况下很有用，但这是基于拼写偏差很可能是偶然错误的假设（Kukich，1992 年；Pollock 和 Zamora，1984 年），因此当前的算法不太可能很好地处理故意非标准的问题 拼写。 尽管如此，语言算法原则上可以检测到一系列常见的缩写词和新词。 非语言机器学习算法通常根据文档中单个单词、单词对和单词三元组的出现来预测情绪。 由于拼写问题和情绪表达的创造力，即使有大量的训练语料库可用，这些也可能在非正式文本上表现不佳（见下文）。</p>
+</blockquote>
+<p>The social network site MySpace, the source of the data used in the current study, is known for its young members, its musical orientation and its informal communication patterns (boyd, 2008; boyd, 2008). Probably as a result of these factors 95% of English public comments exchanged between friends contain at least one abbreviation from standard English (Thelwall, 2009). Common features include emoticons, texting-style abbreviations and the use of repeated letters or punctuation for emphasis (e.g., a loooong time, Hi!!!). Comments are typically short (mean 18.7 words, median 13 words, 68 characters) (Thelwall, 2009) but positive emotion is common (Thelwall, Wilkinson, &amp; Uppal, 2010).</p>
+<blockquote>
+<p>社交网站 MySpace 是当前研究中使用的数据来源，以其年轻成员、音乐取向和非正式交流模式而闻名（boyd，2008 年；boyd，2008 年）。 可能由于这些因素，95% 好友之间交换的英语公共评论包含至少一个标准英语的缩写 (Thelwall, 2009)。 常见特征包括表情符号、短信式缩写和使用重复字母或标点符号来强调（例如，很长的时间，嗨！！！）。 评论通常很短（平均 18.7 个单词，中位数 13 个单词，68 个字符）（Thelwall，2009）但积极情绪很常见（Thelwall、Wilkinson 和 Uppal，2010）。</p>
+</blockquote>
+<p>This article proposes a new algorithm, SentiStrength, which employs several novel methods to simultaneously extract positive and negative sentiment strength from short informal electronic text. SentiStrength uses a dictionary of sentiment words with associated strength measures and exploits a range of recognised non-standard spellings and other common textual methods of expressing sentiment. SentiStrength was developed through an initial set of 2,600 human-classified MySpace comments, and evaluated on a further random sample of 1,041 MySpace comments. Note that in some articles, but not in emotion psychology, the term sentiment refers to affect split into positive, negative and neutral whereas the term emotion refers to more differentiated affect (e.g., happy, sad, frightened). In contrast, the two terms are used as synonyms here, with their meaning effectively defined by the coder instructions described below. The main novel contributions of this paper are: a machine learning approach to optimise sentiment term weightings; methods for extracting sentiment from repeated letter non-standard spelling in informal text; and a related spelling correction method. In addition, the paper introduces a dual 5-point system for positive and negative sentiment, a corpus of 1,041 MySpace comments for this system, and a new overall sentiment strength detection system that combines novel and existing methods.</p>
+<blockquote>
+<p>本文提出了一种新算法 SentiStrength，它采用多种新颖的方法从简短的非正式电子文本中同时提取正面和负面情绪强度。 SentiStrength 使用带有相关强度度量的情感词词典，并利用一系列公认的非标准拼写和其他表达情感的常见文本方法。 SentiStrength 是通过一组初始的 2,600 条人工分类的 MySpace 评论开发的，并根据 1,041 条 MySpace 评论的进一步随机样本进行了评估。 请注意，在一些文章中，但不是在情绪心理学中，sentiment 一词指的是分为积极、消极和中性的情感，而 emotion 一词指的是更分化的情感（例如，快乐、悲伤、害怕）。 相反，这两个术语在这里用作同义词，其含义由下面描述的编码器指令有效定义。 本文的主要创新贡献是：一种优化情感术语权重的机器学习方法； 从非正式文本中的重复字母非标准拼写中提取情感的方法； 以及相关的拼写纠正方法。 此外，本文还介绍了一个正面和负面情绪的双 5 分系统，该系统包含 1,041 条 MySpace 评论的语料库，以及一个结合了新颖和现有方法的新的整体情绪强度检测系统。</p>
+</blockquote>
+<h2 id="Background-and-Related-Work">Background and Related Work</h2>
+<p>This literature review section discussed related opinion mining/sentiment analysis research as well as some relevant contributions from emotion psychology.</p>
+<blockquote>
+<p>本文献综述部分讨论了相关的意见挖掘/情感分析研究以及情绪心理学的一些相关贡献。</p>
+</blockquote>
+<h3 id="Opinion-mining">Opinion mining</h3>
+<p>Opinion mining, also known as sentiment analysis, is the extraction of positive or negative opinions from (unstructured) text (Pang &amp; Lee, 2008). The many applications of opinion mining include detecting movie popularity from multiple online reviews and diagnosing which parts of a vehicle are liked or disliked by owners through their comments in a dedicated site or forum. There are also applications unrelated to marketing, such as differentiating between emotional and informative social media content (Denecke &amp; Nejdl, 2009).</p>
+<blockquote>
+<p>意见挖掘，也称为情感分析，是从（非结构化）文本中提取正面或负面意见（Pang &amp; Lee，2008）。 意见挖掘的许多应用包括从多个在线评论中检测电影的受欢迎程度，以及通过车主在专门站点或论坛中的评论来诊断车主喜欢或不喜欢车辆的哪些部分。 还有一些与营销无关的应用程序，例如区分情感和信息社交媒体内容（Denecke &amp; Nejdl，2009）。</p>
+</blockquote>
+<p>Opinion mining typically occurs in two or three stages, although more may be needed for some tasks (e.g., Balahur et al., 2010). First, the input text is split into sections, such as sentences, and each section tested to see if it contains any sentiment: if it is subjective or objective (Pang &amp; Lee, 2004). Second, the subjective sentences are analysed to detect their sentiment polarity. Finally, the object about which the opinion is expressed may be extracted (e.g., Gamon, Aue, Corston-Oliver, &amp; Ringger, 2005). Opinion mining normally deals with only positive and negative sentiment rather than discrete emotions (e.g., happiness, surprise), does not detect sentiment strength (but sometimes uses the strength of association of words with positive or negative sentiment, e.g., Kaji &amp; Kitsuregawa, 2007), and does not simultaneously identify both positive and negative emotions. Nevertheless, such opinion mining research can aid the simultaneous assessment of positive and negative sentiment strength both because of its general insights into sentiment analysis and also because most techniques could, in theory, be repurposed for this new task. For example, phrase analysis techniques could be applied to identify both positive and negative sentiment even within individual sentences (Choi &amp; Cardie, 2008; Wilson, 2008; Wilson, Wiebe, &amp; Hoffman, 2009).</p>
+<blockquote>
+<p>意见挖掘通常分两个或三个阶段进行，尽管某些任务可能需要更多阶段（例如，Balahur 等人，2010 年）。 首先，输入文本被分成几个部分，比如句子，每个部分都经过测试，看它是否包含任何情感：是主观的还是客观的（Pang &amp; Lee，2004）。 其次，分析主观句子以检测其情感极性。 最后，可以提取表达意见的对象（例如，Gamon、Aue、Corston-Oliver 和 Ringger，2005 年）。 意见挖掘通常只处理积极和消极的情绪，而不是离散的情绪（例如快乐、惊讶），不检测情绪强度（但有时会使用单词与积极或消极情绪的关联强度，例如，Kaji &amp; Kitsuregawa，2007 ), 并且不会同时识别积极和消极情绪。 尽管如此，这种观点挖掘研究可以帮助同时评估正面和负面情绪强度，因为它对情绪分析有一般见解，而且从理论上讲，大多数技术都可以重新用于这项新任务。 例如，即使在单个句子中，短语分析技术也可用于识别正面和负面情绪（Choi &amp; Cardie, 2008; Wilson, 2008; Wilson, Wiebe, &amp; Hoffman, 2009）。</p>
+</blockquote>
+<p>Opinion mining algorithms often use machine learning to identify general features associated with positive and negative sentiment, where these features could be a subset of the words in the document, parts of speech or n-grams (i.e., the frequency of occurrence of all n consecutive words, where n is typically 1, 2, or 3) (Abbasi, Chen, Thoms, &amp; Fu, 2008; Ng, Dasgupta, &amp; Arifin, 2006; Tang, Tan, &amp; Cheng, 2009). Other features used with some success include: emoticons in online movie reviews (Read, 2005), which seem so be more domain-independent than words; lexico-syntactic patterns (e.g., Riloff &amp; Wiebe, 2003); and artificial features derived from adjective polarity lists (Ng et al., 2006). The additional features typically provide small but significant increases in performance. Rules-based methods have also been used to identify structures in sentences associated with sentiment (Prabowo &amp; Thelwall, 2009; Wu, Chuang, &amp; Lin, 2006). Two recurring machine learning issues are <em>feature selection</em> and <em>classification algorithm choice</em>.</p>
+<blockquote>
+<p>意见挖掘算法通常使用机器学习来识别与正面和负面情绪相关的一般特征，其中这些特征可以是文档中单词的子集、词性或 n-gram（即所有 n 个连续的出现频率） 词，其中 n 通常为 1、2 或 3）（Abbasi、Chen、Thoms 和 Fu，2008 年；Ng、Dasgupta 和 Arifin，2006 年；Tang、Tan 和 Cheng，2009 年）。 其他成功使用的功能包括：在线电影评论中的表情符号（Read，2005 年），它似乎比文字更独立于领域； 词汇句法模式（例如，Riloff &amp; Wiebe，2003）； 以及来自形容词极性列表的人工特征 (Ng et al., 2006)。 附加功能通常会提供小而显着的性能提升。 基于规则的方法也被用于识别与情感相关的句子结构（Prabowo &amp; Thelwall, 2009; Wu, Chuang, &amp; Lin, 2006）。 两个反复出现的机器学习问题是<em>特征选择</em>和<em>分类算法选择</em>。</p>
+</blockquote>
+<p>Feature selection, data processing to remove the least useful n-grams, has been shown to slightly improve classification performance, for example by choosing a restricted set of features (e.g., 5000) that score highest on a measure like information gain (Riloff, Patwardhan, &amp; Wiebe, 2006), or log likelihood (Gamon, 2004). When using n-grams (and lexico-syntactic patterns) small improvements can also be made by pruning the feature set of features that are subsumed by simpler features that have stronger information gain values (Riloff et al., 2006). For example, if “love” has a much higher information gain value than “I love” then the bigram can be eliminated without much risk of loss of power for the subsequent classification. An entropy-weighted genetic algorithm can also perform better than standard feature reduction approaches (Abbasi, Chen, &amp; Salem, 2008).</p>
+<blockquote>
+<p>特征选择，数据处理以去除最不有用的 n-gram，已被证明可以略微提高分类性能，例如通过选择在信息增益等度量上得分最高的一组受限特征（例如 5000）（Riloff，Patwardhan , &amp; Wiebe, 2006) 或对数似然 (Gamon, 2004)。 当使用 n-gram（和词典句法模式）时，也可以通过修剪由具有更强信息增益值的更简单特征所包含的特征的特征集来进行小的改进（Riloff 等人，2006）。 例如，如果“love”比“I love”具有更高的信息增益值，则可以在不损失后续分类能力的情况下消除二元组。 熵加权遗传算法的性能也优于标准特征缩减方法 (Abbasi, Chen, &amp; Salem, 2008)。</p>
+</blockquote>
+<p>In terms of classification algorithms, support vector machines (SVMs) are widely used (Abbasi et al., 2008; Abbasi et al., 2008; Argamon et al., 2007; Gamon, 2004; Mishne, 2005; Wilson, Wiebe, &amp; Hwa, 2006) because they seem to perform as well or better than other methods in most machine learning contexts. Nevertheless, with a few exceptions (Read, 2005; Wilson et al., 2006), explicit comparisons with other methods have not been included in opinion mining publications.</p>
+<blockquote>
+<p>在分类算法方面，支持向量机 (SVM) 被广泛使用 (Abbasi et al., 2008; Abbasi et al., 2008; Argamon et al., 2007; Gamon, 2004; Mishne, 2005; Wilson, Wiebe, &amp; Hwa, 2006)，因为在大多数机器学习环境中，它们的表现似乎与其他方法一样好或更好。 然而，除了少数例外（Read，2005 年；Wilson 等人，2006 年），与其他方法的明确比较尚未包含在意见挖掘出版物中。</p>
+</blockquote>
+<p>Many other approaches have also been used to detect sentiment in text. One is to have a dictionary of positive and negative words (e.g., love, hate), such as that found in General Inquirer (Stone, Dunphy, Smith, &amp; Ogilvie, 1966), WordNet Affect (Strapparava &amp; Valitutti, 2004), SentiWordNet (Baccianella, Esuli, &amp; Sebastiani, 2010; Esuli &amp; Sebastiani, 2006) or Q-WordNet (Agerri &amp; García-Serrano, 2010), and to count how often they occur. Modifications of this approach include the identification of negating terms (Das &amp; Chen, 2001), words that enhance sentiment in other words (e.g., <em>really</em> love, <em>absolutely</em> hate) and overall sentence structures (Turney, 2002). A more sophisticated approach is to identify text features that could potentially be subjective in some contexts and then use contextual information to decide whether they are subjective in each new context (Wiebe, Wilson, Bruce, Bell, &amp; Martin, 2004).</p>
+<blockquote>
+<p>许多其他方法也被用于检测文本中的情绪。 一种是拥有正面和负面词（例如，爱、恨）的字典，例如在 General Inquirer（Stone、Dunphy、Smith 和 Ogilvie，1966 年）、WordNet Affect（Strapparava 和 Valitutti，2004 年）、SentiWordNet 中找到的字典 （Baccianella、Esuli 和 Sebastiani，2010 年；Esuli 和 Sebastiani，2006 年）或 Q-WordNet（Agerri 和 García-Serrano，2010 年），并计算它们出现的频率。 这种方法的修改包括否定词的识别 (Das &amp; Chen, 2001)，换句话说增强情绪的词 （例如，<em>really</em> love, <em>absolutely</em> hate) 和整体句子结构 (Turney, 2002)。 一种更复杂的方法是识别在某些上下文中可能具有主观性的文本特征，然后使用上下文信息来确定它们在每个新上下文中是否是主观的（Wiebe、Wilson、Bruce、Bell 和 Martin，2004 年）。</p>
+</blockquote>
+<p>An alternative opinion mining technique has used a primarily linguistic approach: simple rules based upon compositional semantics (information about likely meanings of a word based upon the surrounding text) to detect the polarity of an expression (Choi &amp; Cardie, 2008). This gives good results on phrases in newswire documents that are manually coded as having at least medium level positive or negative sentiment. This approach seems particularly suited to cases where there is a large volume of grammatically correct text from which rules can be learned. Nevertheless, a study of poor grammatical quality texts in online customer feedback showed that linguistic approaches <em>could</em> improve classification slightly when added to bag of words (1-grams) approaches, although aggressive feature reduction had a similar impact to adding linguistic features (Gamon, 2004). The improvement was probably due to the large data set available (40,884 documents with an average of 2.26 sentences each), as has been previously claimed for an analysis of informal text (Mishne, 2005). Another approach used a lexicon of appraisal adjectives (e.g., “sort of”, “very”) together with an orientation lexicon to detect movie review polarity. This did not perform as well as unigrams but the combined performance was better than that of unigrams alone (Argamon et al., 2007). Linguistic features have also been successfully used to extend opinion mining to a multi-aspect variant that is able to detect opinions about different aspects of a topic (Snyder &amp; Barzilay, 2007). A promising future approach is the incorporation of context about the reasons why sentiment is used, such as differentiating between intention, arguments and speculation (Wilson, 2008).</p>
+<blockquote>
+<p>另一种意见挖掘技术主要使用语言学方法：基于组合语义的简单规则（关于基于周围文本的单词可能含义的信息）来检测表达式的极性（Choi 和 Cardie，2008）。 这对手动编码为至少具有中等水平正面或负面情绪的新闻专线文档中的短语给出了良好的结果。 这种方法似乎特别适用于有大量语法正确的文本可以从中学习规则的情况。 然而，对在线客户反馈中语法质量差的文本的研究表明，语言学方法在添加到词袋（1-grams）方法时<em>可以</em>略微改善分类，尽管积极的特征减少与添加语言特征具有相似的影响（Gamon，2004 年） ). 改进可能是由于可用的大数据集（40,884 个文档，每个文档平均有 2.26 个句子），正如之前对非正式文本的分析所声称的那样（Mishne，2005）。 另一种方法使用评价形容词词典（例如，“有点”、“非常”）和方向词典来检测电影评论的极性。 这不如 unigrams 表现好，但综合性能优于单独的 unigrams (Argamon et al., 2007)。 语言特征也已成功用于将意见挖掘扩展到能够检测关于主题不同方面的意见的多方面变体 (Snyder &amp; Barzilay, 2007)。 一个有前途的未来方法是结合使用情绪的原因的上下文，例如区分意图、论点和推测 (Wilson, 2008)。</p>
+</blockquote>
+<h3 id="Detecting-multiple-emotions">Detecting multiple emotions</h3>
+<p>Psychology of emotion research argues that whilst positive and negative sentiment are important dimensions, there are many different widely socially-recognised types of emotion and the strength of emotions (arousal level) can vary (e.g., Cornelius, 1996; Fox, 2008). In the dimensional model of emotion from psychology (Russell, 1979), sentiment can always be fundamentally split into two axes: arousal (low to high) and valence (positive to negative). Whilst this model is useful, other research has shown that positive and negative sentiment can coexist (e.g., Fox, 2008, p. 127) and are relatively independent in many contexts – particularly when sentiment levels are not extreme and over longer time periods (Diener &amp; Emmons, 1984; Huppert &amp; Whittington, 2003; Watson, 1988; Watson, Clark, &amp; Tellegen, 1988) and so it also seems reasonable to conceive sentiment as separately-measureable positive and negative components, as encoded in a popular psychology research instrument (Watson et al., 1988).</p>
+<blockquote>
+<p>情绪研究的心理学认为，虽然积极和消极情绪是重要的维度，但有许多不同的广泛社会认可的情绪类型，情绪强度（唤醒水平）可能会有所不同（例如，Cornelius，1996 年；Fox，2008 年）。 在心理学的情绪维度模型中（Russell，1979），情绪总是可以从根本上分为两个轴：唤醒（从低到高）和价（积极到消极）。 虽然这个模型很有用，但其他研究表明，积极情绪和消极情绪可以共存（例如，Fox，2008 年，第 127 页），并且在许多情况下是相对独立的——尤其是当情绪水平不极端且持续时间较长时（Diener &amp; Emmons, 1984; Huppert &amp; Whittington, 2003; Watson, 1988; Watson, Clark, &amp; Tellegen, 1988) 因此，将情绪视为可单独测量的正面和负面成分似乎也是合理的，正如流行的心理学研究工具中所编码的那样 （沃森等人，1988 年）。</p>
+</blockquote>
+<p>There have been some previous attempts to develop algorithms to detect the strength or prevalence of sentiment or emotion in text, or to differentiate between several types of emotion. The LIWC (Linguistic Inquiry and Word Count, <a target="_blank" rel="noopener" href="http://www.liwc.net">www.liwc.net</a>) software from psychology, for example, uses a list of emotion-bearing words to detect positive and negative emotion in text in addition to three specific emotions of particular use in psychology and psychotherapy: anger, anxiety and sadness. It uses simple word counting, measuring the proportion of words falling within an extensive predefined list (e.g., 408 positive and 499 negative words or word stems). The list includes some words that are associated with emotions but do not describe them. For example ‘lucky’ is a positive keyword and ‘loses’ is a negative keyword. In contrast to the machine learning approaches discussed above, these lists have been compiled and validated using panels of human judges and statistical testing.</p>
+<blockquote>
+<p>之前已经有一些尝试开发算法来检测文本中情感或情感的强度或普遍性，或者区分几种类型的情感。 以心理学的 LIWC（Linguistic Inquiry and Word Count，<a target="_blank" rel="noopener" href="http://www.liwc.net">www.liwc.net</a>）软件为例，除了心理学中特别使用的三种特定情绪外，还使用情绪承载词列表来检测文本中的积极和消极情绪。 心理治疗：愤怒、焦虑和悲伤。 它使用简单的单词计数，测量落在广泛的预定义列表中的单词的比例（例如，408 个正面和 499 个负面单词或词干）。 该列表包括一些与情绪相关但不描述它们的词。 例如，“lucky”是一个肯定关键词，“loses”是一个否定关键词。 与上面讨论的机器学习方法相反，这些列表是使用人类评委和统计测试小组编制和验证的。</p>
+</blockquote>
+<p>LIWC calculates the <em>prevalence</em> of emotion in text, rather than attempting to diagnose a text’s overall emotion or emotion strength. It is most suited to longer documents, for which its statistics would be useful indicators of the tendency for emotion to occur. The program uses word truncation for simplicity (e.g., joy* matches any word starting with joy), rather than stemming or lemmatisation, but does not take into account booster words like “very” or the negating effect of negatives (e.g., *not* happy). LIWC has been used by psychology researchers to investigate the connection between language and psychology (Pennebaker et al., 2003) and also as a practical tool, for example to detect how well people are likely to cope with bereavement based upon their language use (Pennebaker, Mayne, &amp; Francis, 1997). A related emotion detection approach differentiates between happy, unhappy and neutral states based upon words used by students describing their daily lives (Wu et al., 2006). This is similar to the typical positive/negative/neutral objective for opinion mining, however.</p>
+<blockquote>
+<p>LIWC 计算文本中情感的<em>普遍性</em>，而不是试图诊断文本的整体情感或情感强度。 它最适合较长的文档，因为它的统计数据可以作为情绪发生趋势的有用指标。 该程序为简单起见使用单词截断（例如，joy* 匹配任何以 joy 开头的单词），而不是词干提取或词形还原，但没有考虑像“very”这样的助推词或否定的否定效果（例如，*not\ * 快乐的）。 LIWC 已被心理学研究人员用来研究语言与心理学之间的联系（Pennebaker 等人，2003 年），同时也是一种实用工具，例如，根据他们的语言使用情况来检测人们应对丧亲之痛的能力（Pennebaker ，梅恩和弗朗西斯，1997 年）。 一种相关的情绪检测方法根据学生描述日常生活时使用的词语区分快乐、不快乐和中性状态（Wu 等人，2006 年）。 然而，这类似于意见挖掘的典型正面/负面/中立目标。</p>
+</blockquote>
+<p>One computer science initiative has attempted to identify various emotions in text, focussing on the six so-called basic emotions (Ekman, 1992; Fox, 2008) of anger, disgust, fear, joy, sadness and surprise (Strapparava &amp; Mihalcea, 2008). This initiative also measured emotion strength. A human-annotated corpus was used with the coders allocating a strength from 0 to 100 for each emotion to each text (a news headline), although inter-annotator agreement was low (Pearson correlations of 0.36 to 0.68, depending on the emotion). A variety of algorithms were subsequently trained on this data set. For example, one used WordNet Affect lists to generate appropriate dictionaries for the six emotions. A second approach used a Naive Bayes classifier trained on sets of LiveJournal blogs annotated by their owners with one of the six emotions. The best system (for fine-grained evaluation) was one previously designed for newspaper headlines, UPAR7 (Chaumartin, 2007), which used linguistic parsing and tagging as well as WordNet, SentiWordNet and WordNet Affect, hence relying upon reasonably correct standard grammar and spelling.</p>
+<blockquote>
+<p>一项计算机科学计划试图识别文本中的各种情绪，重点关注六种所谓的基本情绪（Ekman，1992 年；Fox，2008 年），即愤怒、厌恶、恐惧、喜悦、悲伤和惊讶（Strapparava &amp; Mihalcea，2008 年） . 这一举措还衡量了情绪强度。 人工注释的语料库与编码人员一起使用，为每个文本（新闻标题）的每种情绪分配从 0 到 100 的强度，尽管注释者之间的一致性很低（Pearson 相关系数为 0.36 到 0.68，具体取决于情绪）。 随后在该数据集上训练了多种算法。 例如，有人使用 WordNet 情感列表为六种情绪生成适当的词典。 第二种方法使用在 LiveJournal 博客集上训练的朴素贝叶斯分类器，这些博客由其所有者用六种情绪中的一种进行注释。 最好的系统（用于细粒度评估）是以前为报纸头条设计的系统 UPAR7（Chaumartin，2007），它使用语言解析和标记以及 WordNet、SentiWordNet 和 WordNet Affect，因此依赖于合理正确的标准语法和拼写 .</p>
+</blockquote>
+<p>In psychology, the term mood refers to medium and long term affective states. Some blogs and social network sites allow members to describe their mood at the time of editing their status or writing a post, typically by selecting from a range of icons. The results can be used as annotated mood corpora. In theory such corpora ought to be usable to train classifiers to identify mood from the text associated with the mood icon and one system has been designed to do this, but with limited success, probably because the texts analysed are typically short (average 200 words) and there are many moods, some of which are very similar to each other, although even a binary categorisation task also had limited success (Mishne, 2005). A follow up project attempted to derive the proportion of posts with a given mood within a specific time period using 199 words (1-grams) and word pairs (2-grams) derived from the aggregate of all texts, rather than by classifying individual texts (Mishne &amp; de Rijke, 2006). The results showed a high correlation with aggregate self-reported mood. A similar aggregation approach has been applied subsequently in a range of social science contexts (Hopkins &amp; King, 2010).</p>
+<blockquote>
+<p>在心理学中，情绪一词指的是中期和长期的情感状态。 一些博客和社交网站允许会员描述他们在编辑状态或撰写帖子时的心情，通常是从一系列图标中进行选择。 结果可以用作带注释的情绪语料库。 从理论上讲，这样的语料库应该可以用来训练分类器从与情绪图标相关的文本中识别情绪，并且已经设计了一个系统来做到这一点，但收效有限，可能是因为分析的文本通常很短（平均 200 个单词） 并且有很多情绪，其中一些情绪彼此非常相似，尽管即使是二元分类任务也取得了有限的成功（Mishne，2005）。 一个后续项目试图使用从所有文本的集合中派生的 199 个单词（1-grams）和单词对（2-grams）来推导出特定时间段内具有给定情绪的帖子的比例，而不是通过对单个文本进行分类 (Mishne &amp; de Rijke, 2006)。 结果显示与总体自我报告的情绪高度相关。 随后在一系列社会科学背景下应用了类似的聚合方法（Hopkins &amp; King，2010）。</p>
+</blockquote>
+<p>Linguistic processing has also been combined with a pre-existing large collection of subjective common sense statement patterns and applied to relatively informal and domain-independent text in email messages to detect multiple emotions (Liu, Lieberman, &amp; Selker, 2003). This was part of an email support system, however, and the accuracy of the emotion detection was not directly evaluated.</p>
+<blockquote>
+<p>语言处理还与预先存在的大量主观常识陈述模式相结合，并应用于电子邮件消息中相对非正式和领域独立的文本，以检测多种情绪（Liu、Lieberman 和 Selker，2003 年）。 然而，这是电子邮件支持系统的一部分，并且没有直接评估情绪检测的准确性。</p>
+</blockquote>
+<h3 id="Sentiment-strength-detection">Sentiment strength detection</h3>
+<p>In addition to the research discussed above concerning strength detection for multiple emotions (Strapparava &amp; Mihalcea, 2008), there is some work on positive-negative sentiment strength detection. One previous study used modified sentiment analysis techniques to predict the strength of human ratings on a scale of 1 to 5 for movie reviews (Pang &amp; Lee, 2005). This is a kind of sentiment strength evaluation with a combined scale for positive and negative sentiment. Experiments with human judgements led the authors to merge two of the categories and so the final task was a 4 category classification, with a 3 category version also constructed for testing purposes. A comparison of multi-class SVM classification with SVM regression suggested that SVM regression worked slightly better than multi-class SVM classification when all 4 categories were used but not when only 3 categories were used. It seems likely that the relative performance of SVM regression would increase further as the number of categories increases because the ordering of the classes is implicit information that the multi-class SVM does not use but that SVM regression does. Slight improvements were also gained when information about the percentage of positive sentences in each review was added. This may not be relevant to corpora of very short texts, however.</p>
+<blockquote>
+<p>除了上面讨论的关于多种情绪强度检测的研究 (Strapparava &amp; Mihalcea, 2008)，还有一些关于正负情绪强度检测的工作。 之前的一项研究使用改进的情感分析技术来预测人类对电影评论的评分强度，评分范围为 1 到 5（Pang &amp; Lee，2005 年）。 这是一种情绪强度评估，具有正面和负面情绪的组合尺度。 人类判断实验导致作者合并了两个类别，因此最终任务是 4 类别分类，还构建了 3 类别版本用于测试目的。 多类 SVM 分类与 SVM 回归的比较表明，当使用所有 4 个类别时，SVM 回归的效果略好于多类 SVM 分类，但仅使用 3 个类别时则不然。 随着类别数量的增加，SVM 回归的相对性能似乎可能会进一步提高，因为类别的排序是多类别 SVM 不使用但 SVM 回归使用的隐含信息。 当添加有关每个评论中正面句子百分比的信息时，也获得了轻微的改进。 然而，这可能与非常短的文本语料库无关。</p>
+</blockquote>
+<p>Sentiment strength classification has also been developed for a three level scheme (low, medium, and high or extreme) for subjective sentences or clauses in newswire texts using a linguistic analysis converting sentences into dependency trees reflecting their structure (Wilson et al., 2006). Adding dependency trees to unigrams substantially improved the performance of various classifiers compared to unigrams alone, perhaps helped by the fairly large training set (9,313 sentences), the (presumably) good quality grammar of the texts, and the fairly low initial performance on this task (34.5% to 50.9% for unigrams, rising to 48.3% to 55.0% for the three types of classifier applied to level 1 clauses). Here, SVM regression was outperformed by both the rule-based learning Ripper (Cohen, 1995) and BoosTexter, a boosting algorithm combining multiple weak classifiers (Schapire &amp; Singer, 2000).</p>
+<blockquote>
+<p>还针对新闻专线文本中的主观句子或从句开发了三级方案（低、中、高或极端）的情感强度分类，使用语言分析将句子转换为反映其结构的依赖树（Wilson 等人，2006 年） . 与单独的 unigrams 相比，将依赖树添加到 unigrams 大大提高了各种分类器的性能，这可能得益于相当大的训练集（9,313 个句子）、（可能）高质量的文本语法以及此任务的相当低的初始性能 （unigrams 为 34.5% 至 50.9%，应用于 1 级子句的三种分类器上升至 48.3% 至 55.0%）。 在这里，SVM 回归的表现优于基于规则的学习 Ripper (Cohen, 1995) 和 BoosTexter，这是一种结合了多个弱分类器的增强算法 (Schapire &amp; Singer, 2000)。</p>
+</blockquote>
+<p>Quite similar to the current paper is one that measured multiple emotions and their strengths in informal text associated with a dialog system using a combination of methods, including seeking symbolic cues via repeated punctuation (e.g., !!), emoticons and capital letters as well as translating abbreviations (Neviarouskaya, Prendinger, &amp; Ishizuka, 2007). The system also measured emotion intensity on a scale of 0-1 and used a dictionary of terms and intensity ratings assigned by three human judges (with moderate agreement rates: Fleiss Kappa 0.58). The reported evaluation on 160 human-coded sentences showed that in 68% of sentences the system agreed with the coder average to within 20%.</p>
+<blockquote>
+<p>与目前的论文非常相似的是，它使用多种方法测量与对话系统相关的非正式文本中的多种情绪及其强度，包括通过重复标点符号（例如，!!）、表情符号和大写字母以及 翻译缩写 (Neviarouskaya, Prendinger, &amp; Ishizuka, 2007)。 该系统还测量了 0-1 范围内的情绪强度，并使用了由三名人类评委指定的术语和强度评级词典（具有中等一致性率：Fleiss Kappa 0.58）。 报告的对 160 个人工编码句子的评估表明，在 68% 的句子中，系统与编码器的平均一致性在 20% 以内。</p>
+</blockquote>
+<h2 id="Data-Set-and-Human-Judgement-of-Sentiment-Strength">Data Set and Human Judgement of Sentiment Strength</h2>
+<p>MySpace was chosen as a source of test data for this study because it is a public environment containing a large quantity of informal text language and is important in its own right as one of the most visited web sites in the world in 2009. A random sample of MySpace comments was taken by examining the profiles of every 15th member that joined on June 18, 2007, up to 40,000 and selecting those with a declared U.S. nationality and a public profile not of a musician, comedian or film-maker. Of these, those with less than two friends or no comments were rejected as inactive and those with over 1,000 friends or 4,000 comments were rejected as abnormal. A commenting friend was then identified for each remaining member, satisfying the same criteria above, and a random comment selected from each direction of communication between the two. The comments were extracted in December 2008. This produced a large essentially random sample of U.S. commenter-commentee messages. Spam comments and chain messages were subsequently eliminated, as were comments containing images.</p>
+<blockquote>
+<p>之所以选择 MySpace 作为本研究的测试数据源，是因为它是一个包含大量非正式文本语言的公共环境，并且作为 2009 年世界上访问量最大的网站之一，它本身就很重要。随机样本 的 MySpace 评论是通过检查 2007 年 6 月 18 日加入的每 15 名成员的个人资料（最多 40,000 人）并选择那些具有已宣布的美国国籍并且不是音乐家、喜剧演员或电影制作人的公众形象的人来获取的。 其中，好友数少于 2 人或无评论者被视为不活跃被拒绝，好友数超过 1000 人或评论数超过 4000 人被视为异常被拒绝。 然后为每个剩余的成员确定一个评论朋友，满足上述相同的标准，并从两者之间的每个通信方向中选择一个随机评论。 这些评论是在 2008 年 12 月提取的。这产生了美国评论者-被评论者消息的大量随机样本。 垃圾评论和连锁消息随后被删除，包含图像的评论也是如此。</p>
+</blockquote>
+<p>Although sentiment analysis is normally concerned with opinions (Pang &amp; Lee, 2008), Wilson (2008) has generalised this to the psychological task of identifying the author's hidden internal state from their text. For the MySpace data, the objective was not to determine opinions or the author's internal state, however, but to identify the role of expressed sentiment for online communication. Hence the focus of the task was to identify the sentiment expressed in each message, whether reflecting the author's hidden internal state, the intended message interpretation, or the reader's hidden internal state.</p>
+<blockquote>
+<p>尽管情感分析通常与观点有关 (Pang &amp; Lee, 2008)，Wilson (2008) 将其概括为从文本中识别作者隐藏的内部状态的心理任务。 然而，对于 MySpace 数据，目标不是确定观点或作者的内部状态，而是确定表达的情绪对在线交流的作用。 因此，任务的重点是识别每条消息中表达的情感，无论是反映作者隐藏的内部状态、预期的消息解释，还是读者隐藏的内部状态。</p>
+</blockquote>
+<p>In order to obtain reliable human judgements of a random sample of the MySpace comments, two pilot exercises were undertaken with separate samples of the data (a total of 2,600 comments). These were used to identify key judgement issues and an appropriate scale. Although there are many ways to measure emotion (Mauss &amp; Robinson, 2009; Wiebe, Wilson, &amp; Cardie, 2005), human coder subjective judgements were used as an appropriate way to gather sufficient results. A set of coder instructions was drafted and refined and an online system constructed to randomly select comments and present them to the coders. One of the key outcomes from the pilot exercise was that the coders treated expressions of energy as expressions of positive sentiment unless in an explicitly negative context. For example, “Hey!!!” would be interpreted as positive because it expresses energy in a context that gives no clue as to the polarity of the emotion, so it would be accepted by most coders as positive by default. In contrast, “Loser!!!” would be interpreted as more negative than “Loser” as the exclamation marks are associated with a negative word. Consequently, the instructions were revised to explicitly state that this conflation of ostensibly neutral energy and positive sentiment was permissible.</p>
+<blockquote>
+<p>为了对 MySpace 评论的随机样本获得可靠的人为判断，我们对不同的数据样本（总共 2,600 条评论）进行了两次试点练习。 这些被用来确定关键的判断问题和适当的规模。 尽管有很多方法可以衡量情绪（Mauss &amp; Robinson，2009；Wiebe、Wilson 和 Cardie，2005），人类编码员的主观判断被用作收集足够结果的适当方法。 起草和完善了一套编码员说明，并构建了一个在线系统来随机选择评论并将其呈现给编码员。 试点工作的主要成果之一是，编码人员将能量表达视为积极情绪的表达，除非是在明确消极的背景下。 例如，“嘿！！！” 将被解释为积极的，因为它在不提供情绪极性线索的上下文中表达能量，因此默认情况下它会被大多数编码员接受为积极的。 相反，“失败者！！！” 会被解释为比“失败者”更消极，因为感叹号与否定词相关联。 因此，对说明进行了修改，明确指出这种表面上中性能量和积极情绪的混合是允许的。</p>
+</blockquote>
+<p>For the final judgements, over a thousand MySpace comments in the data set (20 words and 101 characters per comment, on average) were selected to be judged on a 5 point scale as follows for both positive and negative sentiment.</p>
+<blockquote>
+<p>对于最终判断，选择了数据集中超过 1000 条 MySpace 评论（平均每条评论 20 个单词和 101 个字符），按照以下 5 分制对正面和负面情绪进行判断。</p>
+</blockquote>
+<p>[no positive emotion or energy] <strong>1– 2 – 3 – 4 – 5</strong> [very strong positive emotion]</p>
+<p>[no negative emotion] <strong>1– 2 – 3 – 4 – 5</strong> [very strong negative emotion]</p>
+<p>The coders were given verbal instructions for coding each text as well as a booklet explaining the task (motivated by Wiebe et al., 2005), with the key instructions reproduced in this article’s appendix. The booklet also contained a list of emoticons and acronyms with explanations and background context of the task for motivation purposes. An early version of the booklet included examples of comments with associated positive and negative sentiment judgements but these had little impact in practice on coders during the pilot testing phase. The set of examples was therefore not used so that inter-coder reliability could be more realistically assessed without the possibility that some of the comments were too similar to the examples given.</p>
+<blockquote>
+<p>编码员得到了对每个文本进行编码的口头说明以及解释任务的小册子（由 Wiebe 等人提出，2005 年），本文附录中转载了关键说明。 这本小册子还包含一系列表情符号和首字母缩略词，以及用于激励目的的任务的解释和背景上下文。 这本小册子的早期版本包括带有相关正面和负面情绪判断的评论示例，但这些在试点测试阶段对编码员的实践影响不大。 因此，没有使用这组示例，以便可以更真实地评估编码员之间的可靠性，而不会出现某些评论与给出的示例过于相似的可能性。</p>
+</blockquote>
+<p>Emotions are perceived differently by individuals, partly because of their life experiences and partly because of personality issues (Barrett, 2006) and gender (Stoppard &amp; Gunn Gruchy, 1993). For system development, the judgements should give a consistent perspective on sentiment in the data, rather than an estimate of the population average perception. As a result, a set of same gender (female) coders was used and initial testing conducted to identify a homogeneous subset. Five coders were initially selected but two were subsequently rejected for giving anomalous results: one gave much higher positive scores than the others, and another gave generally inconsistent results. The mean of the three coders’ results was calculated for each comment and rounded. This was the gold standard for the experiments. Below are some examples of texts and judgements.</p>
+<blockquote>
+<p>个人对情绪的感知不同，部分原因在于他们的生活经历，部分原因在于性格问题 (Barrett, 2006) 和性别问题 (Stoppard &amp; Gunn Gruchy, 1993)。 对于系统开发，判断应该对数据中的情绪给出一致的观点，而不是对人口平均感知的估计。 因此，使用了一组相同性别（女性）的编码员并进行了初步测试以识别同质子集。 最初选择了五名编码员，但后来有两名因给出异常结果而被拒绝：一名给出的积极分数比其他人高得多，而另一名则给出了普遍不一致的结果。 计算每条评论的三位编码员结果的平均值并四舍五入。 这是实验的黄金标准。 下面是一些文本和判断的例子。</p>
+</blockquote>
+<ul>
+<li>hey witch wat cha been up too (scores: +ve: 2,3,1; -ve: 2,2,2)</li>
+<li>omg my son has the same b-day as you lol (scores: +ve: 4,3,1; -ve: 1,1,1)</li>
+<li>HEY U HAVE TWO FRIENDS!! (scores: +ve: 2,3,2; -ve: 1,1,1)</li>
+<li>What's up with that boy Carson? (scores: +ve: 1,1,1; -ve: 3,2,1)</li>
+</ul>
+<p>Table 1 reports the degree of inter-coder agreement. Basic agreement rates are reported here for comparability with SentiStrength. Previous emotion-judgement/annotation tasks have obtained higher inter-coder scores, but without strength measures and therefore having fewer categories (e.g., Wiebe et al., 2005). Moreover, one previous paper noted that inter-coder agreement was higher on longer (blog) texts (Gill, Gergle, French, &amp; Oberlander, 2008), suggesting that obtaining agreement on the short texts here would be difficult. The appropriate type of inter-coder reliability statistic for this kind of data with multiple coders and varying differences between categories is Krippendorff’s α (Artstein &amp; Poesio, 2008; Krippendorff, 2004). Using the numerical difference in emotion score as weights, the three coder α values were 0.5743 for positive and 0.5634 for negative sentiment. These values are positive enough to indicate that there is broad agreement between the coders but not positive enough (e.g., &lt; 0.67. although precise limits are not applicable to Krippendorff’s α with weights) to suggest that the coders are consistently measuring a clear underlying construct. Nevertheless, using the <em>average</em> of the coders as the gold standard still seems to be a reasonable method to get sentiment strength estimates.</p>
+<blockquote>
+<p>表 1 报告了编码器间的一致性程度。 此处报告的基本一致率是为了与 SentiStrength 进行比较。 以前的情绪判断/注释任务获得了更高的编码间分数，但没有强度测量，因此类别较少（例如，Wiebe 等人，2005）。 此外，之前的一篇论文指出，编码员之间对较长（博客）文本的一致性更高（Gill、Gergle、French 和 Oberlander，2008 年），这表明在这里就短文本达成一致是很困难的。 对于此类具有多个编码器和不同类别之间差异的数据，合适的编码器间可靠性统计类型是 Krippendorff 的 α（Artstein &amp; Poesio，2008；Krippendorff，2004）。 使用情绪得分的数值差异作为权重，三个编码器的 α 值对于积极情绪为 0.5743，对于消极情绪为 0.5634。 这些值足以表明编码人员之间存在广泛的一致性，但还不够积极（例如，&lt; 0.67。尽管精确限制不适用于带权重的 Krippendorff α）以表明编码人员始终如一地测量清晰的基础结构。 尽管如此，使用编码器的<em>平均值</em>作为黄金标准似乎仍然是获得情绪强度估计的合理方法。</p>
+</blockquote>
+<p>Table 1. Level of agreement between coders for the 1,041 evaluation comments (exact agreement, % of agreements within one class, mean percentage error, and Pearson correlation).</p>
+<blockquote>
+<p>表 1. 编码员之间对 1,041 条评估意见的一致程度（完全一致、一类内的一致百分比、平均百分比错误和 Pearson 相关）。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th><strong>Comparison</strong></th>
+<th><strong>+ve</strong></th>
+<th><strong>+ve</strong> <strong>+/- 1 class</strong></th>
+<th><strong>+ve mean % diff.</strong></th>
+<th><strong>+ve corr</strong></th>
+<th><strong>-ve</strong></th>
+<th><strong>-ve</strong> <strong>+/- 1 class</strong></th>
+<th><strong>-ve mean % diff.</strong></th>
+<th><strong>-ve corr</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coder 1 vs. 2</td>
+<td>51.0%</td>
+<td>94.3%</td>
+<td>.256</td>
+<td>.564</td>
+<td>67.3%</td>
+<td>94.2%</td>
+<td>.208</td>
+<td>.643</td>
+</tr>
+<tr>
+<td>Coder 1 vs. 3</td>
+<td>55.7%</td>
+<td>97.8%</td>
+<td>.216</td>
+<td>.677</td>
+<td>76.3%</td>
+<td>95.8%</td>
+<td>.149</td>
+<td>.664</td>
+</tr>
+<tr>
+<td>Coder 2 vs. 3</td>
+<td>61.4%</td>
+<td>95.2%</td>
+<td>.199</td>
+<td>.682</td>
+<td>68.2%</td>
+<td>93.6%</td>
+<td>.206</td>
+<td>.639</td>
+</tr>
+</tbody>
+</table>
+<h2 id="The-SentiStrength-Sentiment-Strength-Detection-Algorithm">The SentiStrength Sentiment Strength Detection Algorithm</h2>
+<p>The SentiStrength emotion detection algorithm was developed on an initial set of 2,600 MySpace classifications used for the pilot testing. The key elements of SentiStrength are listed below.</p>
+<blockquote>
+<p>SentiStrength 情绪检测算法是在用于试点测试的初始 2,600 个 MySpace 分类集上开发的。 下面列出了 SentiStrength 的关键要素。</p>
+</blockquote>
+<ul>
+<li>The core of the algorithm is the <strong>sentiment word strength list.</strong> This is a collection of 298 positive terms and 465 negative terms classified for either positive or negative sentiment strength with a value from 2 to 5. The default classifications are based upon human judgements during the development stage, with automatic modification occurring later during the training phase (see below). Following LIWC, some of the words include wild cards (e.g., xx*) matches any number ≥2 of consecutive xs. Some terms are standard English words and others are non-standard but common in MySpace (e.g., luv, xox, lol, haha, muah). The emotion strength is specific to the contexts in which the words tend to be used in MySpace. For example, “love” was originally classified as strength 4 positive but was reduced to strength 3 due to many casual uses such as “Just showin love 2 ur page”. Some of the words explicitly express emotion, such as “love” or “hate” but others, normally given a weak strength 2, are indirectly associated with positive or negative contexts (e.g., appreciate, help, birthday). The SentiStrength algorithm includes procedures (described below) to fine-tune the sentiment strengths using a set of training data.
+<blockquote>
+<p>该算法的核心是**情感词强度列表。**这是一个包含 298 个正面术语和 465 个负面术语的集合，按正面或负面情绪强度分类，值从 2 到 5。默认分类基于 开发阶段的人为判断，稍后在训练阶段进行自动修改（见下文）。 在 LIWC 之后，一些包含通配符的单词（例如 xx*）匹配任意数量 ≥2 的连续 x。 有些术语是标准的英语单词，而另一些是非标准的但在 MySpace 中很常见（例如，luv、xox、lol、haha、muah）。 情感强度特定于 MySpace 中倾向于使用单词的上下文。 例如，“love”最初被归类为强度 4 正面，但由于许多随意使用（例如“Just showin love 2 ur page”）而被降为强度 3。 一些词明确表达情感，例如“爱”或“恨”，但其他词通常具有较弱的强度 2，与积极或消极的语境间接相关（例如，欣赏、帮助、生日）。 SentiStrength 算法包括使用一组训练数据微调情绪强度的过程（如下所述）。</p>
+</blockquote>
+</li>
+<li>The above default manual word strengths are modified by a <strong>training algorithm to optimise the sentiment word strengths</strong>. This algorithms starts with the baseline human-allocated term strengths for the predefined list and then for each term assesses whether an increase or decrease of the strength by 1 would increase the accuracy of the classifications. Any change that increases the overall accuracy by at least 2 is kept. The minimum increase could also be set to 1 which would risk over-fitting, whereas 2 risks loosing useful changes to rare words. Here 2 was selected to make the algorithm run faster, due to less changes, rather than for any theoretical reason (in fact the algorithm worked better on the test data with 1, as the results show). The algorithm tests all words in the sentiment list at random and is repeated until all words have been checked without their strengths being changed.
+<blockquote>
+<p>上述默认手动词强度由<strong>训练算法修改以优化情感词强度</strong>。 该算法从预定义列表的基线人工分配术语强度开始，然后针对每个术语评估强度增加或减少 1 是否会提高分类的准确性。 保留至少将整体精度提高 2 的任何更改。 最小增量也可以设置为 1，这会存在过度拟合的风险，而 2 则可能会丢失对稀有词的有用更改。 这里选择 2 是为了让算法运行得更快，因为变化更少，而不是出于任何理论上的原因（事实上，算法在 1 的测试数据上效果更好，如结果所示）。 该算法随机测试情感列表中的所有单词并重复进行，直到检查完所有单词且其强度没有改变。</p>
+</blockquote>
+</li>
+<li>The word “<strong>miss</strong>” was allocated a positive and negative strength of 2. This was the only word classed as both positive and negative. It was typically used in the phrase “I miss you”, suggesting both sadness and love.
+<blockquote>
+<p>“<strong>miss</strong>”这个词被分配了 2 的正面和负面强度。这是唯一一个同时被归类为正面和负面的词。 它通常用于短语“我想你”中，暗示着悲伤和爱。</p>
+</blockquote>
+</li>
+<li>A <strong>spelling correction algorithm</strong> identifies the standard spellings of words that have been miss-spelled by the inclusion of repeated letters. For example hellllloooo would be identified as “hello” by this algorithm. The algorithm (a) automatically deletes repeated letters above twice (e.g., helllo -&gt; hello); (b) deletes repeated letters occurring twice for letters rarely occurring twice in English (e.g., niice -&gt; nice) and (c) deletes letters occurring twice if not a standard word but would form a standard word if deleted (e.g., nnice -&gt; nice but not hoop -&gt; hop nor baaz -&gt; baz). Formal spelling correction algorithms (see Pollock &amp; Zamora, 1984) were tried but not used as they made very few corrections and had problems with names and slang.
+<blockquote>
+<p><strong>拼写校正算法</strong>识别因包含重复字母而拼写错误的单词的标准拼写。 例如，helllllooooo 将被该算法识别为“hello”。 算法（a）自动删除上面两次重复的字母（例如，hello -&gt; hello）； (b) 删除在英语中很少出现两次的字母重复出现两次的字母（例如，niice -&gt; nice）和 (c) 删除出现两次的字母如果不是标准词但如果删除将形成标准词（例如 nnice -&gt; nice） 不错，但不是 hoop -&gt; hop 或 baaz -&gt; baz）。 正式的拼写校正算法（参见 Pollock &amp; Zamora，1984）被尝试但没有被使用，因为它们只做了很少的校正并且在名称和俚语方面存在问题。</p>
+</blockquote>
+</li>
+<li>A <strong>booster word list</strong> contains words that boost or reduce the emotion of subsequent words, whether positive or negative. Each word increases emotion strength by 1 or 2 (e.g., very, extremely) or decreases it by 1 (e.g., some).
+<blockquote>
+<p><strong>助推词列表</strong>包含可以提升或降低后续词的情绪的词，无论是积极的还是消极的。 每个词都会将情绪强度增加 1 或 2（例如，非常、极端）或减少 1（例如，一些）。</p>
+</blockquote>
+</li>
+<li>A <strong>negating word list</strong> contains words that invert subsequent emotion words (including any preceding booster words). For example, if “very happy” had positive strength 4 then “not very happy” would have negative strength 4. The possibility that some negating terms do not negate was not incorporated as this did not seem to occur often in the pilot data set.
+<blockquote>
+<p><strong>否定词列表</strong>包含反转后续情感词（包括任何前面的助推词）的词。 例如，如果“非常高兴”的正强度为 4，那么“不太高兴”的负强度为 4。一些否定词不否定的可能性没有被纳入，因为这在试验数据集中似乎并不经常发生。</p>
+</blockquote>
+</li>
+<li><strong>Repeated letters</strong> above those needed for correct spelling are used to give a strength boost of 1 to emotion words, as long as there are at least two additional letters. The use of repeated letters is a common device for expressing emotion or energy in MySpace comments, but one repeated letter often appeared to be a typing error.
+<blockquote>
+<p><strong>重复的字母</strong>高于正确拼写所需的字母，用于将情感词的强度提高 1，只要至少有两个额外的字母。 使用重复的字母是 MySpace 评论中表达情感或能量的常用手段，但重复的字母往往看起来像是打字错误。</p>
+</blockquote>
+</li>
+<li>An <strong>emoticon list</strong> with associated strengths (positive or negative 2) supplements the sentiment word strength list (and punctuation included in emoticons is not processed further for the purposes below).
+<blockquote>
+<p>具有相关强度（正面或负面 2）的<strong>表情符号列表</strong>补充了情感词强度列表（出于以下目的，不会进一步处理表情符号中包含的标点符号）。</p>
+</blockquote>
+</li>
+<li>Any sentence with an <strong>exclamation mark</strong> was allocated a minimum positive strength of 2.
+<blockquote>
+<p>任何带有 <strong>感叹号</strong> 的句子都被分配了最小正强度 2。</p>
+</blockquote>
+</li>
+<li><strong>Repeated punctuation</strong> including at least one exclamation mark gives a strength boost of 1 to the immediately preceding emotion word (or sentence).
+<blockquote>
+<p><strong>重复的标点符号</strong>包括至少一个感叹号，使紧接在前的情感词（或句子）的强度提高 1。</p>
+</blockquote>
+</li>
+<li><strong>Negative emotion was ignored in questions</strong>. For example, the question “are you angry?” would be classified as not containing sentiment, despite the presence of the word “angry”. This was not applied to positive sentiment because many question sentences appeared to contain mild positive sentiment. In particular, sentences like “whats up?” were typically classified as containing mild positive sentiment (strength 2).
+<blockquote>
+<p><strong>问题中忽略了负面情绪</strong>。 例如，“你生气了吗？”这个问题。 将被归类为不包含情绪，尽管存在“愤怒”一词。 这不适用于积极情绪，因为许多问题句子似乎包含温和的积极情绪。 特别是像“怎么了？”这样的句子。 通常被归类为包含温和的积极情绪（强度 2）。</p>
+</blockquote>
+</li>
+</ul>
+<p>The above factors were applied separately to each sentence, with the sentence being assigned with both the most positive and most negative emotion identified in it. Each overall comment was assigned with the most positive of its sentence emotions and the most negative of its sentence emotions. Sentence were split either by line breaks in comments or after punctuation other than emoticons.</p>
+<blockquote>
+<p>上述因素分别应用于每个句子，句子被分配了其中确定的最积极和最消极的情绪。 每个整体评论都分配有最积极的句子情绪和最消极的句子情绪。 句子被评论中的换行符或除表情符号以外的标点符号分隔。</p>
+</blockquote>
+<p>Some additional modifications were added to SentiStrength but subsequently rejected after additional testing, or were found to be impractical.</p>
+<blockquote>
+<p>一些额外的修改被添加到 SentiStrength，但随后在额外测试后被拒绝，或者被发现是不切实际的。</p>
+</blockquote>
+<ul>
+<li>Phrase identification was <em>not</em> extensively used except for a few frequent examples found in the initial 2,600 development comments. Although idiomatic phrases were common, their variety was such that it did not seem practical to systematically identify them. Future work could perhaps identify booster phrases like “so much” and “a lot”, and use phrase identification to separate weak uses of the word “love” with stronger uses, such as “I love you”.
+<blockquote>
+<p>除了在最初的 2,600 条开发评论中发现的几个常见示例外，短语识别<em>没有</em>被广泛使用。 尽管惯用语很常见，但它们的多样性使得系统地识别它们似乎并不实用。 未来的工作可能会识别像“这么多”和“很多”这样的助推短语，并使用短语识别来区分“爱”这个词的弱用法和强用法，比如“我爱你”。</p>
+</blockquote>
+</li>
+<li>Semantic disambiguation was <em>not</em> used for ambiguous words because of the problems caused by highly non-standard grammar. This could potentially improve the algorithm but would require considerable computational effort. For example, the word “rock” was sometimes strongly positive (e.g., you rock!!!) and sometime neutral (e.g., do you listen to rock music?).
+<blockquote>
+<p>由于高度不标准的语法引起的问题，语义消歧<em>不</em>用于歧义词。 这可能会改进算法，但需要大量的计算工作。 例如，“摇滚”这个词有时是非常积极的（例如，你摇滚！！！），有时是中性的（例如，你听摇滚音乐吗？）。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="Experiments">Experiments</h2>
+<p>SentiStrength was tested on a set of 1,041 MySpace comments that were different from the comments used in the development phase and were classified by three people (see Table 1), and the average was used as the gold standard. A 10-fold cross-validation approach was used. The results were compared to random allocation and to the baseline majority class classification (a positive sentiment of 2 and a negative sentiment of 1). SentiStrength was also compared to a range of standard machine learning classification algorithms in Weka (Witten &amp; Frank, 2005) using the frequencies of each word in the sentiment word list as the feature set. The <em>extended feature set</em> used for the comparisons included n-grams of length 1-3 consisting of all terms extracted from the text, including emoticons, spelling-corrected words (where appropriate), repeated punctuation, question marks and exclamation marks (e.g., one feature was the 3-gram: “love-u-!”) as well as counts of the total number of 1, 2, and 3-grams in each comment. This extended set of features incorporates most of the elements of text used by SentiStrength.</p>
+<p>A second test compared different feature sets to see whether alternative smaller feature sets could give better results for machine learning and to discover which features were most useful.</p>
+<p>A third test used feature reduction with subsumption (see below for details).</p>
+<p>A fourth test compared different variations of SentiStrength to see which aspects of the algorithm were most powerful.</p>
+<h3 id="Comparison-with-machine-learning-extended-feature-set">Comparison with machine learning, extended feature set</h3>
+<p>Figures 1 and 2 show the performance of various machine learning algorithms on the 1,041 MySpace comments with different feature set sizes, as selected using the top-ranking features from the information gain metric. Feature selection improved the results for all methods, with one minor exception (Naïve Bayes for positive sentiment: 52.0% without feature selection, averaged over 4 10-fold cross-validations). For each method, Table 2 reports comparisons with SentiStrength using the optimal feature set size for each method.</p>
+<p><img src="/1737/clip_image002.gif" alt="img"></p>
+<p>Fig. 1. Positive sentiment classification accuracy against feature set size for different classifiers using the extended feature set; average over 4 classifications.</p>
+<p><img src="/1737/clip_image004.gif" alt="img"></p>
+<p>Fig. 2. Negative sentiment classification accuracy against feature set size for different classifiers using the extended feature set; average over 4 classifications.</p>
+<p>From Table 2, machine learning classifiers using the extended feature set with the optimal number of features, as selected by information gain, are significantly less accurate than SentiStrength. SentiStrength also has the highest correlation with the gold standard, the lowest mean percentage error and the highest accuracy to within one class. Hence it performs consistently better (at least 2.1%) than the other algorithms. The level of accuracy for SentiStrength is nevertheless moderate at 60.6%. This is similar to the degree of agreement between the human coders (Table 1), suggesting that positive sentiment strength detection in informal short texts is an inherently difficult task.</p>
+<p>Table 2. Performance of various algorithms on positive sentiment strength detection for 1,041 comments with the extended feature set and 10-fold cross-validation (decreasing order of positive sentiment strength performance). Other than SentiStrength, results are averages over 4 runs of different random test/training splits and for the optimal feature numbers, as selected from Figure 1.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Algorithm</strong></th>
+<th><strong>Optimal</strong> <strong>features</strong></th>
+<th><strong>Accuracy</strong></th>
+<th><strong>Accuracy</strong> <strong>+/- 1</strong> <strong>class</strong></th>
+<th><strong>Corr.</strong></th>
+<th><strong>Mean %</strong> <strong>absolute</strong> <strong>error</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SentiStrength</strong> (standard configuration, 30 runs)</td>
+<td>-</td>
+<td>60.6%</td>
+<td>96.9%</td>
+<td>.599</td>
+<td>22.0%</td>
+</tr>
+<tr>
+<td>Simple logistic regression</td>
+<td>700</td>
+<td><strong>58.5%</strong></td>
+<td>96.1%</td>
+<td><strong>.557</strong></td>
+<td><strong>23.2%</strong></td>
+</tr>
+<tr>
+<td>SVM (SMO)</td>
+<td>800</td>
+<td><strong>57.6%</strong></td>
+<td><strong>95.4%</strong></td>
+<td><strong>.538</strong></td>
+<td><strong>24.4%</strong></td>
+</tr>
+<tr>
+<td>J48 classification tree</td>
+<td>700</td>
+<td><strong>55.2%</strong></td>
+<td><strong>95.9%</strong></td>
+<td>.548</td>
+<td>24.7%</td>
+</tr>
+<tr>
+<td>JRip rule-based classifier</td>
+<td>700</td>
+<td><strong>54.3%</strong></td>
+<td>96.4%</td>
+<td><strong>.476</strong></td>
+<td><strong>28.2%</strong></td>
+</tr>
+<tr>
+<td>SVM regression (SMO)</td>
+<td>100</td>
+<td><strong>54.1%</strong></td>
+<td>97.3%</td>
+<td><strong>.469</strong></td>
+<td><strong>28.2%</strong></td>
+</tr>
+<tr>
+<td>AdaBoost</td>
+<td>100</td>
+<td><strong>53.3%</strong></td>
+<td><strong>97.5%</strong></td>
+<td><strong>.464</strong></td>
+<td><strong>28.5%</strong></td>
+</tr>
+<tr>
+<td>Decision table</td>
+<td>200</td>
+<td><strong>53.3%</strong></td>
+<td>96.7%</td>
+<td><strong>.431</strong></td>
+<td><strong>28.2%</strong></td>
+</tr>
+<tr>
+<td>Multilayer Perceptron</td>
+<td>100</td>
+<td><strong>50.0%</strong></td>
+<td><em>94.1%</em></td>
+<td><strong>.422</strong></td>
+<td><strong>30.2%</strong></td>
+</tr>
+<tr>
+<td>Naïve Bayes</td>
+<td>100</td>
+<td><strong>49.1%</strong></td>
+<td><strong>91.4%</strong></td>
+<td><strong>.567</strong></td>
+<td><strong>27.5%</strong></td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>-</td>
+<td><strong>47.3%</strong></td>
+<td><strong>94.0%</strong></td>
+<td><strong>-</strong></td>
+<td><strong>31.2%</strong></td>
+</tr>
+<tr>
+<td>Random</td>
+<td>-</td>
+<td><strong>19.8%</strong></td>
+<td><strong>56.9%</strong></td>
+<td><strong>.016</strong></td>
+<td><strong>82.5%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Bold=sig at 0.01, italic=sig at 0.05 compared to SentiStrength.</p>
+<p>For negative sentiment strength, most of the methods give quite similar results and some give better results than SentiStrength. Although the SentiStrength accuracy is 72.8%, this is only 2.9% better than the baseline, several of the other methods have similar levels of accuracy and SVM is significantly more accurate. SentiStrength is significantly the most accurate of the methods if up to one class error is allowed, and has significantly the highest correlation with the human coder results. Note that in theory none of the methods ought to be worse than the baseline but this can occur due to optimisation on the training set rather than the evaluation set. Overall, it seems that SentiStrength is not good at identifying negative emotion but that this is a hard task for the short texts analysed here. Note also that the mean percentage absolute error for the random category is over 100% due to the predominance of ‘1’ as the correct category for negative sentiment.</p>
+<p>Table 3. Performance of various algorithms on negative sentiment strength detection for 1,041 comments with the extended feature set and 10-fold cross-validation (decreasing order of positive sentiment strength performance). Other than SentiStrength, results are averages over 4 runs and for the optimal feature numbers, as selected from Figure 2.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Algorithm</strong></th>
+<th><strong>Optimal</strong> <strong>features</strong></th>
+<th><strong>Accuracy</strong></th>
+<th><strong>Accuracy</strong> <strong>+/- 1</strong> <strong>class</strong></th>
+<th><strong>Corr.</strong></th>
+<th><strong>Mean %</strong> <strong>absolute</strong> <strong>error</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SVM (SMO)</td>
+<td>100</td>
+<td><em>73.5%</em></td>
+<td><strong>92.7%</strong></td>
+<td><strong>.421</strong></td>
+<td><strong>16.5%</strong></td>
+</tr>
+<tr>
+<td>SVM regression (SMO)</td>
+<td>300</td>
+<td>73.2%</td>
+<td><strong>91.9%</strong></td>
+<td><strong>.363</strong></td>
+<td>17.6%</td>
+</tr>
+<tr>
+<td>Simple logistic regression</td>
+<td>800</td>
+<td>72.9%</td>
+<td><strong>92.2%</strong></td>
+<td><strong>.364</strong></td>
+<td>17.3%</td>
+</tr>
+<tr>
+<td><strong>SentiStrength</strong> (standard configuration, 30 runs)</td>
+<td>-</td>
+<td>72.8%</td>
+<td>95.1%</td>
+<td>.564</td>
+<td>18.3%</td>
+</tr>
+<tr>
+<td>Decision table</td>
+<td>100</td>
+<td>72.7%</td>
+<td><strong>92.1%</strong></td>
+<td><strong>.346</strong></td>
+<td><strong>17.0%</strong></td>
+</tr>
+<tr>
+<td>JRip rule-based classifier</td>
+<td>500</td>
+<td>72.2%</td>
+<td><strong>91.5%</strong></td>
+<td><strong>.309</strong></td>
+<td>17.3%</td>
+</tr>
+<tr>
+<td>J48 classification tree</td>
+<td>400</td>
+<td>71.1%</td>
+<td><strong>91.6%</strong></td>
+<td><strong>.235</strong></td>
+<td>18.8%</td>
+</tr>
+<tr>
+<td>Multilayer Perceptron</td>
+<td>100</td>
+<td>70.1%</td>
+<td><strong>92.5%</strong></td>
+<td><strong>.346</strong></td>
+<td>20.0%</td>
+</tr>
+<tr>
+<td>AdaBoost</td>
+<td>100</td>
+<td><strong>69.9%</strong></td>
+<td><strong>90.6%</strong></td>
+<td><strong>-</strong></td>
+<td><strong>16.8%</strong></td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>-</td>
+<td><strong>69.9%</strong></td>
+<td><strong>90.6%</strong></td>
+<td><strong>-</strong></td>
+<td><strong>16.8%</strong></td>
+</tr>
+<tr>
+<td>Naïve Bayes</td>
+<td>200</td>
+<td><strong>68.0%</strong></td>
+<td><strong>89.8%</strong></td>
+<td><strong>.311</strong></td>
+<td><strong>27.3%</strong></td>
+</tr>
+<tr>
+<td>Random</td>
+<td>-</td>
+<td><strong>20.5%</strong></td>
+<td><strong>46.0%</strong></td>
+<td><strong>.010</strong></td>
+<td><strong>157.7%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Bold=sig at 0.01, italic=sig at 0.05 compared to SentiStrength.</p>
+<p>The remainder of the paper focuses on positive sentiment alone, since the results for negative sentiment are not significant.</p>
+<h3 id="Comparison-of-feature-sets-for-machine-learning-–positive-sentiment-strength">Comparison of feature sets for machine learning –positive sentiment strength</h3>
+<p>Figures 3 and 4 compare the impact of using different feature sets with the two best-performing algorithms for positive sentiment strength detection. The feature sets are: 1-3-grams; 1-3-grams with emoticons; 1-3-grams with punctuation; 1-3-grams with misspellings (i.e., including terms before spelling correction in addition to terms after spelling correction, when different); 1-3-grams with emoticons, punctuation and misspellings; 1-3-grams with emotion terms; and 1-grams. The basic bag or words approach (1-grams) performs poorly – always the worst feature set for logistic regression and the worst or amongst the worst few feature sets all the time for SVM. For SVM, the best results are achieved with the basic 1-3-grams enhanced by the emotion terms, although most of the time (i.e., for 500-1000 features) the extended feature set (labelled “all of the above” and the same as used in the results above) performs best, perhaps mainly due to the punctuation component, since this enhancement performs second best for 700-1000 features.</p>
+<p><img src="/1737/clip_image006.gif" alt="img"></p>
+<p>Fig. 3. SVM (SMO) positive sentiment classification accuracy against feature set size for different feature set types; average over 4 classifications.</p>
+<p>Figure 4 suggests that, other than the basic bag of words, the difference between feature sets is less clear-cut for logistic regression than for SVM but the best performing combination is again the 1-3 grams plus emotion terms. For larger feature sets, the combined feature set performed best, probably due to the punctuation and emotion terms.</p>
+<p>![img](file:///C:/Users/37756/AppData/Local/Temp/msohtmlclip1/01/clip_image008.gif)</p>
+<p>Fig. 4. Logistic regression positive sentiment classification accuracy against feature set size for different feature set types; average over 4 classifications.</p>
+<p>A potential weakness of using bigrams and trigrams in conjunction with unigrams is that there is some redundancy involved. For instance, the trigram “I love you” will also match the bigrams “I love” and “love you” as well as the unigrams “I”, “love” and “you”. In response, subsumption is a feature selection method that eliminates bigrams and trigrams that appear to be redundant in the sense of not giving additional information above that of their constituent unigrams (and bigrams for trigrams). This approach is appropriate here. Subsumption was applied with a logical extension: that word patterns, like happ* could eliminate matching words (e.g., happily, happy in this case) if the appropriate measure was matched. Figures 5 and 6 show the results of subsumption for the two machine learning algorithms for which it performed best: SVM and logistic regression. Subsumption performs best in conjunction with feature reduction, as both graphs show. For the other algorithms, subsumption improved the performance of Jrip by 0.4% (α = 0.005, 100 features), SVM regression by 1.1% (α = 0.02, 100 features), multilayer perceptron by 1.0% (α = 0.02, 100 features) and decision table by 1.0% (α = 0.005, 900 features) but did not improve J48, AdaBoost and Naïve Bayes.</p>
+<p><img src="/1737/clip_image010.gif" alt="img"></p>
+<p>Fig. 5. SVM(SMO) positive sentiment classification accuracy against feature set size for subsumption with various α values; average over 5 classifications.</p>
+<p><img src="/1737/clip_image012.gif" alt="img"></p>
+<p>Fig. 6. Logistic regression positive sentiment classification accuracy against feature set size for subsumption with various α values; average over 5 classifications.</p>
+<p>From Figure 5, SVM with subsumption outperforms SVM without subsumption on the extended feature set by 1.8%, and outperforms SVM on all the other feature sets (α = 0.02, 500 features). Nevertheless, its accuracy is lower than the SentiStrength standard version, although the difference is not statistically significant (accuracy = 59.42%, accuracy +/-1 = 96.60%, correlation = 0.5822, mean absolute error = 22.65%; only the mean absolute error difference is statistically significant from SentiStrength standard configuration). From Figure 6, logistic regression with subsumption outperforms logistic regression without on the extended feature set by a lower margin of 0.7% (α = 0.01, 200 features). It performs less well than 1-3grams with the emotion terms added, however (Figure 4), but this could be a statistical anomaly due to the large number of comparisons performed. Logistic regression performs less well than standard SentiStrength, but the difference is again not significant (accuracy = 59.23%, accuracy +/-1 = 95.79%, correlation = 0.5820, mean absolute error = 22.57%; all except accuracy are statistically significantly different from SentiStrength standard configuration). In terms of α values, 0.02 tends to perform almost uniformly better than other values for this data set.</p>
+<p>Note that that although SentiStrength is not statistically significantly better than the optimal SVM and logistic regression models using subsumption, the optimal variation of SentiStrength in Table 4, with one simple modification (training needs only increase of 1 to alter word strengths), is statistically significantly better in all respects than SVM and is statistically significantly better in all respects, except accuracy within +/-1, than logistic regression.</p>
+<h3 id="Comparison-of-SentiStrength-versions">Comparison of SentiStrength versions</h3>
+<p>Tables 4 and 5 report comparisons of different variations of SentiStrength. Most variations have little influence on the results – individually accounting for a maximum of 0.8% of the performance of the algorithm, except for the last two options. These differences are small enough to be attributable to the corpus used and so the table does not provide convincing evidence that any of the variations are better or worse than the standard approach. When removing all the options (but not changing the averaging method) the cumulative effect is more significant, however, reducing performance by 3.4%. Perhaps comments using non-standard features tend to use multiple non-standard features and so if one special rule is ignored then this is frequently compensated for by the other special rules.</p>
+<p>Compared with tables 2 and 3, the main power of SentiStrength is in the combined effect of its rules to adapt to various informal text variations as well as in the overall approach of using a list of term strengths and identifying the strongest positive and negative terms in any comment. In this context, it seems that the generic classification algorithms in Table 2 were a minimum of 2.1% less effective than SentiStrength mainly due to the 1-3 grams approach being insufficiently flexible to cope with non-standard MySpace language (about 3.4% attributable to this cause). In addition, it seems that they were not able to draw upon a large enough training set to learn effective term strengths and a much larger training set could see some of them approach closer to the performance of SentiStrength. Finally, note that the variations of SentiStrength that apparently improve it are not robustly better: when all these are combined to make a new version of SentiStrength this has exactly the same accuracy as the standard configuration (60.64% correct, 97.07% +/- 1 class, .6071 correlation, 21.62% mean % error).</p>
+<p>Table 4. Comparison of the <strong>positive</strong> emotion performance over several algorithm variations: average over 30 10-fold cross-validations for 1,041 classified comments.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>% Correct</th>
+<th><strong>+/- 1 class</strong></th>
+<th><strong>corr.</strong></th>
+<th><strong>Mean % err.</strong> <strong>(pred-act)/act</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SentiStrength standard algorithm (but training needs only increase of 1 to alter word strengths)</td>
+<td><strong>61.03%</strong></td>
+<td><strong>96.68%</strong></td>
+<td>.5983</td>
+<td><strong>21.66%</strong></td>
+</tr>
+<tr>
+<td>Negating words <em>not</em> used to switch following sentiment (e.g., not happy)</td>
+<td>60.87%</td>
+<td><strong>97.50%</strong></td>
+<td><strong>.6206</strong></td>
+<td><strong>21.28%</strong></td>
+</tr>
+<tr>
+<td>Multiple consecutive positive words <em>not</em> used as emotion boosters</td>
+<td>60.70%</td>
+<td>96.88%</td>
+<td>.5962</td>
+<td>21.97%</td>
+</tr>
+<tr>
+<td>Emoticons ignored</td>
+<td>60.68%</td>
+<td>96.87%</td>
+<td>.5977</td>
+<td>21.95%</td>
+</tr>
+<tr>
+<td>Booster words ignored (e.g., very)</td>
+<td>60.68%</td>
+<td><strong>96.80%</strong></td>
+<td>.5970</td>
+<td><strong>22.14%</strong></td>
+</tr>
+<tr>
+<td><strong>SentiStrength standard algorithm</strong></td>
+<td>60.64%</td>
+<td>96.90%</td>
+<td>.5986</td>
+<td>21.96%</td>
+</tr>
+<tr>
+<td>Exclamation marks <em>not</em> given a strength of 2</td>
+<td>60.51%</td>
+<td><strong>96.62%</strong></td>
+<td><strong>.6035</strong></td>
+<td><strong>21.47%</strong></td>
+</tr>
+<tr>
+<td>Automatic spelling correction disabled</td>
+<td><em>60.39%</em></td>
+<td>96.88%</td>
+<td><em>.5961</em></td>
+<td>22.05%</td>
+</tr>
+<tr>
+<td>Extra multiple letters <em>not</em> used as emotion boosters</td>
+<td><strong>60.21%</strong></td>
+<td><strong>96.81%</strong></td>
+<td><strong>.5952</strong></td>
+<td><strong>22.16%</strong></td>
+</tr>
+<tr>
+<td>The term “miss” <em>not</em> given a strength of +2</td>
+<td>60.45%</td>
+<td><strong>96.77%</strong></td>
+<td><strong>.5953</strong></td>
+<td><strong>22.16%</strong></td>
+</tr>
+<tr>
+<td>Idiom lookup table disabled</td>
+<td>60.52%</td>
+<td>96.88%</td>
+<td><strong>.6054</strong></td>
+<td><strong>21.62%</strong></td>
+</tr>
+<tr>
+<td>Neutral words with emphasis <em>not</em> counted as positive emotion</td>
+<td><strong>60.13%</strong></td>
+<td><strong>96.79%</strong></td>
+<td>.5966</td>
+<td>21.90%</td>
+</tr>
+<tr>
+<td>SentiStrength with <em>all</em> the above changes</td>
+<td><strong>57.44%</strong></td>
+<td><strong>96.07%</strong></td>
+<td><strong>.6073</strong></td>
+<td>21.91%</td>
+</tr>
+<tr>
+<td>Sentence sentiment is the average of all term sentiments (rather than the maximum)</td>
+<td><strong>42.40%</strong></td>
+<td><strong>88.54%</strong></td>
+<td><strong>.4065</strong></td>
+<td><strong>29.27%</strong></td>
+</tr>
+<tr>
+<td>Text sentiment is the average of all sentence sentiments (rather than the maximum)</td>
+<td><strong>39.13%</strong></td>
+<td><strong>86.96%</strong></td>
+<td><strong>.3293</strong></td>
+<td><strong>33.19%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>* Bold=significant at p=0.01, italic=sig. at p=0.05, compared to the standard algorithm.</p>
+<p>Table 5. Comparison of the <strong>negative</strong> emotion performance over several algorithm variations: average over 30 10-fold cross-validations for 1,041 classified comments.</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>% Correct</th>
+<th><strong>+/- 1 class</strong></th>
+<th><strong>corr.</strong></th>
+<th><strong>Mean % err.</strong> <strong>(pred-act)/act</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Negative sentiment in questions is <em>not</em> ignored</td>
+<td><strong>73.56%</strong></td>
+<td><strong>95.14%</strong></td>
+<td><strong>.5921</strong></td>
+<td><strong>18.11%</strong></td>
+</tr>
+<tr>
+<td>SentiStrength standard algorithm (but training needs only increase of 1 to alter word strengths)</td>
+<td>72.95%</td>
+<td><strong>94.86%</strong></td>
+<td>.5651</td>
+<td><strong>18.16%</strong></td>
+</tr>
+<tr>
+<td>Negating words <em>not</em> used to switch following sentiment (e.g., not happy)</td>
+<td>72.84%</td>
+<td><strong>94.79%</strong></td>
+<td><strong>.5706</strong></td>
+<td>18.35%</td>
+</tr>
+<tr>
+<td><strong>SentiStrength standard algorithm</strong></td>
+<td>72.83%</td>
+<td>95.07%</td>
+<td>.5644</td>
+<td>18.27%</td>
+</tr>
+<tr>
+<td>Multiple consecutive negative words <em>not</em> used as emotion boosters</td>
+<td>72.81%</td>
+<td>95.08%</td>
+<td>.5653</td>
+<td>18.29%</td>
+</tr>
+<tr>
+<td>Emoticons ignored</td>
+<td>72.80%</td>
+<td><strong>94.97%</strong></td>
+<td>.<em>5614</em></td>
+<td>18.28%</td>
+</tr>
+<tr>
+<td>SentiStrength with all the changes in this table except averaging</td>
+<td>72.76%</td>
+<td><strong>94.59%</strong></td>
+<td>.5668</td>
+<td><strong>19.07%</strong></td>
+</tr>
+<tr>
+<td>Idiom lookup table disabled</td>
+<td><em>72.73%</em></td>
+<td><em>95.03%</em></td>
+<td><strong>.5556</strong></td>
+<td><strong>18.63%</strong></td>
+</tr>
+<tr>
+<td>Extra multiple letters <em>not</em> used as emotion boosters</td>
+<td>72.72%</td>
+<td>95.04%</td>
+<td>.5627</td>
+<td><strong>18.40%</strong></td>
+</tr>
+<tr>
+<td>Text sentiment is the average of all sentence sentiments (rather than the maximum)</td>
+<td>72.66%</td>
+<td><strong>95.83%</strong></td>
+<td><strong>.5486</strong></td>
+<td><strong>16.81%</strong></td>
+</tr>
+<tr>
+<td>Automatic spelling correction disabled</td>
+<td><strong>72.64%</strong></td>
+<td>95.07%</td>
+<td><strong>.5586</strong></td>
+<td><strong>18.62%</strong></td>
+</tr>
+<tr>
+<td>Booster words ignored (e.g., very)</td>
+<td><strong>72.35%</strong></td>
+<td><em>95.03%</em></td>
+<td><strong>.5559</strong></td>
+<td><strong>18.50%</strong></td>
+</tr>
+<tr>
+<td>Sentence sentiment is the average of all term sentiments (rather than the maximum)</td>
+<td><strong>72.17%</strong></td>
+<td><strong>95.35%</strong></td>
+<td><strong>.4980</strong></td>
+<td><strong>16.82%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>* Bold=significant at p=0.01, italic=sig.t at p=0.05, compared to the standard algorithm.</p>
+<p>Table 5 shows that there is very little variation in the performance of the different variations of SentiStrength for negative emotion strength detection: the performance differs from the standard configuration by a maximum of 0.83%. It suggests however, that negative sentiment in questions (e.g., “Do you hate Tony?”) should <em>not</em> be ignored in future.</p>
+<h2 id="Discussion-and-Conclusions">Discussion and Conclusions</h2>
+<p>Recall that the main novel contributions of this paper are: a machine learning approach to optimise sentiment term weightings; methods for extracting sentiment from non-standard spelling in text; and a related spelling correction method. SentiStrength was able to identify the strength of positive sentiment on a scale of 1 to 5 in 60.6% of the time in informal MySpace language, significantly above the best standard machine-learning approaches which had a performance of up to 58.5% - in line with those for a previous 4-category opinion intensity classification task (Wilson et al., 2006). The standard version of SentiStrength was also better then standard machine learning methods when their performance was improved (or not, in some cases) with the use of subsumption and information gain feature reduction, but the difference was not statistically significant. A slightly modified version of SentiStrength was statistically significantly better than the improved machine learning methods, however. This is good evidence of the efficacy of SentiStrength for positive sentiment strength detection given the range of different algorithms and parameters that it was compared against (9 algorithms x 11 feature set sizes, x 7 feature set types = 693 variations, plus 9 algorithms x 10 feature set sizes x 3 α values = 270 variations for subsumption), which gives lower-performing algorithms a reasonable statistical chance of outperforming SentiStrength through chance, but none did.</p>
+<p>The main reason for SentiStrength’s relative success seems to be procedures for decoding non-standard spellings and methods for boosting the strength of words, which accounted for much of its performance. Without these factors, the SentiStrength variant based solely upon a dictionary of emotion-associated words and their estimated strengths with 57.5% was only 1.3% better than the most successful machine learning approach on an extended set of 1-3grams. In contrast, SentiStrength was able to identify negative sentiment little better (1.8%) than the baseline, probably due to creativity in expressing negative comments or due to the difficulty in getting significantly above the baseline when one category dominates (Artstein &amp; Poesio, 2008; Krippendorff, 2004). It seems that both positive and negative sentiment detection in informal text language like MySpace comments is challenging because of several factors: language creativity, expressions of sentiment without emotion-bearing words, and differences between human coder interpretations meaning that there is not a genuinely correct classification for most comments.</p>
+<p>Given the success in generating an algorithm for positive sentiment strength detection and the predominance of positive sentiment in MySpace comments, it seems that future research can apply the sentiment strength detection techniques to automatically identify and classify positive sentiment in informal web communication environments on a large scale. Moreover, there are many commercial applications of sentiment analysis, some of which use informal computer text generate from chatrooms or mobile phone text messages, and this algorithm shows that it is possible to estimate the strength of positive sentiment even in these short messages.</p>
+<p>In terms of future work, a next logical step is to attempt to improve the performance of the system through linguistic processing, despite the poor grammar of the short informal text messages analysed. Previous work has shown that this approach is promising, particularly via dependency trees (Wilson et al., 2009) and that, given a large enough training sample, improvements may be possible even in poor quality text (Gamon, 2004).</p>
+<h2 id="Appendix-Coder-Instructions-extract">Appendix: Coder Instructions (extract)</h2>
+<p>Code each comment for the degree to which it expresses positive emotion <em>or energy</em>. Excitement, enthusiasm or energy should be counted as positive emotion here. If you think that the punctuation emphasises the positive emotion or energy in any way then include this in your rating. The scale for <strong>*positive*</strong> emotion or energy is:</p>
+<p>[no positive emotion or energy] <strong>1– 2 – 3 – 4 – 5</strong> [very strong positive emotion]</p>
+<ul>
+<li>Allocate 1 if the comment contains no positive emotion or energy.</li>
+<li>Allocate 5 if the comment contains very strong positive emotion.</li>
+<li>Allocate a number between 2 and 4 if the comment contains some positive emotion but not very strong positive emotion. Use your judgement about the exact positive emotion strength.</li>
+</ul>
+<p>Code each comment for the degree to which it expresses negative emotion or is negative. If you think that the punctuation emphasises the negative emotion in any way then include this in your rating. The scale for <strong>*negative*</strong> emotion is:</p>
+<p>[no negative emotion] <strong>1– 2 – 3 – 4 – 5</strong> [very strong negative emotion]</p>
+<ul>
+<li>Allocate 1 if the comment contains no negative emotion at all.</li>
+<li>Allocate 5 if the comment contains very strong negative emotion.</li>
+<li>Allocate a number between 2 and 4 if the comment contains some negative emotion but not very strong negative emotion. Use your judgement about the exact negative emotion strength.</li>
+</ul>
+<p>When making judgements, please be as consistent with your previous decisions as possible. Also, please interpret emotion within the individual comment that it appears and ignore all other comments.</p>
+<h2 id="References">References</h2>
+<p>Abbasi, A., Chen, H., &amp; Salem, A. (2008). Sentiment analysis in multiple languages: Feature selection for opinion classification in web forums. <em>ACM Transactions on Information Systems, 26</em>(3), 12:11-12.34.</p>
+<p>Abbasi, A., Chen, H., Thoms, S., &amp; Fu, T. (2008). Affect analysis of Web forums and Blogs using correlation ensembles. <em>IEEE Transactions on Knowledge and Data Engineering, 20</em>(9), 1168-1180.</p>
+<p>Agerri, R., &amp; García-Serrano, A. (2010). Q-WordNet: Extracting polarity from WordNet senses. <em>Proceedings of the Seventh conference on International Language Resources and Evaluation</em>, Retrieved May 25, 2010 from: <a target="_blank" rel="noopener" href="http://www.lrec-conf.org/proceedings/lrec2010/pdf/2695_Paper.pdf">http://www.lrec-conf.org/proceedings/lrec2010/pdf/2695_Paper.pdf</a>.</p>
+<p>Argamon, S., Whitelaw, C., Chase, P., Hota, S. R., Garg, N., &amp; Levitan, S. (2007). Stylistic text classification using functional lexical features. <em>Journal of the American Society for Information Science and Technology, 58</em>(6), 802-822.</p>
+<p>Artstein, R., &amp; Poesio, M. (2008). Inter-coder agreement for computational linguistics. <em>Journal of Computational Linguistics, 34</em>(4), 555-596.</p>
+<p>Baccianella, S., Esuli, A., &amp; Sebastiani, F. (2010). SentiWordNet 3.0: An enhanced lexical resource for sentiment analysis and opinion mining. <em>Proceedings of the Seventh conference on International Language Resources and Evaluation</em>, Retrieved May 25, 2010 from: <a target="_blank" rel="noopener" href="http://www.lrec-conf.org/proceedings/lrec2010/pdf/2769_Paper.pdf">http://www.lrec-conf.org/proceedings/lrec2010/pdf/2769_Paper.pdf</a>.</p>
+<p>Balahur, A., Kozareva, Z., &amp; Montoyo, A. (2009). Determining the polarity and source of opinions expressed in political debates. <em>Lecture Notes in Computer Science, 5449</em>, 468-480.</p>
+<p>Balahur, A., Steinberger, R., Kabadjov, M., Zavarella, V., Goot, E. v. d., Halkia, M., et al. (2010). Sentiment analysis in the news. <em>Proceedings of the Seventh conference on International Language Resources and Evaluation</em>, Retrieved May 25, 2010 from: <a target="_blank" rel="noopener" href="http://www.lrec-conf.org/proceedings/lrec2010/pdf/2909_Paper.pdf">http://www.lrec-conf.org/proceedings/lrec2010/pdf/2909_Paper.pdf</a>.</p>
+<p>Baron, N. S. (2003). Language of the Internet. In A. Farghali (Ed.), <em>The Stanford Handbook for Language Engineers</em> (pp. 59-127). Stanford: CSLI Publications.</p>
+<p>Barrett, L. F. (2006). Valence as a basic building block of emotional life. <em>Journal of Research in Personality, 40</em>(1), 35-55.</p>
+<p>boyd, d. (2008). <em>Taken out of context: American teen sociality in networked publics.</em> University of California, Berkeley, Berkeley.</p>
+<p>boyd, d. (2008). Why youth (heart) social network sites: The role of networked publics in teenage social life. In D. Buckingham (Ed.), <em>Youth, identity, and digital media</em> (pp. 119-142). Cambridge, MA: MIT Press.</p>
+<p>Brill, E. (1992). A simple rule-based part of speech tagger. <em>Proceedings of the Third Conference on Applied Natural Language Processing</em>, 152-155.</p>
+<p>Chaumartin, F.-R. (2007). UPAR7: A knowledge-based system for headline sentiment tagging. In <em>Proceedings of the 4th International Workshop on Semantic Evaluations (SemEval-2007)</em> (pp. 422-425). New York, NY: ACM.</p>
+<p>Choi, Y., &amp; Cardie, C. (2008). Learning with compositional semantics as structural inference for subsentential sentiment analysis. <em>Proceedings of the Conference on Empirical Methods in Natural Language Processing</em>, 793-801.</p>
+<p>Cohen, W. (1995). Fast effective rule induction. <em>Proceedings of the Twelfth International Conference on Machine Learning</em>, 115–123.</p>
+<p>Cornelius, R. R. (1996). <em>The science of emotion</em>.Upper Saddle River, NJ: Prentice Hall.</p>
+<p>Crystal, D. (2006). <em>Language and the Internet</em> (2nd ed.). Cambridge, UK: Cambridge University Press.</p>
+<p>Das, S., &amp; Chen, M. (2001). Yahoo! for Amazon: Extracting market sentiment from stock message boards. <em>Proceedings of the Asia Pacific Finance Association Annual Conference (APFA)</em>, Bangkok, Thailand, July 22-25, Retrieved July 17, 2009 from: <a target="_blank" rel="noopener" href="http://sentiment.technicalanalysis.org.uk/DaCh.pdf">http://sentiment.technicalanalysis.org.uk/DaCh.pdf</a>.</p>
+<p>Denecke, K., &amp; Nejdl, W. (2009). How valuable is medical social media data? Content analysis of the medical web. <em>Information Sciences, 179</em>(12), 1870-1880.</p>
+<p>Derks, D., Bos, A. E. R., &amp; von Grumbkow, J. (2008). Emoticons and online message interpretation. <em>Social Science Computer Review, 26</em>(3), 379-388.</p>
+<p>Derks, D., Fischer, A. H., &amp; Bos, A. E. R. (2008). The role of emotion in computer-mediated communication: A review. <em>Computers in Human Behavior, 24</em>(3), 766–785.</p>
+<p>Diener, E., &amp; Emmons, R. A. (1984). The independence of positive and negative affect. <em>Journal of Personality and Social Psychology, 47</em>(5), 1105-1117.</p>
+<p>Ekman, P. (1992). An argument for basic emotions. <em>Cognition and Emotion, 6</em>(3/4), 169-200.</p>
+<p>Esuli, A., &amp; Sebastiani, F. (2006). SENTIWORDNET: A publicly available lexical resource for opinion mining. <em>Proceedings of Language Resources and Evaluation (LREC) 2006</em>, Retrieved July 28, 2009 from: <a target="_blank" rel="noopener" href="http://tcc.fbk.eu/projects/ontotext/Publications/LREC2006-esuli-sebastiani.pdf">http://tcc.fbk.eu/projects/ontotext/Publications/LREC2006-esuli-sebastiani.pdf</a>.</p>
+<p>Fox, E. (2008). <em>Emotion science</em>.Basingstoke: Palgrave Macmillan.</p>
+<p>Fullwood, C., &amp; Martino, O. I. (2007). Emoticons and impression formation. <em>The Visual in Popular Culture, 19</em>(7), 4-14.</p>
+<p>Gamon, M. (2004). Sentiment classification on customer feedback data: noisy data, large feature vectors, and the role of linguistic analysis. <em>Proceedings of the 20th international conference on Computational Linguistics</em>, No.841.</p>
+<p>Gamon, M., Aue, A., Corston-Oliver, S., &amp; Ringger, E. (2005). Pulse: Mining customer opinions from free text (IDA 2005). <em>Lecture Notes in Computer Science, 3646</em>, 121-132.</p>
+<p>Gill, A. J., Gergle, D., French, R. M., &amp; Oberlander, J. (2008). Emotion rating from short blog texts. In <em>Proceeding of the twenty-sixth annual SIGCHI conference on Human factors in computing systems</em> (pp. 1121-1124). New York, NY: ACM.</p>
+<p>Grinter, R. E., &amp; Eldridge, M. (2003). Wan2tlk? everyday text messaging. <em>CHI 2003,</em> 441-448.</p>
+<p>Hancock, J. T., Gee, K., Ciaccio, K., &amp; Lin, J. M.-H. (2008). I'm sad you're sad: Emotional contagion in CMC. <em>Proceedings of the ACM 2008 conference on Computer supported cooperative work</em>, 295-298.</p>
+<p>Hopkins, D. J., &amp; King, G. (2010). A method of automated nonparametric content analysis for social science. <em>American Journal of Political Science, 54</em>(1), 229-247.</p>
+<p>Huang, Y.-P., Goh, T., &amp; Liew, C. L. (2007). Hunting suicide notes in web 2.0 - Preliminary findings. In <em>Ninth Ieee International Symposium On Multimedia - Workshops, Proceedings</em> (pp. 517-521). Los Alamitos: IEEE.</p>
+<p>Huppert, F. A., &amp; Whittington, J. E. (2003). Evidence for the independence of positive and negative well-being: Implications for quality of life assessment. <em>British Journal of Health Psychology, 8</em>(1), 107-122.</p>
+<p>Kaji, N., &amp; Kitsuregawa, M. (2007). Building lexicon for sentiment analysis from massive collection of HTML documents. In <em>Proceedings of the 2007 Joint Conference on Empirical Methods in Natural Language Processing and Computational Natural Language Learning</em> (pp. 1075-1083, retrieved July 1028 from: <a target="_blank" rel="noopener" href="http://www.aclweb.org/anthology/D/D1007/D1007-1115.pdf">http://www.aclweb.org/anthology/D/D1007/D1007-1115.pdf</a>).</p>
+<p>Krippendorff, K. (2004). <em>Content analysis: An introduction to its methodology</em>.Thousand Oaks, CA: Sage.</p>
+<p>Kukich, K. (1992). Techniques for automatically correcting words in text. <em>ACM computing surveys, 24</em>(4), 377-439.</p>
+<p>Liu, H., Lieberman, H., &amp; Selker, T. (2003). A model of textual affect sensing using real-world knowledge. <em>Proceedings of the 2003 International Conference on Intelligent User Interfaces, IUI 2003</em>, 125-132.</p>
+<p>Mauss, I. B., &amp; Robinson, M. D. (2009). Measures of emotion: A review. <em>Cognition and Emotion, 23</em>(2), 209-237.</p>
+<p>Mishne, G. (2005). Experiments with mood classification in Blog posts. <em>Style - the 1st Workshop on Stylistic Analysis Of Text For Information Access, at SIGIR 2005</em>.</p>
+<p>Mishne, G., &amp; de Rijke, M. (2006). Capturing global mood levels using Blog posts. In <em>Proceedings of the AAAI Spring Symposium on Computational Approaches to Analysing Weblogs (AAAI-CAAW)</em> (pp. 145-152). Menlo Park, CA: AAAI Press.</p>
+<p>Nardi, B. A. (2005). Beyond bandwidth: Dimensions of connection in interpersonal communication. <em>Computer-Supported Cooperative Work, 14</em>(1), 91-130.</p>
+<p>Neviarouskaya, A., Prendinger, H., &amp; Ishizuka, M. (2007). Textual affect sensing for sociable and expressive online communication. <em>Lecture Notes in Computer Science, 4738</em>, 218-229.</p>
+<p>Ng, V., Dasgupta, S., &amp; Arifin, S. M. N. (2006). Examining the role of linguistic knowledge sources in the automatic identification and classification of reviews. <em>Proceedings of the COLING/ACL 2006 Main Conference</em>, 611-618.</p>
+<p>Pang, B., &amp; Lee, L. (2004). Sentimental education: Sentiment analysis using subjectivity summarization based on minimum cuts. In <em>Proceedings of ACL 2004</em> (pp. 271-278). New York: ACL Press.</p>
+<p>Pang, B., &amp; Lee, L. (2005). Seeing stars: Exploiting class relationships for sentiment categorization with respect to rating scales. <em>Proceedings of the 43rd Annual Meeting of the ACL</em>, 115-124.</p>
+<p>Pang, B., &amp; Lee, L. (2008). Opinion mining and sentiment analysis. <em>Foundations and Trends in Information Retrieval, 1</em>(1-2), 1-135.</p>
+<p>Pennebaker, J., Mehl, M., &amp; Niederhoffer, K. (2003). Psychological aspects of natural language use: Our words, our selves. <em>Annual Review of Psychology, 54</em>, 547-577.</p>
+<p>Pennebaker, J. W., Mayne, T., &amp; Francis, M. E. (1997). Linguistic predictors of adaptive bereavement. <em>Journal of Personality and Social Psychology, 72</em>(4), 863-871.</p>
+<p>Pollock, J. J., &amp; Zamora, A. (1984). Automatic spelling correction in scientific and scholarly text. <em>Communications of the ACM, 27</em>(4), 358-368.</p>
+<p>Prabowo, R., &amp; Thelwall, M. (2009). Sentiment analysis: A combined approach. <em>Journal of Informetrics, 3</em>(1), 143-157.</p>
+<p>Read, J. (2005). Using emoticons to reduce dependency in machine learning techniques for sentiment classification. <em>Proceedings of the ACL 2005 Student Research Workshop</em>, 43-48.</p>
+<p>Riloff, E., Patwardhan, S., &amp; Wiebe, J. (2006). Feature subsumption for opinion analysis. <em>Proceedings of the Conference on Empirical Methods in Natural Language Processing</em>, 440-448.</p>
+<p>Riloff, E., &amp; Wiebe, J. (2003). Learning extraction patterns for subjective expressions. <em>Proceedings of the 2003 Conference on Empirical Methods in Natural Language Processing (EMNLP-03)</em>, Retrieved April 11, 2010 from: <a target="_blank" rel="noopener" href="http://www.cs.utah.edu/~riloff/pdfs/emnlp2003.pdf">http://www.cs.utah.edu/~riloff/pdfs/emnlp2003.pdf</a>.</p>
+<p>Russell, J. A. (1979). Affective space is bipolar. <em>Journal of Personality and Social Psychology, 37</em>(3), 345-356.</p>
+<p>Schapire, R., &amp; Singer, Y. (2000). BoosTexter: A boosting-based system for text categorization. <em>Machine Learning, 39</em>(2/3), 135-168.</p>
+<p>Short, J. C., &amp; Palmer, T. B. (2008). The application of DICTION to content analysis research in strategic management. <em>Organizational Research Methods, 11</em>(4), 727-752.</p>
+<p>Snyder, B., &amp; Barzilay, R. (2007). Multiple aspect ranking using the good grief algorithm. <em>Proceedings of NAACL HLT</em>.</p>
+<p>Stone, P. J., Dunphy, D. C., Smith, M. S., &amp; Ogilvie, D. M. (1966). <em>The general inquirer: A computer approach to content analysis</em>.Cambridge, MA: The MIT Press.</p>
+<p>Stoppard, J. M., &amp; Gunn Gruchy, C. D. (1993). Gender, context, and expression of positive emotion. <em>Personality and Social Psychology Bulletin, 19</em>(2), 143-150.</p>
+<p>Strapparava, C., &amp; Mihalcea, R. (2008). Learning to identify emotions in text, <em>Proceedings of the 2008 ACM symposium on Applied computing</em> (pp. 1556-1560). New York, NY: ACM.</p>
+<p>Strapparava, C., &amp; Valitutti, A. (2004). Wordnet-affect: an affective extension of wordnet. In <em>Proceedings of the 4th International Conference on Language Resources and Evaluation</em> (pp. 1083-1086). Lisbon.</p>
+<p>Tang, H., Tan, S., &amp; Cheng, X. (2009). A survey on sentiment detection of reviews. <em>Expert Systems with Applications: An International Journal, 36</em>(7), 10760-10773.</p>
+<p>Thelwall, M. (2009). MySpace comments. <em>Online Information Review, 33</em>(1), 58-76.</p>
+<p>Thelwall, M., Wilkinson, D., &amp; Uppal, S. (2010). Data mining emotion in social network communication: Gender differences in MySpace. <em>Journal of the American Society for Information Science and Technology, 21</em>(1), 190-199.</p>
+<p>Thurlow, C. (2003). Generation Txt? The sociolinguistics of young people's text-messaging. <em>Discourse Analysis Online, 1</em>(1), Retrieved January 3, 2008 from: <a target="_blank" rel="noopener" href="http://extra.shu.ac.uk/daol/articles/v2001/n2001/a2003/thurlow2002003-paper.html">http://extra.shu.ac.uk/daol/articles/v2001/n2001/a2003/thurlow2002003-paper.html</a>.</p>
+<p>Turney, P. D. (2002). Thumbs up or thumbs down? Semantic orientation applied to unsupervised classification of reviews. <em>In: Proceedings of the 40th annual meeting of the Association for Computational Linguistics (ACL), July 6-12, 2002, Philadelphia, PA</em>, 417-424.</p>
+<p>Walther, J., &amp; Parks, M. (2002). Cues filtered out, cues filtered in: computer-mediated communication and relationships. In M. Knapp, J. Daly &amp; G. Miller (Eds.), <em>The Handbook of Interpersonal Communication (3rd ed.)</em> (pp. 529-563). Thousand Oaks, CA: Sage.</p>
+<p>Watson, D. (1988). Intraindividual and interindividual analyses of positive and negative affect: their relation to health complaints, perceived stress, and daily activities. <em>Journal of Personality and Social Psychology, 54</em>(6), 1020-1030.</p>
+<p>Watson, D., Clark, L. A., &amp; Tellegen, A. (1988). Development and validation of brief measures of positive and negative affect: The PANAS scales. <em>Journal of Personality and Social Psychology, 54</em>(6), 1063-1070.</p>
+<p>Wiebe, J., Wilson, T., Bruce, R., Bell, M., &amp; Martin, M. (2004). Learning subjective language. <em>Computational Linguistics, 30</em>(3), 277-308.</p>
+<p>Wiebe, J., Wilson, T., &amp; Cardie, C. (2005). Annotating expressions of opinions and emotions in language. <em>Language Resources and Evaluation, 39</em>(2-3), 165-210.</p>
+<p>Wilson, T. (2008). <em>Fine-grained subjectivity and sentiment analysis: Recognizing the intensity, polarity, and attitudes of private states.</em> University of Pittsburgh.</p>
+<p>Wilson, T., Wiebe, J., &amp; Hoffman, P. (2009). Recognizing contextual polarity: An exploration of features for phrase-level sentiment analysis. <em>Computational linguistics, 35</em>(3), 399-433.</p>
+<p>Wilson, T., Wiebe, J., &amp; Hwa, R. (2006). Recognizing strong and weak opinion clauses. <em>Computational Intelligence, 22</em>(2), 73-99.</p>
+<p>Witten, I. H., &amp; Frank, E. (2005). <em>Data mining: Practical machine learning tools and techniques</em>.San Francisco: Morgan Kaufmann.</p>
+<p>Wu, C.-H., Chuang, Z.-J., &amp; Lin, Y.-C. (2006). Emotion recognition from text using semantic labels and separable mixture models. <em>ACM Transactions on Asian Language Information Processing, 5</em>(2), 165-183.</p>
+<hr>
+<p>[<a href="#_ftnref1">1]</a> Thelwall, M., Buckley, K., Paltoglou, G., Cai, D., &amp; Kappas, A. (2010). Sentiment strength detection in short informal text. <em>Journal of the American Society for Information Science and Technology</em>, 61(12), 2544–2558. Copyright © 2010 (American Society for Information Science and Technology)</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/8874/" rel="prev" title="软件详细设计-06-观察者模式、中介者模式和模版方法模式">
+      <i class="fa fa-chevron-left"></i> 软件详细设计-06-观察者模式、中介者模式和模版方法模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2643/" rel="next" title="数据集成-作业二可视化">
+      数据集成-作业二可视化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Background-and-Related-Work"><span class="nav-number">2.</span> <span class="nav-text">Background and Related Work</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Opinion-mining"><span class="nav-number">2.1.</span> <span class="nav-text">Opinion mining</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Detecting-multiple-emotions"><span class="nav-number">2.2.</span> <span class="nav-text">Detecting multiple emotions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Sentiment-strength-detection"><span class="nav-number">2.3.</span> <span class="nav-text">Sentiment strength detection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Set-and-Human-Judgement-of-Sentiment-Strength"><span class="nav-number">3.</span> <span class="nav-text">Data Set and Human Judgement of Sentiment Strength</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-SentiStrength-Sentiment-Strength-Detection-Algorithm"><span class="nav-number">4.</span> <span class="nav-text">The SentiStrength Sentiment Strength Detection Algorithm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Experiments"><span class="nav-number">5.</span> <span class="nav-text">Experiments</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Comparison-with-machine-learning-extended-feature-set"><span class="nav-number">5.1.</span> <span class="nav-text">Comparison with machine learning, extended feature set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Comparison-of-feature-sets-for-machine-learning-%E2%80%93positive-sentiment-strength"><span class="nav-number">5.2.</span> <span class="nav-text">Comparison of feature sets for machine learning –positive sentiment strength</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Comparison-of-SentiStrength-versions"><span class="nav-number">5.3.</span> <span class="nav-text">Comparison of SentiStrength versions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Discussion-and-Conclusions"><span class="nav-number">6.</span> <span class="nav-text">Discussion and Conclusions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Appendix-Coder-Instructions-extract"><span class="nav-number">7.</span> <span class="nav-text">Appendix: Coder Instructions (extract)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#References"><span class="nav-number">8.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

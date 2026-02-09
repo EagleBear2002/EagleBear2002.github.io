@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 交换机 网桥和路由器一般是通过软件来完成的，基于操作系统的。交换机是基于硬件的。 交换机基本功能  根据 MAC 地址建立和维护交换表（类似于网桥表） 将帧切换出接口到目标">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网计算-09-局域网交换与虚拟局域网">
+<meta property="og:url" content="https://eaglebear2002.github.io/61334/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 交换机 网桥和路由器一般是通过软件来完成的，基于操作系统的。交换机是基于硬件的。 交换机基本功能  根据 MAC 地址建立和维护交换表（类似于网桥表） 将帧切换出接口到目标">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093933356.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093938137.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093943736.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093947215.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093951148.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093955028.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716093958357.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230716094004121.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625113036768.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625113022203.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625113013160.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/12-1653388258842259.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112632302.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/37-1653388258843263.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/38-1653388258843265.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625112550722.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625112620469.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625112634243.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20220625112653182.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/39-1653388258843275.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/40-1653388258843277.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/41-1653388258843279.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112652858.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112703499.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112710248.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112715546.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112721126.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112725908.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112730615.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112737955.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112744419.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/28-1653388258844301.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/29-1653388258844303.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721112849063.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/33-1653388258844311.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721113005939.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721113011356.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721113014529.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/61334/image-20230721113018458.png">
+<meta property="article:published_time" content="2022-05-24T10:19:35.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.609Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/61334/image-20230716093933356.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/61334/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网计算-09-局域网交换与虚拟局域网 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/61334/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网计算-09-局域网交换与虚拟局域网
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-24 18:19:35" itemprop="dateCreated datePublished" datetime="2022-05-24T18:19:35+08:00">2022-05-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Spring-互联网计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="交换机">交换机</h2>
+<p>网桥和路由器一般是通过软件来完成的，基于操作系统的。交换机是基于硬件的。</p>
+<h3 id="交换机基本功能">交换机基本功能</h3>
+<ol>
+<li>根据 MAC 地址建立和维护<strong>交换表</strong>（类似于网桥表）</li>
+<li>将帧切换出接口到目标</li>
+</ol>
+<h3 id="对称交换">对称交换</h3>
+<p>对称交换（Symmetric Switching）可在具有相同带宽（10/10 Mbps 或 100/100 Mbps）的端口之间提供交换连接。用户尝试访问其他网段上的服务器时，可能会导致瓶颈，因为对称交换可能会导致带宽不足。</p>
+<p><img src="/61334/image-20230716093933356.png" alt></p>
+<p>多个客户端向服务器访问的话，服务器端口流量会比较阻塞（在对称切换中，双端的带宽是完全对称的），这是一个瓶颈。</p>
+<h3 id="非对称交换">非对称交换</h3>
+<p>非对称交换（Asymmetric Switching）通过将带有服务器的网段连接到更高带宽的端口（100 Mbps），减少了服务器上潜在瓶颈的可能性。</p>
+<p>非对称交换需要在交换器中进行<strong>内存缓冲</strong>。非对称交换端口解决对称交换端口中的对称阻塞问题，进一步保证了服务器的稳定实现。</p>
+<p><img src="/61334/image-20230716093938137.png" alt></p>
+<p>内存缓冲：交换机中存储目标和传输数据的内存区域，直到可以将其切换出正确的端口为止。</p>
+<ol>
+<li>基于端口（Port）的内存缓冲：
+<ol>
+<li>每个端口都有一个 buffer</li>
+<li>数据包存储在每个端口的队列中</li>
+<li>由于目标端口繁忙，一个数据包可能会延迟其他数据包的传输</li>
+<li>其他端口可能会空闲，存在不均衡的问题。</li>
+</ol>
+</li>
+<li>共享（Shared）内存缓冲
+<ol>
+<li>所有端口共享的公用内存缓冲</li>
+<li>允许将数据包在一个端口上接收并在另一个端口上发送出去，而无需将其更改为其他队列</li>
+<li>需要自己记录端口的信息</li>
+</ol>
+</li>
+<li>发生阻塞的时候，根据情况按照端口或者内存将包缓存下来</li>
+</ol>
+<h3 id="交换方式">交换方式</h3>
+<h4 id="储存转发">储存转发</h4>
+<p>储存转发（Store-and-Forward）：网桥、路由器等通过软件转发的设备使用。</p>
+<p>交换机<strong>接收整个帧</strong>，最后校验其 CRC，然后再将其发送到目的地。</p>
+<h4 id="直通">直通</h4>
+<p>直通（Cut-through）</p>
+<p>上述存储转发会增加延迟，通过使用直通切换方法可以减少延迟。</p>
+<p>快速转发切换：仅在立即转发帧之前检查目标 MAC，即只要看到帧的目的地址就转发，而不看帧的后面的部分</p>
+<h4 id="无碎片转发">无碎片转发</h4>
+<p>无碎片转发（Segment-free Switching）</p>
+<p>碎片释放（Fragment Free）：在转发帧之前读取前 64 个字节以减少错误：避免碰撞和帧碎片</p>
+<p>三种不同的转发方式的比较</p>
+<p><img src="/61334/image-20230716093943736.png" alt></p>
+<h3 id="第二层交换机">第二层交换机</h3>
+<p><img src="/61334/image-20230716093947215.png" alt></p>
+<p>大规模集成电路，保证链路效率，低时延，低成本。有一个 MAC 地址。</p>
+<h3 id="第三层交换机">第三层交换机</h3>
+<p><img src="/61334/image-20230716093951148.png" alt></p>
+<ol>
+<li>基于硬件的帧转发机制，较高的帧转发性能，低时延（路由器是针对路由表进行转发）</li>
+<li>较高速的计算</li>
+<li>每一个端口的代价低</li>
+<li>流控制</li>
+<li>安全性更高</li>
+<li>对数据流进行路由，生成 MAC 和 IP 的映射（消除了路由器对路由转发而导致的延时）</li>
+<li>MAC 地址过来的时候直接根据表从二层进行通过</li>
+</ol>
+<h3 id="第四层交换机">第四层交换机</h3>
+<p><img src="/61334/image-20230716093955028.png" alt></p>
+<ol>
+<li>数据段在数据报里面，数据报在数据帧里面</li>
+<li>只要交换机可以看到数据帧的数据部分的首部</li>
+<li>可以根据端口主机的应用特点进行一定的流量控制</li>
+<li>和 Net OS 是不一样的，没有那么智能</li>
+<li>识别到前 80 个字节的数据报长度，对指定应用进行管理</li>
+</ol>
+<h3 id="多层交换机总结">多层交换机总结</h3>
+<p><img src="/61334/image-20230716093958357.png" alt></p>
+<ol>
+<li>一般我们只是用二层交换机</li>
+<li>交换机可以简单识别第三层和第四层信息</li>
+</ol>
+<h2 id="生成树协议">生成树协议</h2>
+<p>生成树协议（STP, The Spanning-Tree Protocol）</p>
+<h3 id="桥回路">桥回路</h3>
+<p>出于各种原因，网络中可能会出现<strong>环路</strong>。</p>
+<ol>
+<li>通常，网络中的环路是故意（deliberate）提供冗余的结果。</li>
+<li>也可能由于配置错误而发生：在桥接网络中，环路可能是绝对灾难性的两个主要原因：
+<ol>
+<li>广播回路（广播风暴），第二层的帧结构中没有 TTL</li>
+<li>路由表的错误</li>
+</ol>
+</li>
+</ol>
+<p>往往是<strong>第二层交换机</strong>的冗余导致的桥回路。</p>
+<p>接入层到核心层的接入往往<strong>要有冗余</strong>，这个区域是主干网（backbone）</p>
+<h3 id="冗余造成了路由回路">冗余造成了路由回路</h3>
+<p><img src="/61334/image-20230716094004121.png" alt></p>
+<ul>
+<li>设备通过 backbone 和远端设备进行链接</li>
+</ul>
+<h3 id="第二层路由回路">第二层路由回路</h3>
+<p>广播和第二层循环可能是危险的组合。</p>
+<p>以太网帧没有 TTL 字段，因此以太网帧开始循环后，它可能会继续下去，直到有人关闭其中一台交换机或断开链路为止（外部条件）。</p>
+<p>交换机将抖动（flip flop）主机 A 的桥接表条目（创建极高的 CPU 利用率），消耗 CPU 和内存</p>
+<h4 id="第二层路由回路-泛洪单播帧">第二层路由回路-泛洪单播帧</h4>
+<p><img src="/61334/image-20220625113036768.png" alt></p>
+<p>过一段时间 CAT-1 和 CAT-2 没有收到 Host-B 的信息，删除表中的对应记录。</p>
+<p>在这之后，Host-A 发送给 Host-B 信息，然后在 CAT-1 和 CAT-2 之间进行循环。</p>
+<h3 id="生成树协议综述">生成树协议综述</h3>
+<p>生成树协议的元素：</p>
+<ol>
+<li>主要功能：在<strong>交换机/桥接网络</strong>中允许<strong>冗余路径</strong>，而不会因环路的影响而引起延迟。</li>
+<li>STP 通过计算<strong>稳定的生成树</strong>网络拓扑<strong>来防止环路</strong></li>
+<li><strong>生成树帧</strong>（称为桥协议数据单元，bridge protocol data unit，BPDU）用于确定生成树拓扑</li>
+</ol>
+<p>在正常情况下禁用一些端口来防止出现冗余。</p>
+<h4 id="STP-决策顺序">STP 决策顺序</h4>
+<p>生成树始终使用相同的四步决策序列：</p>
+<ol>
+<li>在拓扑里面最低的 root BID（Bridge Identification，网桥标识）</li>
+<li>找到 Root bridge 的最低路径成本</li>
+<li>每个路径都会选择一个最低 BID 的 sender 这个是针对一个链路的，详见例子</li>
+<li>每个路径再指定一个最低的 ID 端口</li>
+</ol>
+<p>这些信息的得取都是靠的 BPDU 帧的交换</p>
+<h4 id="桥协议数据单元">桥协议数据单元</h4>
+<ol>
+<li>BPDU 是交换机之间的流量；它们不承载最终用户（end-user）流量。</li>
+<li>STP 建立一个称为<strong>根网桥的根节点</strong>，生成的树源自根桥。</li>
+<li>不属于最短路径树的冗余连接将被阻止（block 端口，不转发，但是接收）</li>
+<li>在阻塞的链接上收到的数据帧将被丢弃。</li>
+<li>交换机发送的允许形成无环逻辑拓扑的消息是 BPDU</li>
+</ol>
+<p>BPDU 的结构：</p>
+<p><img src="/61334/image-20220625113022203.png" alt></p>
+<ul>
+<li>BPDU 里面包含几个字段标识协议、版本、数据类型、标志等，记录它认可的 Root BID（类似 OSPF）、到 BID 最小的代价、发送的交换机的 ID、从哪个端口发送</li>
+<li>和 OSPF 不一样的：不一定以自己为根</li>
+<li>这样在选举之后，不在最短生成树中的冗余链路就被屏蔽掉了</li>
+</ul>
+<h4 id="STP-的-BPDU-帧">STP 的 BPDU 帧</h4>
+<p><img src="/61334/image-20220625113013160.png" alt></p>
+<p>注意前四个是很有意义的。</p>
+<p>默认交换机每 2s 发送一次 BPDU，主要是维护最短的路径。</p>
+<p>接收到 BPDU 帧的时候，会比较根 ID 并计算，如果更优则接受，反之则不接受。经过一段时间的传递后会全局稳定。</p>
+<h4 id="网桥标识">网桥标识</h4>
+<ol>
+<li>网桥 ID（BID）：8 个字节（2 + 6）
+<ol>
+<li>高阶子字段（2 个字节）：网桥优先级，值域：0-65535（默认值：32,768），通常以十进制格式表示</li>
+<li>低阶子字段（6 个字节）：分配给交换机的 MAC 地址，以十六进制格式表示</li>
+</ol>
+</li>
+<li>STP 成本值：成本越低越好。</li>
+</ol>
+<h4 id="选举根交换机">选举根交换机</h4>
+<ol>
+<li>交换机通过查找具有<strong>最低 BID</strong>的交换机（通常称为根战争）来选择单个根交换机。</li>
+<li>如果所有交换机都使用默认的网桥优先级 32768，则最低的 MAC 地址将作为根交换机。</li>
+<li>可以通过配置优先级来调整根网桥</li>
+</ol>
+<h3 id="路径代价">路径代价</h3>
+<p><img src="/61334/12-1653388258842259.png" alt></p>
+<p>网桥使用成本的概念来评估它们与其他桥梁的距离。</p>
+<p>和 OSPF 算法相同，这个标准是比较合适的，比之前 OSPF 要新，用固定的数值除以带宽来获得代价。</p>
+<h3 id="五个-STP-状态">五个 STP 状态</h3>
+<p>通过根策略配置每个端口来建立状态。只有在交换机做 STP 时，交换机才会出现这五个状态。</p>
+<p>然后，STP 根据流量模式（traffic Patterns）和潜在环路（Protential Loops）修改状态。</p>
+<p>STP 状态的默认顺序为：</p>
+<ol>
+<li>阻塞：没有转发帧，听到了 BPDU</li>
+<li>监听：不转发任何帧，监听数据帧（确定自己可以参加的交换），也会发送一些数据帧表示自己状态变了</li>
+<li>学习：不转发帧，学习地址</li>
+<li>转发：转发帧，学习地址</li>
+<li>禁用：没有转发帧，没有听到 BPDU</li>
+</ol>
+<p><img src="/61334/image-20230721112632302.png" alt></p>
+<p>STP 过程：Blocking -&gt; 20s Listening -&gt; 15s Learning -&gt; 15s Fowarding 或者 Disabled</p>
+<p><img src="/61334/37-1653388258843263.png" alt></p>
+<p><img src="/61334/38-1653388258843265.png" alt></p>
+<p>2s 可以调整</p>
+<p>老化时间：保存的时间</p>
+<h3 id="初始-STP-收敛">初始 STP 收敛</h3>
+<p>当网络首次启动时，所有网桥都会混合使用 BPDU 信息来泛洪网络（开始泛洪 BPDU 信息）。立即，他们应用决策序列，允许他们 BPDU 进行 PK，然后选择出来 ROOT，从而形成整个网络的单个生成树。</p>
+<ol>
+<li>根交换机决定：选择一个根桥作为该网络的中心点</li>
+<li>选择根端口：所有剩余的网桥都会计算出一组根端口</li>
+<li>选择指定端口：其余所有网桥计算一组指定端口（Designated Ports）</li>
+</ol>
+<p>Root switch 针对一个特定的交换机，根端口针对一个交换机，指定端口对应链路。</p>
+<h4 id="步骤-1：根交换机决定">步骤 1：根交换机决定</h4>
+<ol>
+<li>宣布自己为根</li>
+<li>检查端口上收到的所有 BPDU 以及将在该端口上发送的 BPDU</li>
+<li>对于每个到达的 BPDU，如果其值小于为端口保存的现有 BPDU，则旧值被替换，并且 BPDU 的发送者被接受为新的根</li>
+</ol>
+<p><img src="/61334/image-20220625112550722.png" alt></p>
+<ul>
+<li>BC 收到后将根修改为 A</li>
+<li>比如在 BC 链路中，B 的 MAC 地址比较小，作为链路的 Sender BID，这个 port 是指定端口。</li>
+</ul>
+<h4 id="步骤-2：选择根端口">步骤 2：选择根端口</h4>
+<p>每个<strong>非根桥</strong>必须选择一个根端口。</p>
+<ol>
+<li>桥的根端口是最接近根桥的端口。</li>
+<li>根路径成本是到根网桥的<strong>所有链接的累积（cumulative）成本。</strong></li>
+</ol>
+<p>STP 成本随着在端口上接收到 BPDU 而增加，而不是随着它们从端口发送出去而增加。</p>
+<p><img src="/61334/image-20220625112620469.png" alt></p>
+<p>B 会把上面一个端口做为 Root Port，虽然两个可达，但是上面一个更快，C 也是同样</p>
+<h4 id="步骤-3：选择网段的指定端口">步骤 3：选择网段的指定端口</h4>
+<p>每个<strong>网段</strong>都有一个指定端口（Designated Port）：充当单个网桥/交换机端口，该端口既向该网段又向根网桥发送流量，也从该网段和根网桥接收流量。</p>
+<p>包含给定网段的指定端口的网桥/交换机称为该网段的指定网桥。</p>
+<p>所有网桥/交换机将 block 它们的未指定的端口，根网桥上的每个活动端口都将成为指定端口</p>
+<p>每个链路只有一个指定端口，一旦选定其他就 block 了。</p>
+<p><img src="/61334/image-20220625112634243.png" alt></p>
+<p>BC 之间的链路，两个端口优先级相同，左边是 BID 小所以将其选择为指定端口。</p>
+<p>根端口是 B 和 C 上面的端口。</p>
+<p><img src="/61334/image-20220625112653182.png" alt></p>
+<p>AB 和 AC 之间的链路的指定端口是 A 上面的端口。</p>
+<h2 id="虚拟局域网">虚拟局域网</h2>
+<p>虚拟局域网（Virtual Local Area Network，VLAN）</p>
+<h3 id="为什么引入-VLAN？">为什么引入 VLAN？</h3>
+<p><img src="/61334/39-1653388258843275.png" alt></p>
+<p><img src="/61334/40-1653388258843277.png" alt></p>
+<h3 id="VLAN-可以不通过路由器就隔离广播域吗？">VLAN 可以不通过路由器就隔离广播域吗？</h3>
+<p><img src="/61334/41-1653388258843279.png" alt></p>
+<h3 id="VLAN-简介">VLAN 简介</h3>
+<h4 id="现有的共享局域网配置">现有的共享局域网配置</h4>
+<p>在典型的共享局域网中：</p>
+<ol>
+<li>根据用户所插入（plug）的集线器对用户进行<strong>物理分组</strong></li>
+<li>路由器分割局域网并提供广播防火墙</li>
+</ol>
+<p>在 VLAN 中：</p>
+<ol>
+<li>您可以按使用的功能，部门或应用程序对用户进行<strong>逻辑分组</strong></li>
+<li>通过专有软件进行配置</li>
+</ol>
+<h4 id="LAN-和-VLAN-之间的差异">LAN 和 VLAN 之间的差异</h4>
+<p>VLAN：</p>
+<ol>
+<li>在第 2 层和第 3 层工作</li>
+<li>控制网络广播</li>
+<li>允许用户由网络管理员分配</li>
+<li>提供更严格的网络安全性</li>
+</ol>
+<p><img src="/61334/image-20230721112652858.png" alt></p>
+<p>左边是基于地理位置划分成子网（传统局域网），VLAN 是是通过逻辑位置进行划分。</p>
+<p>VLAN1 的报文不会发送给 VLAN2（虽然连接在一个交换机上）</p>
+<h4 id="特点">特点</h4>
+<p>VLANs（IEEE 802.1q）</p>
+<ol>
+<li>不限于物理交换机网段的网络设备或用户的<strong>逻辑分组</strong>。</li>
+<li>VLAN 中的设备或用户可以按功能，部门，应用程序等进行分组，而<strong>不管其物理网段的位置</strong>如何。</li>
+<li>VLAN <strong>创建一个不限于物理网段</strong>的单个广播域，并且将其视为子网。</li>
+<li>VLAN 设置是由网络管理员使用供应商的软件在交换机中完成的。</li>
+</ol>
+<h4 id="优点">优点</h4>
+<ol>
+<li>限制广播包，提高带宽的利用率。</li>
+<li>增强通信的安全性：其他 VLAN 用户网络收不到非本 VLAN 的报文，避免被监听</li>
+<li>创建虚拟工作组：可以一个部门工作的人划分为一个 VLAN，这样子即使他移动了办公位置，仍然能够正常办公</li>
+<li>增强网络的健壮性：将一些网络故障限制在一个 VLAN 中</li>
+</ol>
+<h4 id="分组用户">分组用户</h4>
+<p>VLAN 可以从逻辑上将用户划分为不同的子网（广播域），广播帧仅在具有相同 VLAN ID 的一个或多个交换机的端口之间切换（VLAN ID 属于端口）。</p>
+<p>可以通过基于以下内容的软件对用户进行逻辑分组：</p>
+<ol>
+<li>端口号</li>
+<li>MAC 地址</li>
+<li>使用的协议</li>
+<li>使用的应用</li>
+</ol>
+<h5 id="没有-VLAN-时的网络广播">没有 VLAN 时的网络广播</h5>
+<p><img src="/61334/image-20230721112703499.png" alt></p>
+<p>大家在一个交换机上不可以进行划分</p>
+<h5 id="划分了-VLAN-的网络广播">划分了 VLAN 的网络广播</h5>
+<p><img src="/61334/image-20230721112710248.png" alt></p>
+<p>各自角色之间单独进行通信，虽然连接的是同一个交换机，如果不在同一个 VLAN 上，相互之间也不能通信</p>
+<h4 id="VLAN-间通信">VLAN 间通信</h4>
+<p><img src="/61334/image-20230721112715546.png" alt></p>
+<ul>
+<li>首先 172.17.10.21 询问网关地址（ARQ）</li>
+<li>路由器帮忙转发（VLAN 的交换需要路由器的支持）</li>
+<li>交换机 S2 的不同端口在不同的 VLAN，S1 和 S2、S1 和 S3 之间是 VLAN 骨干（backbone，VLAN 中继）</li>
+</ul>
+<h4 id="VLAN-和第三层转发来控制广播域">VLAN 和第三层转发来控制广播域</h4>
+<p><img src="/61334/image-20230721112721126.png" alt></p>
+<p>第三层交换机：为每一个网段设置一个 SVI（switch virtual interface，虚拟交换机结构，也可以理解为子接口），通过这个来进行不同网段之间的通信</p>
+<h3 id="VLAN-的结构">VLAN 的结构</h3>
+<h4 id="VLAN-通过骨干网">VLAN 通过骨干网</h4>
+<p>骨干网（BackBone）</p>
+<p><img src="/61334/image-20230721112725908.png" alt></p>
+<ol>
+<li>VLAN 配置需要支持互连的路由器和交换机之间的骨干数据传输。</li>
+<li>骨干网是用于 VLAN 间通信的区域，可以跑多个 VLAN</li>
+<li>骨干网应该是高速链路，通常为 100Mbps 或更高</li>
+<li>BackBone 可以跑多个 VLAN，是骨干网</li>
+</ol>
+<h4 id="在-VLAN-中的路由器的作用">在 VLAN 中的路由器的作用</h4>
+<p>路由器提供不同 VLAN 之间的连接。</p>
+<p>例如，您有 VLAN1 和 VLAN2。在交换机内，位于不同 VLAN 上的用户无法相互通信（VLAN 的好处）；但是 VLAN1 上的用户可以向 VLAN2 上的用户发送电子邮件，但他们<strong>需要路由器的支持</strong>才能执行此操作。</p>
+<h4 id="在-VLAN-中的帧的使用">在 VLAN 中的帧的使用</h4>
+<p>交换机根据帧中的数据做出过滤和转发决策。注意 trunk 链路要用交叉线来连接。</p>
+<p>使用了两种技术：</p>
+<ol>
+<li>帧过滤：检查有关每个帧的特定信息（MAC 地址或第三层协议类型），特定的 VLAN 记录或者映射</li>
+<li>帧标记：在整个网络骨干网中转发时，在每个帧的标题中放置一个唯一的标识符</li>
+</ol>
+<p><img src="/61334/image-20230721112730615.png" alt></p>
+<h5 id="帧过滤">帧过滤</h5>
+<p>帧过滤（Frame Filiter）：</p>
+<p><img src="/61334/image-20230721112737955.png" alt></p>
+<ul>
+<li>收到帧转发后，发现都不在一个 VLAN 上，然后通过 Backbone 转发</li>
+<li>Frame Table 在交换机上传输：在 Frame Table 上面建立起 MAC 地址和 VLAN 的对应关系</li>
+</ul>
+<h5 id="帧标记">帧标记</h5>
+<p>帧标记（Frame Tagging）实施过程：</p>
+<ol>
+<li>在整个网络骨干网中转发时，在每个帧的标题中放置一个 <strong>VLAN 标识符。</strong></li>
+<li>每个交换机都可以理解和检查标识符</li>
+<li>当<strong>帧离开网络骨干网时，交换机会在帧发送到目标终端站之前删除标识符</strong>。<strong>只和端口绑定，而不影响主机</strong></li>
+</ol>
+<p>帧标记在第二层起作用，并且几乎不需要处理或管理开销。</p>
+<p><img src="/61334/image-20230721112744419.png" alt></p>
+<p>从主机到了交换机端口，交换机端口进行标记，然后进行转发。</p>
+<h4 id="IEEE802-1Q-和-ISL">IEEE802.1Q 和 ISL</h4>
+<p>IEEE802.1Q：IEEE 标准，在标头中插入 VLAN 的标签以标识所属的 VLAN（帧标记）</p>
+<p>ISL（Inter-Switch Link）：思科专有。ISL 在数据帧的前面添加一个 26 字节的标头，并在末尾附加一个 CRC（4 字节）。</p>
+<p>标记一般在 BackBone 上</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Encapsulation</th>
+<th>Label</th>
+<th>Media</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>802.1Q</td>
+<td>No</td>
+<td>Yes</td>
+<td>Ethernet</td>
+</tr>
+<tr>
+<td>ISL</td>
+<td>Yes</td>
+<td>No</td>
+<td>Ethernet</td>
+</tr>
+</tbody>
+</table>
+<h3 id="VLAN-的实现">VLAN 的实现</h3>
+<h4 id="端口、VLAN-和广播">端口、VLAN 和广播</h4>
+<p>实现 VLAN 的两种方法</p>
+<ol>
+<li>静态的</li>
+<li>动态的</li>
+</ol>
+<p>每一个端口绑定给一个 VLAN</p>
+<ol>
+<li>确保不共享同一 VLAN 的端口不共享广播。</li>
+<li>确保共享相同 VLAN 的端口将共享广播。</li>
+<li>VLAN 标签的添加与删除都是需要依靠交换机或者路由器的</li>
+</ol>
+<p>实现途径：</p>
+<ol>
+<li>基于端口的 VLAN</li>
+<li>基于 MAC 地址的 VLAN</li>
+<li>基于 IP 地址的 VLAN</li>
+<li>基于上层协议的 VLAN</li>
+</ol>
+<h4 id="静态-VLAN">静态 VLAN</h4>
+<p><img src="/61334/28-1653388258844301.png" alt></p>
+<p>定义：静态 VLAN 是指交换机上的端口以管理方式分配给 VLAN</p>
+<p>优点：</p>
+<ol>
+<li>安全，易于配置和监控</li>
+<li>在控制移动的网络中效果很好</li>
+</ol>
+<p>端口是写死在交换机的端口上的。</p>
+<h4 id="动态-VLAN">动态 VLAN</h4>
+<p><img src="/61334/29-1653388258844303.png" alt></p>
+<p>一个服务器来配置 VLAN 的信息。</p>
+<p>交换机通过 MAC 地址或者哪一个协议，指定是哪一个 VLAN。</p>
+<p>当工作站最初连接到未分配的端口时，交换机会检查表中的条目，并使用正确的 VLAN 动态配置端口。</p>
+<p>优点：</p>
+<ol>
+<li>添加或移动用户时减少管理（更多前期工作）</li>
+<li>集中通知未授权用户</li>
+</ol>
+<h4 id="以端口为中心的-VLAN">以端口为中心的 VLAN</h4>
+<p>![](09-局域网交换与虚拟局域网/09-局域网交换与 VLAN/30-1653388258844305.png)</p>
+<p>实际的网络是有层次的：static 的物理的接入层（physical Layer）</p>
+<p>不同电脑在一个房间内，不同房间的不同电脑组成一个 VLAN。</p>
+<p>路由器网关来处理。</p>
+<h5 id="以端口为中心的-VLAN-的优点">以端口为中心的 VLAN 的优点</h5>
+<p>同一 VLAN 中的所有节点都连接到同一路由器接口，使管理更容易，因为：</p>
+<ol>
+<li>通过路由器端口分配用户</li>
+<li>VLAN 易于管理</li>
+<li>提供更高的安全性</li>
+<li>数据包不会“泄漏”到其他域</li>
+</ol>
+<h4 id="接入和骨干连接">接入和骨干连接</h4>
+<p>![](09-局域网交换与虚拟局域网/09-局域网交换与 VLAN/31-1653388258844307.png)</p>
+<p>分为两类：</p>
+<ol>
+<li>接入链路：通过一个 VLAN 报文</li>
+<li>骨干链路：通过多个 VLAN 报文</li>
+</ol>
+<h4 id="访问连接">访问连接</h4>
+<p>访问连接是仅作为一个 VLAN 成员的交换机上的连接。</p>
+<p>此 VLAN 被称为端口的本机 VLAN，连接到端口的任何设备都完全不知道 VLAN 存在。</p>
+<h4 id="主干链路">主干链路</h4>
+<ol>
+<li>主干链路能够支持多个 VLAN</li>
+<li>主干链路通常用于将交换机连接到其他交换机或路由器。</li>
+<li>交换机在快速以太网和千兆位以太网端口上都支持骨干链路。</li>
+<li>也存在访问和骨干链接</li>
+</ol>
+<p>一般 Trunk 就是 BackBone。</p>
+<p><img src="/61334/image-20230721112849063.png" alt></p>
+<blockquote>
+<ol>
+<li>Sa 和 Sb 上面连接使用单独的线，浪费</li>
+<li>底下使用串行的线，不浪费端口</li>
+</ol>
+</blockquote>
+<ol>
+<li>骨干是支持多个 VLAN 的点对点链接</li>
+<li>骨干用于在两个实现 VLAN 的设备之间创建链接时节省端口</li>
+<li>骨干链路不属于特定的 VLAN：充当交换机和路由器之间 VLAN 的通道。</li>
+<li>可以将骨干链路配置为传输所有 VLAN 或有限数量的 VLAN。</li>
+<li>但是，骨干链路可能具有本地 VLAN。</li>
+<li>如果骨干线链路由于任何原因失败，则骨干线的本地 VLAN 是该骨干线使用的 VLAN。</li>
+<li>native VLAN 是不发送无标记的信息。</li>
+</ol>
+<h4 id="交换机-29xx-中的配置">交换机 29xx 中的配置</h4>
+<ol>
+<li>在 Cisco 29xx 交换机上配置 VLAN 时，必须遵循以下准则：
+<ol>
+<li>VLAN 的最大数量取决于交换机本身。</li>
+<li>VLAN 1 是出厂默认 VLAN 之一。（native VLAN 往往是 VLAN1，以及广播也是）</li>
+<li>VLAN 1 是默认的以太网 VLAN。</li>
+<li>思科发现协议（CDP）和 VLAN 骨干协议（VTP）通告在 VLAN 1 上发送。</li>
+<li>默认情况下，Catalyst 29xx IP 地址在 VLAN 1 广播域中。</li>
+</ol>
+</li>
+</ol>
+<h4 id="VLAN-配置">VLAN 配置</h4>
+<p>步骤 1：创建 VLAN 所需的步骤。 如果需要，还可以配置 VLAN 名称。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">Switch# vlan database<br>Switch(vlan)# vlan vlan_number<br>Switch(vlan)# <span class="hljs-built_in">exit</span><br></code></pre></td></tr></table></figure>
+<p>步骤 2：将 VLAN 分配给一个或多个接口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">Switch(config)# interface fastethernet 0/9 Switch（config-if）# switchport access vlan vlan_number<br></code></pre></td></tr></table></figure>
+<h4 id="添加-VLAN-示例">添加 VLAN 示例</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat2950#vlan database<br>cat2950(vlan)#vlan 9 name switchlab90<br>VLAN 9 added:<br>   Name: switchlab90<br>cat2950(vlan)#?<br>VLAN database editing buffer manipulation commands：<br>    abort Exit mode without applying the changes<br>    apply Apply current changes and bump revision number<br>    <span class="hljs-built_in">exit</span> Apply changes, bump revision number, and <span class="hljs-built_in">exit</span> mode<br>    reset Abandon current changes and reread current database Adding a VLAN Example<br>cat2950(config)#interface fa 0/2<br>cat2950(config-if)# switchport access vlan 9<br></code></pre></td></tr></table></figure>
+<h4 id="配置-VLAN">配置 VLAN</h4>
+<ol>
+<li><code>Switch# show vlan [vlanid]</code></li>
+</ol>
+<p><img src="/61334/33-1653388258844311.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat2950#sh vlan<br><br>VLAN Name                         Status    Ports<br>---- ------------------------  ------------ ------------<br>1    Default				active		Fa0/1, Fa0/3<br>9    switchlab90			active		Fa0/2<br>1002 fddi-default			active<br>1003 token-ring-default		active<br>1004 fddinet-default			active<br>1005 trnet-default			active<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>剩下的是默认 VLAN</p>
+</blockquote>
+<h4 id="删除-VLAN">删除 VLAN</h4>
+<ol>
+<li>删除 VLAN 后，分配给该 VLAN 的所有端口都将变为非活动状态。 但是，端口将一直与删除的 VLAN 关联，直到分配给新的 VLAN。</li>
+<li><code>switch（vlan）# no vlan vlanid [name /vlan-name]</code></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat2950(vlan)#no vlan 9<br>Deleting VLAN 9...<br>cat2950(vlan)#<span class="hljs-built_in">exit</span><br>APPLY completed.<br>Exiting....<br>cat2950#<br></code></pre></td></tr></table></figure>
+<h3 id="在局域网之间的路由">在局域网之间的路由</h3>
+<p><img src="/61334/image-20230721113005939.png" alt></p>
+<ol>
+<li>每个端口连接一个 VLAN，每个 IP 和一个 VLAN 连接</li>
+<li>如下图，我们使用串口线，物理上是一个一个接口，划分成多个 IP 和子接口</li>
+</ol>
+<p><img src="/61334/image-20230721113011356.png" alt></p>
+<p>对比如下：接入方式不同</p>
+<p><img src="/61334/image-20230721113014529.png" alt></p>
+<h4 id="子接口">子接口</h4>
+<p><img src="/61334/image-20230721113018458.png" alt></p>
+<ol>
+<li>物理上一个，划分成 Fa0/0.1、Fa0/0.2 和 Fa0/0.3</li>
+<li>涉及到的是单臂路由</li>
+</ol>
+<h4 id="配置-VLAN-间路由">配置 VLAN 间路由</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router（config）#interface fastethernet port-number. subinterface-number <span class="hljs-comment"># Step1：识别界面</span><br>Router（config-if）#encapsulation dot1q vlan-number <span class="hljs-comment">#Step2：定义 VLAN 封装.（一般用 dot1q）</span><br>Router（config-if）#ip address ip-address subnet-mask <span class="hljs-comment">#Step3：为接口分配 IP 地址</span><br></code></pre></td></tr></table></figure>
+<h4 id="配置-VLAN-间路由-2">配置 VLAN 间路由</h4>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">Sydney(config)#interface FastEthernet 0/0<br>Sydney(config-if)#full duplex 全双工<br>Sydney(config-if)#no shut<br>Sydney(config-if)#interface FastEthernet 0/0.1<br><br>Sydney(config-subif)#encapsulation 802.1q 1<br>Sydney(config-subif)#ip address 192.168.1.1 255.255.255.0<br>Sydney(config-if)#interface FastEthernet 0/0.2<br><br>Sydney(config-subif)#encapsulation 802.1q 20<br>Sydney(config-subif)#ip address 192.168.2.1 255.255.255.0<br>Sydney(config-if)#interface FastEthernet 0/0.3<br><br>Sydney(config-subif)#encapsulation 802.1q 30<br>Sydney(config-subif)#ip address 192.168.3.1 255.255.255.0<br></code></pre></td></tr></table></figure>
+<ol>
+<li>如果是 Trunk Link：应该使用交叉线，而不是直通线</li>
+<li>如果是 Access Link：直通线</li>
+</ol>
+<h3 id="VLAN-题目备注">VLAN 题目备注</h3>
+<ol>
+<li>同一 VLAN 中的两台主机可以跨越多台交换机</li>
+<li>必须是第三层及以上的交换机才能用来构建 VLAN</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/19717/" rel="prev" title="互联网计算-03-局域网数据链路层原理与技术">
+      <i class="fa fa-chevron-left"></i> 互联网计算-03-局域网数据链路层原理与技术
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/61317/" rel="next" title="互联网计算-06-会话、表示、应用层">
+      互联网计算-06-会话、表示、应用层 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">1.</span> <span class="nav-text">交换机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD"><span class="nav-number">1.1.</span> <span class="nav-text">交换机基本功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E4%BA%A4%E6%8D%A2"><span class="nav-number">1.2.</span> <span class="nav-text">对称交换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E4%BA%A4%E6%8D%A2"><span class="nav-number">1.3.</span> <span class="nav-text">非对称交换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%96%B9%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">交换方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%82%A8%E5%AD%98%E8%BD%AC%E5%8F%91"><span class="nav-number">1.4.1.</span> <span class="nav-text">储存转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B4%E9%80%9A"><span class="nav-number">1.4.2.</span> <span class="nav-text">直通</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A0%E7%A2%8E%E7%89%87%E8%BD%AC%E5%8F%91"><span class="nav-number">1.4.3.</span> <span class="nav-text">无碎片转发</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">1.5.</span> <span class="nav-text">第二层交换机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">1.6.</span> <span class="nav-text">第三层交换机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">1.7.</span> <span class="nav-text">第四层交换机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%B1%82%E4%BA%A4%E6%8D%A2%E6%9C%BA%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.</span> <span class="nav-text">多层交换机总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%A0%91%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.</span> <span class="nav-text">生成树协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%A5%E5%9B%9E%E8%B7%AF"><span class="nav-number">2.1.</span> <span class="nav-text">桥回路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%97%E4%BD%99%E9%80%A0%E6%88%90%E4%BA%86%E8%B7%AF%E7%94%B1%E5%9B%9E%E8%B7%AF"><span class="nav-number">2.2.</span> <span class="nav-text">冗余造成了路由回路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%B7%AF%E7%94%B1%E5%9B%9E%E8%B7%AF"><span class="nav-number">2.3.</span> <span class="nav-text">第二层路由回路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E5%B1%82%E8%B7%AF%E7%94%B1%E5%9B%9E%E8%B7%AF-%E6%B3%9B%E6%B4%AA%E5%8D%95%E6%92%AD%E5%B8%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">第二层路由回路-泛洪单播帧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%A0%91%E5%8D%8F%E8%AE%AE%E7%BB%BC%E8%BF%B0"><span class="nav-number">2.4.</span> <span class="nav-text">生成树协议综述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#STP-%E5%86%B3%E7%AD%96%E9%A1%BA%E5%BA%8F"><span class="nav-number">2.4.1.</span> <span class="nav-text">STP 决策顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%A5%E5%8D%8F%E8%AE%AE%E6%95%B0%E6%8D%AE%E5%8D%95%E5%85%83"><span class="nav-number">2.4.2.</span> <span class="nav-text">桥协议数据单元</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#STP-%E7%9A%84-BPDU-%E5%B8%A7"><span class="nav-number">2.4.3.</span> <span class="nav-text">STP 的 BPDU 帧</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BD%91%E6%A1%A5%E6%A0%87%E8%AF%86"><span class="nav-number">2.4.4.</span> <span class="nav-text">网桥标识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E4%B8%BE%E6%A0%B9%E4%BA%A4%E6%8D%A2%E6%9C%BA"><span class="nav-number">2.4.5.</span> <span class="nav-text">选举根交换机</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E5%BE%84%E4%BB%A3%E4%BB%B7"><span class="nav-number">2.5.</span> <span class="nav-text">路径代价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E4%B8%AA-STP-%E7%8A%B6%E6%80%81"><span class="nav-number">2.6.</span> <span class="nav-text">五个 STP 状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B-STP-%E6%94%B6%E6%95%9B"><span class="nav-number">2.7.</span> <span class="nav-text">初始 STP 收敛</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E6%A0%B9%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%86%B3%E5%AE%9A"><span class="nav-number">2.7.1.</span> <span class="nav-text">步骤 1：根交换机决定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9A%E9%80%89%E6%8B%A9%E6%A0%B9%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.7.2.</span> <span class="nav-text">步骤 2：选择根端口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9A%E9%80%89%E6%8B%A9%E7%BD%91%E6%AE%B5%E7%9A%84%E6%8C%87%E5%AE%9A%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.7.3.</span> <span class="nav-text">步骤 3：选择网段的指定端口</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%B1%80%E5%9F%9F%E7%BD%91"><span class="nav-number">3.</span> <span class="nav-text">虚拟局域网</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BC%95%E5%85%A5-VLAN%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">为什么引入 VLAN？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VLAN-%E5%8F%AF%E4%BB%A5%E4%B8%8D%E9%80%9A%E8%BF%87%E8%B7%AF%E7%94%B1%E5%99%A8%E5%B0%B1%E9%9A%94%E7%A6%BB%E5%B9%BF%E6%92%AD%E5%9F%9F%E5%90%97%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">VLAN 可以不通过路由器就隔离广播域吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VLAN-%E7%AE%80%E4%BB%8B"><span class="nav-number">3.3.</span> <span class="nav-text">VLAN 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%B0%E6%9C%89%E7%9A%84%E5%85%B1%E4%BA%AB%E5%B1%80%E5%9F%9F%E7%BD%91%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.1.</span> <span class="nav-text">现有的共享局域网配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LAN-%E5%92%8C-VLAN-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">3.3.2.</span> <span class="nav-text">LAN 和 VLAN 之间的差异</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9"><span class="nav-number">3.3.3.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-number">3.3.4.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E7%94%A8%E6%88%B7"><span class="nav-number">3.3.5.</span> <span class="nav-text">分组用户</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B2%A1%E6%9C%89-VLAN-%E6%97%B6%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B9%BF%E6%92%AD"><span class="nav-number">3.3.5.1.</span> <span class="nav-text">没有 VLAN 时的网络广播</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%92%E5%88%86%E4%BA%86-VLAN-%E7%9A%84%E7%BD%91%E7%BB%9C%E5%B9%BF%E6%92%AD"><span class="nav-number">3.3.5.2.</span> <span class="nav-text">划分了 VLAN 的网络广播</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#VLAN-%E9%97%B4%E9%80%9A%E4%BF%A1"><span class="nav-number">3.3.6.</span> <span class="nav-text">VLAN 间通信</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#VLAN-%E5%92%8C%E7%AC%AC%E4%B8%89%E5%B1%82%E8%BD%AC%E5%8F%91%E6%9D%A5%E6%8E%A7%E5%88%B6%E5%B9%BF%E6%92%AD%E5%9F%9F"><span class="nav-number">3.3.7.</span> <span class="nav-text">VLAN 和第三层转发来控制广播域</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VLAN-%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">3.4.</span> <span class="nav-text">VLAN 的结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#VLAN-%E9%80%9A%E8%BF%87%E9%AA%A8%E5%B9%B2%E7%BD%91"><span class="nav-number">3.4.1.</span> <span class="nav-text">VLAN 通过骨干网</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8-VLAN-%E4%B8%AD%E7%9A%84%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.4.2.</span> <span class="nav-text">在 VLAN 中的路由器的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8-VLAN-%E4%B8%AD%E7%9A%84%E5%B8%A7%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">3.4.3.</span> <span class="nav-text">在 VLAN 中的帧的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%A7%E8%BF%87%E6%BB%A4"><span class="nav-number">3.4.3.1.</span> <span class="nav-text">帧过滤</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%A7%E6%A0%87%E8%AE%B0"><span class="nav-number">3.4.3.2.</span> <span class="nav-text">帧标记</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IEEE802-1Q-%E5%92%8C-ISL"><span class="nav-number">3.4.4.</span> <span class="nav-text">IEEE802.1Q 和 ISL</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VLAN-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.5.</span> <span class="nav-text">VLAN 的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E3%80%81VLAN-%E5%92%8C%E5%B9%BF%E6%92%AD"><span class="nav-number">3.5.1.</span> <span class="nav-text">端口、VLAN 和广播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81-VLAN"><span class="nav-number">3.5.2.</span> <span class="nav-text">静态 VLAN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81-VLAN"><span class="nav-number">3.5.3.</span> <span class="nav-text">动态 VLAN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E7%AB%AF%E5%8F%A3%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84-VLAN"><span class="nav-number">3.5.4.</span> <span class="nav-text">以端口为中心的 VLAN</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A5%E7%AB%AF%E5%8F%A3%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84-VLAN-%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-number">3.5.4.1.</span> <span class="nav-text">以端口为中心的 VLAN 的优点</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%85%A5%E5%92%8C%E9%AA%A8%E5%B9%B2%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.5.5.</span> <span class="nav-text">接入和骨干连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.5.6.</span> <span class="nav-text">访问连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%B9%B2%E9%93%BE%E8%B7%AF"><span class="nav-number">3.5.7.</span> <span class="nav-text">主干链路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E6%9C%BA-29xx-%E4%B8%AD%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">3.5.8.</span> <span class="nav-text">交换机 29xx 中的配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#VLAN-%E9%85%8D%E7%BD%AE"><span class="nav-number">3.5.9.</span> <span class="nav-text">VLAN 配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-VLAN-%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.5.10.</span> <span class="nav-text">添加 VLAN 示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-VLAN"><span class="nav-number">3.5.11.</span> <span class="nav-text">配置 VLAN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%A0%E9%99%A4-VLAN"><span class="nav-number">3.5.12.</span> <span class="nav-text">删除 VLAN</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%B1%80%E5%9F%9F%E7%BD%91%E4%B9%8B%E9%97%B4%E7%9A%84%E8%B7%AF%E7%94%B1"><span class="nav-number">3.6.</span> <span class="nav-text">在局域网之间的路由</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.6.1.</span> <span class="nav-text">子接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-VLAN-%E9%97%B4%E8%B7%AF%E7%94%B1"><span class="nav-number">3.6.2.</span> <span class="nav-text">配置 VLAN 间路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-VLAN-%E9%97%B4%E8%B7%AF%E7%94%B1-2"><span class="nav-number">3.6.3.</span> <span class="nav-text">配置 VLAN 间路由</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VLAN-%E9%A2%98%E7%9B%AE%E5%A4%87%E6%B3%A8"><span class="nav-number">3.7.</span> <span class="nav-text">VLAN 题目备注</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="JavaScript 作用域 作用域是当前的执行上下文，值（en-US）和表达式在其中“可见”或可被访问，即作用域指的是有权访问的变量集合。  如果一个变量（en-US）或表达式不在当前的作用域中，那么它是不可用的 作用域也可以堆叠成层次结构，子作用域可以访问父作用域，反过来则不行  JavaScript 的作用域分以下三种：  全局作用域：脚本模式运行所有代码的默认作用域 模块作用域：模块模式中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 前端开发-07-2-JavaScript 作用域与闭包">
+<meta property="og:url" content="https://eaglebear2002.github.io/30728/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="JavaScript 作用域 作用域是当前的执行上下文，值（en-US）和表达式在其中“可见”或可被访问，即作用域指的是有权访问的变量集合。  如果一个变量（en-US）或表达式不在当前的作用域中，那么它是不可用的 作用域也可以堆叠成层次结构，子作用域可以访问父作用域，反过来则不行  JavaScript 的作用域分以下三种：  全局作用域：脚本模式运行所有代码的默认作用域 模块作用域：模块模式中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/30728/image-20230116184219495.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30728/image-20230116184240304.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30728/image-20230116184420262.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30728/image-20230116184603014.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/30728/image-20230116184614383.png">
+<meta property="article:published_time" content="2023-01-16T10:09:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.501Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/30728/image-20230116184219495.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/30728/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Web 前端开发-07-2-JavaScript 作用域与闭包 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/30728/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Web 前端开发-07-2-JavaScript 作用域与闭包
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-16 18:09:00" itemprop="dateCreated datePublished" datetime="2023-01-16T18:09:00+08:00">2023-01-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-Web-%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">2022Fall-Web 前端开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="JavaScript-作用域">JavaScript 作用域</h2>
+<p>作用域是当前的执行上下文，值（en-US）和表达式在其中“可见”或可被访问，即作用域指的是有权访问的变量集合。</p>
+<ul>
+<li>如果一个变量（en-US）或表达式不在当前的作用域中，那么它是不可用的</li>
+<li>作用域也可以堆叠成层次结构，子作用域可以访问父作用域，反过来则不行</li>
+</ul>
+<p>JavaScript 的作用域分以下三种：</p>
+<ul>
+<li>全局作用域：脚本模式运行所有代码的默认作用域</li>
+<li>模块作用域：模块模式中运行代码的作用域</li>
+<li>函数作用域：由函数创建的作用域</li>
+</ul>
+<p>此外，（ES6）用 <code>let</code> 或 <code>const</code> 声明的变量属于额外的作用域：</p>
+<ul>
+<li>块级作用域：用一对花括号（一个代码块）创建出来的作用域</li>
+</ul>
+<h3 id="JavaScript-变量">JavaScript 变量</h3>
+<p>在 JavaScript 中，对象和函数也是变量。</p>
+<p>作用域决定了从代码不同部分对变量、对象和函数的可访问性。</p>
+<h3 id="全局变量">全局变量</h3>
+<p>在函数之外声明的变量，叫做全局变量，因为它可被当前文档中的任何其他代码所访问。</p>
+<p>全局变量的作用域是全局的：网页的所有脚本和函数都能够访问它。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> carName = <span class="hljs-string">&quot; Volvo&quot;</span>;<br><br><span class="hljs-comment">// code here can use carName</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">myFunction</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-comment">// code here can use carName</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="自动全局">自动全局</h3>
+<p>如果为尚未声明的变量赋值，此变量会自动成为全局变量。这段代码将声明一个全局变量 carName，即使在函数内进行了赋值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// code here can use carName</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">myFunction</span>(<span class="hljs-params"></span>) &#123;<br>	carName = <span class="hljs-string">&quot;Volvo&quot;</span>;<br>	<span class="hljs-comment">// code here can use carName</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="函数作用域">函数作用域</h3>
+<p>在函数内定义的变量不能在函数之外的任何地方访问，因为变量仅仅在该函数的域的内部有定义。</p>
+<p>相对应的，一个函数可以访问定义在其范围内的任何变量和函数。</p>
+<p>换言之，定义在全局域中的函数可以访问所有定义在全局域中的变量。在另一个函数中定义的函数也可以访问在其父函数中定义的所有变量和父函数有权访问的任何其他变量。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// code here can not use carName</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">myFunction</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> carName = <span class="hljs-string">&quot;Volvo&quot;</span>;<br>	<span class="hljs-comment">// code here can use carName</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="JavaScript-变量的有效期">JavaScript 变量的有效期</h3>
+<p>JavaScript 变量的有效期始于其被创建时。</p>
+<p>局部变量会在函数完成时被删除。</p>
+<p>全局变量会在您关闭页面是被删除。</p>
+<p>函数参数：函数参数也是函数内的局部变量。</p>
+<p>HTML 中的全局变量：</p>
+<ul>
+<li>通过 JavaScript，全局作用域形成了完整的 JavaScript 环境。</li>
+<li>在 HTML 中，全局作用域是 window。所有全局变量均属于 window 对象。</li>
+</ul>
+<h3 id="困境">困境</h3>
+<p>假设想要使用一个变量来计算，并且希望这个计数器对所有函数都可用。</p>
+<p>可以使用一个全局变量和一个函数来增加计数器：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> counter = <span class="hljs-number">0</span>;<br><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"></span>) &#123;<br>	counter += <span class="hljs-number">1</span>;<br>&#125;<br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br></code></pre></td></tr></table></figure>
+<p>但是，如果在函数内部声明了计数器，没有人可以在不调用 <code>add()</code> 的情况下更改它：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> counter = <span class="hljs-number">0</span>;<br>	counter += <span class="hljs-number">1</span>;<br>&#125;<br><br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br><span class="hljs-comment">// the counter should now be 3, but it does not work !</span><br></code></pre></td></tr></table></figure>
+<h3 id="JavaScript-嵌套函数">JavaScript 嵌套函数</h3>
+<p>所有函数都可以访问全局作用域</p>
+<p>事实上，在 JavaScript 中，所有函数都可以访问它们“上层”的作用域</p>
+<p>JavaScript 支持嵌套函数。嵌套函数可以访问它们“上层”的作用域</p>
+<p>在这个例子中，内部函数 <code>plus()</code> 可以访问父函数中的 counter 变量</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> counter = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">function</span> <span class="hljs-title function_">plus</span>(<span class="hljs-params"></span>) &#123;<br>		counter += <span class="hljs-number">1</span>;<br>	&#125;<br>	<span class="hljs-title function_">plus</span>();<br>	<span class="hljs-keyword">return</span> counter;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="JavaScript-闭包">JavaScript 闭包</h2>
+<p>给变量 add 分配一个自调用函数的返回值。</p>
+<p>自调用函数只运行一次。它将计数器设置为零（0），并返回一个函数表达式。</p>
+<p>这样 add 就变成了一个函数。“奇妙的”部分是它可以访问父作用域中的计数器。</p>
+<p>这称为 JavaScript 闭包。它使函数具有“私有”变量成为可能。</p>
+<p>计数器受匿名函数作用域的保护，只能使用 add 函数进行更改。</p>
+<p>闭包是可以访问父作用域的函数，即使父函数已经关闭。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> add = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> counter = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-keyword">return</span> (counter += <span class="hljs-number">1</span>);<br>	&#125;;<br>&#125;)();<br><br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br><span class="hljs-title function_">add</span>();<br></code></pre></td></tr></table></figure>
+<h3 id="闭包的定义">闭包的定义</h3>
+<p>闭包（closure）是一个函数以及其捆绑的周边环境状态（lexical environment，词法环境）的引用的组合。换而言之，闭包让开发者可以从内部函数访问外部函数的作用域。在 JavaScript 中，闭包会随着函数的创建而被同时创建。</p>
+<p>闭包是函数和执行它的作用域组成的综合体——《JavaScript 权威指南》。所有的函数都是闭包。</p>
+<p>函数可以访问它被创建时的上下文环境，称为闭包——《JavaScript 语言精粹》。内部函数比它的外部函数具有更长的生命周期。</p>
+<p>更简单的定义：闭包是引用了自由变量的函数。自由变量是作用域可以导出到外部作用域的变量。函数内部变量和函数参数都可以是自由变量；函数参数不包含 this 和 arguments</p>
+<h3 id="词法作用域">词法作用域</h3>
+<p>词法（lexical）一词指的是，词法作用域根据源代码中声明变量的位置来确定该变量在何处可用。嵌套函数可访问声明于它们外部作用域的变量。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">init</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;Mozilla&quot;</span>; <span class="hljs-comment">// name 是一个被 init 创建的局部变量</span><br>	<span class="hljs-keyword">function</span> <span class="hljs-title function_">displayName</span>(<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-comment">// displayName() 是内部函数，一个闭包</span><br>		<span class="hljs-title function_">alert</span>(name); <span class="hljs-comment">// 使用了父函数中声明的变量</span><br>	&#125;<br><br>	<span class="hljs-title function_">displayName</span>();<br>&#125;<br><br><span class="hljs-title function_">init</span>();<br></code></pre></td></tr></table></figure>
+<h3 id="闭包应用场景">闭包应用场景</h3>
+<p>闭包很有用，因为它允许将函数与其所操作的某些数据（环境）关联起来。这显然类似于面向对象编程。</p>
+<ol>
+<li>实现私有成员</li>
+<li>保护命名空间</li>
+<li>避免污染全局变量</li>
+<li>变量需要长期驻留在内存</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">a</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>;<br>	<span class="hljs-keyword">function</span> <span class="hljs-title function_">b</span>(<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-title function_">alert</span>(++i);<br>	&#125;<br>	<span class="hljs-keyword">return</span> b;<br>&#125;<br><span class="hljs-keyword">var</span> c = <span class="hljs-title function_">a</span>();<br><span class="hljs-title function_">c</span>();<br></code></pre></td></tr></table></figure>
+<h3 id="例：用闭包模拟私有方法">例：用闭包模拟私有方法</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> <span class="hljs-title class_">Counter</span> = (<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> privateCounter = <span class="hljs-number">0</span>;<br><br>	<span class="hljs-keyword">function</span> <span class="hljs-title function_">changeBy</span>(<span class="hljs-params">val</span>) &#123;<br>		privateCounter += val;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> &#123;<br>		<span class="hljs-attr">increment</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-title function_">changeBy</span>(<span class="hljs-number">1</span>);<br>		&#125;,<br>		<span class="hljs-attr">decrement</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-title function_">changeBy</span>(-<span class="hljs-number">1</span>);<br>		&#125;,<br>		<span class="hljs-attr">value</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-keyword">return</span> privateCounter;<br>		&#125;,<br>	&#125;;<br>&#125;)();<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">value</span>()); <span class="hljs-comment">/* logs 0 */</span><br><span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">increment</span>();<br><span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">increment</span>();<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">value</span>()); <span class="hljs-comment">/* logs 2 */</span><br><span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">decrement</span>();<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">Counter</span>.<span class="hljs-title function_">value</span>()); <span class="hljs-comment">/* logs 1 */</span><br></code></pre></td></tr></table></figure>
+<h3 id="作用域链">作用域链</h3>
+<p>function 对象同其他对象一样，拥有可以编程访问的属性，和一系列不能通过代码访问而仅供 js 引擎存取的内部属性，其中一个是[[scope]]，包含了一个函数被创建的作用域中对象的集合。称为作用域链（Scope chain）。决定了那些数据可以被函数访问。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">num1, num2</span>) &#123;<br>	<span class="hljs-keyword">var</span> sum = num1 + num2;<br>	<span class="hljs-keyword">return</span> sum;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="/30728/image-20230116184219495.png" alt></p>
+<h3 id="执行-add-函数">执行 add 函数</h3>
+<p>执行环境和作用域链。</p>
+<p><img src="/30728/image-20230116184240304.png" alt></p>
+<h3 id="例子">例子</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">initUI</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> bd = <span class="hljs-variable language_">document</span>.<span class="hljs-property">body</span>,<br>		links = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementsByTagName</span>(<span class="hljs-string">&quot;a&quot;</span>),<br>		i = <span class="hljs-number">0</span>,<br>		len = links.<span class="hljs-property">length</span>;<br>	<span class="hljs-keyword">while</span> (i &lt; len) &#123;<br>		<span class="hljs-title function_">update</span>(links[i++]);<br>	&#125;<br>	<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;go-btn&quot;</span>).<span class="hljs-property">onclick</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-title function_">start</span>();<br>	&#125;;<br>	bd.<span class="hljs-property">className</span> = <span class="hljs-string">&quot;active&quot;</span>;<br>&#125;<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">initUI</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> doc = <span class="hljs-variable language_">document</span>,<br>		bd = doc.<span class="hljs-property">body</span>,<br>		links = doc.<span class="hljs-title function_">getElementsByTagName</span>(<span class="hljs-string">&quot;a&quot;</span>),<br>		i = <span class="hljs-number">0</span>,<br>		len = links.<span class="hljs-property">length</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="改变作用域链-with">改变作用域链-with</h3>
+<p>不推荐使用 with，在 ECMAScript 5 严格模式中该标签已被禁止。推荐的替代方案是声明一个临时变量来承载你所需要的属性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">initUI</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-title function_">with</span> (<span class="hljs-variable language_">document</span>) &#123;<br>		<span class="hljs-comment">//avoid!</span><br>		<span class="hljs-keyword">var</span> bd = body,<br>			links = <span class="hljs-title function_">getElementsByTagName</span>(<span class="hljs-string">&quot;a&quot;</span>),<br>			i = <span class="hljs-number">0</span>,<br>			len = links.<span class="hljs-property">length</span>;<br>		<span class="hljs-keyword">while</span> (i &lt; len) &#123;<br>			<span class="hljs-title function_">update</span>(links[i++]);<br>		&#125;<br>		<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;go-btn&quot;</span>).<span class="hljs-property">onclick</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-title function_">start</span>();<br>		&#125;;<br>		bd.<span class="hljs-property">className</span> = <span class="hljs-string">&quot;active&quot;</span>;<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="改变作用域链—性能问题">改变作用域链—性能问题</h3>
+<p><img src="/30728/image-20230116184420262.png" alt></p>
+<h3 id="try-catch">try-catch</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">try</span> &#123;<br>	<span class="hljs-title function_">methodThatMightCauseAnError</span>();<br>&#125; <span class="hljs-keyword">catch</span> (ex) &#123;<br>	<span class="hljs-title function_">alert</span>(ex.<span class="hljs-property">message</span>); <span class="hljs-comment">//scope chain is augmented here</span><br>&#125;<br><span class="hljs-keyword">try</span> &#123;<br>	<span class="hljs-title function_">methodThatMightCauseAnError</span>();<br>&#125; <span class="hljs-keyword">catch</span> (ex) &#123;<br>	<span class="hljs-title function_">handleError</span>(ex); <span class="hljs-comment">//delegate to handler method</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="闭包、作用域和内存">闭包、作用域和内存</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">assignEvents</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> id = <span class="hljs-string">&quot;xdi9592&quot;</span>;<br>	<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;save - btn&quot;</span>).<span class="hljs-property">onclick</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) &#123;<br>		<span class="hljs-title function_">saveDocument</span>(id);<br>	&#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="/30728/image-20230116184603014.png" alt></p>
+<h3 id="闭包执行">闭包执行</h3>
+<p><img src="/30728/image-20230116184614383.png" alt></p>
+<h3 id="提升（Hosting）">提升（Hosting）</h3>
+<p>引擎会在解释 JavaScript 代码之前首先进行编译，编译过程中的一部分工作就是找到所有的声明，并用合适的作用域将他们关联起来，这也正是词法作用域的核心内容。</p>
+<p>JavaScript 变量的另一个不同寻常的地方是，你可以先使用变量稍后再声明变量而不会引发异常。这一概念称为变量提升；JavaScript 变量感觉上是被“提升”或移到了函数或语句的最前面。</p>
+<p>但是，提升后的变量将返回 undefined 值。因此在使用或引用某个变量之后进行声明和初始化操作，这个被提升的变量仍将返回 undefined 值。</p>
+<h3 id="例子-2">例子</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">/* 例子 1*/</span><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(x === <span class="hljs-literal">undefined</span>); <span class="hljs-comment">// true</span><br><span class="hljs-keyword">var</span> x = <span class="hljs-number">3</span>;<br><br><span class="hljs-comment">/* 例子 2*/</span><br><span class="hljs-comment">// will return a value of undefined</span><br><span class="hljs-keyword">var</span> myvar = <span class="hljs-string">&quot;my value&quot;</span>;<br>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(myvar); <span class="hljs-comment">// undefined</span><br>	<span class="hljs-keyword">var</span> myvar = <span class="hljs-string">&quot;local value&quot;</span>;<br>&#125;)();<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">/* 例子 1*/</span><br><span class="hljs-keyword">var</span> x;<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(x === <span class="hljs-literal">undefined</span>); <span class="hljs-comment">// true</span><br>x = <span class="hljs-number">3</span>;<br><span class="hljs-comment">/* 例子 2*/</span><br><span class="hljs-keyword">var</span> myvar = <span class="hljs-string">&quot;my value&quot;</span>;<br>(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">var</span> myvar;<br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(myvar); <span class="hljs-comment">// undefined</span><br>	myvar = <span class="hljs-string">&quot;local value&quot;</span>;<br>&#125;)();<br></code></pre></td></tr></table></figure>
+<p>由于存在变量提升，一个函数中所有的 var 语句应尽可能地放在接近函数顶部的地方。这个习惯将大大提升代码的清晰度。</p>
+<h3 id="let-和-const-关键字">let 和 const 关键字</h3>
+<p>ES6 新增块级作用域。这个区块对这些变量从一开始就形成了封闭作用域，直到声明语句完成，这些变量才能被访问（获取或设置），否则会报错 ReferenceError。</p>
+<p>暂时性死区（英 temporal dead zone，简 TDZ），即代码块开始到变量声明语句完成之间的区域。</p>
+<p>通过 let 声明的变量没有变量提升、拥有暂时性死区，作用于块级作用域：</p>
+<ul>
+<li>当进入变量的作用域（包围它的语法块），立即为它创建（绑定）存储空间，不会立即初始化，也不会被赋值</li>
+<li>访问（获取或设置）该变量会抛出异常 ReferenceError</li>
+<li>当执行到变量的声明语句时，如果变量定义了值则会被赋值，如果变量没有定义值，则被赋值为 undefined</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js">&#123;<br>	<span class="hljs-comment">// TDZ starts at beginning of scope</span><br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(bar); <span class="hljs-comment">// undefined</span><br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo); <span class="hljs-comment">// ReferenceError</span><br>	<span class="hljs-keyword">var</span> bar = <span class="hljs-number">1</span>;<br>	<span class="hljs-keyword">let</span> foo = <span class="hljs-number">2</span>; <span class="hljs-comment">// End of TDZ (for foo)</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="temporal">temporal</h3>
+<p>使用术语“temporal”是因为区域取决于执行顺序（时间），而不是编写代码的顺序（位置）。例如，下面的代码会生效，是因为即使使用 let 变量的函数出现在变量声明之前，但函数的执行是在暂时性死区的外面。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js">&#123;<br>	<span class="hljs-comment">// TDZ starts at beginning of scope</span><br>	<span class="hljs-keyword">const</span> <span class="hljs-title function_">func</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(letVar); <span class="hljs-comment">// OK</span><br>	<span class="hljs-comment">// Within the TDZ letVar access throws `ReferenceError`</span><br>	<span class="hljs-keyword">let</span> letVar = <span class="hljs-number">3</span>; <span class="hljs-comment">// End of TDZ (for letVar)</span><br>	<span class="hljs-title function_">func</span>(); <span class="hljs-comment">// Called outside TDZ!</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="函数提升">函数提升</h3>
+<p>对于函数来说，只有函数声明会被提升到顶部，而函数表达式不会被提升。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">/* 函数声明 */</span><br><span class="hljs-title function_">foo</span>(); <span class="hljs-comment">// &quot;bar&quot;</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bar&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">/* 函数表达式 */</span><br><span class="hljs-title function_">baz</span>(); <span class="hljs-comment">// 类型错误：baz 不是一个函数</span><br><span class="hljs-keyword">var</span> baz = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;bar2&quot;</span>);<br>&#125;;<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;The Window&quot;</span>;<br><span class="hljs-keyword">var</span> object = &#123;<br>	<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;My Object&quot;</span>,<br>	<span class="hljs-attr">getNameFunc</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span>;<br>		&#125;;<br>	&#125;,<br>&#125;;<br><span class="hljs-title function_">alert</span>(object.<span class="hljs-title function_">getNameFunc</span>()());<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> name = <span class="hljs-string">&quot;The Window&quot;</span>;<br><span class="hljs-keyword">var</span> object = &#123;<br>	<span class="hljs-attr">name</span>: <span class="hljs-string">&quot;My Object&quot;</span>,<br>	<span class="hljs-attr">getNameFunc</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>		<span class="hljs-keyword">var</span> that = <span class="hljs-variable language_">this</span>;<br>		<span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>			<span class="hljs-keyword">return</span> that.<span class="hljs-property">name</span>;<br>		&#125;;<br>	&#125;,<br>&#125;;<br><span class="hljs-title function_">alert</span>(object.<span class="hljs-title function_">getNameFunc</span>()());<br></code></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/49870/" rel="prev" title="Web 前端开发-07-1-JavaScript 事件">
+      <i class="fa fa-chevron-left"></i> Web 前端开发-07-1-JavaScript 事件
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/9298/" rel="next" title="盘古之白：中西文之间批量添加空格">
+      盘古之白：中西文之间批量添加空格 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript-%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">1.</span> <span class="nav-text">JavaScript 作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript-%E5%8F%98%E9%87%8F"><span class="nav-number">1.1.</span> <span class="nav-text">JavaScript 变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F"><span class="nav-number">1.2.</span> <span class="nav-text">全局变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%85%A8%E5%B1%80"><span class="nav-number">1.3.</span> <span class="nav-text">自动全局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">1.4.</span> <span class="nav-text">函数作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript-%E5%8F%98%E9%87%8F%E7%9A%84%E6%9C%89%E6%95%88%E6%9C%9F"><span class="nav-number">1.5.</span> <span class="nav-text">JavaScript 变量的有效期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%B0%E5%A2%83"><span class="nav-number">1.6.</span> <span class="nav-text">困境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript-%E5%B5%8C%E5%A5%97%E5%87%BD%E6%95%B0"><span class="nav-number">1.7.</span> <span class="nav-text">JavaScript 嵌套函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript-%E9%97%AD%E5%8C%85"><span class="nav-number">2.</span> <span class="nav-text">JavaScript 闭包</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">闭包的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">2.2.</span> <span class="nav-text">词法作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.3.</span> <span class="nav-text">闭包应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%EF%BC%9A%E7%94%A8%E9%97%AD%E5%8C%85%E6%A8%A1%E6%8B%9F%E7%A7%81%E6%9C%89%E6%96%B9%E6%B3%95"><span class="nav-number">2.4.</span> <span class="nav-text">例：用闭包模拟私有方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE"><span class="nav-number">2.5.</span> <span class="nav-text">作用域链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C-add-%E5%87%BD%E6%95%B0"><span class="nav-number">2.6.</span> <span class="nav-text">执行 add 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">2.7.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E5%8F%98%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE-with"><span class="nav-number">2.8.</span> <span class="nav-text">改变作用域链-with</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E5%8F%98%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE%E2%80%94%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-number">2.9.</span> <span class="nav-text">改变作用域链—性能问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#try-catch"><span class="nav-number">2.10.</span> <span class="nav-text">try-catch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E3%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F%E5%92%8C%E5%86%85%E5%AD%98"><span class="nav-number">2.11.</span> <span class="nav-text">闭包、作用域和内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E6%89%A7%E8%A1%8C"><span class="nav-number">2.12.</span> <span class="nav-text">闭包执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8D%87%EF%BC%88Hosting%EF%BC%89"><span class="nav-number">2.13.</span> <span class="nav-text">提升（Hosting）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-2"><span class="nav-number">2.14.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#let-%E5%92%8C-const-%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">2.15.</span> <span class="nav-text">let 和 const 关键字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#temporal"><span class="nav-number">2.16.</span> <span class="nav-text">temporal</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E6%8F%90%E5%8D%87"><span class="nav-number">2.17.</span> <span class="nav-text">函数提升</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="重点掌握 CHAP 挑战握手认证协议（Challenge Handshake Authentication Protocol），链路建立阶段结束之后，认证者向对端点发送“challenge”消息；对端点用经过单向哈希函数计算出来的值做应答；认证者根据它自己计算的哈希值来检查应答，如果值匹配，认证得到承认，否则连接应该终止；经过一定的随机间隔，认证者发送一个新 challenge 给端点，重复上述步">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网计算-名词分析总结">
+<meta property="og:url" content="https://eaglebear2002.github.io/25884/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="重点掌握 CHAP 挑战握手认证协议（Challenge Handshake Authentication Protocol），链路建立阶段结束之后，认证者向对端点发送“challenge”消息；对端点用经过单向哈希函数计算出来的值做应答；认证者根据它自己计算的哈希值来检查应答，如果值匹配，认证得到承认，否则连接应该终止；经过一定的随机间隔，认证者发送一个新 challenge 给端点，重复上述步">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/25884/9239391d8a7441158adb2a54a7571564.png">
+<meta property="article:published_time" content="2022-05-25T08:45:45.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.612Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/25884/9239391d8a7441158adb2a54a7571564.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/25884/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网计算-名词分析总结 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/25884/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网计算-名词分析总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-25 16:45:45" itemprop="dateCreated datePublished" datetime="2022-05-25T16:45:45+08:00">2022-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Spring-互联网计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="重点掌握">重点掌握</h2>
+<h3 id="CHAP">CHAP</h3>
+<p>挑战握手认证协议（Challenge Handshake Authentication Protocol），链路建立阶段结束之后，认证者向对端点发送“challenge”消息；对端点用经过单向哈希函数计算出来的值做应答；认证者根据它自己计算的哈希值来检查应答，如果值匹配，认证得到承认，否则连接应该终止；经过一定的随机间隔，认证者发送一个新 challenge 给端点，重复上述步骤。</p>
+<h3 id="ISP">ISP</h3>
+<p>互联网服务提供商（Internet Service Providers），向广大用户综合提供互联网接入业务、信息业务、和增值业务的电信运营商。</p>
+<h3 id="PPP">PPP</h3>
+<p>点对点协议（Point-to-Point Protocol），是为在同等单元之间传输数据包这样的简单链路设计的数据链路层协议，是数据链路层使用最多的一种协议。这种链路提供全双工操作，并按照顺序传递数据包。特点为：简单；只检测差错而不纠正差错，不进行流量控制；支持多种网络层协议。</p>
+<h3 id="RARP">RARP</h3>
+<p>反向地址解析协议（Reverse Address Resolution Protocol），ARP 为 IP 到 MAC 的转换，而 RARP 为 MAC 到 IP 的转换，向 RARP 服务器请求分配 IP。主要流程：发出要反向解析的物理地址并希望返回其对应的 IP 地址。发送主机发送一个本地的 RARP 广播，在此广播包中，声明自己的 MAC 地址并且请求任何收到此请求的 RARP 服务器分配一个 IP 地址。 本地网段上的 RARP 服务器收到此请求后，检查其 RARP 列列表，查找该 MAC 地址对应的 IP 地址。 如果存在，RARP 服务器器就给源主机发送一个响应数据包并将此 IP 地址提供给对方主机使用；如果不存在，RARP 服务器对此不做任何的响应。 源主机收到从 RARP 服务器的响应信息，就利用得到的 IP 地址进行通讯；如果一直没有收到 RARP 服务器的响应信息，表示初始化失败。</p>
+<h3 id="ICMP">ICMP</h3>
+<p>因特网控制报文协议（Internet Control Message Protocol），是为了提高 IP 数据报交付成功的机会，允许主机或路由器报告差错情况和提供有关异常情况报告的协议，运行在 IP 层。</p>
+<h3 id="HTML">HTML</h3>
+<p>超文本标记语言（HyperText Markup Language）</p>
+<h3 id="CSMA-CA">CSMA/CA</h3>
+<p>带冲突避免的载波侦听多路访问（Carrier Sense Multiple Access with Collision Avoidance）</p>
+<h3 id="CSMA-CD">CSMA/CD</h3>
+<p>带冲突检测的载波侦听多路访问（Carrier Sense Multiple Access with Collision Detection），“多点接入”就是说明这是总线型网络，“载波监听”就是用电子技术检测总线上有没有其他计算机也在发送。“碰撞检测”也就是“边发送边监听”，即适配器边发送数据边检测信道上的信号电压的变化情况，以便判断自己在发送数据时其他站是否也在发送数据。</p>
+<h3 id="CIDR">CIDR</h3>
+<p>无类域间路由（Classless Inter-Domain Routing），是一个在因特网上创建附加地址的方法，这些地址提供给服务提供商（ISP），再由 ISP 分配给客户，（VLSM + CIDR 就形成了如 192.168.1.0/28 子网掩码 255.255.255.240 这样的形式）</p>
+<h3 id="IEEE-MAC-Sub-layer">IEEE MAC Sub-layer</h3>
+<p>电气与电子工程师学会的 MAC 子层划分（Institute of Electrica and Electronics Engineers MAC Sub_layer），IEEE 将数据链路层分成 LLC（Logical Link Control，逻辑链路控制）和 MAC（Media Access Control，介质访问控制）两个子层。MAC 控制各个 host 对 media 的使用权。MAC 子层定义了 frame 如何在物理线上运输，处理物理地址，定义网络拓扑和网线使用规则。</p>
+<h3 id="Split-Horizon">Split Horizon</h3>
+<p>水平分割，是一种避免路由环路的出现和加快路由汇聚的技术。水平分割法的规则和原理是路由器从某个接口接收到的更新信息不允许再从这个接口发回去。</p>
+<h3 id="Flow-Control">Flow Control</h3>
+<p>流量控制，让发送方的发送速率不要太快，要让接收方来得及接收。</p>
+<h3 id="DNS">DNS</h3>
+<p>域名系统（Domain Name System），因特网上作为域名和 IP 地址相互映射的一个分布式数据库，将域名转化为 IP 地址，能够使用户更方便的访问互联网，而不用去记住能够被机器直接读取的 IP 数串。共分为三级域名、二级域名、顶级域名。因特网采用层次树状结构命名方法，由多个域名服务器共同完成。每个服务器接收到域名后尝试解析，如果不能解析则传给上一层服务器。</p>
+<h3 id="TDM">TDM</h3>
+<p>时分复用（Time Division Multiplexing），采用同一物理连接的不同时段来传输不同的信号，达到多路传输的目的；或者是时分复用是将时间划分为一段段等长的时分复用（TDM）帧，每个时分复用的用户在每个 TDM 帧中占用固定序号的时隙</p>
+<h3 id="ADSL">ADSL</h3>
+<p>非对称数字用户线路（Aysmmetric Digital Subscriber Line），用数字技术对现有的模拟电话用户线进行改造，使它能承载宽带数字业务。ADSL 下行带宽远远大于上行带宽，因此得名“非对称”。</p>
+<h3 id="FTP">FTP</h3>
+<p>文件传输协议（File Transfer Protocol），是可靠的，面向连接的服务。基于 TCP 端口 20（传输数据）和 21（建立控制连接），工作流程：首先通过套接字建立控制连接，然后建立数据连接，通过数据连接传输数据</p>
+<h2 id="其他重点">其他重点</h2>
+<table>
+<thead>
+<tr>
+<th>英文简称</th>
+<th>英文全称</th>
+<th>中文全称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACL</td>
+<td>Access Control Lists</td>
+<td>访问控制列表</td>
+<td>是路由器和交换机接口的指令列表，用来控制端口进出的数据包</td>
+</tr>
+<tr>
+<td>AP</td>
+<td>Access Point</td>
+<td>接入点</td>
+<td></td>
+</tr>
+<tr>
+<td>ARP</td>
+<td>Address Resolution Protocol</td>
+<td>地址解析协议</td>
+<td>把 IP 地址解析为硬件地址，解决了同一个局域网上的主机或者路由器的 IP 地址和硬件地址的映射问题。ARP 的高速缓存可以大大减少网络上的通信量。只针对同一网段</td>
+</tr>
+<tr>
+<td>ARQ</td>
+<td>Automatic Repeat-reQuest</td>
+<td>自动重传请求</td>
+<td>是 OSI 模型中数据链路层的错误纠正协议之一</td>
+</tr>
+<tr>
+<td>ASCII</td>
+<td>American Standard Code for Information Interchange</td>
+<td>美国信息交换标准码</td>
+<td></td>
+</tr>
+<tr>
+<td>B Channel</td>
+<td>Barrier Channel</td>
+<td>B 信道</td>
+<td>用于电路交换（circuit-switch）的数据，通过 PPP 或 HDLC，B 信道工作在 64 kbps 的速率下，用于传输数据和语音流量</td>
+</tr>
+<tr>
+<td>BRI</td>
+<td>Basic Rate Interface</td>
+<td>基本速率接口</td>
+<td>BRI = 2B + D</td>
+</tr>
+<tr>
+<td>CDM</td>
+<td>Code Division Multiplexing</td>
+<td>码分复用</td>
+<td>常用的名词是码分多址 CDMA（Code Division Multiple Access）靠不同的编码来区分各路原始信号的一种复用方式</td>
+</tr>
+<tr>
+<td>CDMA</td>
+<td>Code Division Multiple Access</td>
+<td>码分多址</td>
+<td>是一种多路方式，多路信号只占用一条信道</td>
+</tr>
+<tr>
+<td>CRC</td>
+<td>Cyclic Redundancy Check</td>
+<td>循环冗余校验</td>
+<td></td>
+</tr>
+<tr>
+<td>D Channel</td>
+<td>Delta Channel</td>
+<td>D 信道</td>
+<td>信号信息（signaling information），通过 LAPD（Link Access Procedure of D-Channel，D 信道链路规程），D 信道工作在 16 kbps 的速率下，用于告诉公用交换电话网络如何处理 B 信道</td>
+</tr>
+<tr>
+<td>DHCP</td>
+<td>Dynamic Host Configuraion Protocol</td>
+<td>动态主机配置协议</td>
+<td>是一个局域网的网络协议，使用 UDP 协议工作，主要有两个用途：给内部网络或网络服务供应商自动分配 IP 地址，给用户或者内部网络管理员作为对所有计算机作中央管理的手段</td>
+</tr>
+<tr>
+<td>DOS</td>
+<td>Disk Operation System</td>
+<td>磁盘操作系统</td>
+<td>是个人计算机上的一类操作系统</td>
+</tr>
+<tr>
+<td>DR</td>
+<td>Designated Router</td>
+<td>指定路由器</td>
+<td>指定路由器，在 OSPF 多路访问网络中，在同一个区域内被选举出来代表所有路由的路由。为了减少在同一个网段中几个邻居互相交换信息的数量</td>
+</tr>
+<tr>
+<td>FDM</td>
+<td>Frequency Division Multiplexing</td>
+<td>频分复用</td>
+<td>用户在分配到一定的频带后，在通信过程中自始至终都占用这个频带</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>Hypertext Transfer Protocol</td>
+<td>超文本传输协议</td>
+<td>物理层的 PDU 是数据位（bit），数据链路层的 PDU 是数据帧（frame），网络层的 PDU 是数据包（packet），传输层的 PDU 是数据段（segment），其他更高层次的 PDU 是数据（data）</td>
+</tr>
+<tr>
+<td>Internet</td>
+<td>Internet</td>
+<td>互联网</td>
+<td>互联网；指当前全球最大的、最开放的由众多网络相互连接而成的特定互连网，它采用 TCP/IP 协议族作为通信的规则，且其前身是美国的 ARPANET</td>
+</tr>
+<tr>
+<td>internet</td>
+<td>internet</td>
+<td>互连网</td>
+<td>泛指多个计算机网络互连而成的计算机网络</td>
+</tr>
+<tr>
+<td>IP</td>
+<td>Internet Protocol</td>
+<td>网际互联协议</td>
+<td>由 network ID 与 host ID 组成,0-127 Class A address,128-191 Class B address,192-223 Class C address,224-239 Class D-Multicast,240-255 Class E-Research</td>
+</tr>
+<tr>
+<td>ISDN</td>
+<td>Integrated Services Digital Network</td>
+<td>综合业务数字网</td>
+<td>以电话综合数字网为基础发展成的通信网，能提供端到端的数字连接，用来承载包括话音和非话音在内的多种电信业务。</td>
+</tr>
+<tr>
+<td>LAN</td>
+<td>Local Area Networks</td>
+<td>局域网</td>
+<td>是指在某一区域内由多台计算机互联成的计算机组</td>
+</tr>
+<tr>
+<td>LLC</td>
+<td>Logical Link Control</td>
+<td>逻辑链路控制</td>
+<td>是局域网中数据链路层的上层部分。用户的数据链路服务通过 LLC 子层为网络层提供统一的接口。逻辑上标志不同的协议类型并且封装起来。处理差错通知，网络拓扑和流控制。</td>
+</tr>
+<tr>
+<td>LSP</td>
+<td>Link State Protocols</td>
+<td>链路状态协议</td>
+<td>每个路由器都了解整个网络的拓扑结构，利用算法计算两个路由之间的最短路径，更新由事件触发，每次更新都只向周围的路由器传递路由表的更新信息，包括 OSPF 等</td>
+</tr>
+<tr>
+<td>MAC</td>
+<td>Media Access Control</td>
+<td>介质访问控制</td>
+<td>OSI 模型中，数据链接层的子层。MAC 地址是 OSI 模型中对应数据链路层的地址，每个网络位置都有一个唯一的编号。定义了物理线路上怎样传输帧。解决了物理地址问题，定义网络拓扑和流水线</td>
+</tr>
+<tr>
+<td>MTU</td>
+<td>Maximal Transfer Unit</td>
+<td>最大传输单元</td>
+<td></td>
+</tr>
+<tr>
+<td>NAT</td>
+<td>Network Address Translation</td>
+<td>网络地址转换</td>
+<td>网络地址转换，将网络内部的私有 IP 地址转换为公有 IP 地址以节省 IP 地址的方法。只能一对一映射</td>
+</tr>
+<tr>
+<td>NRZ</td>
+<td>Non-Return to Zero</td>
+<td>不归零制码</td>
+<td>信号电平的一次反转代表 1，电平不变化表示 0，并且在表示完一个码元后，电压不需回到 0</td>
+</tr>
+<tr>
+<td>NVRAM</td>
+<td>Non-volatile Random Access Memory</td>
+<td>非易失随机存取存储器</td>
+<td>非易失性 RAM，用来存储存储备份或启动配置文件，关机或重启后信息不会丢失</td>
+</tr>
+<tr>
+<td>OSI</td>
+<td>Open System Interconnection</td>
+<td>开发式系统互联</td>
+<td>OSI 将计算机网络体系结构（architecture）划分为以下七层：物理层、数据链路层、网络层、传输层、会话层、表示层、应用层</td>
+</tr>
+<tr>
+<td>OSPF</td>
+<td>Open Shortest Path First</td>
+<td>开发式最短路径优先</td>
+<td>基于分布式的链路状态协议，适用于大型互联网。OSPF 只在链路状态发生变化时，才用向本自治系统内的所有路由器，用洪泛法发送与本路由器相邻的所有路由器的链路状态信息，最终了解全网的拓扑结构图。</td>
+</tr>
+<tr>
+<td>PAT</td>
+<td>Port Address Translation</td>
+<td>端口地址转换</td>
+<td>是对网络地址转换（NAT）的扩展，它允许本地网（LAN）上的多个设备映射到一个单一的公共 IP 地址</td>
+</tr>
+<tr>
+<td>PING</td>
+<td>Packet Internet Groper</td>
+<td>因特网包探测器</td>
+<td>用于测试网络连接量的程序。使用了 ICMP 回送请求和回送回答报文，是应用程序直接使用网络层 ICMP 的例子，没有通过 TCP/UDP</td>
+</tr>
+<tr>
+<td>POP3</td>
+<td>Post Office Protocol 3</td>
+<td>邮局协议 3</td>
+<td>用于从服务器读取邮件。本协议主要用于支持使用客户端远程管理在服务器上的电子邮件</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>Power On Self Test</td>
+<td>开机自检</td>
+<td></td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>Random Access Memory</td>
+<td>随机存取存储器</td>
+<td></td>
+</tr>
+<tr>
+<td>RIP</td>
+<td>Routing Information Protocol</td>
+<td>路由信息协议</td>
+<td>分布式基于距离向量的路由选择协议，只适用于小型网络。按固定的时间间隔与相邻路由器交换信息。交换的信息是自己当前的路由表，即到达本自治系统中所有网络的（最短）距离，以及到每个网络应经过的下一跳路由器。但是不知道全网的拓扑结构。</td>
+</tr>
+<tr>
+<td>ROM</td>
+<td>Read-only Memory</td>
+<td>只读存储器</td>
+<td></td>
+</tr>
+<tr>
+<td>RZ</td>
+<td>Return to Zero</td>
+<td>归零制码</td>
+<td>是信号电平在一个码元之内都要恢复到零的编码方式</td>
+</tr>
+<tr>
+<td>SMTP</td>
+<td>Simple Mail Transfer Protocol</td>
+<td>简单邮件传输协议</td>
+<td>它是一组用于由源地址到目的地址传送邮件的规则，由它来控制信件的中转方式。SMTP 协议属于 TCP/IP 协议族，它帮助每台计算机在发送或中转信件时找到下一个目的地。通过 SMTP 协议所指定的服务器,就可以把 E-mail 寄到收信人的服务器上了，整个过程只要几分钟。SMTP 服务器则是遵循 SMTP 协议的发送邮件服务器，用来发送或中转发出的电子邮件。用于： 用户代理把邮件传送到服务器；在邮件服务器之间的传送</td>
+</tr>
+<tr>
+<td>SPF</td>
+<td>Shortest Path First</td>
+<td>最短路径优先算法</td>
+<td>最短路径算法，这个算法其实就是 Dijkstra 算法，是 LSP 中计算路径的一种方式</td>
+</tr>
+<tr>
+<td>STP</td>
+<td>Shielded Twisted Pair</td>
+<td>屏蔽双绞线</td>
+<td>是一种广泛用于数据传输的铜质双绞线</td>
+</tr>
+<tr>
+<td>STP</td>
+<td>Spanning Tree Protocol</td>
+<td>生成树协议</td>
+<td>该协议可应用于在网络中建立树形拓扑，消除网络中的环路，并且可以通过一定的方法实现路径冗余，但不是一定可以实现路径冗余</td>
+</tr>
+<tr>
+<td>STDM</td>
+<td>Statistic Time Division Multiplexing</td>
+<td>统计时分复用</td>
+<td>是一种根据用户实际需要动态分配线路资源的时分复用方法</td>
+</tr>
+<tr>
+<td>TCP</td>
+<td>Transmission Control Protocal</td>
+<td>传输控制协议</td>
+<td>一种面向连接的、可靠的、基于字节流的传输层通信协议，不支持单播和组播</td>
+</tr>
+<tr>
+<td>TFTP</td>
+<td>Trivial File Transfer Protocol</td>
+<td>一般文本传输协议</td>
+<td>TCP/IP 协议族中的一个用来在客户机与服务器之间进行简单文件传输的协议，提供不复杂、开销不大的文件传输服务。无连接的服务。基于 UDP，小且容易实现</td>
+</tr>
+<tr>
+<td>TTL</td>
+<td>Time To Live</td>
+<td>生存时间</td>
+<td></td>
+</tr>
+<tr>
+<td>UDP</td>
+<td>User Datagram Protocol</td>
+<td>用户数据包协议</td>
+<td>是 OSI 参考模型中一种无连接的传输层协议，提供面向事务的简单不可靠、无连接、无确认、无流控制的信息传送服务</td>
+</tr>
+<tr>
+<td>UTP</td>
+<td>Unshielded Twisted Pair</td>
+<td>无屏蔽双绞线</td>
+<td>由 8 根不同颜色的线分成 4 对绞合在一起，无金属屏蔽材料；线缆不需要接地，因此便于在线缆末端加上连接器；价格低廉；直径小，因此安装简单且更适合安装在管道中；和其他铜传输介质具有一样的数据传输速率；使用 RJ 连接器后极大地降低了噪音的影响。</td>
+</tr>
+<tr>
+<td>URL</td>
+<td>Uniform Resource Locator</td>
+<td>统一资源定位符</td>
+<td></td>
+</tr>
+<tr>
+<td>VLAN</td>
+<td>Virtual Local Area Network</td>
+<td>虚拟局域网</td>
+<td>是一组逻辑上的设备和用户，这些设备和用户并不受物理位置的限制，可以根据功能、部门及应用等因素将它们组织起来，相互之间的通信就好像它们在同一个网段中一样，由此得名虚拟局域网。用于划分逻辑子网。工作在第二层和第三层。<strong>可以分割广播域</strong></td>
+</tr>
+<tr>
+<td>VLSM</td>
+<td>Variable Length Subnet Masks</td>
+<td>可变长度子网掩码</td>
+<td>规定了一个网络在划分子网时的不同部分使用不同的子网掩码，更有效的使用 IP 地址；使用路由汇总的能力更强</td>
+</tr>
+<tr>
+<td>VPN</td>
+<td>Virtual Private Network</td>
+<td>虚拟专用网络</td>
+<td></td>
+</tr>
+<tr>
+<td>WAN</td>
+<td>Wide Area Networks</td>
+<td>广域网</td>
+<td>指一种跨地区的数据通讯网络,通常包含一个国家或地区</td>
+</tr>
+</tbody>
+</table>
+<h2 id="其他名词简单解释">其他名词简单解释</h2>
+<ol>
+<li>Frame Relay；帧中继；是一种用于连接计算机系统的面向分组的通信方法。它主要用在公共或专用网上的局域网互联以及广域网连接。大多数公共电信局都提供帧中继服务，把它作为建立高性能的虚拟广域连接的一种途径。</li>
+<li>Data；数据；数据是二进制序列的表示。</li>
+<li>Protocol；协议；协议定义消息传输和传递的详细方式。</li>
+<li>Data Packets；数据分组；为了传输方， 计算机数据通常被分解成小的、易传输的单元，称为数据分组。</li>
+<li>Symmetric Switching： 对称交换。交换机上所有端口带宽一样</li>
+<li>Asymmetric Switching： 非对称交换。不同端口带宽不同</li>
+<li>Store-and-Forward： 储存转发式交换。交换机收到帧后，先校验 CRC 再转发</li>
+<li>Cut-through： 直通式交换。不校验就转发</li>
+<li>Fast forward Switching： 快速转发交换。只查看目的 MAC 地址后就转发。</li>
+<li>Fragment Free： 免碎片。转发前查看帧前 64 字节以减少线路上噪声造成的错误。</li>
+<li>L2 Switching： Layer 2 Switching，二层交换</li>
+<li>L3 Switching： Layer 3 Switching，三层交换</li>
+<li>L4 Switching： Layer 4 Switching，四层交换</li>
+<li>Multilayer Switching： 多层交换</li>
+<li>backbone： 主干。用于 VLAN 间的通信。</li>
+<li>Frame Filtering： 帧过滤。阻止不符合条件的帧。</li>
+<li>Frame Tagging： 帧标记。在每个要被在主干线路上转发的帧的头部加上一个独特的标签，用来标识它来自哪一个 VLAN。离开主干线路时被去除。</li>
+<li>Static VLAN： 静态 VLAN。直接指派端口所属的 VLAN。</li>
+<li>Dynamic VLAN： 动态 VLAN。当有新的节点插入端口时，交换机查表来动态配置这个端口所属的 VLAN</li>
+<li>Port-Centric VLAN： 以端口为中心的 VLAN。同一 VLAN 下的所有节点接入到同一个路由器接口上，或者反过来说，接入同一个路由器端口的节点被划分到同一个 VLAN 下。</li>
+<li>Access Link： 接入链路。其上只有一个 VLAN 的链路。这个 VLAN 被称为这个链路对应的端口的本地 VLAN。</li>
+<li>Trunk Link： Trunk 链路（就这么叫吧，硬要叫的话是主干链路）。其上有多个 VLAN 的链路。用于连接交换机与交换机或路由器。（总之其实就是一根线上多个 VLAN 的帧在跑，所以这些帧得打上标签标识它来自于哪一个 VLAN，不然就搞混了。到达对面的交换机之后再根据标签把这些帧转发到对应的 VLAN 里面去。Trunk 链路最大的好处只是省端口和方便配置，以牺牲一点性能为代价。）</li>
+<li>Trunk 链路也可以有本地 VLAN，即在 trunk 链路因为一些原因失败的时候使用的 VLAN。</li>
+<li>Routing Between VLANs： VLAN 间路由</li>
+<li>Infrastructure Mode：基础建设模式</li>
+<li>Toll Network ：长途通信网</li>
+<li>CO Switch ：中心局交换机</li>
+<li>流量控制 Flow Control：让发送方的发送速率不要太快，要让接收方来得及接收。</li>
+<li>拥塞控制 Congestion Control：防止过多的数据注入到网络中，这样可以使网络中的路由器或链路不致过载。</li>
+<li>Socket：TCP 连接的端点，表示为（IP address：port）。一个连接表示为（socket_sourse，socket_des）</li>
+<li>Computer virus 病毒：编制者在计算机程序中插入的破坏计算机功能或者数据的代码，能影响计算机使用，能自我复制的一组计算机指令或者程序代码</li>
+<li>simplex transmission：单工。只能有一个方向的通信，没有反方方向的交互。</li>
+<li>half-duplex transmission：半双工。信号可双向传输，但不能同时发送或同时接收。</li>
+<li>full-duplex transmission：全双工。通信的双方可同时发送和接收消息，信号可同时双向传输。</li>
+<li>Split horizon：水平分割是一种避免路由环路的出现和加快路由汇聚的技术。水平分割法的规则和原理是路由器从某个接口接收到的更新信息不允许再从这个接口发回去。</li>
+<li>冲突域（物理分段）：连接在同一导线上的所有工作站的集合，或者说是同一物理网段上所有节点的集合或以太网上竞争同一带宽的节点集合。</li>
+<li>广播域：接收同样广播消息的节点的集合。</li>
+</ol>
+<h2 id="协议总结">协议总结</h2>
+<p><img src="/25884/9239391d8a7441158adb2a54a7571564.png" alt></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/39769/" rel="prev" title="互联网计算-11-网络安全">
+      <i class="fa fa-chevron-left"></i> 互联网计算-11-网络安全
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/19402/" rel="next" title="软件工程与计算II-00-题目">
+      软件工程与计算II-00-题目 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E7%82%B9%E6%8E%8C%E6%8F%A1"><span class="nav-number">1.</span> <span class="nav-text">重点掌握</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CHAP"><span class="nav-number">1.1.</span> <span class="nav-text">CHAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISP"><span class="nav-number">1.2.</span> <span class="nav-text">ISP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PPP"><span class="nav-number">1.3.</span> <span class="nav-text">PPP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RARP"><span class="nav-number">1.4.</span> <span class="nav-text">RARP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ICMP"><span class="nav-number">1.5.</span> <span class="nav-text">ICMP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML"><span class="nav-number">1.6.</span> <span class="nav-text">HTML</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSMA-CA"><span class="nav-number">1.7.</span> <span class="nav-text">CSMA&#x2F;CA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSMA-CD"><span class="nav-number">1.8.</span> <span class="nav-text">CSMA&#x2F;CD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CIDR"><span class="nav-number">1.9.</span> <span class="nav-text">CIDR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IEEE-MAC-Sub-layer"><span class="nav-number">1.10.</span> <span class="nav-text">IEEE MAC Sub-layer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Split-Horizon"><span class="nav-number">1.11.</span> <span class="nav-text">Split Horizon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flow-Control"><span class="nav-number">1.12.</span> <span class="nav-text">Flow Control</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS"><span class="nav-number">1.13.</span> <span class="nav-text">DNS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TDM"><span class="nav-number">1.14.</span> <span class="nav-text">TDM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ADSL"><span class="nav-number">1.15.</span> <span class="nav-text">ADSL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FTP"><span class="nav-number">1.16.</span> <span class="nav-text">FTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%87%8D%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">其他重点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E5%90%8D%E8%AF%8D%E7%AE%80%E5%8D%95%E8%A7%A3%E9%87%8A"><span class="nav-number">3.</span> <span class="nav-text">其他名词简单解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">协议总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

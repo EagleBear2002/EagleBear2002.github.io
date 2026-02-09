@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="摘要 事务处理是大多数数据库应用程序的核心部分。虽然可序列化性仍然是理想事务语义的黄金标准，但许多数据库系统通过选择较低的隔离级别来提高事务吞吐量，但代价是引入潜在的异常。事务通常不是任意的，而是受到在应用程序级别定义的一组事务程序的约束（例如 TPC-C 的情况），这意味着并非所有潜在异常都能有效实现。本文的核心问题是：在特定事务程序的上下文中，何时隔离级别低于可序列化性，才能提供与可序列化性相">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PODS&#39;22-Robustness Against Read Committed-A Free Transactional Lunch">
+<meta property="og:url" content="https://eaglebear2002.github.io/8969/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="摘要 事务处理是大多数数据库应用程序的核心部分。虽然可序列化性仍然是理想事务语义的黄金标准，但许多数据库系统通过选择较低的隔离级别来提高事务吞吐量，但代价是引入潜在的异常。事务通常不是任意的，而是受到在应用程序级别定义的一组事务程序的约束（例如 TPC-C 的情况），这意味着并非所有潜在异常都能有效实现。本文的核心问题是：在特定事务程序的上下文中，何时隔离级别低于可序列化性，才能提供与可序列化性相">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/8969/image-20240822095555012.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/8969/image-20240822100019890.png">
+<meta property="article:published_time" content="2024-08-21T11:40:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.768Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/8969/image-20240822095555012.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/8969/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>PODS'22-Robustness Against Read Committed-A Free Transactional Lunch | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/8969/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PODS'22-Robustness Against Read Committed-A Free Transactional Lunch
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-08-21 19:40:00" itemprop="dateCreated datePublished" datetime="2024-08-21T19:40:00+08:00">2024-08-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/" itemprop="url" rel="index"><span itemprop="name">数据库研究</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A0%94%E7%A9%B6/%E5%AE%A2%E6%88%B7%E7%A8%8B%E5%BA%8F%E9%B2%81%E6%A3%92%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">客户程序鲁棒性</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>摘要</strong></p>
+<p>事务处理是大多数数据库应用程序的核心部分。虽然可序列化性仍然是理想事务语义的黄金标准，但许多数据库系统通过选择较低的隔离级别来提高事务吞吐量，但代价是引入潜在的异常。事务通常不是任意的，而是受到在应用程序级别定义的一组事务程序的约束（例如 TPC-C 的情况），这意味着并非所有潜在异常都能有效实现。本文的核心问题是：在特定事务程序的上下文中，何时隔离级别低于可序列化性，才能提供与可序列化性相同的保证？我们将后者称为稳健性问题。本文调查了针对（多版本）读取提交的稳健性测试的最新结果，重点关注完整条件而非充分条件。我们展示了如何将稳健性测试提升到事务模板和程序以增加实际适用性。我们讨论了未解决的问题并强调了未来研究的有希望的方向。</p>
+<p>作者：</p>
+<ul>
+<li>Brecht Vandevoort, UHasselt, Data Science Institute, ACSL, Belgium</li>
+<li>Bas Ketsman, Vrije Universiteit Brussel, Belgium</li>
+<li>Christoph Koch, École Polytechnique Fédérale de Lausanne, Switzerland</li>
+<li>Frank Neven, UHasselt, Data Science Institute, ACSL, Belgium</li>
+</ul>
+<h2 id="INTRODUCTION">INTRODUCTION</h2>
+<p>客户端通过发出事务与 DBMS 进行交互，从概念层面上讲，事务是涉及多个数据库对象的复杂操作。例如，事务可能将特定金额的资金从储蓄账户转移到同一客户的支票账户。DBMS 保证事务完全执行或根本不执行（原子性），即使在发生故障的情况下也是如此。通过在事务中交错操作来促进对数据的并发访问，同时通过可序列化的隔离级别保证一致性。可序列化确保事务的并发执行效果始终等同于串行执行。因此，数据库系统保证每个事务的完美隔离，这对应用程序程序员来说至关重要，因为它允许他们将注意力集中在单个事务的正确性属性上。</p>
+<p>然而，确保可串行化需要付出不小的性能代价 [48]。已经提出了许多提高事务吞吐量的方法：改进的或新的悲观算法（参见 [24、34、36、42、49]）或乐观算法（参见 [10、11、16、17、22、23、25、27-29、31、37、38、50、51]），以及基于协调避免的方法（参见 [18、19、30、33、35、40、41]）。许多数据库系统提供的正交方法是通过提供各种隔离级别来权衡隔离保证以提高性能。尽管通常默认配置了低于可串行化的隔离级别（例如，参见 [4]），但是在这样的隔离级别下并发执行事务并非没有风险，因为它可能会引入某些异常。然而，有时可以在低于可串行化的隔离级别下执行一组事务而不会引入任何异常。例如，在快照隔离下运行的 TPC-C 基准测试应用程序 [43] 就是这种情况。在这种情况下，该组事务被称为对特定隔离级别具有鲁棒性。更正式地说，如果在指定隔离级别下允许的每种可能的事务交错都是可序列化的，则一组事务对给定的隔离级别具有鲁棒性。检测鲁棒性是非常可取的，因为它可以以较低隔离级别的性能为代价来保证完美的隔离。</p>
+<p>Fekete 等人 [21] 发起了快照隔离背景下的鲁棒性研究，将其称为可接受性问题，并提供了静态依赖图中不存在具有特定类型边的循环的充分条件。这些算法是合理的，但不完整，因为它们可能导致假阴性，但永远不会导致假阳性。Bernardi 和 Gotsman [9] 扩展了这一结果，通过提供充分条件来决定针对不同隔离级别的鲁棒性，这些隔离级别可以在声明性框架中定义，正如 Cerone 等人 [12] 所介绍的那样。该框架提供了各种隔离级别（包括快照隔离）的统一规范，这些隔离级别承认原子可见性，即要求每个事务的所有更新对其他事务都可见或都不可见的条件。原子可见性假设是关键，因为它允许通过事务级别上的一致性公理而不是每个事务内各个操作的粒度来指定隔离级别。充分条件再次基于不存在具有某些类型边的循环。一个相关但不同的概念是事务斩断，它将事务拆分成更小的部分以获得性能优势，并且如果对于斩断的每个可序列化执行，都有一个等效的可序列化原始事务执行，则是正确的[39]。Cerone 等人[13, 14]研究了不同隔离级别下的斩断。</p>
+<p>虽然健壮性在文献中得到了相当多的关注，但现有的大多数工作都集中在快照隔离 [2, 6, 20, 21] 或更高的隔离级别 [7, 9, 12, 15] 上。到目前为止，对较低隔离级别（例如读已提交隔离级别的不同变体）的健壮性只受到了很少的关注（一个值得注意的例外是 Alomari 和 Fekete 的工作 [3]）。这可能看起来令人惊讶，因为读已提交非常常见，通常甚至是相当多数据库系统的默认隔离级别 [5]，也是少数提供高可用性事务的隔离级别之一 [4]。由于读已提交提供的性能损失较低，因此建立针对此隔离级别的健壮性可以实现快速并发执行，同时保证完美的隔离。</p>
+<p>在本文中，我们调查了针对（多版本）读取提交的稳健性问题的最新研究[26，45–47]。一种独特的方法是，我们首先关注健全和完整的算法，然后通过越来越普遍的事务程序形式化，为这些结果的实际应用设定步骤。</p>
+<p>在第 3 节中，我们研究了简化设置下的稳健性，其中事务只是读写序列，其结构以及它们将访问的数据库中的对象都是预先知道的。此设置与 Fekete [20] 考虑的设置最相似，他获得了用于确定针对快照隔离的稳健性的可靠且完整的特征。我们提供了针对单版本和多版本读取提交的稳健性的完整特征。</p>
+<p>在实践中，事务通常由（有限）数量的事务程序生成（例如，通过 API 提供）。例如，TPC-C 基准 [43] 包含五个不同的事务程序，从中可以实例化无限数量的具体事务。在第 4 节中，我们将前面的结果（部分）扩展为事务程序的形式化，我们将其称为事务模板，从概念上讲，它们是带有参数的函数。然后，鲁棒性成为可以在 API 设计时离线测试的静态属性。当模板集通过测试时，可以将数据库隔离级别设置为该 API 的读取已提交，而不必担心引入异常。我们获得了一个完善的算法来决定事务模板对多版本读取已提交的鲁棒性。当考虑到其他约束（如外键约束）时，可以确定更大的事务模板集是鲁棒的。虽然这些约束使得鲁棒性问题通常无法判定，但有一些限制使问题变得可判定甚至可处理。</p>
+<p>第 4 节中介绍的机制的一个主要缺点是它不能扩展到谓词读取、插入或删除，这些操作在现实世界的事务中很常见。因此，我们在第 5 节中不再寻求获得合理和完整的特征，而是讨论如何测试更一般的事务程序的稳健性，这些程序形式化为包含谓词读取、插入、删除以及控制结构的 BTP。一个主要优点是，一旦 SQL 事务程序被转换成 BTP 的形式，稳健性测试就会完全自动进行，不再需要数据库管理员的干预来预测可能的冲突，就像早期的稳健性工作一样。</p>
+<p>在第 6 节中，我们讨论了未来工作的方向。本文的处理水平相当高。因此，我们参考 [44] 进行更深入的讨论和缺少的正式定义。</p>
+<h2 id="PRELIMINARIES">PRELIMINARIES</h2>
+<p>我们首先介绍必要的定义。我们对事务和冲突可序列化的形式化基于 [20]。这些定义与 Adya 等人 [1] 提出的形式化密切相关，但我们假设调度中的操作是全序而不是部分序。</p>
+<h3 id="Transactions-and-Schedules">Transactions and Schedules</h3>
+<p><img src="/8969/image-20240822095555012.png" alt></p>
+<h3 id="Conflict-Serializability">Conflict Serializability</h3>
+<h3 id="Isolation-Levels">Isolation Levels</h3>
+<h2 id="ROBUSTNESS-FOR-TRANSACTIONS">ROBUSTNESS FOR TRANSACTIONS</h2>
+<p>我们首先考虑受限设置中的稳健性，其中假设所考虑的事务集是预先知道的。尽管这种受限设置几乎没有直接的实际意义，原因很简单，因为事务集 T 通常不是预先知道的，但我们在下一节中表明，所获得的结果可以推广到应用程序级别的离线稳健性测试，其中与数据库的交互通过由一组固定的事务程序组成的 API 进行。</p>
+<p>稳健性属性 [9]（在 [20, 21] 中也称为可接受性）保证给定隔离级别的给定事务集的所有调度的可序列化性：</p>
+<h3 id="Single-Version-Read-Un-Committed">Single Version Read (Un)Committed</h3>
+<blockquote>
+<p>定理 14</p>
+<p>对于一个事务集合 $\T$：</p>
+<ol>
+<li>如果 $\T$ 的一个调度 $s$ 的依赖图有一个环 $C$，则 $C$ 在 $IG(\T)$ 中是一个可转移环；</li>
+<li>如果 $IG(\T)$ 中存在一个非平凡的环 $C$，则 $IG(\T)$ 中存在一个可转移环 $C'$；</li>
+<li>对于基于 $IG(\T)$ 中的一个可转移环 $C$ 的可拆分调度 $s$，$C$ 在 $CG(s)$ 中式一个环。</li>
+</ol>
+</blockquote>
+<h3 id="Multiversion-Read-Committed">Multiversion Read Committed</h3>
+<p>我们将注意力转移到多版本读取已提交 (mvrc)，这是读取已提交隔离级别的变体，适用于多版本调度。此隔离级别允许事务读取对象的最后提交版本，而不必等待其他事务提交。</p>
+<blockquote>
+<p>定义 25</p>
+<p>当一个调度 $s$ 是 read-last-committed 且不包括脏写时该调度被 mvrc 允许。</p>
+</blockquote>
+<h2 id="STATIC-ROBUSTNESS-TESTING-FOR-TEMPLATES">STATIC ROBUSTNESS TESTING FOR TEMPLATES</h2>
+<p>接下来，我们将稳健性测试视为应用程序级别的静态离线问题。我们假设事务只能通过由一组固定的事务程序组成的 API 生成。例如，TPC-C 基准 [43] 由五个不同的事务程序组成，可以从中实例化无限数量的具体事务。一组有限的事务程序（如 TPC-C）对 mvrc 具有稳健性，当且仅当可以从这些程序实例化的每一组事务对 mvrc 具有稳健性。如果答案是肯定的，则可以安全地将隔离级别设置为 mvrc，而无需放弃可序列化性。</p>
+<p>我们的方法基于事务程序的形式化，称为事务模板，有助于对 mvrc 的稳健性进行细粒度推理。形式化的关键方面如下：• 从概念上讲，事务模板是带有参数的函数，例如，可以从数据库系统内的存储过程派生。抽象概括了通常在并发控制研究中研究的事务 - 读写操作序列 - 通过使工作对象可变，由输入参数确定。这些参数被输入以增加分析的额外能力。</p>
+<ul>
+<li>我们支持原子更新（即，读取后写入同一个数据库对象，以对其值进行相对更改），这使我们能够将一些工作负载识别为稳健的，否则将不会如此；</li>
+<li>此外，我们在字段的粒度上对读写的数据库对象进行建模，而不仅仅是整个元组，从而进一步解耦冲突并允许识别在元组级别上无法识别为稳健的其他情况；</li>
+<li>元组之间的依赖关系由功能约束建模。</li>
+</ul>
+<p>该模型也有一些限制。我们假设有一组固定的只读属性，这些属性无法更新，用于选择要更新的元组。最典型的例子是作为参数传递给事务模板的主键值。在许多工作负载中，无法更新主键并不是一个重要的限制，因为出于监管或数据完整性的原因，一旦分配了键，就永远不会更改。我们在第 5 节中展示了如何以牺牲完整性为代价来超越这些限制。</p>
+<h3 id="Formalization-of-Transaction-Templates">Formalization of Transaction Templates</h3>
+<h3 id="Detecting-robust-subsets">Detecting robust subsets</h3>
+<p>对于仅具有变量等式函数约束的事务模板，确定其对 mvrc 的鲁棒性需要多项式时间 [45]。算法 1 不能直接用于测试事务模板的鲁棒性，因为有无数个事务集与给定的一组事务模板一致。但是，算法 1 可以推广到表示潜在冲突的事务模板级别的干扰图：当这些操作的变量通过变量赋值映射到同一个元组时，潜在冲突的操作会导致冲突操作。决策算法的关键在于，当存在反例多版本拆分计划时，所需的变量实例可以紧凑地表示。</p>
+<p>对于具有一般函数约束的交易模板，确定针对 mvrc 的鲁棒性是不可判定的 [47]。当函数约束满足某些限制时，可判定性可以保留。例如，当函数约束允许多树双射时，鲁棒性在 nlogspace 中 [47]。与数据库模式相关的一元函数会诱导一个模式图，将一个关系的元组映射到另一个关系（参见图 8 中的 SmallBank+ 基准）。非正式地说，多树双射意味着应该对函数 (𝑓1, 𝑔1) 进行分区。 , (𝑓𝑛, 𝑔𝑛)，使得每个 𝑓𝑖 和 𝑔𝑖 互为逆，且对于每个 (𝑓𝑖 , 𝑔𝑖) 限制为一个选择的模式图是多树。7 此外，当模式图是非循环时，鲁棒性在 expspace 中 [47]。</p>
+<h3 id="Robustness-of-SmallBank-and-TPC-Ckv">Robustness of SmallBank+ and TPC-Ckv</h3>
+<p>图 9 概述了 SmallBank+ 和 TPC-Ckv 基准测试中检测到的对 mvrc 具有鲁棒性的最大子集（TPC-Ckv 是 TPC-C 的一个版本，其中选择仅限于基于密钥）。交易模板以缩写形式呈现（例如，Bal 指余额）。为了评估抽象的不同特征的影响，我们考虑了不同的设置：“仅 R &amp; W”是通过读取然后写入来建模更新的设置，其中忽略属性和功能约束（即，在整个元组的级别考虑冲突并允许违反功能约束）。</p>
+<p>“原子更新”设置是将更新明确建模为原子更新的扩展。与“仅 R &amp; W”设置相比，此设置已经允许检测相对较大的稳健集。事实上，对于 SmallBank+，集合 {Am, DC, TS} 是一个稳健子集，表明在 mvrc 下允许的任何使用这三个模板的任意数量实例的计划都是可序列化的！此外，对于 TPC-Ckv，检测到更大的稳健子集。</p>
+<p>接下来，“Attr conflicts”将属性纳入分析（即在属性级别指定冲突）。这种粒度差异对 TPC-Ckv 有深远影响，如图 9 第三行所示：发现四个模板（共五个！）的稳健子集：{Del、Pay、NO、SL}。对于 SmallBank+ 而言，没有任何改进，因为此基准的几乎所有冲突都基于储蓄和支票中的相同余额属性。我们强调，如果数据库系统的并发控制子系统以元组而不是单个属性的粒度工作，则对属性粒度冲突的分析仍然有意义：属性级冲突的稳健性意味着这些系统的稳健性。</p>
+<p>最后，“函数约束”在设置中包含了函数约束。对于 SmallBank+ ，添加函数约束允许将 GoPremium 添加到每个最大稳健集，这与以下事实形成对比：如果没有函数约束，集合 {GoPremium} 本身甚至对 mvrc 都不稳健。对于 TPC-Ckv，添加函数约束不会导致对 mvrc 具有更大稳健性的子集。</p>
+<h3 id="When-robustness-fails-promotion">When robustness fails: promotion</h3>
+<p>当一组事务模板对 mvrc 代码修改技术不够稳健时，可以应用该技术使其变得稳健。Alomari 和 Fekete [3] 提出了一种技术，该技术依赖于向数据库添加新元组，这些新元组充当有问题的事务组合的锁，从而强制这些事务不能相互交错。</p>
+<p>我们根据定义 26 中的见解提出了一种模板修改技术：通过将 R 操作提升为写回读取值的 U 操作，可以创建一组等效的、对 mvrc 具有鲁棒性的事务模板。这样的更改不会改变事务模板的效果，但新引入的写操作将触发数据库中的并发机制。我们强调，这是一种通用技术，始终可以用来构建一组等效的鲁棒模板：定义 26 要求操作 𝑏1 与 𝑎1 是 rw 冲突的（条件 (3)），但不与 𝑎1 是 ww 冲突的（条件 (1)），因此将所有 R 操作提升为 U 操作足以保证对 mvrc 的鲁棒性。例如，可以通过将模板 Balance 和 WriteCheck 中对 Savings 和 Checking 类型元组的所有读取操作更改为原子更新，使 SmallBank+ 基准测试对 mvrc 具有鲁棒性。我们参考 [45] 进行更详细的讨论。</p>
+<h2 id="STATIC-ROBUSTNESS-TESTING-FOR-PROGRAMS">STATIC ROBUSTNESS TESTING FOR PROGRAMS</h2>
+<p>第 4 节中的方法的一个缺点是它无法扩展以考虑关键属性或谓词读取的更新。在本节中，我们将讨论一种正交方法，其中我们要求健全性但不再要求完整性。我们为事务程序提供了一个正式的 BTP 模型，其中考虑了谓词读取、插入、删除以及控制结构。然后通过测试所谓的摘要图中是否存在某些循环来获得稳健性测试。所提出方法的主要优点是摘要图的构建仅取决于相应 SQL 程序的 BTP 形式化，并且可以自动构建：无需领域专家或数据库管理员干预来预测可能的冲突。</p>
+<h3 id="Auction-Example">Auction Example</h3>
+<p>我们通过基于拍卖服务的运行示例来说明该方法，其中数据库模式由三个关系组成：Buyer(id, calls)、Bids(buyerId, bid) 和 Log(id, BuyerId, bid)，第 1 场：PODS 开幕式、主题演讲和 Streaming PODS '22，2022 年 6 月 12 日至 17 日，美国宾夕法尼亚州费城，其中每个关系的主键都带有下划线，Bids 和 Log 中的 BuyerId 是引用 Buyer(id) 的外键。关系 Buyer 列出了所有潜在买家，Bids 跟踪每个潜在买家的当前出价，Log 保存所有出价的记录。每个买家都可以通过 API 调用与拍卖服务进行交互。出于记录目的，属性 Buyer(calls) 会计算买家拨打的总电话次数。 API 通过两个事务程序与数据库交互：FindBids(𝐵,𝑇 ) 和 PlaceBid(𝐵,𝑉 )，其 SQL 代码如图 10 所示。FindBids 返回所有高于阈值 𝑇 的当前出价，而 PlaceBids 将买家 𝐵 的出价提高到价值 𝑉（如果 𝑉 高于当前出价，否则当前出价保持不变）并将此新出价作为新元组插入 Log 中。这两个程序都会增加对 𝐵 的调用次数。</p>
+<p><img src="/8969/image-20240822100019890.png" alt></p>
+<h3 id="Basic-Transaction-Programs">Basic Transaction Programs</h3>
+<h3 id="Foreign-Keys">Foreign Keys</h3>
+<h3 id="mvrc-Dependencies-and-Conflict-Serializability">mvrc, Dependencies and Conflict Serializability</h3>
+<h3 id="Linear-Transaction-Programs">Linear Transaction Programs</h3>
+<h3 id="Detecting-Robustness-against-mvrc">Detecting Robustness against mvrc</h3>
+<h2 id="RESEARCH-DIRECTIONS">RESEARCH DIRECTIONS</h2>
+<p>尽管数据库并发控制在过去十年中并未受到数据库理论研究界的太多关注，但我们确实认为许多有趣的挑战仍未得到解答。我们讨论了未来工作的一些可能方向：</p>
+<ul>
+<li>尽管存在更通用的概念，如视图可序列化或最终状态可序列化 [32]，但所有关于稳健性的工作都是在冲突可序列化的设置下进行的。有趣的是，看看是否也可以在这些设置中获得与快照隔离 [20]、读取已提交 [26] 和多版本读取已提交 [45] 类似的稳健性测试特征。如何将这些推广到事务模板，以及它们在实践中是否会有所不同。</li>
+<li>这项工作的总体目标是开发选择适当隔离级别的机制。稳健性提供了轻松的心态：在不放弃可序列化的情况下，增加较低隔离级别的吞吐量保证。但是当工作负载不稳健时该怎么办？一种选择是通过<strong>代码修改技术</strong>（例如，[3, 45]）使工作负载变得稳健，但这也会降低性能。从理论角度来看，有两种正交方法浮现在脑海中。本文考虑的稳健性是一种二元属性：工作负载是稳健的，或者不是稳健的。是否有可能量化健壮性的失败，例如，计划不可序列化的概率？另一个方向是考虑<strong>混合隔离级别，允许在不同的隔离级别下执行不同的事务</strong>。我们不是想决定健壮性，而是想找到隔离级别的最佳分配。Fekete [20] 研究了快照隔离和可序列化的分配问题，[1] 考虑了混合隔离级别，但缺乏分配问题的一般理论。</li>
+<li>考虑到函数约束，事务模板的稳健性是不可判定的。虽然已经获得了一些可判定的限制，但我们对不可判定性的具体要求并没有很好的理解。我们认为仍然可以获得更大的可判定设置。</li>
+<li>第 5 节中提到的结果是迈向实践中稳健性测试的第一步。缺点是没有考虑 SQL 语句中使用的谓词条件。看看如何将当前方法推广到这个目的将会很有趣。这可能需要对事务程序代码的中间表示进行推理，并且可以从编程语言和编译器领域的技术中受益。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/56149/" rel="prev" title="TODS'05-Making Snapshot Isolation Serializable">
+      <i class="fa fa-chevron-left"></i> TODS'05-Making Snapshot Isolation Serializable
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/65369/" rel="next" title="SIGMOD'23-When is it safe to run a transactional workload under Read Committed">
+      SIGMOD'23-When is it safe to run a transactional workload under Read Committed <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#INTRODUCTION"><span class="nav-number">1.</span> <span class="nav-text">INTRODUCTION</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PRELIMINARIES"><span class="nav-number">2.</span> <span class="nav-text">PRELIMINARIES</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Transactions-and-Schedules"><span class="nav-number">2.1.</span> <span class="nav-text">Transactions and Schedules</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conflict-Serializability"><span class="nav-number">2.2.</span> <span class="nav-text">Conflict Serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Isolation-Levels"><span class="nav-number">2.3.</span> <span class="nav-text">Isolation Levels</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ROBUSTNESS-FOR-TRANSACTIONS"><span class="nav-number">3.</span> <span class="nav-text">ROBUSTNESS FOR TRANSACTIONS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Single-Version-Read-Un-Committed"><span class="nav-number">3.1.</span> <span class="nav-text">Single Version Read (Un)Committed</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Multiversion-Read-Committed"><span class="nav-number">3.2.</span> <span class="nav-text">Multiversion Read Committed</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STATIC-ROBUSTNESS-TESTING-FOR-TEMPLATES"><span class="nav-number">4.</span> <span class="nav-text">STATIC ROBUSTNESS TESTING FOR TEMPLATES</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Formalization-of-Transaction-Templates"><span class="nav-number">4.1.</span> <span class="nav-text">Formalization of Transaction Templates</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Detecting-robust-subsets"><span class="nav-number">4.2.</span> <span class="nav-text">Detecting robust subsets</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Robustness-of-SmallBank-and-TPC-Ckv"><span class="nav-number">4.3.</span> <span class="nav-text">Robustness of SmallBank+ and TPC-Ckv</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#When-robustness-fails-promotion"><span class="nav-number">4.4.</span> <span class="nav-text">When robustness fails: promotion</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STATIC-ROBUSTNESS-TESTING-FOR-PROGRAMS"><span class="nav-number">5.</span> <span class="nav-text">STATIC ROBUSTNESS TESTING FOR PROGRAMS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Auction-Example"><span class="nav-number">5.1.</span> <span class="nav-text">Auction Example</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Basic-Transaction-Programs"><span class="nav-number">5.2.</span> <span class="nav-text">Basic Transaction Programs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Foreign-Keys"><span class="nav-number">5.3.</span> <span class="nav-text">Foreign Keys</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mvrc-Dependencies-and-Conflict-Serializability"><span class="nav-number">5.4.</span> <span class="nav-text">mvrc, Dependencies and Conflict Serializability</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linear-Transaction-Programs"><span class="nav-number">5.5.</span> <span class="nav-text">Linear Transaction Programs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Detecting-Robustness-against-mvrc"><span class="nav-number">5.6.</span> <span class="nav-text">Detecting Robustness against mvrc</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RESEARCH-DIRECTIONS"><span class="nav-number">6.</span> <span class="nav-text">RESEARCH DIRECTIONS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

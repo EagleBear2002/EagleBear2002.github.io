@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 路由器基础 路由器的内部组件   特殊组件的计算机 console 口进行具体的调试 辅助口（Auxiliary）：一般不用，但是可能会用到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="互联网计算-07-路由与路由器">
+<meta property="og:url" content="https://eaglebear2002.github.io/18151/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 路由器基础 路由器的内部组件   特殊组件的计算机 console 口进行具体的调试 辅助口（Auxiliary）：一般不用，但是可能会用到">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220606525.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220613781.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220619857.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220626800.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220631459.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220635955.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220640379.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220651132.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220656205.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220659914.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220709983.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220729956.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220733331.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220737177.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220740652.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220744307.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220748183.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220751966.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220757713.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220805433.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220810099.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/23-1676528366146-511.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220834932.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220840019.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220844857.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220848598.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220852526.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220907041.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220915420.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18151/image-20230715220920871.png">
+<meta property="article:published_time" content="2022-05-25T01:47:07.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.608Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18151/image-20230715220606525.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18151/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>互联网计算-07-路由与路由器 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18151/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          互联网计算-07-路由与路由器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-25 09:47:07" itemprop="dateCreated datePublished" datetime="2022-05-25T09:47:07+08:00">2022-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E4%BA%92%E8%81%94%E7%BD%91%E8%AE%A1%E7%AE%97/" itemprop="url" rel="index"><span itemprop="name">2022Spring-互联网计算</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="路由器基础">路由器基础</h2>
+<h3 id="路由器的内部组件">路由器的内部组件</h3>
+<p><img src="/18151/image-20230715220606525.png" alt></p>
+<ul>
+<li>特殊组件的计算机</li>
+<li>console 口进行具体的调试</li>
+<li>辅助口（Auxiliary）：一般不用，但是可能会用到</li>
+</ul>
+<h4 id="随机存取存储器">随机存取存储器</h4>
+<ol>
+<li>路由器配置文件的临时存储，一般做为内存使用</li>
+<li>断电或重新启动时 RAM 内容丢失</li>
+<li>存储：
+<ol>
+<li>路由表</li>
+<li>ARP 缓存</li>
+<li>快速切换缓存</li>
+<li>报文缓存：可能前面有正在处理的，需要等待</li>
+<li>数据包保留队列</li>
+</ol>
+</li>
+<li>根据地址位就可以读到地址内容（访问比较快）</li>
+</ol>
+<h4 id="非易失随机存取存储器">非易失随机存取存储器</h4>
+<p>NVRAM，Non-volatile RAM</p>
+<ol>
+<li>存储备份（backup）/启动（startup）配置文件</li>
+<li>路由器掉电或重启时内容不会丢失。</li>
+<li>内置电池的方式来保证不断电，这一部分可以整体单独拿出来</li>
+<li>保证快速访问，但是存储空间有限。</li>
+</ol>
+<h4 id="Flash">Flash</h4>
+<p>相当于台式机硬盘</p>
+<ol>
+<li>电子可擦可编程只读存储器（EEPROM, Electronically Erasable Programmable Read-Only Memory）</li>
+<li>存储了 Cisco IOS（互联网操作系统）</li>
+<li>允许更新软件而无需更换闪存芯片</li>
+<li>可以存储多个版本的 IOS</li>
+<li>断电保持</li>
+</ol>
+<h4 id="只读存储器">只读存储器</h4>
+<p>ROM，Read-Only Memory</p>
+<ol>
+<li>包含 POST（开机自检）：PC 也有，开机的时候，读取一些参数进行对比，如果一样则保证硬件是正常的。</li>
+<li>引导程序（加载 Cisco IOS）</li>
+<li>作系统软件
+<ol>
+<li>IOS 的备份，精简（trimmed down）版本</li>
+<li>升级需要安装新的芯片组</li>
+</ol>
+</li>
+</ol>
+<h3 id="接口">接口</h3>
+<ol>
+<li>数据包通过其进入和离开路由器的网络连接口</li>
+<li>附在主板（motherboard）上或作为单独的模块。</li>
+<li>大部分是网口，主要是用来支持网络的</li>
+<li>0/0 第一个，串口接口可能还分多个</li>
+</ol>
+<p><img src="/18151/image-20230715220613781.png" alt></p>
+<h2 id="路由器启动步骤">路由器启动步骤</h2>
+<h3 id="系统启动程序">系统启动程序</h3>
+<ol>
+<li>执行开机自检（POST）：在此自检期间，路由器从所有硬件模块上的 ROM 执行诊断：如果有问题导致操作系统无法重启，那么我们就需要对硬件进行检查</li>
+<li>验证 CPU，内存和网络接口端口的基本操作。</li>
+<li>软件初始化。</li>
+</ol>
+<p><img src="/18151/image-20230715220619857.png" alt></p>
+<h3 id="软件启动程序">软件启动程序</h3>
+<ol>
+<li>ROM 中的通用引导加载程序（bootstrap）在 CPU 卡上执行。</li>
+<li>可以在以下几个位置之一找到操作系统（Cisco IOS）。该位置在配置寄存器的引导字段中公开。</li>
+<li>加载操作系统映像。
+<ol>
+<li>先从 Flash 找，也就只有一个 image 文件，将 image 导入内存</li>
+<li>如果 image 找不到，则到 TFTP Server，如果能找到则下载下拉一个 image</li>
+<li>如果 TFTP 也没有配置，则去 ROM 中导出 IOS</li>
+</ol>
+</li>
+<li>将保存在 NVRAM 中的<strong>配置文件</strong>加载到主存储器中，并一次执行一行。
+<ol>
+<li>先看 NVRAM 中有没有配置（start.config）</li>
+<li>然后看 TFTP Server 有没有配置，如果有则下载一个</li>
+<li>如果都没有，用 console 进行配置</li>
+</ol>
+</li>
+<li>如果 NVRAM 中<strong>没有</strong>有效的配置文件，则执行问题驱动（question-driven）的初始配置例程，该例程称为系统配置对话框，也称为<strong>设置模式</strong>。</li>
+</ol>
+<h3 id="路由器初始化过程">路由器初始化过程</h3>
+<ol>
+<li>设置不用作在路由器中输入复杂协议功能的模式。</li>
+<li>对于大多数路由器配置任务，应使用安装程序提出最少的配置，然后使用各种 configuration mode 命令而非安装程序</li>
+</ol>
+<p><img src="/18151/image-20230715220626800.png" alt></p>
+<p><img src="/18151/image-20230715220631459.png" alt></p>
+<h3 id="查看和修改基本的路由器配置">查看和修改基本的路由器配置</h3>
+<p><img src="/18151/image-20230715220635955.png" alt></p>
+<ol>
+<li>其他更加具体命令内容，可以在命令行下使用<code>?</code>来看</li>
+<li><code>config</code>模式是全局配置。</li>
+<li>banner：配置登录提示文字：一般会写路由器是谁用的，干什么用的，谁登录是非法的。</li>
+<li><code>show version</code>命令可以查看到路由器的配置信息。</li>
+</ol>
+<h3 id="执行基本的编址方案">执行基本的编址方案</h3>
+<p><img src="/18151/image-20230715220640379.png" alt></p>
+<ol>
+<li>配置接口，每一个接口可以配置一个描述</li>
+<li>no shutdown：启动端口</li>
+<li>可以拷贝配置情况进入 startup 中</li>
+</ol>
+<h2 id="路由和配置">路由和配置</h2>
+<h3 id="使用网络寻址进行路由">使用网络寻址进行路由</h3>
+<p><img src="/18151/image-20230715220651132.png" alt></p>
+<ol>
+<li>路由器通常使用两个基本功能（路径确定功能和交换功能）将数据包从一条数据链路中继（relay）到另一条数据链路。
+<ol>
+<li><strong>交换功能</strong>允许路由器在一个接口上<strong>接受数据包</strong>并<strong>通过第二个接口转发。</strong></li>
+<li><strong>路径确定</strong>功能使路由器能够选择<strong>最合适的接口</strong>来<strong>转发数据包</strong>。</li>
+</ol>
+</li>
+<li>路由器使用地址的网络部分进行路径选择，以将数据包传递到下一个路由器</li>
+<li>地址的节点部分由直接连接到目标网络的路由器使用，以将数据包传递到正确的主机。</li>
+</ol>
+<h3 id="静态和动态路由">静态和动态路由</h3>
+<p><img src="/18151/image-20230715220656205.png" alt></p>
+<h4 id="静态路由">静态路由</h4>
+<p><img src="/18151/image-20230715220659914.png" alt></p>
+<ol>
+<li>尽管（whereas）动态路由倾向于显示（reveal）有关互联网络的所有已知信息，但是出于安全原因，您可能希望隐藏互联网络的某些部分。</li>
+<li>当只有一条路径可访问网络时，到网络的静态路由就足够了。（默认路由，将 B 所有不知道位置的全部交给 A，由 A 去进行访问）</li>
+<li>这种分区称为末节网络（Stub Network）</li>
+</ol>
+<h4 id="静态路由配置">静态路由配置</h4>
+<p>A static route allows manual configuration of the routing table.</p>
+<p><img src="/18151/image-20230715220709983.png" alt></p>
+<ol>
+<li>network：包含掩码</li>
+<li>adress：要确定下一跳地址</li>
+<li>Distance：管理距离</li>
+</ol>
+<h4 id="管理距离">管理距离</h4>
+<ol>
+<li>**管理距离（administrative distance）**是路由信息源的可信赖性的等级，表示为从 0 到 255 的数值。（管理距离）</li>
+<li>数字越大，可信度（trustworthiness）越低。</li>
+<li>因此静态路由的管理距离通常很短（默认值为 1）</li>
+<li>管理距离是 0 的路由是什么情况?直连网段是最可信的，比静态路由还高</li>
+</ol>
+<h3 id="动态路由">动态路由</h3>
+<ol>
+<li>动态路由协议还可以重定向网络中不同路径之间的流量（或负载分担（loadshare））</li>
+<li>往往网络是冗余的，保证连通性</li>
+<li>静态路由的问题：如果指定的路径中出现故障就会出问题，而静态路由就避免了这个问题。</li>
+</ol>
+<p><img src="/18151/image-20230715220729956.png" alt></p>
+<ol>
+<li>动态路由依赖于路由协议在路由器之间共享知识。</li>
+<li>动态路由取决于两个基本路由器功能：
+<ol>
+<li>维护（maintance）路由表（动态维持的）</li>
+<li>向其他路由器分发（distribution）路由信息</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18151/image-20230715220733331.png" alt></p>
+<ol start="3">
+<li>彼此基于协议交换信息</li>
+</ol>
+<h3 id="收敛（Convergence）时间">收敛（Convergence）时间</h3>
+<p><img src="/18151/image-20230715220737177.png" alt></p>
+<ol>
+<li>收敛时间：
+<ol>
+<li>从刚启动到网络达到稳定的时间</li>
+<li>从发生变化到再次稳定的时间</li>
+</ol>
+</li>
+<li>收敛时间越短，路由协议越强，需要路由器的基本硬件支持。</li>
+</ol>
+<h3 id="动态路由协议分类">动态路由协议分类</h3>
+<p><img src="/18151/image-20230715220740652.png" alt></p>
+<ol>
+<li>大致分为以下三类：
+<ol>
+<li>距离矢量（DV,Distance Vector）</li>
+<li>链路状态（LS,Link State）</li>
+<li>混合路由（HR,Hybird Routing）</li>
+</ol>
+</li>
+<li>其中 Hybrid Routing 是在两种之间</li>
+</ol>
+<h4 id="距离矢量协议">距离矢量协议</h4>
+<p><img src="/18151/image-20230715220744307.png" alt></p>
+<ol>
+<li>距离矢量算法不允许路由器知道互联网络的<strong>确切拓扑</strong></li>
+<li>基于距离矢量的路由算法（也称为 Bellman-Ford 算法）在路由器之间传递路由表的周期性副本。
+<ol>
+<li>大家交换 Routing Table</li>
+<li>只知道可达，但是不知道怎么可达（知道 where,但是不知道 how），不知道整个网路的具体拓扑</li>
+</ol>
+</li>
+</ol>
+<h5 id="路由环路问题">路由环路问题</h5>
+<p><img src="/18151/image-20230715220748183.png" alt></p>
+<blockquote>
+<ol>
+<li><strong>稳定之后</strong>,如果 NetWork1 不可到达</li>
+<li>B 发现不可达，但是告知 C 的时候比较晚，C 已经将信息告诉了 D，这样子就可能循环下去，然后不收敛。</li>
+</ol>
+</blockquote>
+<p><img src="/18151/image-20230715220751966.png" alt></p>
+<ol>
+<li>网络 1 的无效更新将继续循环，直到其他进程停止循环为止。</li>
+<li>尽管有一个基本事实，即目标网络（网络 1）已关闭，但这种称为计数到无穷大的条件却使数据包在网络中连续循环。</li>
+<li>当路由器计数到无穷远时，无效信息将允许存在路由环路。</li>
+</ol>
+<h5 id="路由环路解决方案一：定义最大值（Maximum）">路由环路解决方案一：定义最大值（Maximum）</h5>
+<p><img src="/18151/image-20230715220757713.png" alt="	"></p>
+<ol>
+<li>设置最大跳数，比如最多转发 15 跳，16 跳以上为不可达</li>
+</ol>
+<h5 id="路由环路解决方案二：路由中毒（Route-Poisoning）">路由环路解决方案二：路由中毒（Route Poisoning）</h5>
+<p><img src="/18151/image-20230715220805433.png" alt></p>
+<ol>
+<li>当网络 5 发生故障时，路由器 E 通过将网络 5 的表条目设置为<strong>16 或不可访问</strong>来启动路由中毒。（而不是删除条目）</li>
+<li>、当路由器 C 从路由器 E 接收到路由中毒时，它会将更新（称为毒性逆转，poison reverse）发送回路由器 E。这确保网段上的所有路由器都已接收到中毒的路由信息。</li>
+<li>最终所有的路由器都知道不可达</li>
+<li>路由毒害，由信息在路由表中失效的时候，把该表项的的度量值（metric）设为无穷大 16，而不是马上从路由表中删掉这条路由信息，再将其信息发布出去，这样相邻的路由器就得知这条路由已无效了</li>
+</ol>
+<h5 id="路由环路解决方案三：水平分隔（Split-Horizon）">路由环路解决方案三：水平分隔（Split Horizon）</h5>
+<p><img src="/18151/image-20230715220810099.png" alt></p>
+<ol>
+<li>从某个端口收到的报文信息，不能再从端口发送回去</li>
+<li>比如 A 发送给 B 和 D，之后 B 和 D 又把之后的报文还给 A，这时候就不接受 B 和 D 的。也即使 A 只接受 B 的</li>
+<li>如果 B 和 D 接收到一个到达目的网段 1 的更好的路径，A 是会接收的</li>
+<li><strong>有名词解释题目</strong></li>
+</ol>
+<h5 id="路由环路解决方案四：计时器（Hold-Down-Timers）">路由环路解决方案四：计时器（Hold-Down Timers）</h5>
+<p><img src="/18151/23-1676528366146-511.png" alt></p>
+<ol>
+<li>我收到网络信息不可以到达的信息的时候，启动计时器，开始计时（这个信息包含请计时信息）</li>
+<li>如果有任何一个计时的设备收到了一个比原来更好的达到路径，则会修改对应记录，但是如果更差不会记录。</li>
+<li>计时器结束后，删除掉对应的条目，避免出现问题</li>
+<li>每一条路由表的记录都有<strong>有效时间</strong></li>
+</ol>
+<h4 id="阻止发送路由更新">阻止发送路由更新</h4>
+<ol>
+<li>为了防止接口发出任何路由更新信息，请使用以下命令：<code>Router（config-router）#Passive-interface f0/0</code></li>
+<li>它仅在使用距离矢量路由协议时才有效，因为链接状态路由协议不会直接从其邻居的路由表中获取拓扑信息</li>
+<li><strong>接受路由表的更新，但是不发送报文出去</strong></li>
+</ol>
+<h3 id="链接状态协议">链接状态协议</h3>
+<p>LSP，Link-state Protocol</p>
+<ol>
+<li>基于链接状态的路由算法也称为 SPF（最短路径优先）算法，维护复杂的拓扑信息数据库：对树处理路由表，没有环路问题</li>
+<li>链接状态路由使用：
+<ol>
+<li>链接状态广告（link-state advertisements，LSAs）：告诉你我有这个链路（每一个网段都是相同性质链路，链路上有唯一的 NetID、带宽、连接拓扑关系、网段、链路类型等属性，我们优化属性后，进行 LSA，告知对方主 Key，如果再需要的话，再给具体信息）</li>
+<li>拓扑数据库（有 LSA 组成，每个节点都持有）</li>
+<li>根据 SPF（shortest path first）算法生成的 SPF 树（Tree 会不一样，因为每一个路由都是以自己为根的）</li>
+<li>每个网络的路径和端口的路由表</li>
+</ol>
+</li>
+<li>RFC 1583 包含对 OSPF 链路状态概念和操作的描述。</li>
+</ol>
+<h4 id="链接状态网络发现">链接状态网络发现</h4>
+<p><img src="/18151/image-20230715220834932.png" alt></p>
+<ol>
+<li>路由器之间<strong>交换 LSA</strong>，每个路由器都以直接连接的网络开头</li>
+<li>每个路由器与其他路由器并行<strong>构建一个拓扑数据库</strong>，该拓扑数据库包含来自网络的所有 LSA。</li>
+<li><strong>SPF 算法计算网络可达性</strong>：路由器将此逻辑拓扑构建为一棵树，以其自身为根，由链路状态协议互联网络中每个网络的所有可能路径组成。然后，对这些路径进行最短路径优先（SPF）排序。</li>
+<li><strong>路由器在路由表中列出其最佳路径以及这些目标网络的端口</strong>。它还维护拓扑元素和状态详细信息的其他数据库。</li>
+</ol>
+<h4 id="链接状态的问题">链接状态的问题</h4>
+<ol>
+<li><strong>处理和存储要求</strong>
+<ul>
+<li>在大多数情况下，运行链路状态路由协议要求路由器比距离矢量路由协议使用更多的内存并执行更多的处理：需要 CPU 进行计算</li>
+</ul>
+</li>
+<li><strong>带宽要求</strong>
+<ol>
+<li>在初始链路状态数据包泛洪（flooding）期间，所有使用链路状态路由协议的路由器会将 LSA 数据包发送到所有其他路由器。 随着路由器对带宽的需求增加，此操作将淹没互联网，并暂时减少可用于承载用户数据的路由流量的带宽。</li>
+<li>一开始的时候报文会比较频繁多（所以告知 LSA 而不是 LS，减小压力）</li>
+<li>注：初期消耗大，之后消耗小，稳定之后是根据事务触发更新</li>
+</ol>
+</li>
+</ol>
+<h3 id="问题：链接状态更新">问题：链接状态更新</h3>
+<ol>
+<li>链路状态路由必须确保所有路由器都获得所有必要的 LSA 数据包。</li>
+<li>具有不同 LSA 集的路由器根据不同的拓扑数据计算路由。</li>
+</ol>
+<p><img src="/18151/image-20230715220840019.png" alt></p>
+<ul>
+<li>如果有一个链路的状态发生变化（恢复或者被破坏），必须将修改通知给全部路由器消耗代价比较大（SPF 算法）。</li>
+</ul>
+<h3 id="比较：链接状态和距离矢量">比较：链接状态和距离矢量</h3>
+<p><img src="/18151/image-20230715220844857.png" alt></p>
+<ol>
+<li>DV：距离矢量
+<ol>
+<li>视野窄，代价小</li>
+<li>基于跳数</li>
+<li>定期交换路由表，收敛慢</li>
+<li>交换路由表</li>
+</ol>
+</li>
+<li>LS：链路状态
+<ol>
+<li>视野宽，有一定代价</li>
+<li>基于带宽</li>
+<li>初期充分交换，收敛快</li>
+<li>交换 Linked State 的数据库</li>
+</ol>
+</li>
+</ol>
+<h3 id="混合协议">混合协议</h3>
+<p>混合协议，Hybrid Protocols</p>
+<ol>
+<li>混合协议的示例：
+<ol>
+<li>OSI’s IS-IS（Intermediate System-to-Intermediate System）</li>
+<li>Cisco’s EIGRP（Enhanced Interior Gateway Routing Protocol）. 基于负载和带宽评判，定时交换路由表</li>
+</ol>
+</li>
+</ol>
+<p><img src="/18151/image-20230715220848598.png" alt></p>
+<ul>
+<li>上面是思科的一个视角</li>
+</ul>
+<h3 id="主动路由协议">主动路由协议</h3>
+<p>Routing Protocol</p>
+<ol>
+<li>IP 主动路由协议的示例包括：</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>英文缩写</th>
+<th>英文解释</th>
+<th>中文解释</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RIP</td>
+<td>a distance-vector routing protocol</td>
+<td>距离矢量协议</td>
+<td>DV</td>
+</tr>
+<tr>
+<td>IGRP</td>
+<td>Cisco’s distance-vector routing protocol IGRP</td>
+<td>思科的距离矢量路由协议</td>
+<td>DV，基本启用</td>
+</tr>
+<tr>
+<td>OSPF</td>
+<td>Open Shortest Path First</td>
+<td>开放式最短路径优先</td>
+<td>LSP</td>
+</tr>
+<tr>
+<td>EIGRP</td>
+<td>-</td>
+<td>平衡的混合路由协议</td>
+<td>杂合</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>工作在第三层</li>
+</ol>
+<p><img src="/18151/image-20230715220852526.png" alt></p>
+<h3 id="路由协议的主要目标">路由协议的主要目标</h3>
+<ol>
+<li>最佳（Optimal）路线：选择最佳路线</li>
+<li>效率（Efficiency）：最少使用带宽和路由器处理器资源</li>
+<li>快速收敛（Rapid Convergence）：越快越好。有些比其他人收敛更快。</li>
+<li>灵活性（Flexibility）：可以处理各种情况，例如高使用率和失败的路由</li>
+</ol>
+<h4 id="评价协议的标准">评价协议的标准</h4>
+<ol>
+<li>四个方面都好的协议更好一些</li>
+<li>可以同时运行多个进程，之后基于 AD 度量，AD 的值低的被采用</li>
+</ol>
+<h3 id="如何启用动态路由协议">如何启用动态路由协议</h3>
+<p><img src="/18151/image-20230715220907041.png" alt></p>
+<ul>
+<li>如何启动 protocol：<code>router protocol [RIP...]</code></li>
+<li>公告端口<code>network network-number</code>：要求是直连的网口</li>
+</ul>
+<h3 id="定义默认路由">定义默认路由</h3>
+<ol>
+<li>默认路由使路由表更短。（很多路由被省略）</li>
+<li>如果路由表中没有目标网络的条目，则将数据包发送到默认网络。</li>
+</ol>
+<p><img src="/18151/image-20230715220915420.png" alt></p>
+<blockquote>
+<ol>
+<li>在 B 上设置，除了左侧五个网段的信息，都默认从 192.34.56.0 转发</li>
+<li>对于左边的网络可以被认为是一个末节网络（Stub NetWork）</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>使用动态路由协议定义默认路由：<code>Router（config）## ip default-network [network-number]</code></li>
+</ol>
+<p><img src="/18151/image-20230715220920871.png" alt></p>
+<ol>
+<li>将默认路由定义为静态路由：<code>Router（config）## ip route 0.0.0.0 0.0.0.0 [next-hop-ipaddress| exit-interface]</code></li>
+<li>配置默认路由后，使用 show ip route 将显示：（172.16.1.2 是默认的下一跳地址）
+<ol>
+<li>不得已的网关是到网络 0.0.0.0 的 172.16.1.2</li>
+<li>所有不知道转发给谁的都给 172.16.1.2</li>
+</ol>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/28848/" rel="prev" title="互联网计算-08-路由协议">
+      <i class="fa fa-chevron-left"></i> 互联网计算-08-路由协议
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/54097/" rel="next" title="互联网计算-10-广域网">
+      互联网计算-10-广域网 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">路由器基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%84%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">路由器的内部组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E5%AD%98%E5%8F%96%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">随机存取存储器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E6%98%93%E5%A4%B1%E9%9A%8F%E6%9C%BA%E5%AD%98%E5%8F%96%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-number">1.1.2.</span> <span class="nav-text">非易失随机存取存储器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Flash"><span class="nav-number">1.1.3.</span> <span class="nav-text">Flash</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AA%E8%AF%BB%E5%AD%98%E5%82%A8%E5%99%A8"><span class="nav-number">1.1.4.</span> <span class="nav-text">只读存储器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.2.</span> <span class="nav-text">接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E5%90%AF%E5%8A%A8%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">路由器启动步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.1.</span> <span class="nav-text">系统启动程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%90%AF%E5%8A%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.2.</span> <span class="nav-text">软件启动程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">路由器初始化过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%92%8C%E4%BF%AE%E6%94%B9%E5%9F%BA%E6%9C%AC%E7%9A%84%E8%B7%AF%E7%94%B1%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">2.4.</span> <span class="nav-text">查看和修改基本的路由器配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%BC%96%E5%9D%80%E6%96%B9%E6%A1%88"><span class="nav-number">2.5.</span> <span class="nav-text">执行基本的编址方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%92%8C%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">路由和配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%BD%91%E7%BB%9C%E5%AF%BB%E5%9D%80%E8%BF%9B%E8%A1%8C%E8%B7%AF%E7%94%B1"><span class="nav-number">3.1.</span> <span class="nav-text">使用网络寻址进行路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%92%8C%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1"><span class="nav-number">3.2.</span> <span class="nav-text">静态和动态路由</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B7%AF%E7%94%B1"><span class="nav-number">3.2.1.</span> <span class="nav-text">静态路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.2.</span> <span class="nav-text">静态路由配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E8%B7%9D%E7%A6%BB"><span class="nav-number">3.2.3.</span> <span class="nav-text">管理距离</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1"><span class="nav-number">3.3.</span> <span class="nav-text">动态路由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B6%E6%95%9B%EF%BC%88Convergence%EF%BC%89%E6%97%B6%E9%97%B4"><span class="nav-number">3.4.</span> <span class="nav-text">收敛（Convergence）时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE%E5%88%86%E7%B1%BB"><span class="nav-number">3.5.</span> <span class="nav-text">动态路由协议分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%9D%E7%A6%BB%E7%9F%A2%E9%87%8F%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.5.1.</span> <span class="nav-text">距离矢量协议</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%8E%AF%E8%B7%AF%E9%97%AE%E9%A2%98"><span class="nav-number">3.5.1.1.</span> <span class="nav-text">路由环路问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%8E%AF%E8%B7%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9A%E5%AE%9A%E4%B9%89%E6%9C%80%E5%A4%A7%E5%80%BC%EF%BC%88Maximum%EF%BC%89"><span class="nav-number">3.5.1.2.</span> <span class="nav-text">路由环路解决方案一：定义最大值（Maximum）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%8E%AF%E8%B7%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9A%E8%B7%AF%E7%94%B1%E4%B8%AD%E6%AF%92%EF%BC%88Route-Poisoning%EF%BC%89"><span class="nav-number">3.5.1.3.</span> <span class="nav-text">路由环路解决方案二：路由中毒（Route Poisoning）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%8E%AF%E8%B7%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%89%EF%BC%9A%E6%B0%B4%E5%B9%B3%E5%88%86%E9%9A%94%EF%BC%88Split-Horizon%EF%BC%89"><span class="nav-number">3.5.1.4.</span> <span class="nav-text">路由环路解决方案三：水平分隔（Split Horizon）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E7%8E%AF%E8%B7%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%9B%9B%EF%BC%9A%E8%AE%A1%E6%97%B6%E5%99%A8%EF%BC%88Hold-Down-Timers%EF%BC%89"><span class="nav-number">3.5.1.5.</span> <span class="nav-text">路由环路解决方案四：计时器（Hold-Down Timers）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%BB%E6%AD%A2%E5%8F%91%E9%80%81%E8%B7%AF%E7%94%B1%E6%9B%B4%E6%96%B0"><span class="nav-number">3.5.2.</span> <span class="nav-text">阻止发送路由更新</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E7%8A%B6%E6%80%81%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.6.</span> <span class="nav-text">链接状态协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E7%8A%B6%E6%80%81%E7%BD%91%E7%BB%9C%E5%8F%91%E7%8E%B0"><span class="nav-number">3.6.1.</span> <span class="nav-text">链接状态网络发现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E7%8A%B6%E6%80%81%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.6.2.</span> <span class="nav-text">链接状态的问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%EF%BC%9A%E9%93%BE%E6%8E%A5%E7%8A%B6%E6%80%81%E6%9B%B4%E6%96%B0"><span class="nav-number">3.7.</span> <span class="nav-text">问题：链接状态更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%EF%BC%9A%E9%93%BE%E6%8E%A5%E7%8A%B6%E6%80%81%E5%92%8C%E8%B7%9D%E7%A6%BB%E7%9F%A2%E9%87%8F"><span class="nav-number">3.8.</span> <span class="nav-text">比较：链接状态和距离矢量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.9.</span> <span class="nav-text">混合协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.10.</span> <span class="nav-text">主动路由协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%BB%E8%A6%81%E7%9B%AE%E6%A0%87"><span class="nav-number">3.11.</span> <span class="nav-text">路由协议的主要目标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%84%E4%BB%B7%E5%8D%8F%E8%AE%AE%E7%9A%84%E6%A0%87%E5%87%86"><span class="nav-number">3.11.1.</span> <span class="nav-text">评价协议的标准</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%90%AF%E7%94%A8%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.12.</span> <span class="nav-text">如何启用动态路由协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E9%BB%98%E8%AE%A4%E8%B7%AF%E7%94%B1"><span class="nav-number">3.13.</span> <span class="nav-text">定义默认路由</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

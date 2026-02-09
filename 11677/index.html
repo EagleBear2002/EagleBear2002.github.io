@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 详细设计基础  详细设计的出发点：软件详细设计是在软件体系结构设计之后进行，以需求开发的结果（需求规格说明和需求分析模型）和软件体系结构的结果（软件体系结构设计方案与原型）为出发点。  什么是详细设计  中层设计是对特定的模块的，以及针对特定模块的对象&#x2F;类的低级设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件工程与计算II-12-详细设计">
+<meta property="og:url" content="https://eaglebear2002.github.io/11677/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 详细设计基础  详细设计的出发点：软件详细设计是在软件体系结构设计之后进行，以需求开发的结果（需求规格说明和需求分析模型）和软件体系结构的结果（软件体系结构设计方案与原型）为出发点。  什么是详细设计  中层设计是对特定的模块的，以及针对特定模块的对象&#x2F;类的低级设计">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/1-1653988008904369.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155715528.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155724109.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155736495.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155746803.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155756653.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155800458.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155850203.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160629393.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/38-1653988008905385.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160658138.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160736639.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/41-1653988008905389.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/42-1653988008905391.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/43-1653988008905393.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160819930.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160833569.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160841994.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160855932.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155906758.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155912973.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155917379.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706155925603.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/12-1653988008906411.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/13-1653988008906413.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/14-1653988008906415.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/15-1653988008906417.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160007946.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160012946.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160018125.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160025988.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/20-1653988008907427.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/21-1653988008907429.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160033692.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/23-1653988008907433.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/24-1653988008907435.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/25-1653988008908437.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160055104.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160103728.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/28-1653988008908443.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/29-1653988008908445.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160509561.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160512822.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160515982.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160530367.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/image-20230706160607725.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/51-1653988008909457.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/34-1653988008909459.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/35-1653988008909461.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/36-1653988008909463.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/48-1653988008909465.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/11677/49-1653988008909467.png">
+<meta property="article:published_time" content="2022-05-31T08:54:55.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.629Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/11677/1-1653988008904369.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/11677/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件工程与计算II-12-详细设计 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/11677/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件工程与计算II-12-详细设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-31 16:54:55" itemprop="dateCreated datePublished" datetime="2022-05-31T16:54:55+08:00">2022-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Spring-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97II/" itemprop="url" rel="index"><span itemprop="name">2022Spring-软件工程与计算II</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<h2 id="详细设计基础">详细设计基础</h2>
+<ol>
+<li><strong>详细设计的出发点</strong>：软件详细设计是在软件体系结构设计之后进行，以需求开发的结果（需求规格说明和需求分析模型）和软件体系结构的结果（软件体系结构设计方案与原型）为出发点。</li>
+</ol>
+<h3 id="什么是详细设计">什么是详细设计</h3>
+<ol>
+<li>中层设计是对特定的模块的，以及针对特定模块的对象/类的低级设计</li>
+</ol>
+<p><img src="/11677/1-1653988008904369.png" alt></p>
+<blockquote>
+<ol>
+<li>高层设计反映的是系统高层抽象的构件层次，描述系统的高层结构、关注点和设计决策。</li>
+<li>中层设计反映的是组成模块的内部结构，例如数据定义、函数定义、类定义、类结构等。</li>
+<li>低层设计则是深入莫夸或者类的内部，关注具体的数据结构、算法、类型、语法和控制逻辑等。</li>
+</ol>
+</blockquote>
+<ol>
+<li>软件架构定义了模块的规范（对外抽象出来的接口）：就是模块之间交互需要知道的信息</li>
+<li>细节设计通过细节设计机制实现模块
+<ol>
+<li>中级：（子调制）-&gt; OO-&gt;类指定</li>
+<li>低级：DS. + ALG. -&gt;实现类</li>
+</ol>
+</li>
+<li>细节设计要求设计者考虑模块的美观，功能和许多其他方面
+<ol>
+<li>详细设计中的质量要求：修改，维护，性能……</li>
+</ol>
+</li>
+</ol>
+<h3 id="详细设计的输入">详细设计的输入</h3>
+<p><img src="/11677/image-20230706155715528.png" alt></p>
+<h3 id="从需求、体系结构设计到详细设计">从需求、体系结构设计到详细设计</h3>
+<p><img src="/11677/image-20230706155724109.png" alt></p>
+<ol>
+<li>具体的模块的设计是详细设计</li>
+<li>是对体系结构设计的更加精确的描述</li>
+</ol>
+<h3 id="详细设计是从哪里开始的">详细设计是从哪里开始的</h3>
+<ol>
+<li>详细设计的目的是实现所有功能性需求和非功能性需求。</li>
+</ol>
+<h4 id="详细设计的上下文">详细设计的上下文</h4>
+<ol>
+<li>模块的规格：导出/导入接口</li>
+<li>职责分配：
+<ol>
+<li>有些职责来自 RE(SRS)：典型的用例，领域模型，序列图，状态图</li>
+<li>其他一些来自实施决策</li>
+</ol>
+</li>
+<li>在详细设计文档中需要明确定义：
+<ol>
+<li>模块结构及其接口（如果有更细的模块分解）</li>
+<li>类结构、类协作、类接口（面向对象分析方法）</li>
+<li>控制结构与函数接口（结构化分析方法）</li>
+<li>重要的数据结构和算法逻辑（如果必要的话）</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706155736495.png" alt></p>
+<p><img src="/11677/image-20230706155746803.png" alt></p>
+<h4 id="软件体系结构：构件之间的接口">软件体系结构：构件之间的接口</h4>
+<p><img src="/11677/image-20230706155756653.png" alt></p>
+<p><img src="/11677/image-20230706155800458.png" alt></p>
+<h4 id="详细设计的输出">详细设计的输出</h4>
+<p><img src="/11677/image-20230706155850203.png" alt></p>
+<h2 id="结构化详细设计">结构化详细设计</h2>
+<h3 id="结构化设计的思想">结构化设计的思想</h3>
+<ol>
+<li>分解是降低复杂度的一种方法</li>
+<li>按算法的分解：自然的分解想法</li>
+<li>从数据流图向结构图的转换</li>
+</ol>
+<h3 id="降低复杂度的方法">降低复杂度的方法</h3>
+<ol>
+<li>分解：同一层次</li>
+<li>抽象：从低层次抽象出高层次</li>
+</ol>
+<h3 id="如何描述一个系统？">如何描述一个系统？</h3>
+<ol>
+<li>一系列相互关联的过程</li>
+<li>将输入转化为输出</li>
+<li>DFD：数据流图
+<ol>
+<li>数据流（箭头）</li>
+<li>过程（圆圈）</li>
+<li>数据存储（平行线）</li>
+<li>外部实体（矩形）</li>
+</ol>
+</li>
+</ol>
+<h3 id="按算法分解">按算法分解</h3>
+<ol>
+<li>分而治之</li>
+</ol>
+<p><img src="/11677/image-20230706160629393.png" alt></p>
+<h3 id="结构化设计">结构化设计</h3>
+<ol>
+<li>结构化设计的重心：从数据流图到结构图</li>
+<li>上述转化过程：
+<ol>
+<li>寻找到输入的最高抽象点和输出的最高抽象点</li>
+<li>根据输入、输出的最高抽象点，对模块进行划分</li>
+<li>然后在一次对每个模块寻找最高抽象点，再进行模块分解，从而逐步求精得到树状的结构图</li>
+</ol>
+</li>
+<li>详细参考课本（201 页）</li>
+</ol>
+<p><img src="/11677/38-1653988008905385.png" alt></p>
+<h3 id="数据流图">数据流图</h3>
+<p><img src="/11677/image-20230706160658138.png" alt></p>
+<h3 id="结构图">结构图</h3>
+<p><img src="/11677/image-20230706160736639.png" alt></p>
+<p><img src="/11677/41-1653988008905389.png" alt>
+<img src="/11677/42-1653988008905391.png" alt>
+<img src="/11677/43-1653988008905393.png" alt></p>
+<h3 id="最高抽象点">最高抽象点</h3>
+<p><img src="/11677/image-20230706160819930.png" alt></p>
+<h3 id="转换后的结构图">转换后的结构图</h3>
+<p><img src="/11677/image-20230706160833569.png" alt></p>
+<h3 id="案例">案例</h3>
+<p><img src="/11677/image-20230706160841994.png" alt></p>
+<p><img src="/11677/image-20230706160855932.png" alt></p>
+<h2 id="面向对象详细设计">面向对象详细设计</h2>
+<h3 id="面向对象设计的思想：职责重要">面向对象设计的思想：职责重要</h3>
+<h4 id="职责">职责</h4>
+<ol>
+<li>职责是执行任务（操作职责）或维护某些数据（数据职责）的义务。
+<ol>
+<li>行为职责通常由行为来履行。</li>
+<li>数据职责通常由属性来完成。</li>
+<li>可能会涉及到类之间的协作</li>
+</ol>
+</li>
+</ol>
+<h4 id="职责驱动的分解">职责驱动的分解</h4>
+<ol>
+<li>职责可以在不同的抽象层次上陈述。</li>
+<li>职责可以分解。</li>
+<li>可以将高级职责分配给高级组件。</li>
+<li>职责分解可以作为分解组件的基础：职责既反映了操作义务，也反映了数据义务，因此职责驱动的分解可能与功能分解不同。</li>
+</ol>
+<h4 id="职责启发法">职责启发法</h4>
+<ol>
+<li>很好地分配职责有助于实现高凝聚力和低耦合。（高内聚）</li>
+<li>确保模块职责不重叠。</li>
+<li><strong>仅当操作和数据有助于完成模块的职责时，才将其放置在模块中。</strong></li>
+</ol>
+<h4 id="委托">委托</h4>
+<ol>
+<li>委托是一种策略，其中一个模块（委托人）将职责交给另一个模块（委托人）。</li>
+<li>代理帮你完成联系和收集的情况</li>
+</ol>
+<h3 id="面向对象设计的思想：协作重要">面向对象设计的思想：协作重要</h3>
+<h4 id="什么是协作">什么是协作</h4>
+<ol>
+<li>程序中的对象必须<strong>协作</strong>；否则，程序将仅由一个可以执行所有操作的大对象组成。-丽贝卡·维尔夫斯·布洛克等，《设计面向对象的软件》，Prentice Hall，1990 年：内聚性好一定意味着比较零散（类比较多）</li>
+<li>同等重要的（作为继承）是相互负责地协作的对象社会的发明。这些社会形成了我所谓的系统机制，并代表了战略性架构决策，因为它们超越了各个类。 -[The C ++ Journal，Vol.2，No.1 1992 年，&quot;与 Grady Booch 的访谈&quot;]：每个对象都是相对自治的个体。</li>
+<li>一个应用程序可以分解为许多不同的行为。</li>
+<li>每个此类行为都是通过应用程序对象之间的独特协作来实现的：对象和对象之间的实践</li>
+<li>每次协作，无论大小，都保证实现应用程序的行为</li>
+<li>将面向对象的应用程序想象成通过关系连接的对象网络。</li>
+<li>协作是通过网络追求特定行为的<strong>消息模式</strong></li>
+<li>协作分布在对象网络中，因此在任何地方都不存在</li>
+</ol>
+<h3 id="协同设计的需求">协同设计的需求</h3>
+<ol>
+<li>毕竟，我们正在尝试实现的是应用程序操作。</li>
+<li>如果实现它们的协作设计不当，则应用程序将不准确或脆弱</li>
+</ol>
+<h2 id="面向对象详细设计的过程">面向对象详细设计的过程</h2>
+<ol>
+<li>面向对象：对象内部是容易理解的，之间的调用的理解是困难。</li>
+<li>结构化：模块内部是困难的，之间的调用是容易的</li>
+<li>概念类图的类和设计类图的类是不同的：
+<ol>
+<li>因为设计类图中有的类是辅助类。</li>
+</ol>
+</li>
+<li>设计模型重构
+<ol>
+<li>根据模块化的思想进行重构，目标是高内聚、低耦合</li>
+<li>根据信息隐藏的思想筹够，目标是隐藏职责与变更</li>
+</ol>
+</li>
+</ol>
+<h3 id="通过职责建立静态设计模型">通过职责建立静态设计模型</h3>
+<h4 id="抽象对象的职责">抽象对象的职责</h4>
+<ol>
+<li>类表达了对对象族的本质特征的抽象，提供了构建一个对象的所需要的蓝图</li>
+<li>职责分类
+<ol>
+<li>属性职责：对象的状态</li>
+<li>行为职责：对象的行为</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706155906758.png" alt></p>
+<ol>
+<li><code>+</code> 是 public，<code>-</code> 是 private</li>
+</ol>
+<h4 id="抽象类之间的关系">抽象类之间的关系</h4>
+<p><img src="/11677/image-20230706155912973.png" alt></p>
+<ol>
+<li>整体存在则部分存在，部分存在则整体存在</li>
+<li>上图需要好好背诵和记忆：重点掌握类图的画法</li>
+</ol>
+<p><img src="/11677/image-20230706155917379.png" alt></p>
+<p><img src="/11677/image-20230706155925603.png" alt></p>
+<h4 id="GRASP-原则">GRASP 原则</h4>
+<ol>
+<li>一般职责分配软件模式</li>
+<li>不是“设计模式”，而是对象设计的基本原理</li>
+<li>专注于对象设计的最重要方面之一：为类分配职责</li>
+<li>强调适用性：并不是一个普适的</li>
+<li>常见的一些特点：
+<ol>
+<li>低耦合：分配一个职责要保证低耦合度</li>
+<li>高耦合：分配一个职责的时候要保持类的高聚合度</li>
+<li>信息专家：将一个职责分配给专家-履行职责所必须的信息的类</li>
+<li>创建者：创建规则在后面</li>
+<li>控制者：控制规则在后面（避免大多数信息由一个类发出、组件相对较小、行为职责和数据绑定、职责单一）</li>
+</ol>
+</li>
+</ol>
+<h5 id="拇指原则">拇指原则</h5>
+<ol>
+<li>当存在替代设计选择时，请仔细研究替代方案的<strong>凝聚力和耦合含义</strong>，并可能对替代方案的未来发展压力。</li>
+<li>选择具有良好内聚性，耦合性和稳定性的替代方案。</li>
+</ol>
+<h5 id="信息专家">信息专家</h5>
+<ol>
+<li>问题：在面向对象设计中分配职责的最基本原则是什么？</li>
+<li>解决方案：将具有完成任务所必需的信息的班级分配给班级。</li>
+<li>维护信息封装</li>
+<li>促进低耦合</li>
+<li>促进高内聚类</li>
+</ol>
+<h6 id="信息专家的例子">信息专家的例子</h6>
+<ol>
+<li>谁负责了解典型的销售点应用程序中的销售总额？（求总价） Sale</li>
+</ol>
+<p><img src="/11677/12-1653988008906411.png" alt></p>
+<ol>
+<li>计算总计需要所有 SalesLineItem 实例及其小计。而这是只有销售（Sale）道的</li>
+<li>这就是为什么 Sale 是信息专家。</li>
+<li>因此（通过全部的情况进行开展的）</li>
+</ol>
+<p><img src="/11677/13-1653988008906413.png" alt></p>
+<ol>
+<li>但是每个订单项都需要小计（数量乘以价格）。</li>
+<li>根据专家的说法，SalesLineItem 是专家，知道数量并且与知道价格的产品规格相关联。</li>
+</ol>
+<p><img src="/11677/14-1653988008906415.png" alt></p>
+<ol>
+<li>因此，职责分配给 3 个类别。</li>
+</ol>
+<p><img src="/11677/15-1653988008906417.png" alt></p>
+<h6 id="Eg-Case-Study：-智能热水器">Eg.Case Study： 智能热水器</h6>
+<ol>
+<li>智能控制水温
+<ol>
+<li>周末水温高</li>
+<li>夜晚水温低</li>
+<li>生病等特殊情况水温高</li>
+<li>度假水温低</li>
+</ol>
+</li>
+<li>概念模型
+<ol>
+<li>类
+<ol>
+<li>热水器控制器
+<ol>
+<li>模式</li>
+<li>低温</li>
+<li>高温</li>
+<li>周末</li>
+</ol>
+</li>
+<li>时钟</li>
+</ol>
+</li>
+<li>接口：</li>
+<li>WaterHeaterController 和 Clock 怎么交互？
+<ol>
+<li>轮询</li>
+<li>通知</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>怎么知道当前时间是该升温还是降温？
+<ol>
+<li>Controller 自己保存特殊时间并计算（比较当前时间和特殊时间）：Bad：多个职责。</li>
+<li>由 SpecialTime 类保存特殊时间；Controller 调用 getSpecialTime()到特殊时间，再计算
+<ol>
+<li>Bad：数据职责与行为职责的分离</li>
+<li>SpecialTime 是信息专家，对外给接口</li>
+</ol>
+</li>
+<li>由 SpecialTime 类保存特殊时间，并提供 isSpecialTime();Controller 调用方法
+<ol>
+<li>Good：单一职责</li>
+</ol>
+</li>
+<li>谁有信息谁是专家，数据和功能不要分开</li>
+<li>为什么同样是 get 方法
+<ol>
+<li>一个是合理的：商品那个，那个是因为商品和单价是分开的，所以是合理的</li>
+<li>一个是不合理的：现在这个，因为只有一个数据就可以完成计算</li>
+<li>一个是简单的 get 方法，不完全数据和行为</li>
+<li>另一个是只需要这一个数据就可以了，并且行为封装在一起是合理的</li>
+<li>类之间的关系的影响</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="添加辅助类">添加辅助类</h4>
+<ol>
+<li>接口类</li>
+<li>记录类（数据类）</li>
+<li>启动类：从各种地方的初始化，进行转发和分派</li>
+<li>控制器类</li>
+<li>实现数据类型的类</li>
+<li>容器类</li>
+</ol>
+<h4 id="添加辅助类后的设计模型">添加辅助类后的设计模型</h4>
+<p><img src="/11677/image-20230706160007946.png" alt></p>
+<h3 id="通过协作创建动态设计模型">通过协作创建动态设计模型</h3>
+<h4 id="抽象对象之间协作">抽象对象之间协作</h4>
+<ol>
+<li>从小到大,将对象的小职责聚合形成大职责;</li>
+<li>从大到小,将大职责分配给各个小对象。</li>
+<li>这两种方法,一般是同时运用的,共同来完成对协作的抽象。</li>
+<li>顺序图
+<ul>
+<li>可以用顺序图表示对象之间的协作。顺序图是交互图的一种,它表达了对象之间如何通过消息的传递来完成比较大的职责。</li>
+<li>包含两部分：对象本身和对象之间的信息流</li>
+</ul>
+</li>
+<li>信息分为：图示见课本 206 页
+<ol>
+<li>同步消息</li>
+<li>异步消息</li>
+<li>同步消息返回</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706160012946.png" alt></p>
+<ol start="6">
+<li>对象结束之后可以在底下画一个 X 表示结束</li>
+<li>状态图
+<ol>
+<li>除了顺序图,我们还可以通过状态图来表达软件的动态模型。UML 状态图（State Diagram)</li>
+<li>主要用于描述一个复杂对象在其生存期间的动态行为,表现为一个对象所经历的状态序列, 引起状态转移的事件（Event),以及因状态转移而伴随的动作（Action)。一般可以用状态机对一个对象的生命周期建模,UML 状态图用于显示状态机（State Machine Diagram),重点在于描述 UML 状态图的控制流。而协作是：用复杂对象的状态图中的 Event 体现出对象之间消息的传递;用 Action 体现消息引发的对象状态的改变（行为）。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706160018125.png" alt></p>
+<h4 id="明确对象的创建">明确对象的创建</h4>
+<h5 id="创建者模式">创建者模式</h5>
+<ol>
+<li>问题：谁负责创建某个类的新实例？</li>
+<li>解决方案：根据潜在的创建者类与要实例化的类之间的关系，确定哪个类应创建类的实例。</li>
+<li>问题：谁负责创建对象？</li>
+<li>回答：如果有以下情况，则由创建者分配 B 类创建 A 类实例的职责：
+<ol>
+<li>B 聚集了 A 对象</li>
+<li>B 包含了 A 对象</li>
+<li>B 记录了 A 的实例</li>
+<li>B 要经常使用 A 对象</li>
+<li>当 A 的实例被创建，B 具有传递给 A 的初始化数据（也就是 B 是创建 A 的实例这项任务的信息专家）</li>
+<li>在有选择的地方，更喜欢 B 聚合或包含 A 对象</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706160025988.png" alt></p>
+<ul>
+<li>第一个（组合关系）</li>
+<li>第二个（单向被关联）：比如访问数据库，你要访问的时候，我就给一个访问对象来使用，不用的时候归还就行。</li>
+<li>第三个（持有必要数据）：根据业务的情况决定什么时候被创建，有时候 B 可以创建但是不知道什么时机来创建，如果 C 知道，那么我们可能让 C 创建对象，然后 B 进行初始化</li>
+<li>第四个（聚合关系）：关系比较多，要看时机等什么时候合适</li>
+</ul>
+<h5 id="创建例子">创建例子</h5>
+<ol>
+<li>谁负责创建 SalesLineItem 对象？ <strong>销售</strong>：往往是一旦有 sale 就会创建</li>
+<li>找到聚合或者包含了 SalesLineItem 的物体类</li>
+</ol>
+<p><img src="/11677/20-1653988008907427.png" alt></p>
+<ol start="3">
+<li>创建者模式建议是 Sale</li>
+<li>合作图是</li>
+</ol>
+<p><img src="/11677/21-1653988008907429.png" alt></p>
+<h5 id="创作者摘要">创作者摘要</h5>
+<ol>
+<li>通过创建负责创建需要引用的对象的类的实例来促进低耦合</li>
+<li>通过自己创建对象，它们避免依赖于另一个类为它们创建对象.</li>
+</ol>
+<h5 id="谁创建-Square-Piece-Player？">谁创建 Square / Piece / Player？</h5>
+<p><img src="/11677/image-20230706160033692.png" alt></p>
+<ol>
+<li>Piece 的创建（那个关联性最强，就是用哪一个来创建）
+<ul>
+<li>Player？对</li>
+<li>Board？</li>
+</ul>
+</li>
+<li>Squares 的创建：Board 创建</li>
+<li>Player 的创建：用 Game 创建（没有大问题）</li>
+</ol>
+<h4 id="控制器">控制器</h4>
+<ol>
+<li>问题：如何分配处理系统事件的职责？</li>
+<li>解决方案：如果程序从其图形界面以外的其他来源接收事件，请添加事件类以将事件源与实际处理事件的对象分离。</li>
+</ol>
+<h5 id="控制方式">控制方式</h5>
+<ol>
+<li>将处理系统事件消息的职责分配给代表以下选项之一的类：
+<ol>
+<li>整个组织的业务（立面控制器）。</li>
+<li>整个系统（外观控制器）。</li>
+<li>在问题域中真实操作解决问题的人（角色控制器）。</li>
+<li>自动化解决用例的模块（用例控制器）。</li>
+</ol>
+</li>
+</ol>
+<h5 id="控制者">控制者</h5>
+<ol>
+<li>购买项目用例中的系统事件
+<ol>
+<li>输入部分</li>
+<li>结束售卖</li>
+<li>结账</li>
+</ol>
+</li>
+<li>谁负责输入</li>
+<li>控制者有四种处理对象
+<ol>
+<li>整个系统 Post</li>
+<li>整个业务商店</li>
+<li>在现实生活中活跃在任务中的</li>
+<li>在系统中机器处理这个部分</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/23-1653988008907433.png" alt>
+<img src="/11677/24-1653988008907435.png" alt></p>
+<ol>
+<li>按了按钮就会直接进行响应</li>
+</ol>
+<p><img src="/11677/25-1653988008908437.png" alt></p>
+<ol>
+<li>用 POST 方法申请 Item</li>
+<li>谁设定 1：enterItem 接口？和需求有关</li>
+<li>界面变更和逻辑变更的频率时不同的，需要分开，Controller 存在的必要性</li>
+</ol>
+<h5 id="控制器总结">控制器总结</h5>
+<ol>
+<li>Controller 本身不是面向对象的，它包含很多复杂的逻辑</li>
+<li>使用控制器对象可使外部事件源和内部事件处理程序彼此独立于他们的类型和行为</li>
+<li>控制器对象可能变得高耦合和职责上低内聚</li>
+</ol>
+<h5 id="什么是棋盘游戏的控制者？">什么是棋盘游戏的控制者？</h5>
+<p><img src="/11677/image-20230706160055104.png" alt></p>
+<h4 id="选择合适的控制风格（重要）">选择合适的控制风格（重要）</h4>
+<ol>
+<li>集中式控制风格</li>
+<li>委托式控制风格</li>
+<li>分散式控制风格</li>
+</ol>
+<p><img src="/11677/image-20230706160103728.png" alt></p>
+<ol>
+<li>系统行为的逻辑在对象（组件）网络之间分布的方式。</li>
+<li>分散的：系统行为的逻辑通过对象网络“<strong>广泛传播</strong>”</li>
+<li>集中式：一个额外的控制器记录系统行为的所有逻辑。</li>
+</ol>
+<h5 id="控件控制情况">控件控制情况</h5>
+<ol>
+<li>做出决定并指导他人行动的对象是控制器。</li>
+<li>他们总是与他人合作有两个原因：
+<ol>
+<li>收集信息以便做出决定</li>
+<li>并呼吁其他人采取行动。</li>
+</ol>
+</li>
+<li>他们的重点通常是决策而不是执行后续操作：他们的最终职责通常会转移给对控制器负责的较大任务有更多特定职责的其他人</li>
+</ol>
+<h5 id="控制器协作情况">控制器协作情况</h5>
+<ol>
+<li>控件样式是一种将所有系统行为分布在对象（组件）网络之间的方式。
+<ol>
+<li>集中式：几个控制器记录所有系统行为的逻辑</li>
+<li>委托式：通过对象网络分配决策，由几个控制器进行主要决策</li>
+<li>分散式：所有系统行为都通过对象网络广泛传播</li>
+</ol>
+</li>
+</ol>
+<h5 id="集中式控制风格">集中式控制风格</h5>
+<ol>
+<li>容易找到做出决定的地方</li>
+<li>易于查看如何制定决策以及如何更改决策流程</li>
+<li>控制器可能会变得的庞大，复杂且难以理解，维护，测试等。</li>
+<li>控制器可以将其他组件视为数据存储库
+<ol>
+<li>增加耦合</li>
+<li>破坏信息隐藏</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/28-1653988008908443.png" alt></p>
+<ul>
+<li>都是他在调用别人</li>
+</ul>
+<p><img src="/11677/29-1653988008908445.png" alt></p>
+<ul>
+<li>部分去中心化的中心模式（如上）</li>
+</ul>
+<p><img src="/11677/image-20230706160509561.png" alt></p>
+<ul>
+<li>上图例子：通过一些部分特别的方式读取输入</li>
+</ul>
+<p><img src="/11677/image-20230706160512822.png" alt></p>
+<ul>
+<li>上图例子：依赖状态来降低指向性</li>
+<li>控制器只负责状态转移，不管具体的状态处理</li>
+</ul>
+<p><img src="/11677/image-20230706160515982.png" alt></p>
+<ul>
+<li>更加分散的设计：进行分发，只负责协调</li>
+</ul>
+<h5 id="控制的启发-1">控制的启发 1</h5>
+<ol>
+<li>避免大多数消息都来自单个组件的交互设计。</li>
+<li>保持组件较小。</li>
+<li>确保并非仅将全部职责分配给几个组件。</li>
+<li>确保操作职责与数据职责一致。</li>
+</ol>
+<h5 id="委托式控制风格">委托式控制风格</h5>
+<ol>
+<li>作出决策的对象不只有一个，职责的分解决定了控制对象的层次。</li>
+</ol>
+<h5 id="分散式控制风格">分散式控制风格</h5>
+<ol>
+<li>其特点是拥有许多组件，几乎没有数据，职责也很少。</li>
+<li>很难理解控制流。</li>
+<li>组件无法独自完成很多工作，从而增加了耦合。</li>
+<li>隐藏信息是很难的。</li>
+<li>内聚性通常很差。</li>
+<li>很少有模块化原则可以满足。</li>
+<li>完全靠对象自治的方式来实现自己的职责。</li>
+</ol>
+<h5 id="控制启发二">控制启发二</h5>
+<ol>
+<li>避免要求每个组件发送许多消息的交互。</li>
+</ol>
+<p><img src="/11677/image-20230706160530367.png" alt></p>
+<h2 id="为类间协作开发集成测试用例">为类间协作开发集成测试用例</h2>
+<h3 id="详细设计的集成测试">详细设计的集成测试</h3>
+<ol>
+<li>类间协作的集成测试
+<ol>
+<li>重点针对复杂逻辑（交互比较多）</li>
+<li>自顶向下或者自底向上的集成</li>
+</ol>
+</li>
+<li>Mock Object
+<ol>
+<li>不是 stub</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/image-20230706160607725.png" alt>
+<img src="/11677/51-1653988008909457.png" alt></p>
+<ol>
+<li>测试用例</li>
+</ol>
+<h3 id="类间协作的集成测试">类间协作的集成测试</h3>
+<p><img src="/11677/34-1653988008909459.png" alt>
+<img src="/11677/35-1653988008909461.png" alt>
+<img src="/11677/36-1653988008909463.png" alt></p>
+<h2 id="详细设计文档描述和评审">详细设计文档描述和评审</h2>
+<p><img src="/11677/48-1653988008909465.png" alt></p>
+<ol>
+<li>所有模块都应该尽量详细</li>
+</ol>
+<h3 id="详细设计验证">详细设计验证</h3>
+<ol>
+<li>评审：应该很好的展开</li>
+<li>度量
+<ol>
+<li>模块化度量</li>
+</ol>
+</li>
+<li>测试
+<ol>
+<li>协作测试</li>
+</ol>
+</li>
+</ol>
+<p><img src="/11677/49-1653988008909467.png" alt></p>
+<ol start="4">
+<li>设计的信息程度对后继开发人员是否足够?就是给不同人应该差不太多。</li>
+</ol>
+<h2 id="第三阶段">第三阶段</h2>
+<ol>
+<li>制品合理性</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/61526/" rel="prev" title="软件工程与计算II-11-人机交互设计">
+      <i class="fa fa-chevron-left"></i> 软件工程与计算II-11-人机交互设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/14417/" rel="next" title="软件工程与计算II-13-模块化与信息隐藏">
+      软件工程与计算II-13-模块化与信息隐藏 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">详细设计基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">什么是详细设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%BE%93%E5%85%A5"><span class="nav-number">1.2.</span> <span class="nav-text">详细设计的输入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E9%9C%80%E6%B1%82%E3%80%81%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1%E5%88%B0%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.3.</span> <span class="nav-text">从需求、体系结构设计到详细设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E6%98%AF%E4%BB%8E%E5%93%AA%E9%87%8C%E5%BC%80%E5%A7%8B%E7%9A%84"><span class="nav-number">1.4.</span> <span class="nav-text">详细设计是从哪里开始的</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.4.1.</span> <span class="nav-text">详细设计的上下文</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%EF%BC%9A%E6%9E%84%E4%BB%B6%E4%B9%8B%E9%97%B4%E7%9A%84%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.4.2.</span> <span class="nav-text">软件体系结构：构件之间的接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%BE%93%E5%87%BA"><span class="nav-number">1.4.3.</span> <span class="nav-text">详细设计的输出</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">结构化详细设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%80%9D%E6%83%B3"><span class="nav-number">2.1.</span> <span class="nav-text">结构化设计的思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">降低复杂度的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%8F%8F%E8%BF%B0%E4%B8%80%E4%B8%AA%E7%B3%BB%E7%BB%9F%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">如何描述一个系统？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%89%E7%AE%97%E6%B3%95%E5%88%86%E8%A7%A3"><span class="nav-number">2.4.</span> <span class="nav-text">按算法分解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%8C%96%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.5.</span> <span class="nav-text">结构化设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%9B%BE"><span class="nav-number">2.6.</span> <span class="nav-text">数据流图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%9B%BE"><span class="nav-number">2.7.</span> <span class="nav-text">结构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E9%AB%98%E6%8A%BD%E8%B1%A1%E7%82%B9"><span class="nav-number">2.8.</span> <span class="nav-text">最高抽象点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E5%90%8E%E7%9A%84%E7%BB%93%E6%9E%84%E5%9B%BE"><span class="nav-number">2.9.</span> <span class="nav-text">转换后的结构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">2.10.</span> <span class="nav-text">案例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">面向对象详细设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%80%9D%E6%83%B3%EF%BC%9A%E8%81%8C%E8%B4%A3%E9%87%8D%E8%A6%81"><span class="nav-number">3.1.</span> <span class="nav-text">面向对象设计的思想：职责重要</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3"><span class="nav-number">3.1.1.</span> <span class="nav-text">职责</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%88%86%E8%A7%A3"><span class="nav-number">3.1.2.</span> <span class="nav-text">职责驱动的分解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3%E5%90%AF%E5%8F%91%E6%B3%95"><span class="nav-number">3.1.3.</span> <span class="nav-text">职责启发法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A7%94%E6%89%98"><span class="nav-number">3.1.4.</span> <span class="nav-text">委托</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%80%9D%E6%83%B3%EF%BC%9A%E5%8D%8F%E4%BD%9C%E9%87%8D%E8%A6%81"><span class="nav-number">3.2.</span> <span class="nav-text">面向对象设计的思想：协作重要</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%8D%8F%E4%BD%9C"><span class="nav-number">3.2.1.</span> <span class="nav-text">什么是协作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E5%90%8C%E8%AE%BE%E8%AE%A1%E7%9A%84%E9%9C%80%E6%B1%82"><span class="nav-number">3.3.</span> <span class="nav-text">协同设计的需求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">面向对象详细设计的过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E8%81%8C%E8%B4%A3%E5%BB%BA%E7%AB%8B%E9%9D%99%E6%80%81%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">通过职责建立静态设计模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%81%8C%E8%B4%A3"><span class="nav-number">4.1.1.</span> <span class="nav-text">抽象对象的职责</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E7%B1%BB%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.1.2.</span> <span class="nav-text">抽象类之间的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GRASP-%E5%8E%9F%E5%88%99"><span class="nav-number">4.1.3.</span> <span class="nav-text">GRASP 原则</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8B%87%E6%8C%87%E5%8E%9F%E5%88%99"><span class="nav-number">4.1.3.1.</span> <span class="nav-text">拇指原则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E4%B8%93%E5%AE%B6"><span class="nav-number">4.1.3.2.</span> <span class="nav-text">信息专家</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E4%B8%93%E5%AE%B6%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">4.1.3.2.1.</span> <span class="nav-text">信息专家的例子</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Eg-Case-Study%EF%BC%9A-%E6%99%BA%E8%83%BD%E7%83%AD%E6%B0%B4%E5%99%A8"><span class="nav-number">4.1.3.2.2.</span> <span class="nav-text">Eg.Case Study： 智能热水器</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%BE%85%E5%8A%A9%E7%B1%BB"><span class="nav-number">4.1.4.</span> <span class="nav-text">添加辅助类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E8%BE%85%E5%8A%A9%E7%B1%BB%E5%90%8E%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.5.</span> <span class="nav-text">添加辅助类后的设计模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%8D%8F%E4%BD%9C%E5%88%9B%E5%BB%BA%E5%8A%A8%E6%80%81%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">通过协作创建动态设计模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%AF%B9%E8%B1%A1%E4%B9%8B%E9%97%B4%E5%8D%8F%E4%BD%9C"><span class="nav-number">4.2.1.</span> <span class="nav-text">抽象对象之间协作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%8E%E7%A1%AE%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">4.2.2.</span> <span class="nav-text">明确对象的创建</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">创建者模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%BE%8B%E5%AD%90"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">创建例子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E4%BD%9C%E8%80%85%E6%91%98%E8%A6%81"><span class="nav-number">4.2.2.3.</span> <span class="nav-text">创作者摘要</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B0%81%E5%88%9B%E5%BB%BA-Square-Piece-Player%EF%BC%9F"><span class="nav-number">4.2.2.4.</span> <span class="nav-text">谁创建 Square &#x2F; Piece &#x2F; Player？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="nav-number">4.2.3.</span> <span class="nav-text">控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">4.2.3.1.</span> <span class="nav-text">控制方式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E8%80%85"><span class="nav-number">4.2.3.2.</span> <span class="nav-text">控制者</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8%E6%80%BB%E7%BB%93"><span class="nav-number">4.2.3.3.</span> <span class="nav-text">控制器总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%A3%8B%E7%9B%98%E6%B8%B8%E6%88%8F%E7%9A%84%E6%8E%A7%E5%88%B6%E8%80%85%EF%BC%9F"><span class="nav-number">4.2.3.4.</span> <span class="nav-text">什么是棋盘游戏的控制者？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">4.2.4.</span> <span class="nav-text">选择合适的控制风格（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E4%BB%B6%E6%8E%A7%E5%88%B6%E6%83%85%E5%86%B5"><span class="nav-number">4.2.4.1.</span> <span class="nav-text">控件控制情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8%E5%8D%8F%E4%BD%9C%E6%83%85%E5%86%B5"><span class="nav-number">4.2.4.2.</span> <span class="nav-text">控制器协作情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9B%86%E4%B8%AD%E5%BC%8F%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC"><span class="nav-number">4.2.4.3.</span> <span class="nav-text">集中式控制风格</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E7%9A%84%E5%90%AF%E5%8F%91-1"><span class="nav-number">4.2.4.4.</span> <span class="nav-text">控制的启发 1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A7%94%E6%89%98%E5%BC%8F%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC"><span class="nav-number">4.2.4.5.</span> <span class="nav-text">委托式控制风格</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E6%95%A3%E5%BC%8F%E6%8E%A7%E5%88%B6%E9%A3%8E%E6%A0%BC"><span class="nav-number">4.2.4.6.</span> <span class="nav-text">分散式控制风格</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A7%E5%88%B6%E5%90%AF%E5%8F%91%E4%BA%8C"><span class="nav-number">4.2.4.7.</span> <span class="nav-text">控制启发二</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E7%B1%BB%E9%97%B4%E5%8D%8F%E4%BD%9C%E5%BC%80%E5%8F%91%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">为类间协作开发集成测试用例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">5.1.</span> <span class="nav-text">详细设计的集成测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E9%97%B4%E5%8D%8F%E4%BD%9C%E7%9A%84%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95"><span class="nav-number">5.2.</span> <span class="nav-text">类间协作的集成测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3%E6%8F%8F%E8%BF%B0%E5%92%8C%E8%AF%84%E5%AE%A1"><span class="nav-number">6.</span> <span class="nav-text">详细设计文档描述和评审</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E8%AE%BE%E8%AE%A1%E9%AA%8C%E8%AF%81"><span class="nav-number">6.1.</span> <span class="nav-text">详细设计验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5"><span class="nav-number">7.</span> <span class="nav-text">第三阶段</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

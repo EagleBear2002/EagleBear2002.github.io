@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 本文提供了 pdf 版，以供打印：商务智能-03-联机分析处理.pdf。 联机分析处理（OLAP） 从联机事务处理（OLTP）到联机分析处理（OLAP）  关系数据库模型出现：60 年代末 E.F. Codd 提出的关系数据库模型促进了关系数据库及 OLTP 的发展； 数据量大幅度增长：数据量从 80 年">
+<meta property="og:type" content="article">
+<meta property="og:title" content="商务智能-03-联机分析处理">
+<meta property="og:url" content="https://eaglebear2002.github.io/14835/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="本文主要内容来自 SpriCoder的博客，更换了更清晰的图片并对原文的疏漏做了补充和修正。 本文提供了 pdf 版，以供打印：商务智能-03-联机分析处理.pdf。 联机分析处理（OLAP） 从联机事务处理（OLTP）到联机分析处理（OLAP）  关系数据库模型出现：60 年代末 E.F. Codd 提出的关系数据库模型促进了关系数据库及 OLTP 的发展； 数据量大幅度增长：数据量从 80 年">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131122956963.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131123015952.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131123042384.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131123646425.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124008549.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124041180.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124043816.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124118396.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124215646.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124323740.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230201153022824.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124353518.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124401262.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124405481.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124426577.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124432000.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124435639.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124444603.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124502444.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124526225.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124534084.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124549685.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124608177.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124639030.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124709526.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124732045.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124753581.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124802429.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124908355.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124919669.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124936451.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124942155.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124947415.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124951055.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124955527.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131124959517.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131125003847.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131125011206.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/14835/image-20230131125020199.png">
+<meta property="article:published_time" content="2023-01-31T03:41:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.526Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/14835/image-20230131122956963.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/14835/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>商务智能-03-联机分析处理 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/14835/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          商务智能-03-联机分析处理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-31 11:41:00" itemprop="dateCreated datePublished" datetime="2023-01-31T11:41:00+08:00">2023-01-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E5%95%86%E5%8A%A1%E6%99%BA%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">2022Fall-商务智能</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文主要内容来自 <a target="_blank" rel="noopener" href="https://spricoder.github.io/">SpriCoder的博客</a>，更换了更清晰的图片并对原文的疏漏做了补充和修正。</p>
+<p>本文提供了 pdf 版，以供打印：<a href="https://eaglebear2002.github.io/14835/%E5%95%86%E5%8A%A1%E6%99%BA%E8%83%BD-03-%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86.pdf">商务智能-03-联机分析处理.pdf</a>。</p>
+<h2 id="联机分析处理（OLAP）">联机分析处理（OLAP）</h2>
+<h3 id="从联机事务处理（OLTP）到联机分析处理（OLAP）">从联机事务处理（OLTP）到联机分析处理（OLAP）</h3>
+<ol>
+<li>关系数据库模型出现：60 年代末 E.F. Codd 提出的关系数据库模型促进了关系数据库及 OLTP 的发展；</li>
+<li>数据量大幅度增长：数据量从 80 年代的 M 字节及 G 字节过渡到现在的 T 字节和 P 字节；</li>
+<li>性能差异：在这样的数据量的前提下，兼顾事务操作和分析操作在性能上越来越不可能；</li>
+<li>实际情况的不同需求：实际的情况要求为两种目的、特点有很大差异的应用提供不同的解决技术，OLAP 应运而生；</li>
+<li>OLTP 和 OLAP 是针对两种不同的环境：
+<ol>
+<li>OLTP 和关系型数据库相关，面向数据和信息片段；</li>
+<li>OLAP 是面向完全的信息体的。</li>
+</ol>
+</li>
+</ol>
+<h3 id="OLAP">OLAP</h3>
+<p>通过专门的数据综合引擎，辅之以更加直观的数据访问界面，力图统一分散的公共应用逻辑，在短时间内响应非数据处理专业人员的复杂查询要求。1993 年，E.F. Codd 将这类技术定义为 OLAP（Online Analytical Processing）。</p>
+<ol>
+<li>短时间：数据仓库做不到短时间响应，不是在线服务；</li>
+<li>非数据处理专业人员：不是所有人都有能力的，访问信息体的过程包含了所有的决策过程，是比较主观的。为什么不配备数据处理专业人员：大量的交流时间；</li>
+</ol>
+<p>OLAP（联机分析处理）是针对特定问题的联机数据访问和分析。通过对信息（这些信息已经从原始的数据进行了转换，以反映用户能理解的企业的真实的“维”）的很多种可能的观察形式进行快速、稳定一致和交互性的存取，允许管理决策人员对数据进行深入观察。</p>
+<h3 id="OLAP-vs-OLTP">OLAP vs. OLTP</h3>
+<table>
+<thead>
+<tr>
+<th>比较项目</th>
+<th>OLAP</th>
+<th>OLTP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用基础</td>
+<td>数据仓库</td>
+<td>DBMS</td>
+</tr>
+<tr>
+<td>用户</td>
+<td>决策者（高级管理人员）</td>
+<td>一般操作员（管理人员）</td>
+</tr>
+<tr>
+<td>目的</td>
+<td>为决策和管理提供支持</td>
+<td>为日常工作服务</td>
+</tr>
+<tr>
+<td>数据特征</td>
+<td>导出数据</td>
+<td>原始数据</td>
+</tr>
+<tr>
+<td>数据细节</td>
+<td>综合性数据，细节程度低</td>
+<td>细节程度高</td>
+</tr>
+<tr>
+<td>时间特征</td>
+<td>历史数据，横跨一个时段</td>
+<td>当前数据</td>
+</tr>
+<tr>
+<td>更新方法</td>
+<td>周期性刷新</td>
+<td>可实时更新</td>
+</tr>
+<tr>
+<td>数据量需求</td>
+<td>一次处理需大量数据</td>
+<td>一次处理需少量数据</td>
+</tr>
+</tbody>
+</table>
+<p>操作型应用和分析型应用的对比图与之类似。</p>
+<h2 id="OLAP-的特征及衡量标准">OLAP 的特征及衡量标准</h2>
+<h3 id="Codd-关于-OLAP-的评价准则">Codd 关于 OLAP 的评价准则</h3>
+<h4 id="OLAP-必须提供多维概念视图">OLAP 必须提供多维概念视图</h4>
+<p>从多个维度考察对象：大量情况下，一般是 10-15 个维度。</p>
+<h4 id="透明性准则">透明性准则</h4>
+<ol>
+<li>OLAP 在体系结构中的位置对用户是透明的</li>
+<li>OLAP 的数据源对用户也是透明的</li>
+</ol>
+<h4 id="存取能力准则">存取能力准则</h4>
+<ol>
+<li>将 OLAP 的概念视图映射到异质的数据存储上，能访问数据并执行所需转换，从而提供单一、完整、连续的用户视图</li>
+<li>不是客观正确，是主观正确。</li>
+</ol>
+<h4 id="稳定的报表功能">稳定的报表功能</h4>
+<p>数据的维数和数据的综合层次增加时，提供给最终分析人员的报表能力和响应速度不应该有明显的降低和减慢</p>
+<h4 id="客户-服务器体系结构">客户/服务器体系结构</h4>
+<ol>
+<li>服务器保证透明性和建立统一的公共概念模式、逻辑模式和物理模式。</li>
+<li>客户端负责应用逻辑和界面</li>
+</ol>
+<h4 id="维的同等性原则">维的同等性原则</h4>
+<p>每一数据维在数据结构和操作能力上都是等同的</p>
+<h4 id="动态的稀疏矩阵处理准则">动态的稀疏矩阵处理准则</h4>
+<ol>
+<li>OLAP 工具必须使得模型的物理模式充分适应指定的维数，尤其是特定模型的数据分布</li>
+<li>压缩和解压缩：解压缩的时间会不会影响到在线服务，同时要保证空间。</li>
+</ol>
+<h4 id="多用户支持能力准则">多用户支持能力准则</h4>
+<p>OLAP 工具必须提供并发访问、数据完整性及安全性机制</p>
+<h4 id="非受限的跨维操作">非受限的跨维操作</h4>
+<ol>
+<li>对于多维数据之间存在的固有的层次关系（构成包含的层次关系，比如国家、省市等），OLAP 工具应自己推导而不是由用户明确定义相关计算</li>
+<li>对于无法从固有关系中得出得计算，提供计算完备的语言来定义各种计算公式</li>
+</ol>
+<h4 id="直观的数据操作">直观的数据操作</h4>
+<h4 id="灵活的报表生成">灵活的报表生成</h4>
+<h4 id="不受限维与聚集层次">不受限维与聚集层次</h4>
+<ol>
+<li>维数不应小于 15</li>
+<li>任意聚集层次</li>
+</ol>
+<h3 id="FASMI：另一个评价准则">FASMI：另一个评价准则</h3>
+<p>FASMI (Fast Analysis of Shared Multidimensional Information)</p>
+<ol>
+<li>Fast：在线</li>
+<li>Analysis：分析是临时起意、规律还是外在的影响</li>
+<li>Shared：多个分析人员使用分时方式来对信息体进行只读的利用</li>
+<li>Multidimensional：多维度，不是按照实现需要、软件需要进行组装，不一定是上下文相关的</li>
+<li>Information：是在信息和信息体层面上的。</li>
+</ol>
+<h2 id="OLAP-中的几个基本概念">OLAP 中的几个基本概念</h2>
+<h3 id="度量值">度量值</h3>
+<p>度量值，在分析型处理中，我们所关心和分析的对象</p>
+<ol>
+<li>在多维数据集中，度量值是一组值，而且通常为数字值，比如午饭的花费。</li>
+<li>度量值是所分析的多维数据集的中心值，即：度量值是最终用户浏览多维数据集时重点查看的数值型数据</li>
+<li>度量值的选择取决于最终用户所请求的信息类型</li>
+<li>一些常见的度量值有：
+<ol>
+<li>销售金额：sales</li>
+<li>成本金额：cost</li>
+<li>库存数量：production count</li>
+<li>消费金额：expenditures</li>
+</ol>
+</li>
+<li>度量值是主观的，但是受到客观的制约（要但是没有）</li>
+</ol>
+<h3 id="维">维</h3>
+<p>维是观察度量值的角度，比如有大量数据与之相关，那么我们需要考虑和观察期内部的联系。</p>
+<p>例如：可以从三个“维”角度观察销售金额这个度量值</p>
+<ol>
+<li>时间维：可从时间角度统计（所有）商品在不同时间段内的销售（总）金额，以便于分析其与时间之间的关系</li>
+<li>商品维：根据商品的分类情况统计每一类商品的销售金额，以便于分析其与商品类型之间的关系</li>
+<li>地域维：可根据每个连锁店所在的地域统计其销售（总）金额，以便于分析其与地域之间的关系</li>
+</ol>
+<h3 id="层">层</h3>
+<p>在分析型应用中，对度量值可以在不同的深度层面上进行分析与观察，并可能得到不同的分析结果。因此，“层”反映了对度量值的观察深度。</p>
+<p>一般而言，“层”是与“维”相关联的。在一个“维”中可允许存在若干个“层”，并且可以采用多种不同的“层”次划分方法。</p>
+<p>维中的“层”通常被组织成一个层次结构，在数据仓库系统的元数据中需要记录不同“层”之间的包含关系，以便于能够在数据仓库中已有的统计结果上正确地执行新的统计查询。</p>
+<h4 id="时间维中的层次关系">时间维中的层次关系</h4>
+<ol>
+<li>日-月-季-年：包含关系，高层次数据可以通过低层次关系计算出来。</li>
+<li>日-周-年</li>
+<li>但是我们认为周和月份是没有偏序关系的：有些周是跨月份的。</li>
+<li>时间维度关联的度量值在不同层次的体现就是之前讲述的不同粒度。</li>
+</ol>
+<img src="/14835/image-20230131122956963.png" style="zoom: 33%;">
+<h4 id="地域维中的层次关系">地域维中的层次关系</h4>
+<p>市-省-国-洲</p>
+<img src="/14835/image-20230131123015952.png" style="zoom:33%;">
+<h4 id="商品维中的层次关系">商品维中的层次关系</h4>
+<p>按商品的类别可以分为：</p>
+<ol>
+<li>家电（大家电（电视机，洗衣机，冰箱，...），小家电（...），...）</li>
+<li>服装（男式，女式，童装）</li>
+<li>日用品（......）</li>
+</ol>
+<img src="/14835/image-20230131123042384.png" style="zoom: 50%;">
+<p>按如下的方法进行层次划分：</p>
+<ol>
+<li>按商品的价格分为：高档，中档，低档</li>
+<li>按商品的供应商分为：外资，合资，国营，私营，个体</li>
+<li>按购买商品的顾客信息划分
+<ol>
+<li>按照年龄层次来划分：老年，中年，青年，少年儿童，婴儿</li>
+<li>按照所从事的职业来划分</li>
+</ol>
+</li>
+</ol>
+<h3 id="维成员">维成员</h3>
+<p>维的一个取值称为该维的一个“维成员”。</p>
+<p>如果一个维是多层次的，则该维的“维成员”可以是：</p>
+<ol>
+<li>在不同维层次上的取值的组合：
+<ol>
+<li>例如：对具有日，月，年三个层次的“时间维”来说，“某年某月某日”、“某年某月”、“某月某日”、“某年”都是其维成员，如：1998 年，1 月，1998 年 1 月，1998 年 1 月 1 日，1 月 1 日</li>
+<li>这部分代表在这个过程中的维度。</li>
+</ol>
+</li>
+<li>在某个维层次上的取值：临时取出作为一个拷贝。
+<ol>
+<li>例如：“地域”维中的“江苏”，“南京”，......</li>
+<li>例如：“商品”维中的“电视机”，“服装”，......</li>
+</ol>
+</li>
+</ol>
+<p>对一个度量值来说，维成员是该度量值在某维中位置的描述。</p>
+<h3 id="多维数组">多维数组</h3>
+<p>一个多维数组可以表示为（维 1，维 2，...，维 n，变量）</p>
+<ol>
+<li>其中：
+<ol>
+<li>“变量” 表示我们所观察的度量值</li>
+<li>维 1、维 2、......、维 n 分别表示我们观察该度量值的角度（维）</li>
+</ol>
+</li>
+<li>如：（时间，商品种类，商店，销售额）是一个有关商品销售额的三维数组，其中的数据成员可以表示为：
+<ol>
+<li>（2000 年，家电，南京市，5000 万）</li>
+<li>（2000 年 7 月，女式服装，江苏省，2000 万）</li>
+</ol>
+</li>
+<li>维度越高，当前的不可用数据就越多。</li>
+</ol>
+<h3 id="数据单元（单元格）">数据单元（单元格）</h3>
+<ol>
+<li>多维数组可以被看成是一个根据多个下标进行定位的值的集合</li>
+<li>当多维数组的每一维都选中一个维成员，这些维成员的组合就唯一确定了一个度量值，即：（维成员 1，维成员 2，......，维成员 n，度量值）</li>
+<li>这样一个值或存放该值的地方我们称其为一个“数据单元”</li>
+<li>可以是实际存在的，也可以是在概念上的一个讨论。</li>
+<li>数据单元可能是冗余关系，为了保证访问效率。</li>
+</ol>
+<h3 id="多维数组和联机分析处理">多维数组和联机分析处理</h3>
+<p>假设：在一个分析型应用中需要若干个度量值（设为 $r$ 个）， 以它们为聚焦点作不同角度（设每个分析对象有 $m$ 个维）与深度（设每个维上又分为 $n$ 个层）的分析，那么可以得到多种不同的统计分析结果（共为 $r \times n ^ m$ 种），即可以构造出 $r \times n ^ m$ 种多维数组。</p>
+<p>为了方便快速地查到这些统计分析结果，OLAP 需要解决以下两个问题：</p>
+<ol>
+<li>OLAP 的数据构造方式</li>
+<li>OLAP 的基本数据模型</li>
+</ol>
+<h2 id="OLAP-中的数据构造方式（重要）">OLAP 中的数据构造方式（重要）</h2>
+<h3 id="ROLAP，Relational-OLAP">ROLAP，Relational OLAP</h3>
+<ol>
+<li>用传统的“关系数据库管理系统”（RDBMS）管理，将星型（雪花型）模式用二维表形式存储，表间用关键字相连，从而构成一个关系模式，它称为 ROLAP；</li>
+<li>用户在 ROLAP 上的查询操作将被改写成 RDBMS 中的查询操作并执行获得查询结果。</li>
+</ol>
+<h3 id="MOLAP，Multi-Dimensional-OLAP">MOLAP，Multi-Dimensional OLAP</h3>
+<ol>
+<li>用“多维数据库管理系统”管理，多维数据库采用的基本数据模式就是“多维数组”；</li>
+<li>在 MOLAP 中，“事实表”被表示成一个“多维数组”，“维”的属性值被映射成“多维数组”的下标，而“度量值”（包括综合数据）则作为多维数组的取值存储在数据单元中。在查询时，可以通过下标的取值来找到相应多维数组中的“度量值”。</li>
+</ol>
+<h3 id="MOLAP-与-ROLAP">MOLAP 与 ROLAP</h3>
+<img src="/14835/image-20230131123646425.png" style="zoom: 33%;">
+<ol>
+<li>结合多维综合引擎作为中介使用</li>
+<li>ROLAP 使用关系数据库管理系统（RDBMS）或扩充关系数据库管理系统（XRDBMS）存储和管理数据仓库，以关系表存储多维数据，有较强的可伸缩性。
+<ol>
+<li>维数据存储在维表</li>
+<li>事实数据和维 ID 则存储在事实表</li>
+<li>维表和事实表通过主键和外键关联。</li>
+<li>此外，ROLAP 通过一些软件工具实现，物理层仍用关系数据库的存储结构，因此称为虚拟 OLAP（virtual OLAP）。</li>
+</ol>
+</li>
+<li>MOLAP 支持数据的多维视图，采用多维数组存储数据
+<ol>
+<li>它把维映射到多维数组的下标或下标的范围</li>
+<li>事实数据则存储在数组单元中，从而实现了多维视图到数组的映射，形成了立方体（cube）结构。</li>
+<li>但随着维数的增加，大容量的数据可能使立方体稀疏化，此时需要借助稀疏矩阵压缩技术来处理。由于 MOLAP 是从物理层实现，采用了多维数组的存储结构,故又称为物理 OLAP（physical OLAP）。</li>
+</ol>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>MOLAP</th>
+<th>ROLAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>专为 OLAP 所设计</td>
+<td>沿用现有的关系数据库的技术</td>
+</tr>
+<tr>
+<td>性能好、响应速度快</td>
+<td>响应速度比 MOLAP 慢</td>
+</tr>
+<tr>
+<td>数据装载速度慢</td>
+<td>数据装载速度快</td>
+</tr>
+<tr>
+<td>需要进行预计算，可能导致数据爆炸，<strong>维数有限</strong>；无法支持维的动态变化</td>
+<td>存储空间耗费小，<strong>维数没有限制</strong></td>
+</tr>
+<tr>
+<td>受操作系统平台中文件大小的限制，难以达到 TB 级（只能 10~20 G）</td>
+<td>借用 RDBMS 存储数据，没有文件大小限制</td>
+</tr>
+<tr>
+<td>缺乏数据模型和数据访问的标准</td>
+<td>可以通过结构化查询语言（sql）实现详细数据与概要数据的存储</td>
+</tr>
+<tr>
+<td>支持高性能的决策支持计算：复杂的跨维计算；多用户的读写操作；行级的计算</td>
+<td>不支持有关预计算的读写操作：sql 无法完成部分计算；无法完成多行的计算；无法完成维之间的计算</td>
+</tr>
+<tr>
+<td>管理简便</td>
+<td>维护困难</td>
+</tr>
+</tbody>
+</table>
+<h3 id="混合联机分析处理（HOLAP）">混合联机分析处理（HOLAP）</h3>
+<p>试图将 MOLAP 和 ROLAP 进行融合，从而在大量数据上获得高效率。</p>
+<p>方式：</p>
+<ol>
+<li>同时提供多维数据库（MDDB）和关系数据库（RDB）；</li>
+<li>将 RDB 的查询结果存储到 MDDB；</li>
+<li>使用 MDDB 存储高层次数据，RDB 存储细节数据。</li>
+</ol>
+<p>高层和查询结果使用 MOLAP，底层使用 ROLAP。</p>
+<h2 id="OLAP-的基本数据模型">OLAP 的基本数据模型</h2>
+<h3 id="OLAP-需解决的问题">OLAP 需解决的问题</h3>
+<p>OLAP 服务器必须提高对 OLAP 数据的访问效率，包括：</p>
+<ol>
+<li>数据抽取、转换及加载的效率：相对没有其他二者不重要，因为是可以离线的。</li>
+<li>OLAP 数据查询效率</li>
+<li>OLAP 数据更新效率</li>
+</ol>
+<p>目前可有多种方法以提高 ROLAP 中的处理效率：</p>
+<ol>
+<li>采用物化视图方式：存储物化视图，之后就可以直接调用，将视图这种“虚表”形式转换成实际存在的二维表，以达到快速取得综合数据的目的</li>
+<li>采用特殊的索引与集簇方式，以加速星型模式内表的联接速度</li>
+<li>尽量采用并行操作方式以提高处理速度</li>
+<li>采用 OLAP 中的查询优化技术，如共享排序技术等</li>
+<li>采用增量技术，在 OLAP 数据更新时保留不变的数据，仅更改变动的数据以加快数据更新速度</li>
+</ol>
+<h3 id="OLAP-的基本数据模型-2">OLAP 的基本数据模型</h3>
+<p>MOLAP，多维数据库（MDDB，Multi-Dimensional Database）</p>
+<p>ROLAP，常用的两种 ROLAP 数据模型：</p>
+<ol>
+<li>星形模型</li>
+<li>雪花模型</li>
+</ol>
+<h3 id="MDDB-vs-RDBMS">MDDB vs. RDBMS</h3>
+<img src="/14835/image-20230131124008549.png" style="zoom:50%;">
+<p>左上角是一个三维立体数据模型，每一个块上标注的为对应的数据。</p>
+<ol>
+<li>地理维度：广州、北京、上海</li>
+<li>时间维度：一月、二月、三月</li>
+<li>顾客维度：GDB、EBB、CITIC</li>
+</ol>
+<p>大量的数据中可能蕴涵非常多的稀疏数据带来了空间浪费的问题</p>
+<p>左侧为多维数据模型，右侧为二维数据模型。</p>
+<p>二维数据表可以被拆分为多个表格，之后通过拼接得到最后的大表格，但是我们仍然要考虑冗余的问题和时间效率的问题。</p>
+<p><strong>维度数等价于关系型数据库的关键字数。</strong></p>
+<h3 id="多维联机分析处理（MOLAP）">多维联机分析处理（MOLAP）</h3>
+<ol>
+<li>MOLAP 使用专门的多维数据库来存放所需要的数据</li>
+<li>数据以多维的方式存放，并且使用多维的方式进行展现。</li>
+<li>多维数组比关系数据表表达更清晰且占用存储小（在处理稠密数据时）</li>
+<li>高速的综合速度，MOLAP 适用于需要高速处理的复杂分析</li>
+<li>维护多维数组需要大量资源</li>
+</ol>
+<h4 id="多维数据库存取">多维数据库存取</h4>
+<ol>
+<li>经压缩的、类似于数组的对象构成</li>
+<li>这些对象带有高度压缩的索引及指针结构</li>
+<li>并非维间的每种维成员组合都对应合理的度量值，MDDB 必须具有高效的稀疏数据处理能力，能略过零元、缺失和重复数据</li>
+</ol>
+<h4 id="使用多维查询语言-MDSQL">使用多维查询语言 MDSQL</h4>
+<p>列出 1996 年 1 月至 6 月彩电在北京地区的销售量和成本</p>
+<table>
+<thead>
+<tr>
+<th>语法 1</th>
+<th>语法 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/14835/image-20230131124041180.png" style="zoom: 50%;"></td>
+<td><img src="/14835/image-20230131124043816.png" style="zoom:80%;"></td>
+</tr>
+</tbody>
+</table>
+<h3 id="关系联机分析处理（ROLAP）">关系联机分析处理（ROLAP）</h3>
+<ol>
+<li>ROLAP 使用通用的关系数据库来存储所需数据</li>
+<li>ROLAP 适应于处理大量数据，低效率</li>
+<li>现有的关系型数据库已经对 OLAP 做了很多优化，包括并行存储、并行查询、并行数据管理、基于成本的查询优化、位图索引、SQL 的 OLAP 扩展（cube，rollup）等，性能有所提高</li>
+</ol>
+<h4 id="二维数据模型">二维数据模型</h4>
+<p>计算上限和下限，上限为销售商、发货、顾客和产品。</p>
+<img src="/14835/image-20230131124118396.png" style="zoom: 50%;">
+<h4 id="星型模式">星型模式</h4>
+<p>星型模式是一种多维表结构，它一般由两种不同性质的二维表组成：</p>
+<ol>
+<li>事实表（Fact table）：存放多维表中的主要事实，称为度量值（Measure）</li>
+<li>维表（Dimension Table）：存放多维表中的维成员的取值</li>
+</ol>
+<p>一般一个 n 维的多维表往往有 n 个维表和一个事实表，它们构成了一个星形结构，因而称其为“星型模式”：在星型模式中主体是事实表，而有关维的细节则放置于维表内以达到简化事实表的目的，事实表与维表间由公共属性相连以使它们构成一个整体</p>
+<img src="/14835/image-20230131124215646.png" style="zoom: 33%;">
+<ol start="3">
+<li>上述的星型模式可以转化成下面的四个关系</li>
+</ol>
+<blockquote>
+<p>事实表：销售表（产品标识符，商店标识符，日期标识符，销售额）</p>
+<p>维表 1：产品表（产品标识符，类别，大类别）</p>
+<p>维表 2：商店表（商店标识符，市名，省名，国名，洲名）</p>
+<p>维表 3：时间表（时间标识符，日期，月份，季度，年份）</p>
+</blockquote>
+<img src="/14835/image-20230131124323740.png" style="zoom: 33%;">
+<h4 id="雪花模式">雪花模式</h4>
+<ol>
+<li>雪花模型是对星型模型的扩展：雪花模型对星型模型的维表进一步层次化，原有的各维表可能被扩展为小的事实表，形成一些局部的“层次”区域</li>
+<li>优点：使维表尽可能地规范化，最大限度地减少维表的数据存储量</li>
+<li>缺点：执行查询时需要更多的连接操作，可能会影响查询性能</li>
+<li>例如：前面的维表 1“产品表”也可以是一个如下所示的星型结构：产品（类别，供应商，顾客）</li>
+<li>在前面的“星型模式”中，我们只考虑产品的分类（“类别”属性），在这里我们还可以从产品的“供应商”或“购买顾客”角度来考虑对产品进行分析</li>
+<li>也可以以其中的“供应商”为中心再构成一个“星型模式”</li>
+</ol>
+<p>产品维表示例：</p>
+<img src="/14835/image-20230201153022824.png" style="zoom: 33%;">
+<p>雪花模型示例</p>
+<img src="/14835/image-20230131124353518.png" style="zoom:33%;">
+<ol>
+<li>我们用雪花模型替代星型模型。</li>
+<li>在当前构造数据模型时，我们会有数据总线：这就是伪表的共享问题。</li>
+</ol>
+<h3 id="其他扩展模型">其他扩展模型</h3>
+<table>
+<thead>
+<tr>
+<th>星座模式：通过公共维度连接多个星型模式</th>
+<th>雪暴模式：通过公共维度连接多个雪花模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/14835/image-20230131124401262.png" style="zoom: 33%;"></td>
+<td><img src="/14835/image-20230131124405481.png" style="zoom:33%;"></td>
+</tr>
+</tbody>
+</table>
+<h2 id="数据立方体（Data-Cube）（重要）">数据立方体（Data Cube）（重要）</h2>
+<p>数据仓库的数据模式通常可以看成是定义在多个数据源上的数据视图，其中存储的分析型数据通常是一些经过统计而获得的综合性数据：</p>
+<ol>
+<li>获取这些综合性数据的常用方法是在视图中用统计函数进行计算，但这种方法的缺点是显见的：时间开销太大；</li>
+<li>大多数情况下，数据是比较稀疏的；</li>
+<li>对于真实情况下，一般使用数据仓库的数据量都不会太小，不然也没有必要使用数据仓库。</li>
+</ol>
+<h3 id="物化视图">物化视图</h3>
+<ol>
+<li>为了提高对统计信息的查询速度，我们可以预先计算好数据视图中的统计信息并保存在数据仓库中，这称为<strong>物化视图</strong>，即将虚的视图转变成实际的视图</li>
+<li>其本质类似于使用空间来代换时间，可以较好地提高数据仓库的性能。</li>
+<li>存放物化视图的三维数据模型叫“数据立方体”，可以选择物化全部视图并存储。</li>
+</ol>
+<p>以前面的星型模式为例，其事实表共有三维，即产品 P（product）、商店 S（store）及日期 D（Date），可以为它们定义一系列的物化视图。</p>
+<p>PSD 视图：</p>
+<img src="/14835/image-20230131124426577.png" style="zoom:67%;">
+<p>PS、SD、PD 视图：采用类似的方法也可以定义出 SD、PD 视图</p>
+<img src="/14835/image-20230131124432000.png" style="zoom:67%;">
+<p>P、S、D 视图：采用类似的方法也可以定义出 S、D 视图。</p>
+<img src="/14835/image-20230131124435639.png" style="zoom:67%;">
+<p>ALL 视图：ALL 视图表示不分组，该视图中的销售总额表示销售表中所有销售金额之和。其定义如下：</p>
+<img src="/14835/image-20230131124444603.png" style="zoom:67%;">
+<img src="/14835/image-20230131124502444.png" style="zoom: 50%;">
+<ol>
+<li>如果不考虑层次问题，只考虑维度问题，那么我们可以得到上图中的白色部分</li>
+<li>关于维度的缩减：而其他颜色的部分，我们对维度进行压缩，得到了 sum 部分，而最右下角的则是 All，All，All 视图</li>
+</ol>
+<h3 id="数据超立方体">数据超立方体</h3>
+<p>在数据立方体中进行的是一个三维的分析应用。但当应用中分析对象超过三维时，则构成一个多维（或称 n 维，$n \ge 4$）应用，此时无法用数据立方体表示其中的数据，而只能通过虚拟的 n（$n \ge 4$）维空间建立 n 维立方体，它称为“数据超立方体”，一般主要针对数据立方体进行讲述。</p>
+<p>四维：如图，数据立方体线性排列</p>
+<img src="/14835/image-20230131124526225.png" style="zoom:50%;">
+<p>六维：如图，数据立方体成立方体排列</p>
+<img src="/14835/image-20230131124534084.png" style="zoom:50%;">
+<h3 id="方体格">方体格</h3>
+<img src="/14835/image-20230131124549685.png" style="zoom: 33%;">
+<ol>
+<li>n 维方体称为基本方体</li>
+<li>0 维方体代表最高层次的抽象，称作顶点方体</li>
+<li>方体格构成数据立方体</li>
+<li>每一个顶点都是一个方体，对应了一种的可能表达形式</li>
+</ol>
+<img src="/14835/image-20230131124608177.png" style="zoom: 33%;">
+<ol>
+<li>上图是 4D 方体</li>
+<li>2D 方体是 4D 方体的一个点</li>
+<li>从下向上可以计算，但是不可以从上向下处理</li>
+<li>使用格结构，我们可以发现上层资源计算如果底层有部分物化，则不需要从最底层开始计算</li>
+</ol>
+<h3 id="星型网查询模式">星型网查询模式</h3>
+<img src="/14835/image-20230131124639030.png" style="zoom: 33%;">
+<ol>
+<li>在每一个维度里面，我们还应当一并应用层次来进行查询。</li>
+<li>每一个环我们都称为是一个足迹</li>
+</ol>
+<h3 id="数据立方体的物化">数据立方体的物化</h3>
+<ol>
+<li>不进行物化</li>
+<li>全物化：n 维 L 层的立方体包含 $T = \prod\limits_{i=1}\limits^{n}(L_i+1)$ 种子方，之所以加 1 是因为包含了 All 层次</li>
+<li>部分物化：
+<ol>
+<li>确定要物化的方体子集：
+<ol>
+<li>冰山方体：比如 A 集合的数据是远远大于 B 集合的，那么我们可能会物化 A 集合的底层节点，或者是我们发现某一个维度可能被经常使用，我们可以选择物化其中的部分。</li>
+<li>部分物化：因为存储空间是不确定的</li>
+</ol>
+</li>
+<li>利用查询处理时物化的方体</li>
+<li>在装入和刷新时，有效地更新物化的方体</li>
+</ol>
+</li>
+</ol>
+<h3 id="多维阵列聚合（压缩矩阵）">多维阵列聚合（压缩矩阵）</h3>
+<ol>
+<li>将数组分区成块（块是适合内存的小的子立方体）</li>
+<li>压缩稀疏数组寻址：（chunk_id，偏移量）</li>
+<li>通过按以下顺序访问多维数据集单元以“多路”方式计算聚合，该顺序可以最大程度地减少访问每个单元的次数，并减少内存访问和存储成本</li>
+<li>多维阵列聚合的结果，大概率是无法放置到内存中的</li>
+<li>导入时间是线性的（我们不讨论并发）</li>
+</ol>
+<img src="/14835/image-20230131124709526.png" style="zoom: 33%;">
+<img src="/14835/image-20230131124732045.png" style="zoom: 33%;">
+<blockquote>
+<p>我们需要仔细考虑空间问题：因为空间开销比较大，所以我们开辟了三个 2D 方体来缓存数据内容</p>
+</blockquote>
+<img src="/14835/image-20230131124753581.png" style="zoom: 33%;">
+<ol>
+<li>左侧空间中，我们得到的数据会顺序落入到对应的位置，上图中有 7 个星</li>
+<li>上侧空间中，我们得到的数据会放置到对应的格</li>
+<li>下侧空间中，得到的数据客户映射到对应的格</li>
+</ol>
+<img src="/14835/image-20230131124802429.png" style="zoom: 33%;">
+<blockquote>
+<p>左侧空间中，已经存放了 29 个星。</p>
+</blockquote>
+<img src="/14835/image-20230131124908355.png" style="zoom: 33%;">
+<img src="/14835/image-20230131124919669.png" style="zoom: 33%;">
+<ol>
+<li>对比上面的两种情况，下者比上面的部分要大 10 倍</li>
+<li>我们调用要按照维度从小到大的方式来调用，这样子可以保证所有的二维物化表空间最小化。</li>
+<li>A，B，C 是该多维模型的维度，其中右边的数量是 A，B，C 三个维度上的“刻度”大小，即在图中的一小格，包含多少个可以区分的维成员。</li>
+<li>因为物化的顺序不同的前提下，需要使用的中间存储空间分别是“一格”，“一列”和“一片”</li>
+</ol>
+<h3 id="OLAP-与数据仓库">OLAP 与数据仓库</h3>
+<img src="/14835/image-20230131124936451.png" style="zoom: 67%;">
+<ol>
+<li>底层存储使用雪花模式完成存储</li>
+<li>物化的部分，作为聚集层，作为在线的不同的物化视图</li>
+<li>物化视图通过数据立方体来串联在一起</li>
+<li>轻度综合级和高度综合级是没有严格的划分的</li>
+<li>数据仓库中以主题为核心构建出来的不一定使用 OLAP 进行访问，被记录在数据仓库中元数据中和数据访问相关的部分。</li>
+<li>数据仓库软件都是支持多种数据模型的</li>
+<li>在 OLAP 服务器上可以存放部分私有资源（从数据仓库中拿到后计算得到的，但是只在 OLAP 中使用），OLAP 中物化视图不一定都要放到数据仓库中，如果有共享的部分则放置到数据仓库，而如果不是则不必占用公共资源，之后不再关心这部分，因为对我们是透明的。</li>
+</ol>
+<h2 id="多维数据分析（重要）">多维数据分析（重要）</h2>
+<p>多维分析是指对以多维形式组织起来的数据采取切片、切块、旋转、钻取等各种分析动作，以求剖析数据，使最终用户能从多个角度、多个侧面地观察数据，从而深入地了解被包含在数据中的信息、内涵。</p>
+<p>基本操作：</p>
+<ol>
+<li>切片（Slice）：根据某一维上的<strong>某个维成员值</strong>选择统计数据进行分析</li>
+<li>切块（Dice）
+<ol>
+<li>根据某一维上的<strong>某个维成员取值的区间</strong>选择统计数据进行分析</li>
+<li>根据<strong>多个</strong>维度上的维成员取值的区间选择统计数据进行分析</li>
+</ol>
+</li>
+<li>旋转（Pivot/Rotate）调整维的排列次序的动作称为旋转</li>
+<li>上钻/数据概括（roll_up）将多维下标的取值提升到较高的概念层次上，从而形成新的统计查询结果，并进行分析。</li>
+<li>下钻/数据细化（drill_down）将多维下标的取值降低到较低的概念层次上，从而形成更细致的统计查询结果，并进行分析。</li>
+</ol>
+<p>在大多数 OLAP 中，我们拿到数据的第一步骤一般我们首先选择降维（缩小分析域），也就是我们选择部分属性出来进行观察，直接影响最后的分析效果。</p>
+<img src="/14835/image-20230131124942155.png" style="zoom: 50%;">
+<h3 id="切片">切片</h3>
+<img src="/14835/image-20230131124947415.png" style="zoom: 67%;">
+<h3 id="切块">切块</h3>
+<img src="/14835/image-20230131124951055.png" style="zoom:67%;">
+<h3 id="旋转">旋转</h3>
+<img src="/14835/image-20230131124955527.png" style="zoom:67%;">
+<p>三维方体中有一个平面是被压缩在底下的，我们不好访问。</p>
+<img src="/14835/image-20230131124959517.png" style="zoom:67%;">
+<blockquote>
+<p>六维空间中，如果我们要交换红色轴和里面 x 轴是如何进行操作</p>
+</blockquote>
+<h3 id="上钻">上钻</h3>
+<img src="/14835/image-20230131125003847.png" style="zoom: 67%;">
+<ol>
+<li>同一个维度同一层次的调整下，上钻和下钻是互为逆操作。</li>
+<li>上钻：是将部分的数据进行压缩升高维度，将比较细的表达方式切换为比较粗的表达方式。</li>
+</ol>
+<h3 id="下钻">下钻</h3>
+<img src="/14835/image-20230131125011206.png" style="zoom:67%;">
+<ol>
+<li>将比较粗的表达方式转换为比较细的表达方式</li>
+<li>虽然我们目前只有两个维度的数据，但是数据是不足的，那么我们可能需要补充引入部分数据。</li>
+</ol>
+<h3 id="其他操作">其他操作</h3>
+<ol>
+<li>跨钻（drill across）对多个事实进行操作</li>
+<li>钻透（drill through）下钻至数据立方体的最低细节后，继续细化至数据仓库/数据库的关系型表格</li>
+</ol>
+<h3 id="发现驱动的探查">发现驱动的探查</h3>
+<img src="/14835/image-20230131125020199.png" style="zoom: 50%;">
+<p>使用下钻和上钻等方式来对数据进行探查，对不同的部分中的异常部分进行下钻来溯源</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/38144/" rel="prev" title="Web 前端开发-13-前端性能优化">
+      <i class="fa fa-chevron-left"></i> Web 前端开发-13-前端性能优化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/62073/" rel="next" title="商务智能-04-数据仓库的设计">
+      商务智能-04-数据仓库的设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86%EF%BC%88OLAP%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">联机分析处理（OLAP）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E8%81%94%E6%9C%BA%E4%BA%8B%E5%8A%A1%E5%A4%84%E7%90%86%EF%BC%88OLTP%EF%BC%89%E5%88%B0%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86%EF%BC%88OLAP%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">从联机事务处理（OLTP）到联机分析处理（OLAP）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OLAP"><span class="nav-number">1.2.</span> <span class="nav-text">OLAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OLAP-vs-OLTP"><span class="nav-number">1.3.</span> <span class="nav-text">OLAP vs. OLTP</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OLAP-%E7%9A%84%E7%89%B9%E5%BE%81%E5%8F%8A%E8%A1%A1%E9%87%8F%E6%A0%87%E5%87%86"><span class="nav-number">2.</span> <span class="nav-text">OLAP 的特征及衡量标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Codd-%E5%85%B3%E4%BA%8E-OLAP-%E7%9A%84%E8%AF%84%E4%BB%B7%E5%87%86%E5%88%99"><span class="nav-number">2.1.</span> <span class="nav-text">Codd 关于 OLAP 的评价准则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OLAP-%E5%BF%85%E9%A1%BB%E6%8F%90%E4%BE%9B%E5%A4%9A%E7%BB%B4%E6%A6%82%E5%BF%B5%E8%A7%86%E5%9B%BE"><span class="nav-number">2.1.1.</span> <span class="nav-text">OLAP 必须提供多维概念视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%8F%E6%98%8E%E6%80%A7%E5%87%86%E5%88%99"><span class="nav-number">2.1.2.</span> <span class="nav-text">透明性准则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E5%8F%96%E8%83%BD%E5%8A%9B%E5%87%86%E5%88%99"><span class="nav-number">2.1.3.</span> <span class="nav-text">存取能力准则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E7%9A%84%E6%8A%A5%E8%A1%A8%E5%8A%9F%E8%83%BD"><span class="nav-number">2.1.4.</span> <span class="nav-text">稳定的报表功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7-%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">2.1.5.</span> <span class="nav-text">客户&#x2F;服务器体系结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%B4%E7%9A%84%E5%90%8C%E7%AD%89%E6%80%A7%E5%8E%9F%E5%88%99"><span class="nav-number">2.1.6.</span> <span class="nav-text">维的同等性原则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%9A%84%E7%A8%80%E7%96%8F%E7%9F%A9%E9%98%B5%E5%A4%84%E7%90%86%E5%87%86%E5%88%99"><span class="nav-number">2.1.7.</span> <span class="nav-text">动态的稀疏矩阵处理准则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E7%94%A8%E6%88%B7%E6%94%AF%E6%8C%81%E8%83%BD%E5%8A%9B%E5%87%86%E5%88%99"><span class="nav-number">2.1.8.</span> <span class="nav-text">多用户支持能力准则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E5%8F%97%E9%99%90%E7%9A%84%E8%B7%A8%E7%BB%B4%E6%93%8D%E4%BD%9C"><span class="nav-number">2.1.9.</span> <span class="nav-text">非受限的跨维操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B4%E8%A7%82%E7%9A%84%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C"><span class="nav-number">2.1.10.</span> <span class="nav-text">直观的数据操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%81%B5%E6%B4%BB%E7%9A%84%E6%8A%A5%E8%A1%A8%E7%94%9F%E6%88%90"><span class="nav-number">2.1.11.</span> <span class="nav-text">灵活的报表生成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8D%E5%8F%97%E9%99%90%E7%BB%B4%E4%B8%8E%E8%81%9A%E9%9B%86%E5%B1%82%E6%AC%A1"><span class="nav-number">2.1.12.</span> <span class="nav-text">不受限维与聚集层次</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FASMI%EF%BC%9A%E5%8F%A6%E4%B8%80%E4%B8%AA%E8%AF%84%E4%BB%B7%E5%87%86%E5%88%99"><span class="nav-number">2.2.</span> <span class="nav-text">FASMI：另一个评价准则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OLAP-%E4%B8%AD%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">OLAP 中的几个基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%A6%E9%87%8F%E5%80%BC"><span class="nav-number">3.1.</span> <span class="nav-text">度量值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%B4"><span class="nav-number">3.2.</span> <span class="nav-text">维</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82"><span class="nav-number">3.3.</span> <span class="nav-text">层</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E7%BB%B4%E4%B8%AD%E7%9A%84%E5%B1%82%E6%AC%A1%E5%85%B3%E7%B3%BB"><span class="nav-number">3.3.1.</span> <span class="nav-text">时间维中的层次关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%B0%E5%9F%9F%E7%BB%B4%E4%B8%AD%E7%9A%84%E5%B1%82%E6%AC%A1%E5%85%B3%E7%B3%BB"><span class="nav-number">3.3.2.</span> <span class="nav-text">地域维中的层次关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%95%86%E5%93%81%E7%BB%B4%E4%B8%AD%E7%9A%84%E5%B1%82%E6%AC%A1%E5%85%B3%E7%B3%BB"><span class="nav-number">3.3.3.</span> <span class="nav-text">商品维中的层次关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%B4%E6%88%90%E5%91%98"><span class="nav-number">3.4.</span> <span class="nav-text">维成员</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="nav-number">3.5.</span> <span class="nav-text">多维数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%95%E5%85%83%EF%BC%88%E5%8D%95%E5%85%83%E6%A0%BC%EF%BC%89"><span class="nav-number">3.6.</span> <span class="nav-text">数据单元（单元格）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84%E5%92%8C%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86"><span class="nav-number">3.7.</span> <span class="nav-text">多维数组和联机分析处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OLAP-%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%9E%84%E9%80%A0%E6%96%B9%E5%BC%8F%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">OLAP 中的数据构造方式（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ROLAP%EF%BC%8CRelational-OLAP"><span class="nav-number">4.1.</span> <span class="nav-text">ROLAP，Relational OLAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MOLAP%EF%BC%8CMulti-Dimensional-OLAP"><span class="nav-number">4.2.</span> <span class="nav-text">MOLAP，Multi-Dimensional OLAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MOLAP-%E4%B8%8E-ROLAP"><span class="nav-number">4.3.</span> <span class="nav-text">MOLAP 与 ROLAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86%EF%BC%88HOLAP%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">混合联机分析处理（HOLAP）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OLAP-%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.</span> <span class="nav-text">OLAP 的基本数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OLAP-%E9%9C%80%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">5.1.</span> <span class="nav-text">OLAP 需解决的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OLAP-%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B-2"><span class="nav-number">5.2.</span> <span class="nav-text">OLAP 的基本数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MDDB-vs-RDBMS"><span class="nav-number">5.3.</span> <span class="nav-text">MDDB vs. RDBMS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86%EF%BC%88MOLAP%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">多维联机分析处理（MOLAP）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%98%E5%8F%96"><span class="nav-number">5.4.1.</span> <span class="nav-text">多维数据库存取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A4%9A%E7%BB%B4%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80-MDSQL"><span class="nav-number">5.4.2.</span> <span class="nav-text">使用多维查询语言 MDSQL</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E7%B3%BB%E8%81%94%E6%9C%BA%E5%88%86%E6%9E%90%E5%A4%84%E7%90%86%EF%BC%88ROLAP%EF%BC%89"><span class="nav-number">5.5.</span> <span class="nav-text">关系联机分析处理（ROLAP）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E7%BB%B4%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.5.1.</span> <span class="nav-text">二维数据模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.5.2.</span> <span class="nav-text">星型模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9B%AA%E8%8A%B1%E6%A8%A1%E5%BC%8F"><span class="nav-number">5.5.3.</span> <span class="nav-text">雪花模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%89%A9%E5%B1%95%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.6.</span> <span class="nav-text">其他扩展模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%AB%8B%E6%96%B9%E4%BD%93%EF%BC%88Data-Cube%EF%BC%89%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">数据立方体（Data Cube）（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE"><span class="nav-number">6.1.</span> <span class="nav-text">物化视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%B6%85%E7%AB%8B%E6%96%B9%E4%BD%93"><span class="nav-number">6.2.</span> <span class="nav-text">数据超立方体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E4%BD%93%E6%A0%BC"><span class="nav-number">6.3.</span> <span class="nav-text">方体格</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%9F%E5%9E%8B%E7%BD%91%E6%9F%A5%E8%AF%A2%E6%A8%A1%E5%BC%8F"><span class="nav-number">6.4.</span> <span class="nav-text">星型网查询模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%AB%8B%E6%96%B9%E4%BD%93%E7%9A%84%E7%89%A9%E5%8C%96"><span class="nav-number">6.5.</span> <span class="nav-text">数据立方体的物化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E9%98%B5%E5%88%97%E8%81%9A%E5%90%88%EF%BC%88%E5%8E%8B%E7%BC%A9%E7%9F%A9%E9%98%B5%EF%BC%89"><span class="nav-number">6.6.</span> <span class="nav-text">多维阵列聚合（压缩矩阵）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OLAP-%E4%B8%8E%E6%95%B0%E6%8D%AE%E4%BB%93%E5%BA%93"><span class="nav-number">6.7.</span> <span class="nav-text">OLAP 与数据仓库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E7%BB%B4%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%89"><span class="nav-number">7.</span> <span class="nav-text">多维数据分析（重要）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E7%89%87"><span class="nav-number">7.1.</span> <span class="nav-text">切片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E5%9D%97"><span class="nav-number">7.2.</span> <span class="nav-text">切块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC"><span class="nav-number">7.3.</span> <span class="nav-text">旋转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E9%92%BB"><span class="nav-number">7.4.</span> <span class="nav-text">上钻</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E9%92%BB"><span class="nav-number">7.5.</span> <span class="nav-text">下钻</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%93%8D%E4%BD%9C"><span class="nav-number">7.6.</span> <span class="nav-text">其他操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E7%8E%B0%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%8E%A2%E6%9F%A5"><span class="nav-number">7.7.</span> <span class="nav-text">发现驱动的探查</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

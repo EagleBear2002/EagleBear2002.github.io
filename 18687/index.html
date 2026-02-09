@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="静态网页与动态网页 静态页面：  客户&#x2F;消费者的观点：一个 url 指向同一个 html 文件 服务器&#x2F;生产者的观点：存储在 Web 服务器根文件夹内或子文件夹内的文件 HTML 文件：无论何时当一个特定资源被请求的时候都返回相同的被硬编码的内容 可以直接在浏览器上显示  动态页面：  客户&#x2F;消费者的观点：url 指的是动态 html（可能每次请求都不同） 服务器&#x2F;生产者的观点：程序&#x2F;脚本生成 h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 前端开发-09-Node.js">
+<meta property="og:url" content="https://eaglebear2002.github.io/18687/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="静态网页与动态网页 静态页面：  客户&#x2F;消费者的观点：一个 url 指向同一个 html 文件 服务器&#x2F;生产者的观点：存储在 Web 服务器根文件夹内或子文件夹内的文件 HTML 文件：无论何时当一个特定资源被请求的时候都返回相同的被硬编码的内容 可以直接在浏览器上显示  动态页面：  客户&#x2F;消费者的观点：url 指的是动态 html（可能每次请求都不同） 服务器&#x2F;生产者的观点：程序&#x2F;脚本生成 h">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162412500.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162626685.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162634990.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162657189.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162702738.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129162706644.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129163053804.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129163401046.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129163715961.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129164231349-1674981751848-1.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129164750265.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129164812230.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129164841060.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/18687/image-20230129164852988.png">
+<meta property="article:published_time" content="2023-01-29T07:36:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.503Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/18687/image-20230129162412500.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/18687/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Web 前端开发-09-Node.js | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/18687/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Web 前端开发-09-Node.js
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-29 15:36:00" itemprop="dateCreated datePublished" datetime="2023-01-29T15:36:00+08:00">2023-01-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-Web-%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">2022Fall-Web 前端开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="静态网页与动态网页">静态网页与动态网页</h2>
+<p>静态页面：</p>
+<ul>
+<li>客户/消费者的观点：一个 url 指向同一个 html 文件</li>
+<li>服务器/生产者的观点：存储在 Web 服务器根文件夹内或子文件夹内的文件</li>
+<li>HTML 文件：无论何时当一个特定资源被请求的时候都返回相同的被硬编码的内容</li>
+<li>可以直接在浏览器上显示</li>
+</ul>
+<p>动态页面：</p>
+<ul>
+<li>客户/消费者的观点：url 指的是动态 html（可能每次请求都不同）</li>
+<li>服务器/生产者的观点：程序/脚本生成 html</li>
+<li>它不是一个 html，而是一个程序产生的 html（s），页面通常是通过将数据库的数据植入到 HTML 模板中的占位符中而产生的。</li>
+<li>不能直接在浏览器中显示</li>
+</ul>
+<h3 id="服务端编程">服务端编程</h3>
+<p>服务器端页面是使用多种 web 编程语言/框架之一编写的程序</p>
+<p>例如：PHP，Java/JSP，Ruby on Rails，<a target="_blank" rel="noopener" href="http://ASP.NET">ASP.NET</a>， Python, Perl</p>
+<p>每种语言/框架都有其优点和缺点</p>
+<h3 id="服务端编程的优势">服务端编程的优势</h3>
+<ol>
+<li>信息的高效存储和传输</li>
+<li>定制用户体验</li>
+<li>控制对内容的访问</li>
+<li>存储会话和状态信息</li>
+<li>通知和通讯</li>
+<li>数据分析</li>
+</ol>
+<h2 id="Node-js">Node.js</h2>
+<p>Node（正式名称 Node.js）是一个开源的、跨平台的运行时环境</p>
+<p>服务端 Javascript：开发人员可以使用 JavaScript 创建各种服务器端工具和应用程序</p>
+<p>事件驱动，异步 I/O 框架</p>
+<p>性能：在 v8 之上的 c ++内核</p>
+<p>在单一进程中可以最小的开销（cpu/内存）处理成千上万的并发连接</p>
+<p>模块系统</p>
+<p>不是一个 web 框架，也不是一种语言</p>
+<blockquote>
+<p>Node.js is a platform built on Chrome's JavaScript runtime for easily building fast,scalable network applications. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient, perfect for data-intensive real-time applications that run across distributed devices.</p>
+<div align="right">——from nodejs.org
+</div></blockquote>
+<h3 id="Node-js-的诞生">Node.js 的诞生</h3>
+<p>Ryan Dahl 于 2009 年创造</p>
+<p>由 Joyent（一家位于硅谷的创业公司）开发和维护，注册了“Node.js”这个商标，使用其相关内容需要得到法律授权。</p>
+<ul>
+<li>2014，开源社区 io.js</li>
+<li>2015，Node.js 基金会，支持社区驱动的开放管理模式 2019，</li>
+<li>Node.js 基金会与 JS 基金会合并，成立 OpenJS 基金会</li>
+<li>Licence MIT</li>
+</ul>
+<h3 id="Node-js-现状">Node.js 现状</h3>
+<p>2018 年 5 月 31 日，Node.js 基金会发布的用户调查报告，显示学习 Node.js 看起来更容易了，少于 2 年 node 经验的用户中，有 43% 的觉得“容易”。绝大多数（85%）Node.js 用户用于网页开发，43% 参与一些企业级开发，13% 用于大数据分析，8% 用于嵌入式系统。</p>
+<p><img src="/18687/image-20230129162412500.png" alt></p>
+<h3 id="Node-js-应用场景">Node.js 应用场景</h3>
+<ol>
+<li>网站（如 express/koa 等）</li>
+<li>im 即时聊天（<a target="_blank" rel="noopener" href="http://socket.io">socket.io</a>）</li>
+<li>api（移动端，pc，h5）</li>
+<li>HTTP Proxy（淘宝、Qunar、腾讯、百度都有）</li>
+<li>前端构建工具（grunt/gulp/bower/webpack/fis3……）</li>
+<li>写操作系统（NodeOS）</li>
+<li>跨平台打包工具（PC 端的 electron、nw.js，比如钉钉 PC 客户端、微信小程序 IDE、微信客户端，移动的 cordova，即老的 Phonegap，还有更加有名的一站式开发框架 ionicframework）</li>
+<li>命令行工具（比如 cordova、shell.js）</li>
+<li>反向代理（比如 anyproxy， node-http-proxy）</li>
+</ol>
+<h3 id="Node-优势">Node 优势</h3>
+<p>从 web 服务器开发的角度来看，Node 有很多好处：</p>
+<ol>
+<li>卓越的性能表现！Node 为优化 web 应用的吞吐量和扩展度而生，对常见的 web 开发问题是一套绝佳方案（比如实时 web 应用）。</li>
+<li>代码还是熟悉的老伙伴 JavaScript，这意味着在客户端和服务器端“上下文切换”的时间成本更低。</li>
+<li>与传统的 web 服务器语言（例如 Python、PHP 等）相比，JavaScript 理念更新，语言设计的改进带来了诸多好处。许多其它新近流行的语言也可编译/转换成 JavaScript，所以 TypeScript、CoffeeScript、ClojureScript、Scala、LiveScript 等等也可以使用。</li>
+<li>Node 包管理工具（node package manager，NPM）提供了数十万个可重用的工具包。它还提供了一流的依赖解决方案，可实现自动化工具链构建。</li>
+<li>Node.js 是可移植的，可运行于 Microsoft Windows、macOS、Linux、 Solaris、FreeBSD、OpenBSD、WebOS 和 NonStop OS。此外，许多 web 主机供应商对其提供了良好支持（包括专用的基础框架和构建 Node 站点的文档）。</li>
+<li>它有一个非常活跃的第三方生态系统和开发者社区，很多人愿意提供帮助。</li>
+</ol>
+<h3 id="何时使用">何时使用</h3>
+<p>Node 所针对的应用程序有一个专门的简称：DIRT，表示数据密集型实时（data-intensive real-time）程序。</p>
+<p>性能和 I/O 负载：Nodejs 非常好的解决了 IO 密集的问题，通过异步 IO 来实现。</p>
+<p>大前端的基石。</p>
+<p>从脚手架、辅助前端开发（比如 SSR、PWA 等）的快速开发实践，到 API 中间层、代理层，到专业的后端开发都有非常成熟的经验。</p>
+<p>全栈。</p>
+<blockquote>
+<p>PWA（Progressive Web Apps，渐进式 Web 应用）运用现代的 Web API 以及传统的渐进式增强策略来创建跨平台 Web 应用程序。这些应用无处不在、功能丰富，使其具有与原生应用相同的用户体验优势</p>
+</blockquote>
+<h3 id="Node-js-不适合的领域">Node.js 不适合的领域</h3>
+<p>计算密集型应用内存控制</p>
+<p>大内存的应用，由于 V8 引擎有内存设计的限制，32 位环境中最大堆是 1G，64 位环境中最大堆也不到 2G，如果要一次读入 10G 数据，对于 Nodejs 来说也无法实现。</p>
+<p>静态服务器，虽然 Nodejs 的优势在 IO 密集集应用，但是和 Nginx 的处理静态资源还是有很大的差距。</p>
+<p>不需要异步的应用：比如系统管理，自行化脚本等，Nodejs 的异步调用可能会给编程带来一些麻烦。</p>
+<img src="/18687/image-20230129162626685.png" style="zoom: 67%;">
+<h3 id="Node-js-事件循环">Node.js 事件循环</h3>
+<img src="/18687/image-20230129162634990.png" style="zoom:67%;">
+<h3 id="事件驱动模型">事件驱动模型</h3>
+<p>由一个事件收集器、一个事件发送器和一个事件处理器组成。</p>
+<img src="/18687/image-20230129162657189.png" style="zoom:50%;">
+<img src="/18687/image-20230129162702738.png" style="zoom:50%;">
+<img src="/18687/image-20230129162706644.png" style="zoom: 67%;">
+<h3 id="Node-js-支持-JavaScript">Node.js 支持 JavaScript</h3>
+<p>这是 Node.js 能够发展壮大的一个非常重要的间接原因。</p>
+<ul>
+<li>首先，Javascript 作为前端工程师的主力语言，在技术社区中有相当的号召力。而且，随着 Web 技术的不断发展，特别是前端的重要性增加，不少前端工程师开始试水”后台应用“，在许多采用 Node.js 的企业中，工程师都表示因为习惯了 Javascript，所以选择 Node.js。</li>
+<li>其次，Javascript 的匿名函数和闭包特性非常适合事件驱动、异步编程。</li>
+<li>有 Google V8 引擎的加持，Node.js 的性能也是受益其中。</li>
+</ul>
+<h2 id="同步-vs-异步">同步 vs 异步</h2>
+<table>
+<thead>
+<tr>
+<th>同步</th>
+<th>异步</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>等待每个操作完成，然后执行下一个操作。</td>
+<td>从不等待每个操作完成，一次执行所有操作。</td>
+</tr>
+<tr>
+<td>一步一步执行</td>
+<td>回调，用于处理结果</td>
+</tr>
+</tbody>
+</table>
+<h3 id="同步式-I-O-和异步式-I-O-的特点">同步式 I/O 和异步式 I/O 的特点</h3>
+<p>阻塞方法同步执行，非阻塞方法异步执行。</p>
+<table>
+<thead>
+<tr>
+<th>同步式 I/O（阻塞式）</th>
+<th>异步式 I/O（非阻塞式）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>利用多线程提供吞吐量</td>
+<td>单线程即可实现高吞吐量</td>
+</tr>
+<tr>
+<td>通过时间片分割和线程调度利用多核 CPU</td>
+<td>通过功能划分利用多核 CPU</td>
+</tr>
+<tr>
+<td>需要由操作系统调度多线程使用多核 CPU</td>
+<td>可以将单进程绑定到单核 CPU</td>
+</tr>
+<tr>
+<td>难以充分利用 CPU 资源</td>
+<td>可以充分利用 CPU 资源</td>
+</tr>
+<tr>
+<td>内存轨迹大，数据局部性弱</td>
+<td>内存轨迹小，数据局部性强</td>
+</tr>
+<tr>
+<td>符合线性的编程思维</td>
+<td>不符合线性的编程思维</td>
+</tr>
+</tbody>
+</table>
+<h2 id="阻塞-vs-非阻塞">阻塞 vs 非阻塞</h2>
+<p>阻塞是指在 Node.js 程序中，其它 JavaScript 语句的执行， 必须等待一个非 JavaScript 操作完成。这是因为当阻塞发生时，事件循环无法继续运行 JavaScript。</p>
+<p>在 Node.js 中，JavaScript 由于执行 CPU 密集型操作，而不是等待一个非 JavaScript 操作（例如 I/O）而表现不佳，通常不被称为阻塞。在 Node.js 标准库中使用 libuv 的同步方法是最常用的阻塞操作。原生模块中也有阻塞方法。</p>
+<p>在 Node.js 标准库中的所有 I/O 方法都提供异步版本，非阻塞，并且接受回调函数。某些方法也有对应的阻塞版本，名字以 Sync 结尾。</p>
+<p>示例：从文件中读取数据并显示数据</p>
+<p><img src="/18687/image-20230129163053804.png" alt></p>
+<h3 id="阻塞">阻塞</h3>
+<p>同步文件读取</p>
+<ul>
+<li>从文件读取数据</li>
+<li>显示数据</li>
+<li>完成其他任务</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> data = fs.<span class="hljs-title function_">readFileSync</span>(<span class="hljs-string">&quot;test.txt&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(data);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Do other tasks&quot;</span>);<br></code></pre></td></tr></table></figure>
+<h3 id="非阻塞">非阻塞</h3>
+<p>异步：</p>
+<ol>
+<li>从文件中读取数据。当读取数据完成时，显示数据</li>
+<li>完成其他任务</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs js">fs.<span class="hljs-title function_">readFile</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">err, data</span>) &#123;<br>	<span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(data);<br>&#125;);<br></code></pre></td></tr></table></figure>
+<h2 id="开始">开始</h2>
+<p><a target="_blank" rel="noopener" href="https://nodejs.org/en/download/">https://nodejs.org/en/download/</a></p>
+<p><img src="/18687/image-20230129163401046.png" alt></p>
+<h3 id="Node-Package-Manager-NPM">Node Package Manager (NPM)</h3>
+<ul>
+<li>&lt;<a target="_blank" rel="noopener" href="http://www.npmjs.org">www.npmjs.org</a>&gt;</li>
+<li>1450.000+modules</li>
+<li>package.json 文件（npm init）</li>
+<li><code>npm install &lt;module.name&gt; --save</code></li>
+</ul>
+<h3 id="文件-package-json">文件 package.json</h3>
+<p>项目信息：</p>
+<ol>
+<li>name 项目名称</li>
+<li>version 项目的版本号</li>
+<li>description 项目的描述信息</li>
+<li>entry point 项目的入口文件</li>
+<li>test command 项目启动时脚本命令</li>
+<li>git repository 如果你有 Git 地址，可以将这个项目放到你的 Git 仓库里</li>
+<li>keywords 关键词</li>
+<li>author 作者叫啥</li>
+<li>license 项目要发行的时候需要的证书，平时玩玩忽略它</li>
+</ol>
+<h3 id="安装模块">安装模块</h3>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$</span><span class="language-bash">npm install &lt;module name&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="NodeJS-API">NodeJS API</h3>
+<p><img src="/18687/image-20230129163715961.png" alt></p>
+<h3 id="Node-js-流行模块">Node.js 流行模块</h3>
+<p>Express.js 由核心 Node 项目团队的成员之一 TJ Holowaychuk 构建。大型社区支持此框架，因此具有不断更新和改革所有核心功能的优势。这是一个极简主义的框架，用于构建 mobile 应用程序和 API。</p>
+<p>Koa 由创建 Express.js 的同一团队开发，通常被称为下一代 NodeJS 框架。Koa 的独特之处在于它使用了一些非常酷的 ECMAScript（ES6）方法，使你无需回调即可工作，同时极大地扩展了错误处理。</p>
+<p>Hapi 是一个强大且健壮的框架，用于开发 API。完善的插件系统和各种关键功能（例如输入验证、基于配置的功能、实现缓存、错误处理、日志记录等）使 Hapi 成为最受欢迎的框架之一。它用于构建有用的应用，并通为 PayPal，Disney 等多个大型网站提供技术解决方案。Hapi 以最小的开销构建安全、强大、可扩展的开箱即用的功能。</p>
+<p><a target="_blank" rel="noopener" href="http://Socket.io">Socket.io</a> 用于构建实时 Web 应用。这是一个 Javascript 库，可在 Web 客户端和服务器之间进行双向数据通信。异步数据 I/O、二进制流和即时消息传递是此框架最重要的功能。</p>
+<p>Meteor.JS 是最常用的 NodeJS 框架之一。NodeJS 的全栈框架，允许用户构建实时应用程序。它用于创建基于移动和基于 Web 的 javascript 应用。</p>
+<h2 id="模块">模块</h2>
+<p>两种模块，不兼容</p>
+<ul>
+<li>ES6 模块，简称 ESM</li>
+<li>Node.js 专用的 CommonJS 模块，简称 CJS</li>
+</ul>
+<h3 id="ES6-模块与-CommonJS-模块的差异">ES6 模块与 CommonJS 模块的差异</h3>
+<p>语法</p>
+<p>CommonJS 模块使用 require() 加载和 module.exports 输出</p>
+<p>ES6 模块使用 import 和 export</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;http&quot;</span>);<br><span class="hljs-keyword">var</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;fs&quot;</span>);<br><span class="hljs-keyword">var</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;express&quot;</span>);<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// profile.js</span><br><span class="hljs-keyword">var</span> firstName = <span class="hljs-string">&quot;Michael&quot;</span>;<br><span class="hljs-keyword">var</span> lastName = <span class="hljs-string">&quot;Jackson&quot;</span>;<br><span class="hljs-keyword">var</span> year = <span class="hljs-number">1958</span>;<br><span class="hljs-keyword">export</span> &#123; firstName, lastName, year &#125;;<br><span class="hljs-comment">// main.js</span><br><span class="hljs-keyword">import</span> &#123; firstName, lastName, year &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./profile&quot;</span>;<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(firstName, lastName); <span class="hljs-comment">// Michael Jackson</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用。</li>
+<li>CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
+<ul>
+<li>CommonJS 加载的是一个对象（即 module.exports 属性），该对象只有在脚本运行完才会生成。</li>
+<li>ES6 模块不是对象，它的对外接口只是一种静态定义，在代码静态解析阶段就会生成。</li>
+</ul>
+</li>
+</ul>
+<h3 id="模块加载的实质">模块加载的实质</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// lib.js</span><br><span class="hljs-keyword">var</span> counter = <span class="hljs-number">3</span>;<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">incCounter</span>(<span class="hljs-params"></span>) &#123;<br>	counter++;<br>&#125;<br><br><span class="hljs-variable language_">module</span>.<span class="hljs-property">exports</span> = &#123;<br>	<span class="hljs-attr">counter</span>: counter,<br>	<span class="hljs-attr">incCounter</span>: incCounter,<br>&#125;;<br><span class="hljs-comment">// main.js</span><br><span class="hljs-keyword">var</span> mod = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;./lib&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(mod.<span class="hljs-property">counter</span>); <span class="hljs-comment">// 3</span><br>mod.<span class="hljs-title function_">incCounter</span>();<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(mod.<span class="hljs-property">counter</span>); <span class="hljs-comment">// 3</span><br></code></pre></td></tr></table></figure>
+<h3 id="ES6">ES6</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// lib.mjs</span><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> counter = <span class="hljs-number">3</span>;<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">incCounter</span>(<span class="hljs-params"></span>) &#123;<br>    counter++;<br>&#125;<br><br><span class="hljs-comment">// main.mjs</span><br><span class="hljs-keyword">import</span> &#123;counter, incCounter&#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./lib.mjs;</span><br><span class="hljs-string"></span><br><span class="hljs-string">console.log(counter); // 3</span><br><span class="hljs-string">incCounter();</span><br><span class="hljs-string">console.log(counter); // 4</span><br></code></pre></td></tr></table></figure>
+<h3 id="Node-js-的区分">Node.js 的区分</h3>
+<p>Node.js 要求 ES6 模块采用.mjs 后缀文件名。</p>
+<ul>
+<li>只要脚本文件里面使用 import 或者 export 命令，那么就必须采用.mjs 后缀名。Node.js 遇到.mjs 文件，就认为是 ES6 模块，默认启用严格模式，不必在每个模块文件顶部指定&quot;use strict&quot;。</li>
+<li>如果不希望将后缀名改成.mjs，可以在项目的 package.json 文件中，指定 type 字段为 module。</li>
+</ul>
+<p>.cjs 文件总是以 CommonJS 模块加载。如果没有 type 字段，或者 type 字段为 commonjs，则.js 脚本会被解释成 CommonJS 模块。</p>
+<p>.js 文件的加载取决于 package.json 里面 type 字段的设置。</p>
+<p>注意，ES6 模块与 CommonJS 模块尽量不要混用！！！</p>
+<p>require 命令不能加载.mjs 文件，会报错，只有 import 命令才可以加载.mjs 文件。反之，.mjs 文件里面也不能使用 require 命令，必须使用 import。</p>
+<h3 id="同时支持两种格式的模块">同时支持两种格式的模块</h3>
+<p>如果原始模块是 ES6 格式，那么需要给出一个整体输出接口，比如 export dlefault obj，使得 CommonJS 可以用 import() 进行加载。</p>
+<p>如果原始模块是 CommonJS 格式，那么可以加一个包装层。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">import</span> cjsModule <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../index.js&quot;</span>;<br><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> foo = cjsModule.<span class="hljs-property">foo</span>;<br></code></pre></td></tr></table></figure>
+<p>可以把这个文件的后缀名改为.mjs，或者放在一个子目录，再在这个子目录里面放一个单独的 package.json 文件，指明 {type：&quot;module&quot;}。</p>
+<p>另一种做法是在 package.json 文件的 exports 字段，指明两种格式模块各自的加载入口。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-string">&quot;exports&quot;</span>: &#123;<br>    <span class="hljs-string">&quot;require&quot;</span>: <span class="hljs-string">&quot;./index.js&quot;</span>,<br>    <span class="hljs-string">&quot;import&quot;</span>: <span class="hljs-string">&quot;./esm/wrapper.js&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="require-方法查找策略">require 方法查找策略</h3>
+<p><img src="/18687/image-20230129164231349-1674981751848-1.png" alt></p>
+<h3 id="A-simple-file-server">A simple file server</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> http = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;http&quot;</span>);<br><span class="hljs-keyword">var</span> server = http.<span class="hljs-title function_">createServer</span>(<span class="hljs-keyword">function</span> (<span class="hljs-params">req, res</span>) &#123;<br>	res.<span class="hljs-title function_">writeHead</span>(<span class="hljs-number">200</span>, &#123; <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;text/plain&quot;</span> &#125;);<br>	res.<span class="hljs-title function_">end</span>(<span class="hljs-string">&quot;Hello World\n&quot;</span>);<br>&#125;);<br>server.<span class="hljs-title function_">listen</span>(<span class="hljs-number">3000</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Server running at http://localhost:3000/&quot;</span>);<br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">node server.js<br>sudo npm install -g supervisor<br>supervisor server.js<br></code></pre></td></tr></table></figure>
+<h3 id="as">as</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//main.js</span><br><span class="hljs-keyword">import</span> &#123; lastName <span class="hljs-keyword">as</span> surname &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./profile&quot;</span>;<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(surname); <span class="hljs-comment">// Jackson</span><br><span class="hljs-comment">//profile.js</span><br><span class="hljs-keyword">export</span> &#123; firstName <span class="hljs-keyword">as</span> name &#125;;<br></code></pre></td></tr></table></figure>
+<h3 id="export-default">export default</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//default.js</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">a, b</span>) &#123;<br>    <span class="hljs-keyword">return</span> a + b;<br>&#125;<br><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> add;<br><span class="hljs-comment">// 实际上</span><br><span class="hljs-keyword">export</span> &#123;add <span class="hljs-keyword">as</span> <span class="hljs-keyword">default</span>&#125;;<br><span class="hljs-comment">// main.js</span><br><span class="hljs-keyword">import</span> add <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./default&#x27;</span><br><span class="hljs-comment">//实际上 add 名字可以随便起</span><br><span class="hljs-keyword">import</span> &#123;<span class="hljs-keyword">default</span> <span class="hljs-keyword">as</span> add&#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./default&#x27;</span><br></code></pre></td></tr></table></figure>
+<h3 id="循环加载">循环加载</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//a.js</span><br><span class="hljs-built_in">exports</span>.<span class="hljs-property">done</span> = <span class="hljs-literal">false</span>;<br><span class="hljs-keyword">var</span> b = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;./b.js&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;在 a.js 之中，b.done = %j&quot;</span>, b.<span class="hljs-property">done</span>);<br><span class="hljs-built_in">exports</span>.<span class="hljs-property">done</span> = <span class="hljs-literal">true</span>;<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;a.js 执行完毕&quot;</span>);<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//b.js</span><br><span class="hljs-built_in">exports</span>.<span class="hljs-property">done</span> = <span class="hljs-literal">false</span>;<br><span class="hljs-keyword">var</span> a = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;./a.js&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;在 b.js 之中，a.done = %j&quot;</span>, a.<span class="hljs-property">done</span>);<br><span class="hljs-built_in">exports</span>.<span class="hljs-property">done</span> = <span class="hljs-literal">true</span>;<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;b.js 执行完毕&quot;</span>);<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//main.js</span><br><span class="hljs-keyword">var</span> a = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;./a.js&quot;</span>);<br><span class="hljs-keyword">var</span> b = <span class="hljs-built_in">require</span>(<span class="hljs-string">&quot;./b.js&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;在 main.js 之中, a.done=%j, b.done=%j&quot;</span>, a.<span class="hljs-property">done</span>, b.<span class="hljs-property">done</span>);<br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">在 b.js 之中，a.done = false<br>b.js 执行完毕<br>在 a.js 之中，b.done = true<br>a.js 执行完毕<br>在 main.js 之中, a.done=true, b.done=true<br></code></pre></td></tr></table></figure>
+<h3 id="ES6-循环加载-1">ES6 循环加载-1</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// a.mjs 如下</span><br><span class="hljs-keyword">import</span> &#123; bar &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./b.mjs&quot;</span>;<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;a.mjs&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(bar);<br><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> foo = <span class="hljs-string">&quot;foo&quot;</span>;<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// b.mjs</span><br><span class="hljs-keyword">import</span> &#123; foo &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./a.mjs&quot;</span>;<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;b.mjs&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(foo);<br><span class="hljs-keyword">export</span> <span class="hljs-keyword">let</span> bar = <span class="hljs-string">&quot;bar&quot;</span>;<br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">node --experimental-modules a.mjs</span><br>b.mjs<br>ReferenceError: Cannot access &#x27;foo&#x27; before initialization<br></code></pre></td></tr></table></figure>
+<h3 id="ES6-循环加载-2">ES6 循环加载-2</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// a.mjs</span><br><span class="hljs-keyword">import</span> &#123; bar &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./b.mjs&quot;</span>;<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;a.mjs&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">bar</span>());<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">foo</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;foo&quot;</span>;<br>&#125;<br><br><span class="hljs-keyword">export</span> &#123; foo &#125;;<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// b.mjs</span><br><span class="hljs-keyword">import</span> &#123; foo &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./a.mjs&quot;</span>;<br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;b.mjs&quot;</span>);<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">foo</span>());<br><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">bar</span>(<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">return</span> <span class="hljs-string">&quot;bar&quot;</span>;<br>&#125;<br><br><span class="hljs-keyword">export</span> &#123; bar &#125;;<br></code></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs js">$ node --experimental-modules a.<span class="hljs-property">mjs</span><br>b.<span class="hljs-property">mjs</span><br>foo<br>a.<span class="hljs-property">mjs</span><br>bar<br></code></pre></td></tr></table></figure>
+<h2 id="Node-js-版本">Node.js 版本</h2>
+<p>版本帝</p>
+<p>LTS 和 Current 其实并不是版本，而是同一个主版本号的不同阶段</p>
+<blockquote>
+<p>LTS：Long Term Support。该版本进入了漫长的维护期。它又分为两个阶段：Active LTS 和 Maintenance LTS。从以往的发布历史看，LTS 至少会被跟进 2 年时间，按照最新的官方网站的说法，Active LTS 持续 12 个月，Maintenance LTS 将会被持续维护 18 个月的时间。Nodejs 12 之前，active 阶段持续 18 个月，maintenance 阶段持续 12 个月。</p>
+<p>Current：一个新主版本号 release 后，先进入 Current 阶段，该阶段持续 6 个月，目的是给各个库（library）的作者时间来支持新版。偶数版本在 Current 阶段后进入 LTS 阶段，而奇数版本则终结不再维护</p>
+</blockquote>
+<p>奇偶版本号</p>
+<ul>
+<li>Nodejs 主版本号（semver—major）奇数版本和偶数版本有不同的生命周期。</li>
+<li>每隔 6 个月，社区会从 Nodejs master 分支拉出一个分支作为主版本的 release。偶数版本在 4 月发版，奇数版本则在 10 月。</li>
+<li>奇数版本发版时，上一个偶数版本会进入 LTS 阶段，而奇数版本则只持续 6 个月的时间，则终结不再维护。</li>
+</ul>
+<p><img src="/18687/image-20230129164750265.png" alt></p>
+<h3 id="已无性能优势？">已无性能优势？</h3>
+<ul>
+<li>实现成本</li>
+<li>调优成本</li>
+<li>学习成本</li>
+</ul>
+<p><img src="/18687/image-20230129164812230.png" alt></p>
+<h3 id="MEAN">MEAN</h3>
+<p>MEAN 是一个 Javascript 平台的现代 Web 开发框架总称</p>
+<ul>
+<li>MongoDB 是一个使用 JSON 风格存储的数据库，非常适合 javascript。（JSON 是 JS 数据格式）</li>
+<li>ExpressJS 是一个 Web 应用框架，提供有帮助的组件和模块帮助建立一个网站应用。</li>
+<li>AngularJS 是一个前端 MVC 框架。</li>
+<li>Node.js 是一个并发异步事件驱动的 Javascript 服务器后端开发平台。</li>
+</ul>
+<p><img src="/18687/image-20230129164841060.png" alt></p>
+<h4 id="MEAN-架构原理">MEAN 架构原理</h4>
+<p><img src="/18687/image-20230129164852988.png" alt></p>
+<h2 id="Web-框架">Web 框架</h2>
+<table>
+<thead>
+<tr>
+<th>框架名称</th>
+<th>特性</th>
+<th>点评</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Express</td>
+<td>简单、实用，路由中间件等五脏俱全</td>
+<td>最著名的 Web 框架</td>
+</tr>
+<tr>
+<td>Derby.js &amp;&amp; Meteor</td>
+<td>同构</td>
+<td>前后端都放到一起，模糊了开发便捷，看上去更简单，实际上对开发来说要求更高</td>
+</tr>
+<tr>
+<td>Sails、Total</td>
+<td>面向其他语言，Ruby、PHP 等</td>
+<td>借鉴业界优秀实现，也是 Node.js 成熟的一个标志</td>
+</tr>
+<tr>
+<td>MEAN.js</td>
+<td>面向架构</td>
+<td>类似于脚手架，又期望同构，结果只是蹭了热点</td>
+</tr>
+<tr>
+<td>Hapi 和 Restfy</td>
+<td>面向 Api&amp;&amp; 微服务</td>
+<td>移动互联网时代 Api 的作用被放大，故而独立分类。尤其是对于微服务开发更是利器</td>
+</tr>
+<tr>
+<td>ThinkJS</td>
+<td>面向新特性</td>
+<td>借鉴 ThinkPHP，并慢慢走出自己的一条路，对于 Async 函数等新特性支持，无出其右</td>
+</tr>
+<tr>
+<td>Koa</td>
+<td>专注于异步流程改进</td>
+<td>下一代 Web 框架</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Node-JS-框架的优势">Node.JS 框架的优势</h3>
+<p>现在 NodeJS 框架正在成为最常用的构建 Web 应用前后端的开发框架。这是自定义 Web 开发的首选环境。让我们检查一些主要的 NodeJS 框架的优点：</p>
+<ol>
+<li>实时工作环境</li>
+<li>简单的编码经验</li>
+<li>无缝数据流</li>
+<li>在整个开发过程中使用相同的代码模式</li>
+<li>方便易用</li>
+</ol>
+<h3 id="框架选型">框架选型</h3>
+<p>业务场景、特点</p>
+<p>自身团队能力、喜好，有时候技术选型决定团队氛围的，需要平衡激进与稳定</p>
+<p>熟悉程度</p>
+<p>个人学习求新，企业架构求稳，无非喜好与场景而已</p>
+<h2 id="预处理器">预处理器</h2>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>实现</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模板引擎</td>
+<td>art\mustache\ejs\hbs\jade...</td>
+<td>上百种之多，自定义默认，编译成 html，继而完成更多操作</td>
+</tr>
+<tr>
+<td>css 预处理器</td>
+<td>less\sass\scss\rework\postcsS</td>
+<td>自定义语法规则，编译成 css</td>
+</tr>
+<tr>
+<td>js 友好语言</td>
+<td>coffeescript、typescript</td>
+<td>自定义语法规则、编译成 js</td>
+</tr>
+</tbody>
+</table>
+<h2 id="跨平台">跨平台</h2>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>实现</th>
+<th>点评</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Web/H5</td>
+<td>纯前端</td>
+<td></td>
+</tr>
+<tr>
+<td>PC 客户端</td>
+<td>nw.js 和 electron</td>
+<td>尤其是 atom 和 vscode 编辑器最为著名，像钉钉 PC 端，微信客户端、微信小程序 IDE 等都是这样的，通过 web 技术来打包成 PC 客户端</td>
+</tr>
+<tr>
+<td>移动端</td>
+<td>cordova（旧称 PhoneGap），基于 cordova 的 ionicframework</td>
+<td>这种采用 h5 开发，打包成 ipa 或 apk 的应用，称为 Hybrid 开发（混搭），通过 webview 实现所谓的跨平台，应用的还是非常广泛的</td>
+</tr>
+</tbody>
+</table>
+<h2 id="其他">其他</h2>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>说明</th>
+<th>前景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>爬虫</td>
+<td>抢了不少 Python 的份额，整体来说简单，实用</td>
+<td>看涨</td>
+</tr>
+<tr>
+<td>命令行工具</td>
+<td>写工具、提高效率，node+npm</td>
+<td>看涨</td>
+</tr>
+<tr>
+<td>微服务与 RPC</td>
+<td>Node 做纯后端不好做，但在新项目和微服务架构下，必有一席之地</td>
+<td>看涨</td>
+</tr>
+<tr>
+<td>微信公众号开发</td>
+<td>已经火了 2 年多了，尤其是付费阅读领域，还会继续火下去，gitchat 就是使用 Node.js 做的</td>
+<td>看涨</td>
+</tr>
+<tr>
+<td>反向代理</td>
+<td>Node.js 可以作为 nginx 这样的反向代理，比如 node-http-proxy 和 anyproxy 等，其实使用 Node.js 做这种请求转发是非常简单的</td>
+<td>看涨</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/47566/" rel="prev" title="编译原理-实验开源">
+      <i class="fa fa-chevron-left"></i> 编译原理-实验开源
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/51474/" rel="next" title="Web 前端开发-10-express">
+      Web 前端开发-10-express <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E7%BD%91%E9%A1%B5%E4%B8%8E%E5%8A%A8%E6%80%81%E7%BD%91%E9%A1%B5"><span class="nav-number">1.</span> <span class="nav-text">静态网页与动态网页</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%BC%96%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">服务端编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%BC%96%E7%A8%8B%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">1.2.</span> <span class="nav-text">服务端编程的优势</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node-js"><span class="nav-number">2.</span> <span class="nav-text">Node.js</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E7%9A%84%E8%AF%9E%E7%94%9F"><span class="nav-number">2.1.</span> <span class="nav-text">Node.js 的诞生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E7%8E%B0%E7%8A%B6"><span class="nav-number">2.2.</span> <span class="nav-text">Node.js 现状</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.3.</span> <span class="nav-text">Node.js 应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-%E4%BC%98%E5%8A%BF"><span class="nav-number">2.4.</span> <span class="nav-text">Node 优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%95%E6%97%B6%E4%BD%BF%E7%94%A8"><span class="nav-number">2.5.</span> <span class="nav-text">何时使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E4%B8%8D%E9%80%82%E5%90%88%E7%9A%84%E9%A2%86%E5%9F%9F"><span class="nav-number">2.6.</span> <span class="nav-text">Node.js 不适合的领域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF"><span class="nav-number">2.7.</span> <span class="nav-text">Node.js 事件循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E9%A9%B1%E5%8A%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.8.</span> <span class="nav-text">事件驱动模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E6%94%AF%E6%8C%81-JavaScript"><span class="nav-number">2.9.</span> <span class="nav-text">Node.js 支持 JavaScript</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5-vs-%E5%BC%82%E6%AD%A5"><span class="nav-number">3.</span> <span class="nav-text">同步 vs 异步</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5%E5%BC%8F-I-O-%E5%92%8C%E5%BC%82%E6%AD%A5%E5%BC%8F-I-O-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">同步式 I&#x2F;O 和异步式 I&#x2F;O 的特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E-vs-%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="nav-number">4.</span> <span class="nav-text">阻塞 vs 非阻塞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E"><span class="nav-number">4.1.</span> <span class="nav-text">阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E9%98%BB%E5%A1%9E"><span class="nav-number">4.2.</span> <span class="nav-text">非阻塞</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B"><span class="nav-number">5.</span> <span class="nav-text">开始</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-Package-Manager-NPM"><span class="nav-number">5.1.</span> <span class="nav-text">Node Package Manager (NPM)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6-package-json"><span class="nav-number">5.2.</span> <span class="nav-text">文件 package.json</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%A8%A1%E5%9D%97"><span class="nav-number">5.3.</span> <span class="nav-text">安装模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NodeJS-API"><span class="nav-number">5.4.</span> <span class="nav-text">NodeJS API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E6%B5%81%E8%A1%8C%E6%A8%A1%E5%9D%97"><span class="nav-number">5.5.</span> <span class="nav-text">Node.js 流行模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97"><span class="nav-number">6.</span> <span class="nav-text">模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-%E6%A8%A1%E5%9D%97%E4%B8%8E-CommonJS-%E6%A8%A1%E5%9D%97%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">6.1.</span> <span class="nav-text">ES6 模块与 CommonJS 模块的差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8A%A0%E8%BD%BD%E7%9A%84%E5%AE%9E%E8%B4%A8"><span class="nav-number">6.2.</span> <span class="nav-text">模块加载的实质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6"><span class="nav-number">6.3.</span> <span class="nav-text">ES6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-js-%E7%9A%84%E5%8C%BA%E5%88%86"><span class="nav-number">6.4.</span> <span class="nav-text">Node.js 的区分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%97%B6%E6%94%AF%E6%8C%81%E4%B8%A4%E7%A7%8D%E6%A0%BC%E5%BC%8F%E7%9A%84%E6%A8%A1%E5%9D%97"><span class="nav-number">6.5.</span> <span class="nav-text">同时支持两种格式的模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#require-%E6%96%B9%E6%B3%95%E6%9F%A5%E6%89%BE%E7%AD%96%E7%95%A5"><span class="nav-number">6.6.</span> <span class="nav-text">require 方法查找策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A-simple-file-server"><span class="nav-number">6.7.</span> <span class="nav-text">A simple file server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#as"><span class="nav-number">6.8.</span> <span class="nav-text">as</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#export-default"><span class="nav-number">6.9.</span> <span class="nav-text">export default</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%8A%A0%E8%BD%BD"><span class="nav-number">6.10.</span> <span class="nav-text">循环加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-%E5%BE%AA%E7%8E%AF%E5%8A%A0%E8%BD%BD-1"><span class="nav-number">6.11.</span> <span class="nav-text">ES6 循环加载-1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-%E5%BE%AA%E7%8E%AF%E5%8A%A0%E8%BD%BD-2"><span class="nav-number">6.12.</span> <span class="nav-text">ES6 循环加载-2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Node-js-%E7%89%88%E6%9C%AC"><span class="nav-number">7.</span> <span class="nav-text">Node.js 版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%B2%E6%97%A0%E6%80%A7%E8%83%BD%E4%BC%98%E5%8A%BF%EF%BC%9F"><span class="nav-number">7.1.</span> <span class="nav-text">已无性能优势？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MEAN"><span class="nav-number">7.2.</span> <span class="nav-text">MEAN</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MEAN-%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86"><span class="nav-number">7.2.1.</span> <span class="nav-text">MEAN 架构原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web-%E6%A1%86%E6%9E%B6"><span class="nav-number">8.</span> <span class="nav-text">Web 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-JS-%E6%A1%86%E6%9E%B6%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">8.1.</span> <span class="nav-text">Node.JS 框架的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B"><span class="nav-number">8.2.</span> <span class="nav-text">框架选型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-number">9.</span> <span class="nav-text">预处理器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%A8%E5%B9%B3%E5%8F%B0"><span class="nav-number">10.</span> <span class="nav-text">跨平台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">11.</span> <span class="nav-text">其他</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

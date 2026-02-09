@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Architecturally Significant Requirements  架构攸关的需求（ASR）是对体系结构产生深远影响的要求-如果没有这样的要求，体系结构可能会发生巨大的变化。An Architecturally Significant Requirement (ASR) is a requirement that will have a profound effect on the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软件架构设计-04-Designing Architecture">
+<meta property="og:url" content="https://eaglebear2002.github.io/20764/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="Architecturally Significant Requirements  架构攸关的需求（ASR）是对体系结构产生深远影响的要求-如果没有这样的要求，体系结构可能会发生巨大的变化。An Architecturally Significant Requirement (ASR) is a requirement that will have a profound effect on the">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/48-1686484372740-639.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/49-1686484372740-640.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/50-1686484372740-641.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/51-1686484372740-642.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/52-1686484372740-643.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/53-1686484372740-644.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/54-1686484372740-645.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/55-1686484372740-646.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/56-1686484372740-647.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/57-1686484372740-648.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/58-1686484372740-649.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/59-1686484372741-650.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/1-1686484372741-651.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/2-1686484372741-652.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/3-1686484372741-653.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/4-1686484372741-655.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/5-1686484372741-654.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/6-1686484372741-656.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/7-1686484372741-657.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/8-1686484372741-658.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/9-1686484372741-659.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/10-1686484372741-660.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/11-1686484372741-661.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/12-1686484372741-662.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/13-1686484372741-663.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/14-1686484372741-664.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/15-1686484372741-665.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/16-1686484372741-666.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/17-1686484372741-667.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/28-1686484372741-668.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/29-1686484372741-669.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/30-1686484372741-670.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/31-1686484372741-671.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/32-1686484372741-672.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/18-1686484372741-673.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/19-1686484372741-674.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/20-1686484372741-675.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/21-1686484372741-676.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/22-1686484372742-677.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/23-1686484372742-678.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/24-1686484372742-679.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/25-1686484372742-680.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/26-1686484372742-681.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/20764/27-1686484372742-682.png">
+<meta property="article:published_time" content="2023-05-31T08:43:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.669Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/20764/48-1686484372740-639.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/20764/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>软件架构设计-04-Designing Architecture | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/20764/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          软件架构设计-04-Designing Architecture
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-31 16:43:00" itemprop="dateCreated datePublished" datetime="2023-05-31T16:43:00+08:00">2023-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2023Spring-%E8%BD%AF%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">2023Spring-软件系统设计</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>30k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>27 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Architecturally-Significant-Requirements">Architecturally Significant Requirements</h2>
+<ol>
+<li>架构攸关的需求（ASR）是对体系结构产生深远影响的要求-如果没有这样的要求，体系结构可能会发生巨大的变化。An Architecturally Significant Requirement (ASR) is a requirement that will have a profound effect on the architecture - the architecture might well be dramatically different in the absence of such a requirement.</li>
+<li>QA 需求越困难和重要，就越有可能显着影响体系结构，从而成为 ASR。The more difficult and important the QA requirement, the more likely it is to significantly affect the architecture, and hence to be an ASR.</li>
+<li>如何系统地识别将影响 ASR 和其他因素？How to systematically identify the ASRs and other factors that will shape the architecture?
+<ol>
+<li>从需求文档中收集 ASR Gathering ASRs from requirements documents</li>
+<li>通过采访涉众来收集 ASR Gathering ASRs by interviewing stakeholders</li>
+<li>通过了解业务目标来收集 ASR Gathering ASRs by understanding the business goals</li>
+<li>在项目树中管理 ASR Capturing ASRs in a utility tree</li>
+</ol>
+</li>
+</ol>
+<h3 id="Gathering-ASRs-from-Requirements-Documents">Gathering ASRs from Requirements Documents</h3>
+<ol>
+<li>无论是使用“MoSCoW”样式指定需求还是作为“用户故事”的集合来指定需求，这些都不能帮助您确定质量属性。Whether requirements are specified using the &quot;MoSCoW&quot; style or as a collection of &quot;user stories&quot;, neither of these is much help in nailing down quality attributes.</li>
+<li>MoSCoW 样式：<a target="_blank" rel="noopener" href="https://blog.csdn.net/cheny_com/article/details/6358456">https://blog.csdn.net/cheny_com/article/details/6358456</a>，使用四个级别来定义一个需求的优先级程度</li>
+<li>需求文档通常会以两种方式使架构师失败：Requirements documents often fail an architect in two ways:
+<ol>
+<li>需求规范中的大多数内容都不会影响体系结构。Most of what is in a requirements specification does not affect the achitecture.
+<ol>
+<li>系统应模块化 The system shall be modular</li>
+<li>系统应显示出高易用性 The system shall exhibit high usability</li>
+<li>系统应满足用户的性能期望 The system shall meet users' performance expectations</li>
+</ol>
+</li>
+<li>对架构师有用的大部分内容甚至都没有出现在最佳需求文档中 Much of what is useful to an architect is not in even the best requirements document.
+<ol>
+<li>在收购环境中，需求文档代表的是收购方的利益，而不是开发商的利益。In an acquisition context, the requirements document represents the interests of the acquirer, not that of the developer.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>如果某项要求影响了关键体系结构设计决策的制定，那么根据定义，它就是 ASR。If a requirement affects the making of a critical architectural design decision, it is by definition an ASR.</li>
+</ol>
+<h3 id="Gathering-ASRs-by-Interviewing-Stakeholders">Gathering ASRs by Interviewing Stakeholders</h3>
+<ol>
+<li>质量属性工坊 Quality Attribute Workshop (QAW)
+<ol>
+<li>QAW 演示和介绍 QAW presentation and introductions</li>
+<li>业务任务介绍 Business mission presentation</li>
+<li>架构计划介绍 Architectual plan presentation</li>
+<li>架构驱动程序的识别：就精简的架构驱动程序列表达成共识，其中包括总体需求，业务驱动程序，约束和质量属性。Identification of architectural drivers: to reach a consensus on a ditilled list of architectural drivers that includes overall requirements, business drivers, constraints, and quality attributes.</li>
+<li>场景集思广益：每个利益相关者都表达一个场景，表示他/她对系统的关注。Scenario brainstorming: each stakeholder expresses a scenario representing his/ her concerns with respect to the system.</li>
+<li>方案合并（合并类似方案） Scenario consolidation (merging similar scenarios)</li>
+<li>方案优先级（通过投票） Scenario prioritization(by voting)</li>
+<li>方案细化：对最重要的方案进行细化和阐述。Scenario refinement: the top scenarios are refined and elaborated.</li>
+</ol>
+</li>
+<li>QAW 的结果包括架构驱动程序列表和利益相关者（作为一个小组优先考虑）的一组（2A 方案）。The results of QAW include a list of architectural drivers and a set of QA scenarios that the stakeholders (as a group prioritized).</li>
+</ol>
+<h3 id="Capturing-ASRs-in-a-Utility-Tree">Capturing ASRs in a Utility Tree</h3>
+<img src="/20764/48-1686484372740-639.png" style="zoom:50%;">
+<ol>
+<li>将 scenario 使用量化的方式来描述，之后才可以使用测试等方式来确定是否实现了要求。</li>
+<li>逐渐对质量需求进行分解，分解到含有量化指标为止。</li>
+<li>然后将分解的结果进行细化</li>
+</ol>
+<h3 id="Persona-Based-Approach-to-exploring-ASRs">Persona-Based Approach to exploring ASRs</h3>
+<h4 id="Working-with-ASRs">Working with ASRs</h4>
+<ol>
+<li>在实践中，通常不会引发 ASR（尤其是 NFR），也没有明确规定。 In practice ASRS (especially NFRs) are often not elicited and are not clearly specified.
+<ol>
+<li>许多软件需求规范根本不包含 NFR。Many Software Requirements Specifications simply don't include NFRs.</li>
+<li>同样，许多敏捷项目都没有包含与 ASR 相关的用户案例。Similarly, many agile projects fail to include ASR-related user stories.</li>
+</ol>
+</li>
+<li>有没有更好的办法？Is there a better way?</li>
+<li>在我们的 TraceLab 项目中，我们采用了角色驱动的方法，使我们能够在项目早期发现具有架构重要性的需求，并利用我们的知识对架构设计和实施做出明智的决策。In our TraceLab project we adopted a persona-driven approach which enabled us to discover architecturally significant requirements early in the project and to use our knowledge to make informed decisions about architectural design and implementation.</li>
+</ol>
+<h4 id="ASRs-in-TraceLab">ASRs in TraceLab</h4>
+<ol>
+<li>TraceLab 是一项由国家科学基金会资助的 200 万美元的项目 TraceLab is a US $2 Million Project funded by the National Science Foundation</li>
+<li>由 DePaul 大学，威廉和玛丽学院，肯特州立大学和大学的合作者开发。肯塔基州。Developed by collaborators at DePaul University, College of William and Mary, Kent State Univ, and Univ. of Kentucky.</li>
+<li>旨在通过促进创新和创造力，增强可追溯性研究人员之间的协作，降低新可追溯性研究项目的启动成本和工作量以及促进技术转让来授权未来的可追溯性研究。Intended to empower future traceability research through facilitating innovation and creativity, increasing collaboration between traceability researchers, decreasing the startup costs and effort of new traceability research projects, and fostering technology transfer.</li>
+<li>提供了一个环境，研究人员可以在此环境中设计和执行实验，共享组件和数据集，并在受控的环境中比较评估结果。Provides an environment in which researchers can design and execute experiments, share components and datasets, and comparatively evaluate results in a controlled setting.</li>
+</ol>
+<h4 id="Competing-Tradeoffs">Competing Tradeoffs</h4>
+<img src="/20764/49-1686484372740-640.png" style="zoom:33%;">
+<h4 id="Traditional-HCI-Personas">Traditional HCI Personas</h4>
+<ol>
+<li>我们决定通过开发一组精通架构的角色来表示冲突的需求。We decided to represent the conflicting needs through developing a set of architecturally-savvy personas.</li>
+<li>传统上，角色构建涉及对用户进行调查，对其进行分类，制定使用假设，进行验证，创建方案以及最终设计角色。Traditionally persona construction involves surveying users, classifying them, formulating hypotheses of use, validating, creating scenarios, and finally designing personas.</li>
+<li>我们的项目太耗时，即过多的前期工作会阻碍我们实现目标。Too time consuming for our project i.e. too much upfront effort that would retard the achievement of our goals.</li>
+<li>解决方案：角色草图。Solution: Persona sketches.</li>
+</ol>
+<h4 id="Architecturally-Savvy-Lite">Architecturally-Savvy (Lite)</h4>
+<img src="/20764/50-1686484372740-641.png" style="zoom:33%;">
+<h4 id="几个例子">几个例子</h4>
+<table>
+<thead>
+<tr>
+<th><img src="/20764/51-1686484372740-642.png" alt></th>
+<th><img src="/20764/52-1686484372740-643.png" alt></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/20764/53-1686484372740-644.png" alt></td>
+<td><img src="/20764/54-1686484372740-645.png" alt></td>
+</tr>
+<tr>
+<td><img src="/20764/55-1686484372740-646.png" alt></td>
+<td><img src="/20764/56-1686484372740-647.png" alt></td>
+</tr>
+<tr>
+<td><img src="/20764/57-1686484372740-648.png" alt></td>
+<td><img src="/20764/58-1686484372740-649.png" alt></td>
+</tr>
+<tr>
+<td><img src="/20764/59-1686484372741-650.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="Design-Strategies">Design Strategies</h2>
+<ol>
+<li>Abstraction</li>
+<li>Generate &amp; Test</li>
+<li>Decomposition</li>
+<li>Reusable Elements</li>
+<li>Iteration &amp; Refinement</li>
+<li>Divide &amp; Conquer</li>
+</ol>
+<h3 id="Decomposition">Decomposition</h3>
+<ol>
+<li>质量属性需求可以分解，并分配给分解元素。Quality attribute requirements can be decomposed and assigned to the elements of the decomposition.</li>
+<li>请记住给定的约束，并安排分解，使其能够适应这些约束。Keep in mind the constraints given and arrange the decomposition so that it will accommodate those constraints.</li>
+<li>设计活动的目标是生成一个适应约束并达到系统质量和业务目标的设计。The goal of the design activity is to generate a design that accommodates the constraints and achieves the quality and business goals for the system.</li>
+</ol>
+<h4 id="Designing-to-ASRs">Designing to ASRs</h4>
+<ol>
+<li>非 ASR 需求如何进行设计？ What about the non-ASR requirements?
+<ol>
+<li>ASR 的选择意味着需求的优先级 The choice of ASRs implies a prioritization of the requirements.
+<ol>
+<li>您仍然可以满足其他需求 You can still meet the other requirements.</li>
+<li>您可以稍加调整现有设计来完成其他需求 You can meet the others with a slight adjustment of the existing design.</li>
+<li>您无法在当前设计下满足其他需求 You cannot meet the others under the current design.
+<ol>
+<li>您即将满足需求 you are close to meeting the requirements.</li>
+<li>重新确定需求的优先级并重新设计 reprioritize the requirements and revisit the design.</li>
+<li>您不能满足需求 you cannot meet requirements.</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>是一次性设计所有的 ASR 还是一次设计一个 ASR？Design for all of ASRs or one at a time?
+<ol>
+<li>答案是经验问题。The answer is a matter of experience.</li>
+<li>通过经验和教育，您将开发出一种直观的设计方法，并运用模式/策略来帮助您设计多个 ASR。Through experience and education, you will develop an intuition for designing, and employ patterns/tactics to aid you in designing for multiple ASRs.</li>
+</ol>
+</li>
+</ol>
+<h3 id="Generate-and-Test">Generate and Test</h3>
+<ol>
+<li>将特定设计视为假设：当前设计假设的错误在下一设计假设中得到解决，而正确的事情得到保留。View a particular design as a hypothesis: the things wrong with the current design hypothesis are fixed in the next design hypothesis, and the things right are kept.</li>
+<li>最初的假设从何而来？Where does the initial hypothesis come from?
+<ol>
+<li>现有系统 Existing systems</li>
+<li>框架（部分设计）Frameworks (partial designs)</li>
+<li>模式与策略 Patterns and tactics</li>
+<li>设计清单（提供指导和信心）Design checklists (providing guidance and confidence)</li>
+</ol>
+</li>
+<li>有哪些测试？What are the tests that are applied?
+<ol>
+<li>根据分析技术 Analysis techniques</li>
+<li>根据设计清单 Design checklists
+<ol>
+<li>Allocation of Responsibility</li>
+<li>Coordination Model</li>
+<li>Data Model</li>
+<li>Mapping among Architecture Elements</li>
+<li>Resource Management</li>
+<li>Binding Time</li>
+<li>Choice of Technology</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>下一个假设是如何产生的？How is the next hypothesis generated?
+<ol>
+<li>基于目前的假设，和系统实现的具体情况与质量属性之间的差距</li>
+<li>然后结合新的 tactics 生成下一个假设</li>
+</ol>
+</li>
+<li>你什么时候做完 When are you done?
+<ol>
+<li>具有满足 ASR 的设计，或者在您用尽预算进行设计时。Either have a design that satisfies the ASRs or when you exhaust you budget for design.</li>
+<li>实施您做出的最佳假设 Implement the best hypothesis you made</li>
+</ol>
+</li>
+</ol>
+<h2 id="Attribute-Driven-Design">Attribute-Driven Design</h2>
+<h3 id="ADD-的步骤概述">ADD 的步骤概述</h3>
+<ol>
+<li>步骤 1：确认有足够的需求信息 Step 1: Confirm there is sufficient requirements information</li>
+<li>步骤 2：选择要分解的系统元素 Step 2: Choose an element of the system to decompose</li>
+<li>步骤 3：确定所选元素的 ASR Step 3: ldentify the ASRs for the chosen element</li>
+<li>步骤 4：选择符合 ASR 的设计概念 Step 4:Choose a design concept that satisfies the ASRs</li>
+<li>步骤 5：实例化架构元素并分配职责 Step 5: Instantiate architectural elements and allocate responsibilities</li>
+<li>步骤 6：为实例化元素定义接口 Step6: Define interfaces for instantiated elements</li>
+<li>步骤 7：验证和完善需求，并使其成为实例化元素的约束 Step 7: Verify and refine requirements and make them constraints for instantiated elements</li>
+<li>步骤 8：重复进行，直到满足所有 ASR Step 8: Repeat until all the ASRs have been satisfied</li>
+</ol>
+<h3 id="Inputs-to-ADD-Requirements">Inputs to ADD: Requirements?</h3>
+<p>文档提供的信息是不充分的。</p>
+<h3 id="Step-1-Confirm-there-is-sufficient-requirements-information">Step 1: Confirm there is sufficient requirements information</h3>
+<ol>
+<li>系统的涉众已根据业务和任务目标确定了需求的优先级。The system's stakeholders have prioritized the requirements according to business and mission goals.</li>
+<li>您可以确定设计期间要重点关注的系统元素。You determine which system elements to focus on during the design.</li>
+<li>您确定是否有关于系统质量属性要求的足够信息：“刺激反应”形式（图）。You determine if there is sufficient information about the quality attribute requirements of the system: stimulus-response form.</li>
+</ol>
+<h3 id="Step-2-Choose-an-element-of-the-system-to-decompose">Step 2: Choose an element of the system to decompose</h3>
+<ol>
+<li>如果是第一次作为“未开发”开发的一部分，则将所有需求分配给系统。If the first time as part of a greenfield development, all requirements are assigned to the system.</li>
+<li>完善部分设计的系统时，系统已划分为多个元素，并为其分配了要求。从这些元素中选择一个作为聚焦点。When refining a partially designed system, the system has been partitioned into elements with requirements assigned to them. Choose one of these elements as the focus.</li>
+<li>Ploughed field：耕种过的地</li>
+</ol>
+<h3 id="Step-3-Identify-the-ASRs-for-the-chosen-element">Step 3: Identify the ASRs for the chosen element</h3>
+<p>根据对每个需求的高影响，中影响或低影响，根据对架构的相对影响第二次对这些相同需求进行排名。Rank these same requirements a second time based on their relative impact on the architecture as assigning high impact,&quot; medium impact,&quot; or&quot; low impact&quot; to each requirement.</p>
+<p>(H，H) (H，M) (H，L) (M，H) (M，M) (M，L) (L，H) (L，M) (L，L)</p>
+<ol>
+<li>第一个字母表示要求对涉众的重要性 The first letter indicates the importance of requirements to stakeholders</li>
+<li>第二个字母表示需求对体系结构的潜在影响 The second letter indicates the potential impact of requirements on the architecture</li>
+</ol>
+<h3 id="Step-4-Choose-a-design-concept-that-satisfies-the-ASRs">Step 4: Choose a design concept that satisfies the ASRs</h3>
+<h4 id="Step-4-1-Identify-design-concerns">Step 4.1: Identify design concerns</h4>
+<ol>
+<li>如何解决设计中的 ASR？How to address ASRs in your design?</li>
+<li>如何将问题划分成几个子问题。</li>
+</ol>
+<h4 id="Step-4-2-List-alternative-patterns-tactics-for-subordinate-concerns">Step 4.2: List alternative patterns/tactics for subordinate concerns</h4>
+<p>对于列表中的每个模式，您应该 For each pattern on your list, you should</p>
+<ol>
+<li>识别每个模式的区分参数，以帮助您在模式和战术中进行选择 identify each pattern s discriminating parameters to help you choose among the patterns and tactics</li>
+<li>估计区分参数的值 estimate the values of the discriminating parameters</li>
+</ol>
+<h4 id="Step-4-3-Select-patterns-tactics-from-the-list">Step 4.3: Select patterns/tactics from the list</h4>
+<ol>
+<li>使用每种模式时需要进行哪些权衡？ What tradeoffs are expected when using each pattern?</li>
+<li>模式之间的结合程度如何？ How well do the patterns combine with each other?</li>
+<li>是否有任何模式互斥？ Are any patterns mutually exclusive?</li>
+</ol>
+<img src="/20764/1-1686484372741-651.png" style="zoom:33%;">
+<h4 id="Step-4-4-Determine-relationship-between-patterns-tactics-and-ASRs">Step 4.4: Determine relationship between patterns/ tactics and ASRs</h4>
+<ol>
+<li>考虑到目前为止确定的模式/策略，我决定它们之间的关系。Consider the patterns/ tactics identified so far and decide how they relate to each other. The combination of the selected patterns may result in a new pattern.</li>
+<li>所选图案的组合可以产生新的图案。</li>
+</ol>
+<h4 id="Step-4-5-Capture-preliminary-architectural-viewg">Step 4.5: Capture preliminary architectural viewg</h4>
+<ol>
+<li>通过开始捕获不同的架构视图来描述您选择的模式。Describe the patterns you have selected by starting to capture different architectural views.</li>
+<li>在此阶段，您无需创建完整记录的架构视图（You don't need to create fully documented architectural views at this stage)</li>
+</ol>
+<h4 id="Step-4-6-Evaluate-and-resolve-inconsistencies">Step 4.6: Evaluate and resolve inconsistencies</h4>
+<ol>
+<li>根据体系结构驱动程序评估设计。Evaluate the design against the architectural drivers.</li>
+<li>确定是否有未考虑的体系结构驱动程序。Determine if there are any architectural drivers that were not considered.</li>
+<li>评估替代模式或应用其他策略。Evaluate alternative patterns or apply additional tactics.</li>
+<li>将当前元素的设计与体系结构中其他元素的设计进行评估，并解决所有不一致之处。Evaluate the design of the current element against the design of other elements in the architecture and resolve any inconsistencies.</li>
+</ol>
+<h3 id="Step-5-Instantiate-architectural-elements-and-allocate-responsibilities">Step 5: Instantiate architectural elements and allocate responsibilities</h3>
+<ol>
+<li>实例化您选择的每种元素的一个实例。Instantiate one instance of every type of element you chose.</li>
+<li>根据子元素的类型分配职责。Assign responsibilities to child elements according to their type.</li>
+<li>在其子级之间分配与父级元素相关联的责任。Allocate responsibilities associated with the parent element among its children.</li>
+<li>分析并记录您所做的设计决策。Analyze and document the design decisions you have made.</li>
+</ol>
+<h3 id="Step6-Define-interfaces-for-instantiated-elements">Step6: Define interfaces for instantiated elements</h3>
+<ol>
+<li>接口描述了 PROVIDES 和 REQUIRES 假设，即软件元素之间相互联系。Interfaces describe the PROVIDES and REQUIRES assumptions that software elements make about one another.
+<ol>
+<li>练习涉及您实例化的元素的功能要求。Exercise the functional requirements that involve the elements you instantiated.</li>
+<li>观察由一个元素产生并由另一元素消耗的任何信息。Observe any information that is produced by one element and consumed by another.</li>
+</ol>
+</li>
+</ol>
+<h3 id="Step-7-Verify-and-refine-requirements-and-make-them-constraints-for-instantiated-elements">Step 7: Verify and refine requirements and make them constraints for instantiated elements</h3>
+<ol>
+<li>验证分配给父元素的所有需求是否已分配给一个或多个子元素。Verify that all requirements assigned to the : parent element have been allocated to one or more child elements.</li>
+<li>将分配给子元素的所有职责转换为各个元素的功能需求。Translate any responsibilities assigned to child elements into functional requirements for the individual elements.</li>
+</ol>
+<h3 id="Step-8-Repeat-until-all-the-ASRs-have-been-satisfied">Step 8: Repeat until all the ASRs have been satisfied</h3>
+<img src="/20764/2-1686484372741-652.png" style="zoom:33%;">
+<h3 id="Outputs-of-ADD">Outputs of ADD</h3>
+<ol>
+<li>软件元素：履行各种角色和职责，具有预定属性并与其他软件元素相关以组成系统架构的计算或开发工件 software element: a computational or developmental artifact that fulills various roles and responsibilities, has defined properties, and re elates to other software elements to compose the architecture of a system</li>
+<li>角色：一组相关职责 role: a set of related responsibilities</li>
+<li>责任：软件元素提供的功能，数据或信息 responsibility: the functionality, data, or information that a software element provides</li>
+<li>属性：有关软件元素的附加信息 property: additional information about a software element</li>
+<li>关系：两个软件元素如何相互关联或交互的定义 relationship: a definition of how two software elements are associated with or interact with one another</li>
+</ol>
+<h2 id="基于-ADD-进行系统架构设计的实例">基于 ADD 进行系统架构设计的实例</h2>
+<h3 id="System-Functional-Overview">System Functional Overview</h3>
+<img src="/20764/3-1686484372741-653.png" style="zoom:33%;">
+<h3 id="Functional-Requirements">Functional Requirements</h3>
+<p>轨迹管理器为两种类型的客户端提供跟踪服务：The Track Manager provides a trackin'g service for two types of clients:</p>
+<ol>
+<li>更新客户端：这些客户端会定期向 Track Manager 发送曲目更新。轨迹管理器可以容忍某些偶然的更新丢失，尤其是在由于设备故障造成的瞬态情况下。所有更新客户端每秒都会进行一次更新，当轨迹管理器收到第三个信号时，它可以从两个丢失的更新信号中恢复。如果错过了两个以上的信号，则操作员可能必须在恢复过程中协助轨迹管理器。换句话说，如果发生故障，则必须在两秒钟之前重新开始处理，以避免操作员的干预。update clients: These clients send track updates to the Track Manager periodically. The Track Manager can tolerate some occasional loss of updates, especially during transient conditions caused by equipment failure. All update clients perform an update every second, and thel rack Manager can recover from two missed update signals when it receives the third signal. If more than two signals are missed, the operator may have to assist the Track Manager in the recovery process. In other words, if a failure occurs, the processing must restart before two seconds have elapsed in order to avoid operator intervention.</li>
+<li>查询客户端：这些客户端偶尔会运行，并且必须收到对其查询的准确答复。（查询客户端可能与某些客户端经常请求小块数据（例如，从一个客户端进行两次请求之间有五秒的几千字节的请求）和其他客户端偶尔请求大数据块（例如在两次询问之间有数分钟的几兆字节的请求）不同。查询的时间应少于特定查询正常响应时间的两倍。query clients: These clients operate sporadically and must receive exactly one reply to their query. Query clients can be dissimilar with some clients requesting small chunks of data often (e.g., several kilobytes with five seconds between queries from a single client) and others requesting large chunks of data occasionally (e.g., several megabytes with minutes between queries). | he response time for queries should be less than double the normal response time for a particular query.</li>
+</ol>
+<h3 id="Design-Constraints">Design Constraints</h3>
+<ol>
+<li>容量限制：提供的处理器在交付时应具有 50%的备用处理器和内存容量，而局域网（LAN）具有 50%的备用吞吐量能力。有 100 个更新客户端和 25 个查询客户端。为了进行时序估算，假设每秒有 100 个更新和 5 个查询。capacity restrictions: The provided processors shall have 50% spare processor and memory capacity on delivery, and the local area network (L AN) has 50% spare throughput capability. There are 100 update clients and 25 query clients. For the purposes of timing estimates, assume that there are 100 updates and 5 queries per second.</li>
+<li>持久性存储服务：我的服务将维护状态副本，该副本至少由 Track Manager 每分钟检查一次。 如果 Track Manager 的所有副本均失败，则可以从检查点文件开始重新启动。persistent storage service: T his service will maintain a copy of state that is checked at least once per minute by the Track Manager. If all replicas of the Track Manager fail, a restart can begin from the checkpoint file.</li>
+<li>两个副本：为了满足可用性和可靠性要求，已经进行了可靠性，可用性和可维护性（RMA）研究，并且在正常情况下，Track Manager 和永久性存储元素都应具有两个副本。two replicas: To satisfy the availability and reliability requirements, a Reliability, Availability, and Maintainability (RMA) study has been conducted, and the Track Manager and persistent storage elements shall all have two replicas operating during normal circumstances.</li>
+</ol>
+<h3 id="Quality-Attribute-Requirements">Quality Attribute Requirements</h3>
+<img src="/20764/4-1686484372741-655.png" style="zoom:67%;">
+<h3 id="Step-1-Confirm-there-is-sufficient-requirements-information-2">Step 1: Confirm there is sufficient requirements information</h3>
+<h4 id="第一次迭代的原始元素视图">第一次迭代的原始元素视图</h4>
+<img src="/20764/5-1686484372741-654.png" style="zoom:33%;">
+<h4 id="Results-from-Iteration1">Results from Iteration1</h4>
+<ol>
+<li>该设计使用客户端-服务器模型，其中 Track Manager 为更新和查询客户端提供服务。The design uses a client-server model where the Track Manager provides services to the update and query clients.</li>
+<li>Track Manager 分为两个元素：A 和 B。此分解允许两种部署策略：The Track Manager has been broken into two elements: A and B. This decomposition allows two deployment strategies:</li>
+</ol>
+<img src="/20764/6-1686484372741-656.png" style="zoom:50%;">
+<ol start="3">
+<li>更新和查询客户端与 Track Manager 之间的通信机制不同：The communication mechanisms between the update and query clients and the Track Manager differ:
+<ol>
+<li>更新客户端使用异步通信机制。Update clients use an asynchronous communication mechanism.</li>
+<li>查询客户端使用同步通信机制。Query clients use a synchronous communication mechanism.</li>
+</ol>
+</li>
+<li>元素 A 和 B 都包含状态数据，必须将其保存为永久存储中的检查点。Elements A and B both contain state data that must be saved as a checkpoint in persistent storage.</li>
+</ol>
+<img src="/20764/7-1686484372741-657.png" style="zoom:50%;">
+<ol start="5">
+<li>中间件 Naming Service 接受请求的服务的名称，并返回该服务的访问代码。A middleware naming service accepts the name of a requested service and returns an access code tor the service.</li>
+<li>如果提供中间件注册服务会导致持久性存储超出其备用容量限制，则该中间件注册服务将拒绝为新客户端提供服务。A middleware registration service refuses service to new clients if providing it would cause persistent storage to exceed its spare capacity limit.</li>
+<li>分配了一个单独的团队来考虑 Track Manager 元素的启动。A separate team is assigned to consider the start-up of the Track Manager elements.</li>
+<li>A 和 B 都在命名服务中注册其接口。Both A and B register their interfaces with the naming service.</li>
+<li>当更新客户端发出请求时，该请求直接从 A 或 B 到达异步通信服务，然后再到达命名服务以获取该服务的句柄。When an update client is making the request, the request goes directly from A or B to the asynchronous communication service and then to the naming service to get the handle for the service.</li>
+<li>当查询客户端发出请求时，该请求直接从 A 或 B 到达同步通信服务，然后再到达命名服务以获取该服务的句柄。When a query client is making the request, the request goes directly trom Aor B to the synchronous communication service and then to the naming service to get the handle for the service.</li>
+<li>团队决定由一位容错专家来完善容错占位符。The team decides to have a fault-tolerance expert refine the fault-tolerance placeholder.</li>
+</ol>
+<h4 id="Elements-after-Iteration-1">Elements after Iteration 1</h4>
+<img src="/20764/8-1686484372741-658.png" style="zoom:67%;">
+<h3 id="Step-2-Choose-an-Element-of-system-to-decompose">Step 2: Choose an Element of system to decompose</h3>
+<img src="/20764/9-1686484372741-659.png" style="zoom: 33%;">
+<ul>
+<li>我们选择 Fault-Tolerance Service 作为设计焦点</li>
+</ul>
+<h3 id="Step-3-Identify-the-ASRs-for-the-chosen-element-2">Step 3: Identify the ASRs for the chosen element</h3>
+<img src="/20764/10-1686484372741-660.png" style="zoom:33%;">
+<ol>
+<li>从初始体系结构要求中识别出 7 个 ASR。7 ASRs are identified from the initial architecture requirements.</li>
+<li>从 ADD 的第一次迭代产生的设计约束中识别出 3 个 ASR。3 ASRs are identified from the design constraints resulting from the first iteration of ADD.</li>
+<li>标记为（高，高）的 ASR 直接取决于方案 1（最难满足且具有最高优先级驱动程序）中 2 秒的端到端定时要求。ASRs labeled (high, high) bear directly on the end-to-end timing requirement of 2 seconds in Scenario 1 (the most difficult to satisfy and has the highest priority drivers</li>
+<li>标有（中，中）的 ASR 与运行追踪管理器的单个副本的时间相关联，并且恢复应在 2 分钟内发生。ASRs labeled (medium, medium) are associated with the timing when a single copy of the Track Manager is operating, and restoration should occur within 2 minutes.</li>
+<li>重新启动场景最不重要，因此单独的启动设计工作正在考虑其细节。The restart scenario is least important, and a separate “start-up&quot; design effort is considering its details.</li>
+</ol>
+<h3 id="Step-4-Choose-a-design-concept-that-satisfies-the-ASRs-2">Step 4: Choose a design concept that satisfies the ASRs</h3>
+<h4 id="Step-4-1-Identify-design-concerns-2">Step 4.1: Identify design concerns</h4>
+<p>How to address ASRs in your design?</p>
+<h5 id="Design-concerns-with-Fault-Tolerance-Services">Design concerns with Fault-Tolerance Services</h5>
+<ol>
+<li>故障准备：此问题包括在正常操作过程中定期执行的策略，以确保发生故障时可以进行恢复。fault preparation: T his concern consists of those tactics performed routinely during normal operation to ensure that when a failure occurs, a recovery can take place.</li>
+<li>故障检测：此问题包括与检测故障并通知要处理该故障的元素有关的策略。fault detection: This concern consists of the tactics associated with detecting the fault and notifying an element to deal with the fault.</li>
+<li>故障恢复：此问题解决了在瞬态情况下的操作，在故障发生和恢复正常操作之间的时间段。fault recovery: This concern addresses operations during a transient condition —— the time period between the fault occurrence and the restoration of normal operation.</li>
+<li>4 个分支是 4 个关注点，我们选择 Detect Faults 作为关注点</li>
+</ol>
+<img src="/20764/11-1686484372741-661.png" style="zoom:33%;">
+<h5 id="Design-Concerns-Alternative-Tactics">Design Concerns (Alternative Tactics)</h5>
+<img src="/20764/12-1686484372741-662.png" style="zoom:33%;">
+<h4 id="Step-4-2-List-alternative-patterns-tactics-for-subordinate-concerns-2">Step 4.2: List alternative patterns/tactics for subordinate concerns</h4>
+<h5 id="Alternative-Restart-Tactics">Alternative Restart Tactics</h5>
+<p>区分参数 Discriminating parameters:</p>
+<ol>
+<li>故障后可以忍受的停机时间（方案 1）the downtime that can be tolerated after failure (scenario 1)</li>
+<li>系统在故障时间前后的时间间隔内处理服务请求的方式； 例如，如果它尊重了他们并降低了响应时间或放弃了它们（方案 1） the manner in which the system treats requests for services in the time interval around the failure time; for example, if it honors them and degrades the response time or it drops them (scenario 1)</li>
+</ol>
+<img src="/20764/13-1686484372741-663.png" style="zoom:50%;">
+<h5 id="Alternative-Deployment-Tactics">Alternative Deployment Tactics</h5>
+<p>区分参数：Discriminating parameters:</p>
+<ol>
+<li>故障后可以忍受的停机时间（方案 1）the downtime that can be tolerated after failure (scenario 1)</li>
+<li>支持 100 个更新客户端和 25 个查询客户端（需求 2）the support of 100 update clients and 25 query clients (requirement 2)</li>
+</ol>
+<img src="/20764/14-1686484372741-664.png" style="zoom:33%;">
+<h5 id="Alternative-Data-Integrity-Tactics">Alternative Data Integrity Tactics</h5>
+<img src="/20764/15-1686484372741-665.png" style="zoom:33%;">
+<h5 id="Alternative-Health-Monitoring-Tactics">Alternative Health Monitoring Tactics</h5>
+<p><img src="/20764/16-1686484372741-666.png" alt></p>
+<h5 id="Alternative-Transparency-Tactics">Alternative Transparency Tactics</h5>
+<p><img src="/20764/17-1686484372741-667.png" alt></p>
+<h4 id="Step-4-3-Select-patterns-tactics-from-the-list-2">Step 4.3: Select patterns/tactics from the list</h4>
+<h5 id="Alternative-Restart-Tactics-2">Alternative Restart Tactics</h5>
+<p>区分参数：</p>
+<ol>
+<li>故障后可以容忍的停机时间（方案 1）Discriminating parameters: the downtime that can be tolerated after failure (scenario 1)</li>
+<li>系统在故障时间前后的时间间隔内处理服务请求的方式； 例如，它满足它们并降低了响应时间，或者丢弃了它们（方案 1） the manner in which the system treats requests for services in the time interval around the failure time; for example, it it honors them and degrades the response time or it drops them (scenario 1)</li>
+</ol>
+<img src="/20764/28-1686484372741-668.png" style="zoom: 67%;">
+<ol>
+<li>推理 Reasoning
+<ol>
+<li>方案 1 和要求 1 都指示重新启动时间必须少于 2 秒；因此，冷重启策略是不合适的。Both Scenario1 and Requirement 1 indicate that the restart time must be less than two seconds; thus, Cold Restart tactic is inappropriate.</li>
+<li>“热备份”策略比“主/主”或“老兄共享”策略更易于实施；并且似乎很容易满足场景中描述的时间要求。The Warm Standby tactic is simpler to implement than the Master/ Master or L oad Sharing tactics; and it seems to easily satisfy the timing requirement described in scenario 1.</li>
+</ol>
+</li>
+<li>决策：使用热备份策略。Decision: Use the Warm Standby tactic.</li>
+<li>实现 Implications
+<ol>
+<li>每个组件（A 和 B）的主要跟踪管理器都会接收所有请求并做出响应。A primary Track Manager for each component (A and B) receives all requests and responds to them.</li>
+<li>每个组件（A 和 B）的辅助（备用）轨道管理器都加载在另一个处理器上，并占用内存。A secondary (standby) Track Manager for each component (A' and B&quot;) is loaded on another processor and takes up memory.</li>
+</ol>
+</li>
+</ol>
+<h5 id="Alternative-Deployment-Tactics-2">Alternative Deployment Tactics</h5>
+<p>区分参数：Discriminating parameters:</p>
+<ol>
+<li>故障后可以忍受的停机时间（方案 1） the downtime that can be tolerated after failure(scenario 1)</li>
+<li>支持 100 个更新客户端和 25 个查询客户端（需求 2）the support of 100 update clients and 25 query clients (requirement 2)</li>
+</ol>
+<img src="/20764/29-1686484372741-669.png" style="zoom: 67%;">
+<h5 id="Choose-Deployment-Tactic">Choose Deployment Tactic</h5>
+<ol>
+<li>推理 Reasoning
+<ol>
+<li>即使恢复时间较慢，架构师也熟悉采用单一故障转移方案从软件或硬件故障中恢复（统称为策略）。The architect is familiar with having a single failover scheme for recovery from a software or hardware failure (Together tactic), even though it has a slower recovery time.</li>
+<li>该策略可以满足处理要求，尽管可以减少处理次数。This tactic meets the processing requirements, although it can pertorm less processing.</li>
+</ol>
+</li>
+<li>决策：使用共同战术。Decision: Use the Together tactic.</li>
+<li>实现 Implications
+<ol>
+<li>主要组件（A 和 B）共享一个处理器，次要组件（A 和 B）也共享一个处理器。The primary components (A and B) share a processor, as do the secondary components (A and B ).</li>
+<li>该系统将永远无法与不同处理器中的主要组件一起运行。The system will never be operational with the primary components in different processors.</li>
+</ol>
+</li>
+</ol>
+<h5 id="Alternative-Data-Integrity-Tactics-2">Alternative Data Integrity Tactics</h5>
+<img src="/20764/30-1686484372741-670.png" style="zoom:67%;">
+<ol>
+<li>推理 Reasoning
+<ol>
+<li>显然，需要每分钟有一个状态检查点才能满足方案 2。但是，一分钟前的状态不能满足方案 1。策略 1 被拒绝。Clearly a checkpoint of state every minute is needed to satisfy Scenario 2. However, a state that is one minute old cannot satisfy Scenario 1. Tactic 1 is rejected.</li>
+<li>策略 2 满足方案 1 和 2 的升级要求；但是，这会带来不可接受的通信负载。策略 2 被拒绝。Tactic 2 would satisfy the upgrade requirements of Scenarios 1 and 2; however, it places an unacceptable communication load. Tactic 2 is rejected.</li>
+<li>策略 3 将满足方案 1 和 2，但是（如策略 2 一样）它给通信系统带来了沉重的负担。策略 3 被拒绝。Tactic 3 would satisfy Scenarios1 and 2, but like Tactic 2) it places a significant burden on the communication system. Tactic 了 is rejected.</li>
+<li>如果 x 小于 2 秒，则策略 4 满足方案 1 和 2。这也带来了更合理的通信负载。捆绑升级周期为 2 秒似乎令人满意。选择了战术 4。Tactic 4 satisfies Scenarios 1 and 2 ifx is less than 2 seconds. It also puts a more reasonable communication load. Having a bundled upgrade periodicity of 2 seconds appears to be satisfactory. Tactic 4 is selected.</li>
+<li>策略 5 也可以满足这种情况，但更为复杂，因为辅助服务器必须每隔 x 秒执行一次以更新其状态副本。策略 5 被拒绝。Tactic 5 also satisfies the scenarios but is more complex, since the secondary must execute every x seconds to update its state copy. Tactic 5 is rejected.</li>
+</ol>
+</li>
+<li>决策：
+<ol>
+<li>使用检查点+捆绑日志更改策略。Use the Checkpoint + Bundled Log Changes tactic.</li>
+<li>x 小于 2：此时策略满足了方案 1 和方案 2</li>
+</ol>
+</li>
+<li>实现 Implications
+<ol>
+<li>主副本每分钟将状态保存到一个持久性检查点文件中。The primary replica saves the state to a persistent CheckpointFile every minute.</li>
+<li>主数据库将所有状态更改的本地捆绑文件保留 2 秒，然后每 2 秒将其作为日志文件发送一次。The primary keeps a local bundled file of all state changes for 2 seconds, and sends it as a L ogFile every 2 seconds.</li>
+<li>升级后的主数据库在升级后会先读取检查点文件，然后读取日志文件并在读取时更新每个状态更改 The promoted primary reads in the CheckpointFile after it is promoted, then reads the L _ogFile and updates each state change as it is read...</li>
+</ol>
+</li>
+</ol>
+<h5 id="Alternative-Health-Monitoring-Tactics-2">Alternative Health Monitoring Tactics</h5>
+<img src="/20764/31-1686484372741-671.png" style="zoom: 50%;">
+<ol>
+<li>推理 Reasoning：
+<ol>
+<li>ping/echo 故障检测比心跳检测更为复杂，并且需要两倍的带宽。The ping/echo fault detection is more complex than the heartbeat detection and requires twice the bandwidth.</li>
+<li>不选择 3 和 4 的原因是如果使用客户端来检查，可能没有办法在 2s 之内完成，从而导致更严重的问题。</li>
+</ol>
+</li>
+<li>决策：使用心跳策略。Decision: Use the Heartbeat tactic.</li>
+<li>实现 Implications
+<ol>
+<li>心跳必须足够快，以允许辅助节点初始化并在发生故障后 2 秒钟内开始处理。初始化两个检查点文件需要 1.2 秒。心跳会额外增加 0.25 秒，剩下 0.55 秒的备用时间，这似乎是合理的。The heartbeat must be fast enough to allow the secondary to become initialized and start processing within 2 seconds after a failure occurs. Initializing the two checkpoint files takes 1.2 seconds. The heartbeat adds an additional 0.25 second, leaving 0.55 second spare, which seems reasonable.</li>
+<li>运行状况监视元素每 0.25 秒检查一次心跳。 如果未检测到心跳，则健康监视器会通知所有必要的元素。A health monitoring element checks for the heartbeat every 0.25 second. When a heartbeat is not detected, the health monitor informs all the necessary elements.</li>
+<li>如果主根子跟踪管理器组件检测到内部故障，则用于传达故障的机制是不发出心跳。If a primary Track Manager component detects an internal failure, the mechanism for communicating the failure is to not issue the heartbeat.</li>
+</ol>
+</li>
+</ol>
+<h5 id="Alternative-Transparency-Tactics-2">Alternative Transparency Tactics</h5>
+<img src="/20764/32-1686484372741-672.png" style="zoom: 67%;">
+<ol>
+<li>推理 Reasoning
+<ol>
+<li>客户端处理故障是不希望的，故障转移很容易被误解并使它变得不那么健壮。It is undesirable to have the clients handle failure, the failover could be misinterpreted easily and render it less than robust.</li>
+<li>该基础结构没有内置的多播功能，因此添加此功能将很昂贵。The infrastructure has no built-in multicast capability, and adding this feature would be expensive.</li>
+</ol>
+</li>
+<li>决策：使用代理处理失败策略。Decision: Use the Proxy Handles Failure tactic.</li>
+<li>含义 Implications
+<ol>
+<li>代理服务将服务方法注册到名称服务器。The proxy service registers the service methods with the name server.</li>
+<li>代理服务会启动第一个组件，并以不同的名称（AA.a，AA.b，BB.c 和 BB.d）注册它们，并同样对第二个组件（AA.a，AA'.b，BB'.c 和 BB'.d）进行注册。The proxy service starts the first components, registering them under different names (AA.a, AA.b, BB.c, and BB.d) and does likewise for the secondary components (AA.c, AA'.b, BB'.c, and BB'd).</li>
+<li>客户端请求服务（A.a)。此请求将导致命名服务被调用并返回 A.a 的访问代码，该代码被指定为 access(A.a)。接下来，客户端调用访问权限（A.a)。The client requests a service (A.a). This request causes the naming service to be invoked and to return the access code for A.a, designated as access(A.a). Next, the client invokes access(A.a).</li>
+<li>代理服务（A.a）确定 AA 是主要副本，并将访问（AA.a）作为“转发请求”返回给客户端。The proxy service (A.a) determines that AA is the primary replica and returns access (AA.a) to the client as a forward request to</li>
+<li>客户端调用访问（AA.a）并继续执行直到 AA 失败。The client invokes access(AA.a) and continues to do so until AA fails.</li>
+<li>当运行状况监视器在 AA 中检测到心跳失败时，它将通知代理服务... When the health monitor detects heartbeat failure in AA, it informs the proxy service...</li>
+</ol>
+</li>
+</ol>
+<h4 id="Step-4-4-Determine-relationship-between-patterns-tactics-and-ASRs-2">Step 4.4: Determine relationship between patterns/ tactics and ASRs</h4>
+<h5 id="Mapping-between-Patterns-Tactics-and-ASRs">Mapping between Patterns/Tactics and ASRs</h5>
+<img src="/20764/18-1686484372741-673.png" style="zoom:33%;">
+<h4 id="Step-4-5-Capture-preliminary-architectural-views">Step 4.5: Capture preliminary architectural views</h4>
+<h5 id="Element-Table">Element Table</h5>
+<img src="/20764/19-1686484372741-674.png" style="zoom: 33%;">
+<h5 id="Architectural-Element-View">Architectural Element View</h5>
+<img src="/20764/20-1686484372741-675.png" style="zoom:33%;">
+<h5 id="Sequence-Diagram">Sequence Diagram</h5>
+<img src="/20764/21-1686484372741-676.png" style="zoom:50%;">
+<h4 id="Step-4-6-Evaluate-and-resolve-inconsistencies-2">Step 4.6: Evaluate and resolve inconsistencies</h4>
+<h5 id="Timing-Model">Timing Model</h5>
+<img src="/20764/22-1686484372742-677.png" style="zoom:33%;">
+<h5 id="Events-Occurring-in-Sequence">Events Occurring in Sequence</h5>
+<ol>
+<li>保存对持久性日志文件的状态更新。A save is made of state updates to the persistent LogFile.</li>
+<li>保存状态后，多次检测到心跳。A heartbeat is detected a number of times after the state save.</li>
+<li>轨迹管理器中发生崩溃故障。A crash failure occurs in the Track Manager.</li>
+<li>当心跳之前发生超时时，运行状况监视器将检测到故障。The health monitor detects the failure when a timeout occurs before the heartbeat</li>
+<li>辅助跟踪管理器提升为主要。The secondary Track Manager is promoted to primary</li>
+<li>辅助服务开始响应客户端请求，以减少请求的积压并缩短响应时间。The secondary service starts to respond to client requests, working off the backlog of requests and giving slower response times.</li>
+<li>响应缓慢的过渡时间结束后，服务将恢复正常。The service returns to normal when the transient period of slow responses ends.</li>
+<li>新副本完成初始化，并准备与当前主副本同步并成为辅助副本。A new replica completes initialization and is ready to synchronize with the current primary and become the secondary.</li>
+<li>新副本已完成所有需要的状态更新，并且还原服务的过程已完成。The new replica has completed any needed state updates, and the process of restoring the service is completed.</li>
+</ol>
+<h5 id="Timing-Evaluation">Timing Evaluation</h5>
+<ol>
+<li>Tps：状态 ogFile 保存的周期（2 秒）Tps: periodicity of the state LogFile save (2 seconds)</li>
+<li>Th：心跳周期（0.25 秒）Th: periodicity of the heartbeat (0.25 second)</li>
+<li>TrA：从持久性存储中恢复 A 状态所花费的时间（0.8 秒）TrA: elapsed time taken to recover the state of A from persistent storage (0.8 second)</li>
+<li>TrB：从持久性存储中恢复 B 状态所花费的时间（0.6 秒）TrB: elapsed time taken to recover the state of B from persistent storage (0.6 second)</li>
+<li>TrL：从持久性存储中恢复 LogFile 所花费的时间（估计为 0.2 秒）TrL: elapsed time to recover the LogFile from persistent storage (estimated at 0.2 second)</li>
+<li>Tus：从日志文件更新 A 和 B 的状态所花费的时间（估计为 0.1 秒）Tus: elapsed time to update the state of A and B from the LogFile (estimated at 0.1 second)</li>
+</ol>
+<p>$$
+T1 = Tps + Th + TrA + TrB + TrL + Tus\
+T1 = 2 + 0.25 + 0.8 + 0.6 + 0.2 + 0.1 = 3.95&gt; 2.0
+$$</p>
+<h5 id="Possible-Timing-Resolutions">Possible Timing Resolutions</h5>
+<ol>
+<li>减少日志文件保存到永久性存储的周期。同步日志文件和心跳，以便在启动保存后立即发生心跳。Reduce the periodicity of the LogFile save to persistent storage. Synchronize the LogFile save and the heartbeat such that the heartbeat occurs just after a save is initiated.</li>
+<li>将日志文件保存到永久性存储中相当于心跳。每 0.5 秒发送一次日志。扩展持久性存储元素，以便它识别出未能接收到日志文件更新会触发一个请求，以通知其他必要的元素失败（即代理，备用，客户端）。Have the LogFile save to persistent storage serve as the heartbeat equivalent. Send the log every 0.5 seconds. Extend the persistent storage element so that it recognizes that a failure to receive the LogFile update triggers a request to inform the other necessary elements of a failure (i.e., proxy, standby, clients).</li>
+<li>使持久存储并发访问，而不是顺序访问。Make the 3 persistent storage accesses concurrent instead of sequential.</li>
+<li>将部署决策更改为第二种模式，其中 A 和 B 的主节点位于不同的处理器中；因此，带有组件 A 的处理器的故障将是最坏的情况。Change the deployment decision to the second pattern, in which the primaries of A and B are in different processors; hence, the failure of the processor with component A will be the worst case.</li>
+<li>更改状态更新的样式，其中辅助数据库通过在启动期间与主数据库同步来维护状态模型。它还定期接收一堆状态更新，从而消除了从持久性存储中读取数据的需求。Change the style of the state update, in which the secondary maintains a model of the state by synchronizing with the primary during start-up. It also receives a bundle of state updates periodically, thus obviating the need to read from persistent storage.</li>
+<li>通过在重新启动时重新计算一些状态数据来减少要为组件 A 和 B 保存的状态的大小。Reduce the size of the state to be saved for components A and B by recomputing some state data on restart.</li>
+</ol>
+<h5 id="Timing-Decisions">Timing Decisions</h5>
+<img src="/20764/23-1686484372742-678.png" style="zoom:50%;">
+<h3 id="Step-5-Instantiate-architectural-elements-and-allocate-responsibilities-2">Step 5: Instantiate architectural elements and allocate responsibilities</h3>
+<h4 id="分配职责给每一个元素">分配职责给每一个元素</h4>
+<p><img src="/20764/24-1686484372742-679.png" alt></p>
+<h4 id="解释-1">解释 1</h4>
+<ol>
+<li>A 接收来自查询和更新客户端的消息。 它根据更新客户端消息更新其状态，并回复查询客户端的查询。A receives messages from both query and update clients. It updates its state based on the update client messages and replies to queries from the query clients.</li>
+<li>通常，A 与元素 B 的备份副本 B'部署在同一处理器上。在 B 发生故障之后，B'被提升，并且 A 和 B 都占用相同的处理器，直到启动新版本的 B。 未定义将主节点 B 切换到刚启动的元素 B 的过程。A is normally deployed on the same processor as the backup copy B' of the element B. Just after a failure occurs to B, B' is promoted, and both A and B occupy the same processor until a new version of B is started. The process of switching the primary B to the just- started element B is not defined.</li>
+<li>A 每 0.25 秒向健康监视器发送一次心跳 A sends a heartbeat to the health monitor every 0.25 seconds.</li>
+<li>A 每分钟将其状态复制到检查点文件 A。A copies its state to CheckpointFileA every minute.</li>
+<li>A 会累积由于更新客户端消息而导致的状态更改，并每 1.0 秒将其写入 LogFileA。A accumulates the state changes made due to update client messages and writes them to LogFileA every 1.0 seconds. This write is synchronized with sending the check- point.</li>
+<li>此写入与发送检查点同步。 A 和 A'的启动未解决（另一个团队）。 The start-up of A and A' was not addressed (by another team).</li>
+<li>proxy 元素将收到一个请求，要求元素 A 的两个副本都失败，将停止发送更新，并通知必要的参与者。The proxy element will receive a request that both copies of the element A have failed, will stop sending updates, and will notify the necessary actors.</li>
+</ol>
+<h4 id="解释-2">解释 2</h4>
+<ol>
+<li>它使用命名服务注册与 A 和 B 关联的所有方法 It registers all the methods associated with both A and B with the naming service.</li>
+<li>它启动 AA，AA'，BB 和 BB'，并在命名服务中注册其所有方法。 它通过映射客户端使用的名称（例如 A.a）和元素创建的名称（例如 AA.a 和 AA'.a）来创建缓存。 它确定哪个元素是主要元素，哪个是次要元素。It starts AA, AA', BB, and BB’and registers all their methods with the naming service. It creates a cache by mapping the names used by the clients (e.g,, A.a) and the names created by the elements (e.g., AA.a and AA' .a). It determines which element is primary and which is secondary.</li>
+<li>当客户端请求服务时，它由同步或异步通信元素调用； 例如 A.a. 如果 AA 是主要服务器，它会向 AA.a 发出“转发请求”。当运行状况监视器向代理发出信号通知主服务器（例如 AA）发生故障时，它将向同步和异步通信元素发送转发请求，以访问所有备用方法（例如 AA'.a)，从而提升 AA'到主要位置。It is called by either the synchronous or asynchronous communication element when a client requests a service; e.g., A.a. It replies with a “forward request&quot; to AA.a if AA is the primary.</li>
+<li>When the health monitor signals the proxy that the primary (e.g, AA) has failed, it sends a forward request to both the synchronous and asynchronous communication elements to access all the standby methods (e.g., AA' .a), thus promoting AA' to be primary.</li>
+</ol>
+<h4 id="解释-3">解释 3</h4>
+<ol>
+<li>它接收来自更新客户端的对方法（例如 A.a）的请求，并将该请求定向到适当的元素。It receives a request from the update clients to a method (e.g., A.a), and directs the request to the appropriate element.</li>
+<li>它向名称服务器发送方法 A.a，并接收对 A.a 代理元素的访问代码。It sends the name server the method A.a and receives the access code to the proxy element for A.a.</li>
+<li>它将更新消息发送到代理元素 A.a。It sends the update message to the proxy element A.a.</li>
+<li>当收到转发给 A.a 的转发请求以将消息发送到 A.a 时，它将请求发送给 A.a 并缓存 A.a 的句柄。When receives the forward request for A.a to send the message to AA.a, it sends the request to AA.a and caches the handle for AA.a.</li>
+<li>任何后续请求均直接向 AA.a 句柄发出。Any subsequent requests are made directly to the AA.a handle.</li>
+<li>发生故障时，它将接收到 AA'.a 的转发请求，并将该句柄用于后续请求。When a failure occurs, it receives the forward request to AA'.a and uses that handle for subsequent requests.</li>
+<li>如果 Aa.a 失败并且没有备用，它将通知更新客户端停止发送更新。If AA.a fails and there is no standby, it informs the update client to stop sending updates.</li>
+</ol>
+<h3 id="Step-6-Define-interfaces-for-instantiated-elements">Step 6: Define interfaces for instantiated elements</h3>
+<h4 id="Summary-of-Interfaces">Summary of Interfaces</h4>
+<img src="/20764/25-1686484372742-680.png" style="zoom: 50%;">
+<h3 id="Step-7-Verify-and-refine-requirements-and-make-them-constraints-for-instantiated-elements-2">Step 7: Verify and refine requirements and make them constraints for instantiated elements</h3>
+<h4 id="Architecturally-Significant-Requirements-2">Architecturally Significant Requirements</h4>
+<img src="/20764/26-1686484372742-681.png" style="zoom:33%;">
+<h2 id="Reading-Materials">Reading Materials</h2>
+<img src="/20764/27-1686484372742-682.png" style="zoom:33%;">
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/28203/" rel="prev" title="软件架构设计-03-Architectural Pattern">
+      <i class="fa fa-chevron-left"></i> 软件架构设计-03-Architectural Pattern
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/23562/" rel="next" title="软件架构设计-05-Document">
+      软件架构设计-05-Document <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Architecturally-Significant-Requirements"><span class="nav-number">1.</span> <span class="nav-text">Architecturally Significant Requirements</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Gathering-ASRs-from-Requirements-Documents"><span class="nav-number">1.1.</span> <span class="nav-text">Gathering ASRs from Requirements Documents</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gathering-ASRs-by-Interviewing-Stakeholders"><span class="nav-number">1.2.</span> <span class="nav-text">Gathering ASRs by Interviewing Stakeholders</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Capturing-ASRs-in-a-Utility-Tree"><span class="nav-number">1.3.</span> <span class="nav-text">Capturing ASRs in a Utility Tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Persona-Based-Approach-to-exploring-ASRs"><span class="nav-number">1.4.</span> <span class="nav-text">Persona-Based Approach to exploring ASRs</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Working-with-ASRs"><span class="nav-number">1.4.1.</span> <span class="nav-text">Working with ASRs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ASRs-in-TraceLab"><span class="nav-number">1.4.2.</span> <span class="nav-text">ASRs in TraceLab</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Competing-Tradeoffs"><span class="nav-number">1.4.3.</span> <span class="nav-text">Competing Tradeoffs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Traditional-HCI-Personas"><span class="nav-number">1.4.4.</span> <span class="nav-text">Traditional HCI Personas</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Architecturally-Savvy-Lite"><span class="nav-number">1.4.5.</span> <span class="nav-text">Architecturally-Savvy (Lite)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%A0%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="nav-number">1.4.6.</span> <span class="nav-text">几个例子</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Design-Strategies"><span class="nav-number">2.</span> <span class="nav-text">Design Strategies</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Decomposition"><span class="nav-number">2.1.</span> <span class="nav-text">Decomposition</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Designing-to-ASRs"><span class="nav-number">2.1.1.</span> <span class="nav-text">Designing to ASRs</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-and-Test"><span class="nav-number">2.2.</span> <span class="nav-text">Generate and Test</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Attribute-Driven-Design"><span class="nav-number">3.</span> <span class="nav-text">Attribute-Driven Design</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ADD-%E7%9A%84%E6%AD%A5%E9%AA%A4%E6%A6%82%E8%BF%B0"><span class="nav-number">3.1.</span> <span class="nav-text">ADD 的步骤概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Inputs-to-ADD-Requirements"><span class="nav-number">3.2.</span> <span class="nav-text">Inputs to ADD: Requirements?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1-Confirm-there-is-sufficient-requirements-information"><span class="nav-number">3.3.</span> <span class="nav-text">Step 1: Confirm there is sufficient requirements information</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2-Choose-an-element-of-the-system-to-decompose"><span class="nav-number">3.4.</span> <span class="nav-text">Step 2: Choose an element of the system to decompose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3-Identify-the-ASRs-for-the-chosen-element"><span class="nav-number">3.5.</span> <span class="nav-text">Step 3: Identify the ASRs for the chosen element</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4-Choose-a-design-concept-that-satisfies-the-ASRs"><span class="nav-number">3.6.</span> <span class="nav-text">Step 4: Choose a design concept that satisfies the ASRs</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-1-Identify-design-concerns"><span class="nav-number">3.6.1.</span> <span class="nav-text">Step 4.1: Identify design concerns</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-2-List-alternative-patterns-tactics-for-subordinate-concerns"><span class="nav-number">3.6.2.</span> <span class="nav-text">Step 4.2: List alternative patterns&#x2F;tactics for subordinate concerns</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-3-Select-patterns-tactics-from-the-list"><span class="nav-number">3.6.3.</span> <span class="nav-text">Step 4.3: Select patterns&#x2F;tactics from the list</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-4-Determine-relationship-between-patterns-tactics-and-ASRs"><span class="nav-number">3.6.4.</span> <span class="nav-text">Step 4.4: Determine relationship between patterns&#x2F; tactics and ASRs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-5-Capture-preliminary-architectural-viewg"><span class="nav-number">3.6.5.</span> <span class="nav-text">Step 4.5: Capture preliminary architectural viewg</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-6-Evaluate-and-resolve-inconsistencies"><span class="nav-number">3.6.6.</span> <span class="nav-text">Step 4.6: Evaluate and resolve inconsistencies</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-5-Instantiate-architectural-elements-and-allocate-responsibilities"><span class="nav-number">3.7.</span> <span class="nav-text">Step 5: Instantiate architectural elements and allocate responsibilities</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step6-Define-interfaces-for-instantiated-elements"><span class="nav-number">3.8.</span> <span class="nav-text">Step6: Define interfaces for instantiated elements</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-7-Verify-and-refine-requirements-and-make-them-constraints-for-instantiated-elements"><span class="nav-number">3.9.</span> <span class="nav-text">Step 7: Verify and refine requirements and make them constraints for instantiated elements</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-8-Repeat-until-all-the-ASRs-have-been-satisfied"><span class="nav-number">3.10.</span> <span class="nav-text">Step 8: Repeat until all the ASRs have been satisfied</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Outputs-of-ADD"><span class="nav-number">3.11.</span> <span class="nav-text">Outputs of ADD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-ADD-%E8%BF%9B%E8%A1%8C%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%AE%9E%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">基于 ADD 进行系统架构设计的实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#System-Functional-Overview"><span class="nav-number">4.1.</span> <span class="nav-text">System Functional Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Functional-Requirements"><span class="nav-number">4.2.</span> <span class="nav-text">Functional Requirements</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Design-Constraints"><span class="nav-number">4.3.</span> <span class="nav-text">Design Constraints</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Quality-Attribute-Requirements"><span class="nav-number">4.4.</span> <span class="nav-text">Quality Attribute Requirements</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-1-Confirm-there-is-sufficient-requirements-information-2"><span class="nav-number">4.5.</span> <span class="nav-text">Step 1: Confirm there is sufficient requirements information</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BF%AD%E4%BB%A3%E7%9A%84%E5%8E%9F%E5%A7%8B%E5%85%83%E7%B4%A0%E8%A7%86%E5%9B%BE"><span class="nav-number">4.5.1.</span> <span class="nav-text">第一次迭代的原始元素视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Results-from-Iteration1"><span class="nav-number">4.5.2.</span> <span class="nav-text">Results from Iteration1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Elements-after-Iteration-1"><span class="nav-number">4.5.3.</span> <span class="nav-text">Elements after Iteration 1</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-2-Choose-an-Element-of-system-to-decompose"><span class="nav-number">4.6.</span> <span class="nav-text">Step 2: Choose an Element of system to decompose</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-3-Identify-the-ASRs-for-the-chosen-element-2"><span class="nav-number">4.7.</span> <span class="nav-text">Step 3: Identify the ASRs for the chosen element</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-4-Choose-a-design-concept-that-satisfies-the-ASRs-2"><span class="nav-number">4.8.</span> <span class="nav-text">Step 4: Choose a design concept that satisfies the ASRs</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-1-Identify-design-concerns-2"><span class="nav-number">4.8.1.</span> <span class="nav-text">Step 4.1: Identify design concerns</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Design-concerns-with-Fault-Tolerance-Services"><span class="nav-number">4.8.1.1.</span> <span class="nav-text">Design concerns with Fault-Tolerance Services</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Design-Concerns-Alternative-Tactics"><span class="nav-number">4.8.1.2.</span> <span class="nav-text">Design Concerns (Alternative Tactics)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-2-List-alternative-patterns-tactics-for-subordinate-concerns-2"><span class="nav-number">4.8.2.</span> <span class="nav-text">Step 4.2: List alternative patterns&#x2F;tactics for subordinate concerns</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Restart-Tactics"><span class="nav-number">4.8.2.1.</span> <span class="nav-text">Alternative Restart Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Deployment-Tactics"><span class="nav-number">4.8.2.2.</span> <span class="nav-text">Alternative Deployment Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Data-Integrity-Tactics"><span class="nav-number">4.8.2.3.</span> <span class="nav-text">Alternative Data Integrity Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Health-Monitoring-Tactics"><span class="nav-number">4.8.2.4.</span> <span class="nav-text">Alternative Health Monitoring Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Transparency-Tactics"><span class="nav-number">4.8.2.5.</span> <span class="nav-text">Alternative Transparency Tactics</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-3-Select-patterns-tactics-from-the-list-2"><span class="nav-number">4.8.3.</span> <span class="nav-text">Step 4.3: Select patterns&#x2F;tactics from the list</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Restart-Tactics-2"><span class="nav-number">4.8.3.1.</span> <span class="nav-text">Alternative Restart Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Deployment-Tactics-2"><span class="nav-number">4.8.3.2.</span> <span class="nav-text">Alternative Deployment Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Choose-Deployment-Tactic"><span class="nav-number">4.8.3.3.</span> <span class="nav-text">Choose Deployment Tactic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Data-Integrity-Tactics-2"><span class="nav-number">4.8.3.4.</span> <span class="nav-text">Alternative Data Integrity Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Health-Monitoring-Tactics-2"><span class="nav-number">4.8.3.5.</span> <span class="nav-text">Alternative Health Monitoring Tactics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Alternative-Transparency-Tactics-2"><span class="nav-number">4.8.3.6.</span> <span class="nav-text">Alternative Transparency Tactics</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-4-Determine-relationship-between-patterns-tactics-and-ASRs-2"><span class="nav-number">4.8.4.</span> <span class="nav-text">Step 4.4: Determine relationship between patterns&#x2F; tactics and ASRs</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Mapping-between-Patterns-Tactics-and-ASRs"><span class="nav-number">4.8.4.1.</span> <span class="nav-text">Mapping between Patterns&#x2F;Tactics and ASRs</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-5-Capture-preliminary-architectural-views"><span class="nav-number">4.8.5.</span> <span class="nav-text">Step 4.5: Capture preliminary architectural views</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Element-Table"><span class="nav-number">4.8.5.1.</span> <span class="nav-text">Element Table</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Architectural-Element-View"><span class="nav-number">4.8.5.2.</span> <span class="nav-text">Architectural Element View</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-Diagram"><span class="nav-number">4.8.5.3.</span> <span class="nav-text">Sequence Diagram</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-6-Evaluate-and-resolve-inconsistencies-2"><span class="nav-number">4.8.6.</span> <span class="nav-text">Step 4.6: Evaluate and resolve inconsistencies</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Timing-Model"><span class="nav-number">4.8.6.1.</span> <span class="nav-text">Timing Model</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Events-Occurring-in-Sequence"><span class="nav-number">4.8.6.2.</span> <span class="nav-text">Events Occurring in Sequence</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Timing-Evaluation"><span class="nav-number">4.8.6.3.</span> <span class="nav-text">Timing Evaluation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Possible-Timing-Resolutions"><span class="nav-number">4.8.6.4.</span> <span class="nav-text">Possible Timing Resolutions</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Timing-Decisions"><span class="nav-number">4.8.6.5.</span> <span class="nav-text">Timing Decisions</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-5-Instantiate-architectural-elements-and-allocate-responsibilities-2"><span class="nav-number">4.9.</span> <span class="nav-text">Step 5: Instantiate architectural elements and allocate responsibilities</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E8%81%8C%E8%B4%A3%E7%BB%99%E6%AF%8F%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0"><span class="nav-number">4.9.1.</span> <span class="nav-text">分配职责给每一个元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A-1"><span class="nav-number">4.9.2.</span> <span class="nav-text">解释 1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A-2"><span class="nav-number">4.9.3.</span> <span class="nav-text">解释 2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A-3"><span class="nav-number">4.9.4.</span> <span class="nav-text">解释 3</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-6-Define-interfaces-for-instantiated-elements"><span class="nav-number">4.10.</span> <span class="nav-text">Step 6: Define interfaces for instantiated elements</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Summary-of-Interfaces"><span class="nav-number">4.10.1.</span> <span class="nav-text">Summary of Interfaces</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Step-7-Verify-and-refine-requirements-and-make-them-constraints-for-instantiated-elements-2"><span class="nav-number">4.11.</span> <span class="nav-text">Step 7: Verify and refine requirements and make them constraints for instantiated elements</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Architecturally-Significant-Requirements-2"><span class="nav-number">4.11.1.</span> <span class="nav-text">Architecturally Significant Requirements</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reading-Materials"><span class="nav-number">5.</span> <span class="nav-text">Reading Materials</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>

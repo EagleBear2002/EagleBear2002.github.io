@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="富互联网应用 RIA 从网站到 web 应用 Client&#x2F;Server 三层架构 Three-Tier：将业务应用规划中的表示层 UI、数据访问层 DAL 以及业务逻辑层 BLL，其分层的核心任务是“高内聚低耦合”的实现。 Model-View-Controller">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web 前端开发-11-Ajax-s">
+<meta property="og:url" content="https://eaglebear2002.github.io/1539/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="富互联网应用 RIA 从网站到 web 应用 Client&#x2F;Server 三层架构 Three-Tier：将业务应用规划中的表示层 UI、数据访问层 DAL 以及业务逻辑层 BLL，其分层的核心任务是“高内聚低耦合”的实现。 Model-View-Controller">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101528334.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101513047.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101524674.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101638511.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101805900.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101826703.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101842026.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101916439.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101927332.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130101911716.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130102142399.png">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/11-Ajax-s.jpg">
+<meta property="og:image" content="https://eaglebear2002.github.io/1539/image-20230130104926391.png">
+<meta property="article:published_time" content="2023-01-30T02:10:00.000Z">
+<meta property="article:modified_time" content="2026-02-09T05:08:29.506Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://eaglebear2002.github.io/1539/image-20230130101528334.png">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/1539/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Web 前端开发-11-Ajax-s | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">483</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/1539/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Web 前端开发-11-Ajax-s
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-30 10:10:00" itemprop="dateCreated datePublished" datetime="2023-01-30T10:10:00+08:00">2023-01-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-02-09 13:08:29" itemprop="dateModified" datetime="2026-02-09T13:08:29+08:00">2026-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-Web-%E5%89%8D%E7%AB%AF%E5%BC%80%E5%8F%91/" itemprop="url" rel="index"><span itemprop="name">2022Fall-Web 前端开发</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="富互联网应用-RIA">富互联网应用 RIA</h2>
+<h3 id="从网站到-web-应用">从网站到 web 应用</h3>
+<p>Client/Server</p>
+<p>三层架构 Three-Tier：将业务应用规划中的表示层 UI、数据访问层 DAL 以及业务逻辑层 BLL，其分层的核心任务是“高内聚低耦合”的实现。</p>
+<p>Model-View-Controller</p>
+<p>富互联网应用（Rich Internet Applications，RIA），具有高度互动性、丰富用户体验以及功能强大的客户端。</p>
+<img src="/1539/image-20230130101528334.png" style="zoom:67%;">
+<table>
+<thead>
+<tr>
+<th><img src="/1539/image-20230130101513047.png" style="zoom:50%;"></th>
+<th><img src="/1539/image-20230130101524674.png" style="zoom: 80%;"></th>
+</tr>
+</thead>
+</table>
+<h3 id="传统的-web-应用">传统的 web 应用</h3>
+<p>瘦客户端架构：服务器完成大部分工作并保存大部分数据 $\to$ 更高的流量</p>
+<p>同步通信：</p>
+<ul>
+<li>对于作为某些操作的结果发送的每个请求，客户机在服务器完成响应之前不能与应用程序交互。</li>
+<li>也就是说，缺少交互性的用户体验</li>
+</ul>
+<h3 id="Rich-Internet-Applications">Rich Internet Applications</h3>
+<img src="/1539/image-20230130101638511.png" style="zoom: 80%;">
+<h3 id="RIA：优势">RIA：优势</h3>
+<ol>
+<li>不需要安装</li>
+<li>易于升级</li>
+<li>可以通过互联网/内部网轻松获取</li>
+<li>丰富的用户界面</li>
+<li>更好的响应性</li>
+<li>客户机/服务器平衡</li>
+<li>异步通信</li>
+<li>网络效率</li>
+</ol>
+<h3 id="RIA：-不足">RIA： 不足</h3>
+<ol>
+<li>搜索引擎不够友好</li>
+<li>专有的（相对于开放标准）</li>
+<li>完整性丧失（RIA 通常不能很好地与 HTML 混合）</li>
+<li>软件开发的复杂性（在客户端计算机上缓存或不缓存什么？）</li>
+<li>RIA 体系结构打破了 Web 页面范式</li>
+</ol>
+<h3 id="RIA-的实现方式">RIA 的实现方式</h3>
+<p>浏览器插件：</p>
+<ul>
+<li>Flash/Flex, Java Swing, Silverlight</li>
+<li>潜在的更强的交互性，更高的应用障碍</li>
+<li>关注开放/控制</li>
+</ul>
+<p>在浏览器中，不需要插件</p>
+<ul>
+<li>AJAX</li>
+<li>更低的采用门槛</li>
+<li>跨浏览器问题？</li>
+</ul>
+<h2 id="Ajax">Ajax</h2>
+<p>使用 Ajax 技术网页应用能够快速地将增量更新呈现在用户界面上，而不需要重载（刷新）整个页面，这使得程序能够更快地回应用户的操作。</p>
+<h3 id="web-同步通信模型">web 同步通信模型</h3>
+<img src="/1539/image-20230130101805900.png" style="zoom: 80%;">
+<p>同步：用户必须等待新页面加载。网页中使用的典型通信模式（点击—等待—刷新）</p>
+<p>几乎所有对新数据的更改都会导致页面刷新</p>
+<h3 id="web-异步通信模型">web 异步通信模型</h3>
+<img src="/1539/image-20230130101826703.png" style="zoom:80%;">
+<p>异步：用户可以在数据加载时继续与页面交互</p>
+<p>Ajax 使通信模式成为可能</p>
+<p>使用新数据进行更改，但不刷新页面</p>
+<h3 id="AJAX">AJAX</h3>
+<img src="/1539/image-20230130101842026.png" style="zoom: 80%;">
+<h3 id="Ajax-2">Ajax</h3>
+<p>AJAX（Asynchronous JavaScript And XML）是一种使用 XMLHttpRequest 技术构建更复杂，动态的网页的编程实践。</p>
+<p>Asynchronous JavaScript + XML（异步 JavaScript 和 XML），其本身不是一种新技术， 而是一个在 2005 年被 Jesse James Garrett 提出的新术语，用来描述一种使用现有技术集合的“新”方法，包括：HTML 或 XHTML， CSS， JavaScript， DOM， XML（en-US），XSLT，以及最重要的 XMLHttpRequest。</p>
+<p>AJAX 允许只更新一个 HTML 页面的部分 DOM，而无须重新加载整个页面。AJAX 还允许异步工作，这意味着当网页的一部分正试图重新加载时，您的代码可以继续运行（相比之下，同步会阻止代码继续运行，直到这部分的网页完成重新加载）。</p>
+<p>尽管 X 在 Ajax 中代表 XML，但由于 JSON 的许多优势，比如更加轻量以及作为 Javascript 的一部分，目前 JSON 的使用比 XML 更加普遍。JSON 和 XML 都被用于在 Ajax 模型中打包信息。</p>
+<p>通过交互式网站和现代 Web 标准，AJAX 正在逐渐被 JavaScript 框架中的函数和官方的 Fetch API 标准取代。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/1539/image-20230130101916439.png" alt></th>
+<th><img src="/1539/image-20230130101927332.png" alt></th>
+</tr>
+</thead>
+</table>
+<h3 id="AJAX-事件处理">AJAX 事件处理</h3>
+<p><img src="/1539/image-20230130101911716.png" alt></p>
+<h3 id="Ajax-优点">Ajax 优点</h3>
+<ol>
+<li>更好的交互性和响应性。</li>
+<li>页面将更易于使用。</li>
+<li>由于部分呈现，减少了到 Web 服务器的连接。</li>
+<li>因为只加载更新页面所需的数据，而不是刷新整个页面，因此节省了带宽。</li>
+<li>有助于减少网络流量。</li>
+</ol>
+<h3 id="Ajax-缺点">Ajax 缺点</h3>
+<ol>
+<li>后退和刷新按钮变得不可用。</li>
+<li>收藏网页将变得不可用。</li>
+<li>要求在 Web 浏览器上启用 JavaScript。</li>
+<li>网络延迟可能会破坏可用性。</li>
+<li>通过 AJAX 加载的数据不会被任何主要搜索引擎索引。因此，使其 SEO 不友好。</li>
+</ol>
+<h3 id="使用-AJAX-的真实场景">使用 AJAX 的真实场景</h3>
+<p>下面的列表描述了 AJAX 可以发挥作用的一些现实场景：</p>
+<ol>
+<li>自动完成搜索文本框</li>
+<li>级联下拉列表框</li>
+<li>实时通信，如即时消息传递</li>
+<li>实时数据更新，如分数更新</li>
+<li>即时表单验证反馈</li>
+<li>自动保存用户信息</li>
+</ol>
+<img src="/1539/image-20230130102142399.png" style="zoom:67%;">
+<h2 id="XMLHttpRequest">XMLHttpRequest</h2>
+<h3 id="AJAX-组件">AJAX 组件</h3>
+<p>AJAX 不能独立工作。</p>
+<p>与其他技术结合使用，以创建以下列表中描述的交互式 Web 页面：</p>
+<p>JavaScript：</p>
+<ul>
+<li>松散类型的脚本语言。</li>
+<li>当页面中发生事件时调用 JavaScript 函数。</li>
+<li>整个 AJAX 操作的胶水。</li>
+</ul>
+<p>DOM：</p>
+<ul>
+<li>用于访问和操作结构化文档的 API。</li>
+<li>表示 XML 和 HTML 文档的结构。</li>
+</ul>
+<p>CSS：</p>
+<ul>
+<li>允许将表示样式与内容清晰分离，并且可以通过 JavaScript 以编程方式更改。</li>
+</ul>
+<p>XMLHttpRequest：</p>
+<ul>
+<li>JavaScript 对象，它执行与服务器的异步交互。</li>
+</ul>
+<h3 id="XMLHttpRequest-对象">XMLHttpRequest 对象</h3>
+<p>XMLHttpRequest 对象：</p>
+<ul>
+<li>是 AJAX 最重要的组件。
+自 2000 年 7 月 Internet Explorer 5.5 发布以来一直可用。</li>
+<li>是一个 API，可以被 JavaScript、JScript、VBScript 和其他 Web 浏览器脚本语言使用。</li>
+<li>用于使用 HTTP 在 Web 服务器之间传输和操作 XML 数据。</li>
+<li>在 Web 页面的客户端和服务器端之间建立独立的连接通道。</li>
+<li>除了 XML，XMLHttpRequest 还可以用于获取其他格式的数据，比如 JSON 甚至纯文本。</li>
+</ul>
+<p>执行如下操作：</p>
+<ol>
+<li>在后台从客户端发送数据。</li>
+<li>从服务器接收数据。</li>
+<li>更新网页，无需重新加载。</li>
+</ol>
+<p>AJAX Web 应用程序模型的处理周期如下图所示：</p>
+<ol>
+<li>A client event occurs, such as a button click.</li>
+<li>An <code>XMLHttpRequest</code> object is created.</li>
+<li>The <code>XMLHttpRequest</code> object is configured.</li>
+<li>The <code>XMLHttpRequest</code> object makes an asynchronous request to the Web server.</li>
+<li>The Web server returns the result.</li>
+<li>The <code>XMLHttpRequest</code> object processes the result.</li>
+</ol>
+<p>下表描述了 XMLHttpRequest 对象的常见属性</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onReadyStateChange</code></td>
+<td>Is called whenever readyState attribute changes. It must not be used with synchronous requests.</td>
+</tr>
+<tr>
+<td><code>readyState</code></td>
+<td>Represents the state of the request. It ranges from 0 to 4,<br>as described in the following list:<br>0: UNOPENED, open() is not called.<br>1: OPENED, open is called but send() is not called.<br>2: HEADERS_RECEIVED, send() is called, and headers and status are available.<br>3: LOADING, downloading data; responseText holds the data.<br>4: DONE, the operation is completed fully.</td>
+</tr>
+<tr>
+<td><code>reponseText</code></td>
+<td>Returns response as text.</td>
+</tr>
+<tr>
+<td><code>responseXML</code></td>
+<td>Returns response as XML.</td>
+</tr>
+</tbody>
+</table>
+<p>下表描述了 XMLHttpRequest 对象的基本方法。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>void open(method, URL)</code></td>
+<td>Opens the request specifying get or post method and URL of the requested Web page.</td>
+</tr>
+<tr>
+<td><code>void open(method, URL, async)</code></td>
+<td>same as above but specifies asynchronous or not.</td>
+</tr>
+<tr>
+<td><code>void open(method, URL, async, username, password)</code></td>
+<td>same as above but specifies username and password.</td>
+</tr>
+<tr>
+<td><code>void send()</code></td>
+<td>sends get request.</td>
+</tr>
+<tr>
+<td><code>void send(string)</code></td>
+<td>sends get request.</td>
+</tr>
+<tr>
+<td><code>setRequestHeader(header,value)</code></td>
+<td>it adds request headers.</td>
+</tr>
+</tbody>
+</table>
+<p>为了使用 JavaScript 向服务器发送一个 http 请求，需要一个包含必要函数功能的 XMLHttpRequest 对象实例。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> httpRequest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();<br><span class="hljs-comment">// Old compatibility code, no longer needed.</span><br><span class="hljs-keyword">if</span> (<span class="hljs-variable language_">window</span>.<span class="hljs-property">XMLHttpRequest</span>) &#123;<br>	<span class="hljs-comment">// Mozilla, Safari, IE7+ ...</span><br>	httpRequest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();<br>&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">window</span>.<span class="hljs-property">ActiveXObject</span>) &#123;<br>	<span class="hljs-comment">// IE 6 and older</span><br>	httpRequest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ActiveXObject</span>(<span class="hljs-string">&quot;Microsoft.XMLHTTP&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>创建 XMLHttpRequest 对象后，需要决定在收到服务器对请求的响应后要做什么。</p>
+<p>在这一步，需要定义 JavaScript 函数，该函数将处理服务器响应。</p>
+<p>这可以使用 XMLHttpRequest 对象的</p>
+<p>onreadystatechange 属性来完成，如下所示的代码片段：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs js">httpRequest.<span class="hljs-property">onreadystatechange</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-comment">//process the server response</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>设置响应功能后，需要进行请求。</p>
+<p>为了发出请求，需要调用 XMLHttpRequest 对象的 open() 和 send() 方法，如下所示：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs js">httpRequest.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;GET&quot;</span>, <span class="hljs-string">&quot;serverpage.php&quot;</span>, <span class="hljs-literal">true</span>);<br>httpRequest.<span class="hljs-title function_">send</span>(<span class="hljs-literal">null</span>);<br></code></pre></td></tr></table></figure>
+<p>下面的列表描述了前面代码片段中传递给 open() 方法的参数：</p>
+<ul>
+<li>第一个参数是 HTTP 请求方法，例如 GET、POST 和 HEAD。</li>
+<li>第二个参数是请求的 Web 页面的 URL。</li>
+<li>第三个参数（可选）设置请求是否是异步的。</li>
+</ul>
+<p>处理服务器的响应：</p>
+<p>首先，响应函数需要检查请求的就绪状态。</p>
+<p>如果就绪状态的值为 4，则可以进一步执行。</p>
+<p>接下来，需要检查 HTTP 服务器响应的响应代码。下面的代码片段描述了如何处理服务器的响应：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs js">httpRequest.<span class="hljs-property">onreadystatechange</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>	<span class="hljs-keyword">if</span> (httpRequest.<span class="hljs-property">readyState</span> === <span class="hljs-number">4</span>) &#123;<br>		<span class="hljs-comment">// everything is good, the response is received</span><br>		<span class="hljs-keyword">if</span> (httpRequest.<span class="hljs-property">status</span> === <span class="hljs-number">200</span>) &#123;<br>			<span class="hljs-comment">// process the response</span><br>		&#125; <span class="hljs-keyword">else</span> &#123;<br>			<span class="hljs-comment">// request encountered some problem,</span><br>			<span class="hljs-comment">// for example, the response may contain a HTTP  404 (Not Found) response code</span><br>		&#125;<br>	&#125; <span class="hljs-keyword">else</span> &#123;<br>		<span class="hljs-comment">// still not ready</span><br>	&#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+<h3 id="使用-XMLHttpRequest-获取数据">使用 XMLHttpRequest 获取数据</h3>
+<p>下面的代码片段描述了如何在 Web 页面上显示来自 Web 服务器的响应：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;ajaxButton&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>&gt;</span>Make a request<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript">	(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">		<span class="hljs-keyword">var</span> httpRequest;</span><br><span class="language-javascript">		<span class="hljs-variable language_">document</span></span><br><span class="language-javascript">			.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;ajaxButton&quot;</span>)</span><br><span class="language-javascript">			.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;click&quot;</span>, makeRequest);</span><br><span class="language-javascript"></span><br><span class="language-javascript">		<span class="hljs-keyword">function</span> <span class="hljs-title function_">makeRequest</span>(<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">			httpRequest = <span class="hljs-keyword">new</span> <span class="hljs-title class_">XMLHttpRequest</span>();</span><br><span class="language-javascript">			<span class="hljs-keyword">if</span> (!httpRequest) &#123;</span><br><span class="language-javascript">				<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;Giving up :( Cannot create an XMLHTTP instance&quot;</span>);</span><br><span class="language-javascript">				<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="language-javascript">			&#125;</span><br><span class="language-javascript">			httpRequest.<span class="hljs-property">onreadystatechange</span> = alertContents;</span><br><span class="language-javascript">			httpRequest.<span class="hljs-title function_">open</span>(<span class="hljs-string">&quot;GET&quot;</span>, <span class="hljs-string">&quot;test.html&quot;</span>);</span><br><span class="language-javascript">			httpRequest.<span class="hljs-title function_">send</span>();</span><br><span class="language-javascript">		&#125;</span><br><span class="language-javascript"></span><br><span class="language-javascript">		<span class="hljs-keyword">function</span> <span class="hljs-title function_">alertContents</span>(<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">			<span class="hljs-keyword">if</span> (httpRequest.<span class="hljs-property">readyState</span> === <span class="hljs-title class_">XMLHttpRequest</span>.<span class="hljs-property">DONE</span>) &#123;</span><br><span class="language-javascript">				<span class="hljs-keyword">if</span> (httpRequest.<span class="hljs-property">status</span> === <span class="hljs-number">200</span>) &#123;</span><br><span class="language-javascript">					<span class="hljs-title function_">alert</span>(httpRequest.<span class="hljs-property">responseText</span>);</span><br><span class="language-javascript">				&#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="language-javascript">					<span class="hljs-title function_">alert</span>(<span class="hljs-string">&quot;There was a problem with the request.&quot;</span>);</span><br><span class="language-javascript">				&#125;</span><br><span class="language-javascript">			&#125;</span><br><span class="language-javascript">		&#125;</span><br><span class="language-javascript">	&#125;)();</span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="跨站的-XMLHttpRequest">跨站的 XMLHttpRequest</h3>
+<p>现代浏览器可以通过执行 WebApps 工作小组通过的 Access Control for Cross-Site Requests 标注来支持跨站请求。只要服务器端的配置允许您从您的 Web 应用发送请求，就可以使用 XMLHttpRequest。否则，会抛出一个 INVALID_ACCESS_ERR 异常。</p>
+<p>跨源资源共享（CORS，或通俗地译为跨域资源共享）是一种基
+于 HTTP 头的机制，该机制通过允许服务器标示除了它自己以外的其它源（域、协议和端口），使得浏览器允许这些 origin 访问加载自己的资源。跨源资源共享还通过一种机制来检查服务器是否会允许要发送的真实请求，该机制通过浏览器发起一个到服务器托管的跨源资源的“预检”请求。在预检中，浏览器发送的头中标示有 HTTP 方法和真实请求中会用到的头。</p>
+<p>跨源 HTTP 请求的一个例子：运行在 <a target="_blank" rel="noopener" href="https://domain-a.com">https://domain-a.com</a> 的 JavaScript 代码使用 XMLHttpRequest 来发起一个到 <a target="_blank" rel="noopener" href="https://domain-b.com/data.json">https://domain-b.com/data.json</a> 的请求。 出于安全性，浏览器限制脚本内发起的跨源 HTTP 请求。例如，</p>
+<p>XMLHttpRequest 和 Fetch API 遵循同源策略。这意味着使用这些 API 的 Web 应用程序只能从加载应用程序的同一个域请求 HTTP 资源，除非响应报文包含了正确 CORS 响应头。</p>
+<p>CORS 机制允许 Web 应用服务器进行跨源访问控制，从而使跨源数据传输得以安全进行。现代浏览器支持在 API 容器中（例如 XMLHttpRequest 或 Fetch）使用 CORS， 以降低跨源 HTTP 请求所带来的风险。</p>
+<p><img src="/1539/11-Ajax-s.jpg" alt></p>
+<h3 id="Fetch">Fetch</h3>
+<p>Fetch 是一个现代的概念，等同于 XMLHttpRequest。它提供了许多与 XMLHttpRequest 相同的功能，但被设计成更具可扩展性和高效性。</p>
+<p>Fetch API 提供了一个 JavaScript 接口，用于访问和操纵 HTTP 管道的一些具体部分，例如请求和响应。它还提供了一个全局 fetch() 方法，该方法提供了一种简单，合理的方式来跨网络异步获取资源。</p>
+<p>这种功能以前是使用 XMLHttpRequest 实现的。Fetch 提供了一个更理想的替代方案，可以很容易地被其他技术使用，例如 Service Workers。Fetch 还提供了专门的逻辑空间来定义其他与 HTTP 相关的概念，例如 CORS 和 HTTP 的扩展。</p>
+<h3 id="基本的-fetch-请求">基本的 fetch 请求</h3>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs js"><span class="hljs-title function_">fetch</span>(<span class="hljs-string">&quot;http://example.com/movies.json&quot;</span>)<br>	.<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">response</span>) =&gt;</span> response.<span class="hljs-title function_">json</span>())<br>	.<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(data));<br></code></pre></td></tr></table></figure>
+<h2 id="Ajax-的局限">Ajax 的局限</h2>
+<h3 id="Ajax-风险">Ajax 风险</h3>
+<ol>
+<li>浏览器后退机制的破坏，后退和前进按钮问题</li>
+<li>安全风险</li>
+<li>搜索引擎</li>
+<li>书签的问题</li>
+</ol>
+<h3 id="并发连接数限制">并发连接数限制</h3>
+<p>HTTP 1.1（RFC 2616）建议单用户客户端不应该与任何服务器或代理保持超过 2 个连接。</p>
+<p>大多数浏览器（包括 IE）都遵守这个规则</p>
+<p><img src="/1539/image-20230130104926391.png" alt></p>
+<h2 id="提示">提示</h2>
+<h3 id="Ajax-优化">Ajax 优化</h3>
+<p>优化任何 Ajax 应用程序的方法是找到优化其中的每个元素的最佳方法。应用程序尽可能快速高效地运行是很重要的。</p>
+<h3 id="通信">通信</h3>
+<p>当从服务器接收新数据时没有巨大的延迟时，Ajax 应用程序是快速的。优化两个方面将有助于应用程序成功。</p>
+<p>第一种是压缩从服务器发送到客户端的所有数据。这对于快速数据传输非常重要。</p>
+<p>第二个问题与数据本身有关。从客户机和服务器来回发送的数据也应该尽可能地优化。</p>
+<h3 id="数据">数据</h3>
+<p>向服务器发送数据时，发送最小数量的信息。如果要发送键/值对，请保持键和值都小。尽可能列举选择。而不是像这样：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs js">user_choice=add_data_to_database&amp;data1=value1&amp;data2=value2<br></code></pre></td></tr></table></figure>
+<p>考虑将每个选项设置为单个值，并发送该值：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs js">c=<span class="hljs-number">3</span>&amp;d1=value1&amp;d2=value2<br></code></pre></td></tr></table></figure>
+<p>更小的数据使得被拦截的信息更难被解释（一个很好的安全好处），并保持需要发送和解析的数据的大小更小。</p>
+<h3 id="代码优化">代码优化</h3>
+<p>Ajax 优化的另一个重要部分是优化在客户机上执行的 JavaScript 代码，并创建尽可能快的数据检索。</p>
+<ul>
+<li>内联 SQL 查询</li>
+<li>存储过程</li>
+</ul>
+<p>在客户机上，许多 JavaScript 技术将有助于增加代码的执行时间。当接收到 Ajax 响应时代码可能需要执行的 DOM 操作时，这一点尤其重要。</p>
+<p>没有人说 Ajax 应用程序在没有任何优化的情况下不能平稳有效地运行。在大多数情况下，以太网连接的速度、计算机的处理能力以及浏览器中 JavaScript 的更好实现将确保应用程序运行良好。优化将使应用程序运行得更快。对于用户来说，越快越好。</p>
+<h3 id="AJAX-实现的最佳实践">AJAX 实现的最佳实践</h3>
+<ul>
+<li>理解这一切意味着什么：维基百科</li>
+<li>检查合适的使用场景</li>
+<li>学会用原始代码实现它</li>
+</ul>
+<h3 id="使用库">使用库</h3>
+<p>库不仅提供了可以使用的详尽特性集，而且还确保代码与所有浏览器兼容，而无需做任何额外的工作。</p>
+<ul>
+<li>axios</li>
+<li>AngularJS</li>
+</ul>
+<p>掌握一个库</p>
+<h3 id="了解-Ajax-库的局限性">了解 Ajax 库的局限性</h3>
+<p>所有 JavaScript 库都允许访问 Ajax 对象，该对象规范了浏览器之间的差异，并提供了一致的界面。然而，在提供统一的界面时，这些库也必须简化界面，因为不是每个浏览器都实现每个特性。这将阻止您访问 XMLHttpRequest 的全部功能。</p>
+<p>直接与 XHR 对象交互还减少了函数开销，进一步提高了性能。只是要注意，如果放弃使用 Ajax 库，可能会在使用更老、更晦涩的浏览器时遇到一些问题。</p>
+<h3 id="利用适当的事件和回调函数">利用适当的事件和回调函数</h3>
+<p>正确使用这些事件和它们各自的回调来操作 UI，以获得更好的用户体验。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs js">$.<span class="hljs-title function_">ajax</span>(&#123;<br>	<span class="hljs-comment">//Other code</span><br>	<span class="hljs-attr">success</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">msg</span>) &#123;<br>		<span class="hljs-comment">// Update the UI here to reflect that the request was successful.</span><br>		<span class="hljs-title function_">doSomethingClever</span>();<br>	&#125;,<br>	<span class="hljs-attr">error</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">msg</span>) &#123;<br>		<span class="hljs-comment">// Update the UI here to reflect that the request was unsuccessful</span><br>		<span class="hljs-title function_">doSomethingMoreClever</span>();<br>	&#125;,<br>	<span class="hljs-attr">complete</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">msg</span>) &#123;<br>		<span class="hljs-comment">// Update the UI here to reflect completion</span><br>		<span class="hljs-title function_">doSomethingEvenMoreClever</span>();<br>	&#125;,<br>&#125;);<br></code></pre></td></tr></table></figure>
+<h3 id="选择合适的格式">选择合适的格式</h3>
+<p>在考虑数据传输技术时，必须考虑以下几个因素：特性集、兼容性、性能和方向（到服务器或从服务器）。</p>
+<p>在考虑数据格式时，惟一需要比较的尺度是速度。</p>
+<p>没有一种数据格式总是比其他格式更好。根据正在传输的数据及其在页面上的预期用途，一个可能下载得更快，而另一个可能解析得更快。</p>
+<h4 id="数据格式-XML">数据格式-XML</h4>
+<p>XML</p>
+<ul>
+<li>极大的互操作性（在服务器端和客户端都有出色的支持）</li>
+<li>严格的格式</li>
+<li>容易验证</li>
+<li>非常详细。每一个离散的数据都需要大量的结构，而数据与结构的比率极低。</li>
+<li>XML 的语法也有点模糊。</li>
+<li>解析这个语法同样是不明确的，</li>
+</ul>
+<p>XML 在高性能 Ajax 中没有一席之地</p>
+<h4 id="JSON">JSON</h4>
+<p>JSON（JavaScript Object Notation）由 Douglas Crockford 形式化并推广开来，是一种使用 JavaScript 对象和数组文字语法编写的轻量级且易于解析的数据格式。基于 ECMAScript 的一个子集。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs json">Verbose JSON <span class="hljs-punctuation">:</span><br><span class="hljs-punctuation">[</span><br>   <span class="hljs-punctuation">&#123;</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;username&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;alice&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;realname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Alice Smith&quot;</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;alice@alicesmith.com&quot;</span> <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span> ...<br><span class="hljs-punctuation">]</span><br>Simple JSON<br><span class="hljs-punctuation">[</span><br>   <span class="hljs-punctuation">&#123;</span> <span class="hljs-attr">&quot;i&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;u&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;alice&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;r&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Alice Smith&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;e&quot;</span><span class="hljs-punctuation">:</span><br>         <span class="hljs-string">&quot;alice@alicesmith.com&quot;</span> <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span> ...<br><span class="hljs-punctuation">]</span><br>Array JSON<br><span class="hljs-punctuation">[</span><br>   <span class="hljs-punctuation">[</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;alice&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;Alice Smith&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;alice@alicesmith.com&quot;</span> <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span> ...<br><span class="hljs-punctuation">]</span><br></code></pre></td></tr></table></figure>
+<h4 id="JSON-P">JSON-P</h4>
+<p>Jsonp（JSON with Padding）是 json 的一种“使用模式”，可以让网页从别的域名（网站）那获取资料，即跨域读取数据：当使用动态脚本标记插入时，JSON 数据被视为另一个 JavaScript 文件，并作为本机代码执行。为了实现这一点，必须将数据包装在回调函数中。</p>
+<p>由于数据被视为原生 JavaScript，因此它将以原生 JavaScript 速度进行解析。</p>
+<p>有一个避免使用 JSON—P 的原因与性能无关：由于 JSON—P 必须是可执行的 JavaScript，任何人都可以调用它，并在任何使用动态脚本标签插入的网站中包含它。</p>
+<p>不要在 JSON—P 中编码任何敏感数据，因为即使使用随机 url 或 cookie，也不能确保它保持私有。</p>
+<h4 id="HTML">HTML</h4>
+<p>HTML 作为一种数据格式，既缓慢又臃肿。</p>
+<h4 id="自定义格式">自定义格式</h4>
+<p>这种格式非常简洁，并提供了非常高的数据结构比（显著高于任何其他格式，不包括纯文本）。</p>
+<p>最重要的决定之一是使用什么作为分隔符。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-number">1</span><span class="hljs-punctuation">:</span>alice<span class="hljs-punctuation">:</span>Alice Smith<span class="hljs-punctuation">:</span>alice@alicesmith.com;<br><span class="hljs-number">2</span><span class="hljs-punctuation">:</span>bob<span class="hljs-punctuation">:</span>Bob Jones<span class="hljs-punctuation">:</span>bob@bobjones.com;<br></code></pre></td></tr></table></figure>
+<h3 id="数据格式总结">数据格式总结</h3>
+<p>一般支持轻量级格式；最好的格式是 JSON 和字符分隔的自定义格式。如果数据集很大，解析时间成为问题，可以使用以下两种技术之一：</p>
+<ul>
+<li>JSON—P 数据，使用动态脚本标记插入获取。这将数据视为可执行的 JavaScript，而不是字符串，并允许极快的解析。这可以跨域使用，但不应该用于敏感数据。</li>
+<li>字符分隔的自定义格式，使用 XHR 或动态脚本标记插入获取，并使用 split() 进行解析。这种技术解析超大数据集的速度略快于 JSON—P 技术，而且通常具有较小的文件大小。</li>
+</ul>
+<h3 id="缓存数据">缓存数据</h3>
+<p>最快的 Ajax 请求是不必发出的请求。防止不必要的请求有两种主要方法：</p>
+<ul>
+<li>在服务器端，设置 HTTP 报头，以确保响应将缓存在浏览器中。</li>
+<li>在客户端，将获取的数据存储在本地，这样就不会再次请求它。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/59356/" rel="prev" title="Web 前端开发-12-HTTP 协议">
+      <i class="fa fa-chevron-left"></i> Web 前端开发-12-HTTP 协议
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/27436/" rel="next" title="异体汉字成因及处理">
+      异体汉字成因及处理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%8C%E4%BA%92%E8%81%94%E7%BD%91%E5%BA%94%E7%94%A8-RIA"><span class="nav-number">1.</span> <span class="nav-text">富互联网应用 RIA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%BD%91%E7%AB%99%E5%88%B0-web-%E5%BA%94%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">从网站到 web 应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E7%9A%84-web-%E5%BA%94%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">传统的 web 应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rich-Internet-Applications"><span class="nav-number">1.3.</span> <span class="nav-text">Rich Internet Applications</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIA%EF%BC%9A%E4%BC%98%E5%8A%BF"><span class="nav-number">1.4.</span> <span class="nav-text">RIA：优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIA%EF%BC%9A-%E4%B8%8D%E8%B6%B3"><span class="nav-number">1.5.</span> <span class="nav-text">RIA： 不足</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIA-%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">RIA 的实现方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ajax"><span class="nav-number">2.</span> <span class="nav-text">Ajax</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#web-%E5%90%8C%E6%AD%A5%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">web 同步通信模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#web-%E5%BC%82%E6%AD%A5%E9%80%9A%E4%BF%A1%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">web 异步通信模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AJAX"><span class="nav-number">2.3.</span> <span class="nav-text">AJAX</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ajax-2"><span class="nav-number">2.4.</span> <span class="nav-text">Ajax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AJAX-%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86"><span class="nav-number">2.5.</span> <span class="nav-text">AJAX 事件处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ajax-%E4%BC%98%E7%82%B9"><span class="nav-number">2.6.</span> <span class="nav-text">Ajax 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ajax-%E7%BC%BA%E7%82%B9"><span class="nav-number">2.7.</span> <span class="nav-text">Ajax 缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-AJAX-%E7%9A%84%E7%9C%9F%E5%AE%9E%E5%9C%BA%E6%99%AF"><span class="nav-number">2.8.</span> <span class="nav-text">使用 AJAX 的真实场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XMLHttpRequest"><span class="nav-number">3.</span> <span class="nav-text">XMLHttpRequest</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AJAX-%E7%BB%84%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">AJAX 组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XMLHttpRequest-%E5%AF%B9%E8%B1%A1"><span class="nav-number">3.2.</span> <span class="nav-text">XMLHttpRequest 对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-XMLHttpRequest-%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">3.3.</span> <span class="nav-text">使用 XMLHttpRequest 获取数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%A8%E7%AB%99%E7%9A%84-XMLHttpRequest"><span class="nav-number">3.4.</span> <span class="nav-text">跨站的 XMLHttpRequest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fetch"><span class="nav-number">3.5.</span> <span class="nav-text">Fetch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84-fetch-%E8%AF%B7%E6%B1%82"><span class="nav-number">3.6.</span> <span class="nav-text">基本的 fetch 请求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ajax-%E7%9A%84%E5%B1%80%E9%99%90"><span class="nav-number">4.</span> <span class="nav-text">Ajax 的局限</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ajax-%E9%A3%8E%E9%99%A9"><span class="nav-number">4.1.</span> <span class="nav-text">Ajax 风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E8%BF%9E%E6%8E%A5%E6%95%B0%E9%99%90%E5%88%B6"><span class="nav-number">4.2.</span> <span class="nav-text">并发连接数限制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E7%A4%BA"><span class="nav-number">5.</span> <span class="nav-text">提示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ajax-%E4%BC%98%E5%8C%96"><span class="nav-number">5.1.</span> <span class="nav-text">Ajax 优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1"><span class="nav-number">5.2.</span> <span class="nav-text">通信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE"><span class="nav-number">5.3.</span> <span class="nav-text">数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="nav-number">5.4.</span> <span class="nav-text">代码优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AJAX-%E5%AE%9E%E7%8E%B0%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">5.5.</span> <span class="nav-text">AJAX 实现的最佳实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%BA%93"><span class="nav-number">5.6.</span> <span class="nav-text">使用库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3-Ajax-%E5%BA%93%E7%9A%84%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">5.7.</span> <span class="nav-text">了解 Ajax 库的局限性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E9%80%82%E5%BD%93%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%92%8C%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="nav-number">5.8.</span> <span class="nav-text">利用适当的事件和回调函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E5%90%88%E9%80%82%E7%9A%84%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.9.</span> <span class="nav-text">选择合适的格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F-XML"><span class="nav-number">5.9.1.</span> <span class="nav-text">数据格式-XML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON"><span class="nav-number">5.9.2.</span> <span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON-P"><span class="nav-number">5.9.3.</span> <span class="nav-text">JSON-P</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTML"><span class="nav-number">5.9.4.</span> <span class="nav-text">HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.9.5.</span> <span class="nav-text">自定义格式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E6%80%BB%E7%BB%93"><span class="nav-number">5.10.</span> <span class="nav-text">数据格式总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%95%B0%E6%8D%AE"><span class="nav-number">5.11.</span> <span class="nav-text">缓存数据</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">483</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.7m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">40:25</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
