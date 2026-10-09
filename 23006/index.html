@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.jpg">
+  <link rel="mask-icon" href="/images/avatar.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-big-counter.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"eaglebear2002.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":400,"display":"always","padding":18,"offset":12,"onmobile":true,"scroll_to_top_on_sidebar_toggle":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="面向考前冲刺：优先覆盖“老师最爱考、最容易丢分”的题型与结论。  编译器全流程（先背骨架） 源程序 -&gt; 词法分析 -&gt; 语法分析 -&gt; 语义分析与中间代码生成 -&gt; 代码优化 -&gt; 目标代码生成 -&gt; 汇编&#x2F;链接  前端：词法 + 语法 + 语义（与目标机无关） 后端：优化 + 目标代码（与目标机相关） 符号表：几乎全流程都会访问 出错处理：各阶段都要有（词">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译原理-考前速通">
+<meta property="og:url" content="https://eaglebear2002.github.io/23006/index.html">
+<meta property="og:site_name" content="EagleBear2002 的博客">
+<meta property="og:description" content="面向考前冲刺：优先覆盖“老师最爱考、最容易丢分”的题型与结论。  编译器全流程（先背骨架） 源程序 -&gt; 词法分析 -&gt; 语法分析 -&gt; 语义分析与中间代码生成 -&gt; 代码优化 -&gt; 目标代码生成 -&gt; 汇编&#x2F;链接  前端：词法 + 语法 + 语义（与目标机无关） 后端：优化 + 目标代码（与目标机相关） 符号表：几乎全流程都会访问 出错处理：各阶段都要有（词">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-03-08T05:20:48.000Z">
+<meta property="article:modified_time" content="2026-10-09T12:42:35.343Z">
+<meta property="article:author" content="EagleBear2002">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://eaglebear2002.github.io/23006/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>编译原理-考前速通 | EagleBear2002 的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<script>
+  hljs.initLineNumbersOnLoad();
+</script>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">EagleBear2002 的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">这里必须根绝一切犹豫，这里任何怯懦都无济于事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">61</span></a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">5</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">489</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/eaglebear2002" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://eaglebear2002.github.io/23006/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="EagleBear2002">
+      <meta itemprop="description" content="暮雪朝霜，毋改英雄意气">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="EagleBear2002 的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译原理-考前速通
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-03-08 13:20:48" itemprop="dateCreated datePublished" datetime="2026-03-08T13:20:48+08:00">2026-03-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-09 20:42:35" itemprop="dateModified" datetime="2026-10-09T20:42:35+08:00">2026-10-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">南京大学软件学院本科课程</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%E8%BD%AF%E4%BB%B6%E5%AD%A6%E9%99%A2%E6%9C%AC%E7%A7%91%E8%AF%BE%E7%A8%8B/2022Fall-%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">2022Fall-编译原理</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>面向考前冲刺：优先覆盖“老师最爱考、最容易丢分”的题型与结论。</p>
+</blockquote>
+<h2 id="编译器全流程（先背骨架）">编译器全流程（先背骨架）</h2>
+<p>源程序 -&gt; 词法分析 -&gt; 语法分析 -&gt; 语义分析与中间代码生成 -&gt; 代码优化 -&gt; 目标代码生成 -&gt; 汇编/链接</p>
+<ul>
+<li>前端：词法 + 语法 + 语义（与目标机无关）</li>
+<li>后端：优化 + 目标代码（与目标机相关）</li>
+<li>符号表：几乎全流程都会访问</li>
+<li>出错处理：各阶段都要有（词法/语法/语义错误）</li>
+</ul>
+<p>高频问答：</p>
+<ul>
+<li>解释器 vs 编译器：解释器边翻译边执行；编译器先整体翻译再执行</li>
+<li>一遍编译 vs 多遍编译：多遍更利于优化与模块化</li>
+<li>交叉编译：在 A 平台生成 B 平台可执行文件</li>
+</ul>
+<h2 id="词法分析（正则、自动机、手算题）">词法分析（正则、自动机、手算题）</h2>
+<h3 id="必考概念">必考概念</h3>
+<ul>
+<li>字母表、串、语言、正则表达式、正规文法、NFA、DFA</li>
+<li>识别优先级：关键字通常通过“先按标识符识别，再查保留字表”实现</li>
+<li>最长匹配原则（maximal munch）+ 规则优先级</li>
+</ul>
+<h3 id="高频手算">高频手算</h3>
+<ul>
+<li>正则 -&gt; NFA（Thompson 构造）</li>
+<li>NFA -&gt; DFA（子集构造）</li>
+<li>DFA 最小化（等价状态合并）</li>
+</ul>
+<p>常见扣分点：</p>
+<ul>
+<li>忘记 <code>epsilon</code>-closure</li>
+<li>子集构造时漏了某个输入符号转移</li>
+<li>最小化时把“终态和非终态”错误合并</li>
+</ul>
+<h3 id="词法错误恢复">词法错误恢复</h3>
+<ul>
+<li>跳过非法字符直到分隔符</li>
+<li>报错并尝试继续扫描，避免“一错全挂”</li>
+</ul>
+<h2 id="语法分析（FIRST-FOLLOW、LL-1-、LR）">语法分析（FIRST/FOLLOW、LL(1)、LR）</h2>
+<h3 id="文法基础">文法基础</h3>
+<ul>
+<li>二义性：同一串有不止一棵语法树</li>
+<li>消除左递归：
+<ul>
+<li><code>A -&gt; Aalpha | beta</code></li>
+<li>改写为 <code>A -&gt; betaA'</code>, <code>A' -&gt; alphaA' | epsilon</code></li>
+</ul>
+</li>
+<li>左因子提取：把公共前缀提出来，便于预测分析</li>
+</ul>
+<h3 id="FIRST-FOLLOW（必会手算）">FIRST / FOLLOW（必会手算）</h3>
+<ul>
+<li><code>FIRST(X)</code>：X 能推出串的首终结符集合（含 <code>epsilon</code> 可能）</li>
+<li><code>FOLLOW(A)</code>：句型中 A 后可能出现的终结符集合，开始符号含 <code>$</code></li>
+</ul>
+<p>易错点：</p>
+<ul>
+<li><code>FOLLOW</code> 传播条件漏掉“后继可推出 epsilon”</li>
+<li><code>FIRST(alpha)</code> 计算时遇到可空符号后没有继续看下一个</li>
+</ul>
+<h3 id="LL-1-判定与分析表">LL(1) 判定与分析表</h3>
+<p>文法是 LL(1) 的核心条件：</p>
+<ul>
+<li>对同一非终结符的两个候选式 <code>alpha, beta</code>：
+<ul>
+<li><code>FIRST(alpha) ∩ FIRST(beta) = 空</code></li>
+<li>若 <code>epsilon in FIRST(alpha)</code>，则 <code>FIRST(beta) ∩ FOLLOW(A) = 空</code>（反之同理）</li>
+</ul>
+</li>
+</ul>
+<p>构造分析表 <code>M[A, a]</code>：</p>
+<ul>
+<li>对 <code>a in FIRST(alpha)</code>，填 <code>A -&gt; alpha</code></li>
+<li>若 <code>epsilon in FIRST(alpha)</code>，对 <code>b in FOLLOW(A)</code>，填 <code>A -&gt; alpha</code></li>
+</ul>
+<h3 id="LR-系列（概念题高频）">LR 系列（概念题高频）</h3>
+<ul>
+<li>LR(0) 项、闭包 closure、GOTO</li>
+<li>SLR(1)：用 FOLLOW 约束归约动作</li>
+<li>LR(1)：项目携带展望符，能力最强（表更大）</li>
+<li>LALR(1)：合并同心 LR(1) 项集，工程常用（如 Yacc/Bison 思想）</li>
+</ul>
+<p>对比背诵：</p>
+<ul>
+<li>能力：<code>LR(1) &gt; LALR(1) &gt; SLR(1) &gt; LR(0)</code></li>
+<li>表规模：<code>LR(1)</code> 最大，<code>LALR(1)</code> 兼顾能力和规模</li>
+</ul>
+<h2 id="语义分析与语法制导翻译（属性文法）">语义分析与语法制导翻译（属性文法）</h2>
+<h3 id="属性文法">属性文法</h3>
+<ul>
+<li>综合属性（S-attributed）：自底向上易实现</li>
+<li>继承属性：依赖父/兄弟节点信息</li>
+<li>L-attributed：可在自顶向下时按从左到右计算</li>
+</ul>
+<h3 id="类型检查与作用域">类型检查与作用域</h3>
+<ul>
+<li>静态语义错误：未声明、重复声明、类型不匹配、函数参数不匹配</li>
+<li>符号表常见内容：名字、类型、作用域层次、偏移量、存储类别</li>
+<li>作用域实现：进入块开新层，退出块弹栈</li>
+</ul>
+<h3 id="布尔表达式翻译">布尔表达式翻译</h3>
+<ul>
+<li>短路求值：<code>A &amp;&amp; B</code>，A 假则不算 B；<code>A || B</code>，A 真则不算 B</li>
+<li>回填（backpatching）三件套：<code>truelist/falselist/nextlist</code></li>
+</ul>
+<h2 id="中间代码（四元式、三地址码）">中间代码（四元式、三地址码）</h2>
+<p>常见形式：</p>
+<ul>
+<li>三地址码：<code>x = y op z</code>, <code>x = op y</code>, <code>if x relop y goto L</code></li>
+<li>四元式：<code>(op, arg1, arg2, result)</code></li>
+<li>三元式/间接三元式（了解即可）</li>
+</ul>
+<p>控制流语句翻译常考：</p>
+<ul>
+<li><code>if-else</code></li>
+<li><code>while</code></li>
+<li><code>do-while</code></li>
+<li><code>for</code>（拆成初始化 + 条件 + 循环体 + 迭代）</li>
+</ul>
+<h2 id="代码优化（考试最爱“判断是否优化正确”）">代码优化（考试最爱“判断是否优化正确”）</h2>
+<h3 id="基本块与流图">基本块与流图</h3>
+<ul>
+<li>基本块：单入口单出口</li>
+<li>DAG 可做局部公共子表达式消除</li>
+</ul>
+<h3 id="常见机器无关优化">常见机器无关优化</h3>
+<ul>
+<li>常量折叠、常量传播</li>
+<li>公共子表达式消除</li>
+<li>复制传播</li>
+<li>死代码删除</li>
+<li>强度削弱（乘法转移位/加法）</li>
+<li>循环优化：代码外提、归纳变量消除</li>
+</ul>
+<h3 id="数据流分析（概念）">数据流分析（概念）</h3>
+<ul>
+<li>到达定义（Reaching Definitions）</li>
+<li>活跃变量（Live Variable）</li>
+<li>可用表达式（Available Expressions）</li>
+</ul>
+<p>常见陷阱：</p>
+<ul>
+<li>进行了“看起来合理”但破坏语义的重排（忽视副作用/别名）</li>
+</ul>
+<h2 id="运行时存储组织与目标代码生成">运行时存储组织与目标代码生成</h2>
+<h3 id="活动记录（栈帧）">活动记录（栈帧）</h3>
+<ul>
+<li>典型内容：实参区、返回地址、控制链、访问链、局部变量、临时变量</li>
+<li>控制链（dynamic link）与访问链（static link）区别要会说</li>
+</ul>
+<h3 id="参数传递">参数传递</h3>
+<ul>
+<li>值传递、引用传递、值-结果传递、名字传递（了解）</li>
+<li>递归函数为何需要栈帧隔离</li>
+</ul>
+<h3 id="寄存器分配">寄存器分配</h3>
+<ul>
+<li>图着色思想（会解释即可）</li>
+<li>溢出（spill）：寄存器不够时落内存</li>
+</ul>
+<h2 id="错误处理（简答题高频）">错误处理（简答题高频）</h2>
+<ul>
+<li>词法层：删除/插入字符，跳过到合法起点</li>
+<li>语法层：
+<ul>
+<li>恐慌模式（panic mode）：跳到同步记号</li>
+<li>短语层恢复（phrase-level）</li>
+</ul>
+</li>
+<li>语义层：类型不匹配、未定义标识符等继续检查并收集更多错误</li>
+</ul>
+<h2 id="高频“对比题”速记">高频“对比题”速记</h2>
+<ul>
+<li>最左推导 vs 最右推导：推导顺序不同，语言不变</li>
+<li>语法树 vs 抽象语法树 AST：AST 去掉语法噪声，更适合后续处理</li>
+<li>LL vs LR：LL 自顶向下，LR 自底向上；LR 能处理更广文法</li>
+<li>S 属性定义 vs L 属性定义：前者更适合 LR，后者可用于 LL</li>
+</ul>
+<h2 id="考场手算模板">考场手算模板</h2>
+<h3 id="FIRST-FOLLOW-模板">FIRST/FOLLOW 模板</h3>
+<ol>
+<li>先找所有可空非终结符</li>
+<li>迭代求 FIRST，直到不再增大</li>
+<li>初始化 <code>FOLLOW(S) = {$}</code></li>
+<li>按产生式扫描并迭代传播 FOLLOW</li>
+<li>最后逐项检查 LL(1) 冲突</li>
+</ol>
+<h3 id="LR-项集模板">LR 项集模板</h3>
+<ol>
+<li>增广文法 <code>S' -&gt; S</code></li>
+<li>从 <code>I0 = closure({S' -&gt; .S})</code> 出发</li>
+<li>对每个项目集按符号做 GOTO，得到 DFA</li>
+<li>生成 ACTION/GOTO 表</li>
+<li>检查冲突（shift/reduce, reduce/reduce）</li>
+</ol>
+<h2 id="最后一小时背诵清单">最后一小时背诵清单</h2>
+<ul>
+<li>编译器六大阶段与前后端划分</li>
+<li>正则/NFA/DFA/最小化流程</li>
+<li>消左递归、提左因子</li>
+<li>FIRST/FOLLOW 与 LL(1) 判定条件</li>
+<li>LR(0)/SLR/LALR/LR(1) 区别</li>
+<li>属性文法（综合/继承/L 属性）</li>
+<li>三地址码与控制流翻译</li>
+<li>常见优化与“不能乱优化”的原因</li>
+<li>栈帧结构、静态链/动态链</li>
+<li>错误恢复策略</li>
+</ul>
+<h2 id="临考建议（提分关键）">临考建议（提分关键）</h2>
+<ul>
+<li>先做“确定会做的手算题”：FIRST/FOLLOW、LL(1) 表、简单中间代码</li>
+<li>概念题答法：先下定义，再给对比，最后给一句应用场景</li>
+<li>看到 LR 冲突先别慌：先判断是哪种冲突，再写产生原因</li>
+<li>每道手算题最后留 30 秒自查：
+<ul>
+<li>集合是否漏 <code>$</code> 或 <code>epsilon</code></li>
+<li>分析表是否有重复填项</li>
+<li>跳转标签是否遗漏</li>
+</ul>
+</li>
+</ul>
+<p>祝你考试顺利，稳稳拿下。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat-award.jpg" alt="EagleBear2002 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="EagleBear2002 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/39374/" rel="prev" title="数据库常用基准测试">
+      <i class="fa fa-chevron-left"></i> 数据库常用基准测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/46985/" rel="next" title="私有充电协议汇总">
+      私有充电协议汇总 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E5%85%A8%E6%B5%81%E7%A8%8B%EF%BC%88%E5%85%88%E8%83%8C%E9%AA%A8%E6%9E%B6%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">编译器全流程（先背骨架）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90%EF%BC%88%E6%AD%A3%E5%88%99%E3%80%81%E8%87%AA%E5%8A%A8%E6%9C%BA%E3%80%81%E6%89%8B%E7%AE%97%E9%A2%98%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">词法分析（正则、自动机、手算题）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%85%E8%80%83%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">必考概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E9%A2%91%E6%89%8B%E7%AE%97"><span class="nav-number">2.2.</span> <span class="nav-text">高频手算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E9%94%99%E8%AF%AF%E6%81%A2%E5%A4%8D"><span class="nav-number">2.3.</span> <span class="nav-text">词法错误恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90%EF%BC%88FIRST-FOLLOW%E3%80%81LL-1-%E3%80%81LR%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">语法分析（FIRST&#x2F;FOLLOW、LL(1)、LR）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%B3%95%E5%9F%BA%E7%A1%80"><span class="nav-number">3.1.</span> <span class="nav-text">文法基础</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FIRST-FOLLOW%EF%BC%88%E5%BF%85%E4%BC%9A%E6%89%8B%E7%AE%97%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">FIRST &#x2F; FOLLOW（必会手算）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LL-1-%E5%88%A4%E5%AE%9A%E4%B8%8E%E5%88%86%E6%9E%90%E8%A1%A8"><span class="nav-number">3.3.</span> <span class="nav-text">LL(1) 判定与分析表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LR-%E7%B3%BB%E5%88%97%EF%BC%88%E6%A6%82%E5%BF%B5%E9%A2%98%E9%AB%98%E9%A2%91%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">LR 系列（概念题高频）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90%E4%B8%8E%E8%AF%AD%E6%B3%95%E5%88%B6%E5%AF%BC%E7%BF%BB%E8%AF%91%EF%BC%88%E5%B1%9E%E6%80%A7%E6%96%87%E6%B3%95%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">语义分析与语法制导翻译（属性文法）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E6%96%87%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">属性文法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E4%B8%8E%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">4.2.</span> <span class="nav-text">类型检查与作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E5%B0%94%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%BF%BB%E8%AF%91"><span class="nav-number">4.3.</span> <span class="nav-text">布尔表达式翻译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%EF%BC%88%E5%9B%9B%E5%85%83%E5%BC%8F%E3%80%81%E4%B8%89%E5%9C%B0%E5%9D%80%E7%A0%81%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">中间代码（四元式、三地址码）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96%EF%BC%88%E8%80%83%E8%AF%95%E6%9C%80%E7%88%B1%E2%80%9C%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E4%BC%98%E5%8C%96%E6%AD%A3%E7%A1%AE%E2%80%9D%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">代码优化（考试最爱“判断是否优化正确”）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%9D%97%E4%B8%8E%E6%B5%81%E5%9B%BE"><span class="nav-number">6.1.</span> <span class="nav-text">基本块与流图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%9C%BA%E5%99%A8%E6%97%A0%E5%85%B3%E4%BC%98%E5%8C%96"><span class="nav-number">6.2.</span> <span class="nav-text">常见机器无关优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%88%86%E6%9E%90%EF%BC%88%E6%A6%82%E5%BF%B5%EF%BC%89"><span class="nav-number">6.3.</span> <span class="nav-text">数据流分析（概念）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%AD%98%E5%82%A8%E7%BB%84%E7%BB%87%E4%B8%8E%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-number">7.</span> <span class="nav-text">运行时存储组织与目标代码生成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B4%BB%E5%8A%A8%E8%AE%B0%E5%BD%95%EF%BC%88%E6%A0%88%E5%B8%A7%EF%BC%89"><span class="nav-number">7.1.</span> <span class="nav-text">活动记录（栈帧）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92"><span class="nav-number">7.2.</span> <span class="nav-text">参数传递</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D"><span class="nav-number">7.3.</span> <span class="nav-text">寄存器分配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%EF%BC%88%E7%AE%80%E7%AD%94%E9%A2%98%E9%AB%98%E9%A2%91%EF%BC%89"><span class="nav-number">8.</span> <span class="nav-text">错误处理（简答题高频）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E9%A2%91%E2%80%9C%E5%AF%B9%E6%AF%94%E9%A2%98%E2%80%9D%E9%80%9F%E8%AE%B0"><span class="nav-number">9.</span> <span class="nav-text">高频“对比题”速记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%80%83%E5%9C%BA%E6%89%8B%E7%AE%97%E6%A8%A1%E6%9D%BF"><span class="nav-number">10.</span> <span class="nav-text">考场手算模板</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FIRST-FOLLOW-%E6%A8%A1%E6%9D%BF"><span class="nav-number">10.1.</span> <span class="nav-text">FIRST&#x2F;FOLLOW 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LR-%E9%A1%B9%E9%9B%86%E6%A8%A1%E6%9D%BF"><span class="nav-number">10.2.</span> <span class="nav-text">LR 项集模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E5%B0%8F%E6%97%B6%E8%83%8C%E8%AF%B5%E6%B8%85%E5%8D%95"><span class="nav-number">11.</span> <span class="nav-text">最后一小时背诵清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B4%E8%80%83%E5%BB%BA%E8%AE%AE%EF%BC%88%E6%8F%90%E5%88%86%E5%85%B3%E9%94%AE%EF%BC%89"><span class="nav-number">12.</span> <span class="nav-text">临考建议（提分关键）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="EagleBear2002"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">EagleBear2002</p>
+  <div class="site-description" itemprop="description">暮雪朝霜，毋改英雄意气</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">489</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">61</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/EagleBear2002" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;EagleBear2002" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:eaglebear2002@foxmail.com" title="E-Mail → mailto:eaglebear2002@foxmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://czxingchen.github.io/" title="https:&#x2F;&#x2F;czxingchen.github.io&#x2F;" rel="noopener" target="_blank">PL 顶会研究者-XiaoZhi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.cnblogs.com/the-sword-of-king/" title="https:&#x2F;&#x2F;www.cnblogs.com&#x2F;the-sword-of-king&#x2F;" rel="noopener" target="_blank">模式识别专家-崖山剑</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://en.ydjsir.com.cn/" title="https:&#x2F;&#x2F;en.ydjsir.com.cn&#x2F;" rel="noopener" target="_blank">愿逐月华流照君-YDJSIR</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.csdn.net/m0_51691879?spm=1000.2115.3001.5343" title="https:&#x2F;&#x2F;blog.csdn.net&#x2F;m0_51691879?spm&#x3D;1000.2115.3001.5343" rel="noopener" target="_blank">软院科协掌门人-wbl_z</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://itxia.club/" title="https:&#x2F;&#x2F;itxia.club&#x2F;" rel="noopener" target="_blank">侠之大者为国为民-IT 侠</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://chestnutsilver.github.io/TJIS-My-Helloworld/" title="https:&#x2F;&#x2F;chestnutsilver.github.io&#x2F;TJIS-My-Helloworld&#x2F;" rel="noopener" target="_blank">因果推断爱好者-ChestnutSilver</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://atritium.github.io/" title="https:&#x2F;&#x2F;atritium.github.io&#x2F;" rel="noopener" target="_blank">任天堂技术扛把子-manqi</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.sakiyary.cn/" title="https:&#x2F;&#x2F;blog.sakiyary.cn&#x2F;" rel="noopener" target="_blank">教育部教学创新项目负责人-哈气鸭梨</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://huoxj.github.io/" title="https:&#x2F;&#x2F;huoxj.github.io&#x2F;" rel="noopener" target="_blank">离百年博客还有 98 年捞程序 Runz</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://www.erinwithbmq.xin/" title="https:&#x2F;&#x2F;www.erinwithbmq.xin&#x2F;" rel="noopener" target="_blank">摸鱼小能手 ErinwithBMQ の 尋夢之旅</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://tilnel.github.io/" title="https:&#x2F;&#x2F;tilnel.github.io&#x2F;" rel="noopener" target="_blank">南大耐摔王 Tilnel 的杂谈小屋</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://blog.azifan.club/" title="https:&#x2F;&#x2F;blog.azifan.club&#x2F;" rel="noopener" target="_blank">水龙之魂</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mzy0624.github.io/" title="https:&#x2F;&#x2F;mzy0624.github.io&#x2F;" rel="noopener" target="_blank">Haibara AI</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">EagleBear2002</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">2.9m</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">44:19</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
